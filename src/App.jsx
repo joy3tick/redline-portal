@@ -122,23 +122,23 @@ const C = {
 };
 
 const CATS = [
-  { id: "m1", t: "MODULE 1", sub: "Onboarding & Training", d: "Your foundation for closing deals", ic: "⚡", k: "m1" },
-  { id: "m2", t: "MODULE 2", sub: "Target Market & Lead Gen", d: "Find the right businesses", ic: "🎯", k: "m2" },
-  { id: "m3", t: "MODULE 3", sub: "Positioning & Strategy", d: "Revenue consultant mindset", ic: "🧠", k: "m3" },
-  { id: "m4", t: "MODULE 4", sub: "Cold Call Mastery", d: "Earn attention, don't demand it", ic: "🔥", k: "m4" },
-  { id: "m5", t: "MODULE 5", sub: "Reply Handling", d: "Move fast, get on the phone", ic: "⏱️", k: "m5" },
-  { id: "m6", t: "MODULE 6", sub: "Sales Call Framework", d: "Control the call, close the deal", ic: "📋", k: "m6" },
-  { id: "m7", t: "MODULE 7", sub: "Value Prop & Messaging", d: "Sell outcomes, not design", ic: "💎", k: "m7" },
-  { id: "m8", t: "MODULE 8", sub: "Pricing & Objections", d: "Price with confidence", ic: "💵", k: "m8" },
-  { id: "m9", t: "MODULE 9", sub: "Post-Close & Handoff", d: "Precision in the handoff", ic: "🤝", k: "m9" },
-  { id: "m10", t: "MODULE 10", sub: "Compensation & Growth", d: "How you get paid and advance", ic: "📈", k: "m10" },
-  { id: "m11", t: "MODULE 11", sub: "Full Deal Walkthrough", d: "Locate → Call → Book → Pitch → Close", ic: "🎬", k: "m11" },
-  { id: "m12", t: "MODULE 12", sub: "Payment & Onboarding", d: "Invoices, forms, and handoff", ic: "✅", k: "m12" },
-  { id: "d1", t: "BOOTCAMP", sub: "Technical Knowledge", d: "Deep-dive on what you sell", ic: "🔧", k: "tech-bc" },
-  { id: "d2", t: "BOOTCAMP", sub: "Sales Crash Course", d: "The system that closes deals", ic: "💪", k: "sales-bc" },
-  { id: "d3", t: "REFERENCE", sub: "Call Script & Objections", d: "Scripts and objection playbook", ic: "📞", k: "call-script" },
-  { id: "d4", t: "REFERENCE", sub: "Compensation Plan", d: "Full commission breakdown", ic: "💰", k: "comp-plan" },
-  { id: "d5", t: "REFERENCE", sub: "Onboarding Email Template", d: "Payment links and forms", ic: "📧", k: "onboard-email" },
+  { id: "m1", t: "MODULE", n: "MODULE 1", sub: "Onboarding & Training", d: "Your foundation for closing deals", ic: "⚡", k: "m1" },
+  { id: "m2", t: "MODULE", n: "MODULE 2", sub: "Target Market & Lead Gen", d: "Find the right businesses", ic: "🎯", k: "m2" },
+  { id: "m3", t: "MODULE", n: "MODULE 3", sub: "Positioning & Strategy", d: "Revenue consultant mindset", ic: "🧠", k: "m3" },
+  { id: "m4", t: "MODULE", n: "MODULE 4", sub: "Cold Call Mastery", d: "Earn attention, don't demand it", ic: "🔥", k: "m4" },
+  { id: "m5", t: "MODULE", n: "MODULE 5", sub: "Reply Handling", d: "Move fast, get on the phone", ic: "⏱️", k: "m5" },
+  { id: "m6", t: "MODULE", n: "MODULE 6", sub: "Sales Call Framework", d: "Control the call, close the deal", ic: "📋", k: "m6" },
+  { id: "m7", t: "MODULE", n: "MODULE 7", sub: "Value Prop & Messaging", d: "Sell outcomes, not design", ic: "💎", k: "m7" },
+  { id: "m8", t: "MODULE", n: "MODULE 8", sub: "Pricing & Objections", d: "Price with confidence", ic: "💵", k: "m8" },
+  { id: "m9", t: "MODULE", n: "MODULE 9", sub: "Post-Close & Handoff", d: "Precision in the handoff", ic: "🤝", k: "m9" },
+  { id: "m10", t: "MODULE", n: "MODULE 10", sub: "Compensation & Growth", d: "How you get paid and advance", ic: "📈", k: "m10" },
+  { id: "m11", t: "MODULE", n: "MODULE 11", sub: "Full Deal Walkthrough", d: "Locate → Call → Book → Pitch → Close", ic: "🎬", k: "m11" },
+  { id: "m12", t: "MODULE", n: "MODULE 12", sub: "Payment & Onboarding", d: "Invoices, forms, and handoff", ic: "✅", k: "m12" },
+  { id: "d1", t: "BOOTCAMP", n: "BOOTCAMP", sub: "Technical Knowledge", d: "Deep-dive on what you sell", ic: "🔧", k: "tech-bc" },
+  { id: "d2", t: "BOOTCAMP", n: "BOOTCAMP", sub: "Sales Crash Course", d: "The system that closes deals", ic: "💪", k: "sales-bc" },
+  { id: "d3", t: "REFERENCE", n: "REFERENCE", sub: "Call Script & Objections", d: "Scripts and objection playbook", ic: "📞", k: "call-script" },
+  { id: "d4", t: "REFERENCE", n: "REFERENCE", sub: "Compensation Plan", d: "Full commission breakdown", ic: "💰", k: "comp-plan" },
+  { id: "d5", t: "REFERENCE", n: "REFERENCE", sub: "Onboarding Email Template", d: "Payment links and forms", ic: "📧", k: "onboard-email" },
 ];
 
 function useWidth() {
@@ -382,7 +382,7 @@ export default function App() {
                   <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
                     <div style={{ fontSize: 22, width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center", background: "#0E0E10", borderRadius: 12, flexShrink: 0 }}>{x.ic}</div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 9, fontWeight: 700, color: bc[x.t], letterSpacing: 1.5, marginBottom: 3 }}>{x.t}</div>
+                      <div style={{ fontSize: 9, fontWeight: 700, color: bc[x.t], letterSpacing: 1.5, marginBottom: 3 }}>{x.n || x.t}</div>
                       <h3 style={{ fontSize: 14, fontWeight: 700, color: "#FFF", margin: "0 0 2px" }}>{x.sub}</h3>
                       <p style={{ fontSize: 11, color: "#555", margin: 0, lineHeight: 1.3 }}>{x.d}</p>
                     </div>
