@@ -120,7 +120,6 @@ const C = {
     { h: "📧  EMAIL TEMPLATE", b: "Subject: Redline Web Services — Next Steps & Onboarding | [CLIENT COMPANY NAME]\n\nHey [CLIENT FIRST NAME],\n\nGreat talking with you. Here's what we need:\n\n1. Onboarding Form (5 min): https://forms.gle/EGaHjGUffqdGBH8v9\n\n2. Payment: [include correct link only]\n▶ Starter: https://buy.stripe.com/dRmfZa5ucdSC9uDfAQ3ks08\n▶ Pro: https://buy.stripe.com/aFaaEQ09Sg0K22bdsI3ks0c\n▶ Elite: https://buy.stripe.com/aFabIUf4MaGq7mvgEU3ks09\n▶ Monthly: https://buy.stripe.com/00w00c6yg4i2ayHfAQ3ks0a\n▶ Yearly: https://buy.stripe.com/3cI4gs8Go29UfT19cs3ks0b\n\n[YOUR NAME] · Redline Web Services" },
   ]},
 };
-
 const CATS = [
   { id: "m1", t: "MODULE", n: "MODULE 1", sub: "Onboarding & Training", d: "Your foundation for closing deals", ic: "⚡", k: "m1" },
   { id: "m2", t: "MODULE", n: "MODULE 2", sub: "Target Market & Lead Gen", d: "Find the right businesses", ic: "🎯", k: "m2" },
@@ -141,252 +140,361 @@ const CATS = [
   { id: "d5", t: "REFERENCE", n: "REFERENCE", sub: "Onboarding Email Template", d: "Payment links and forms", ic: "📧", k: "onboard-email" },
 ];
 
-function useWidth() {
-  const [w, setW] = useState(typeof window !== "undefined" ? window.innerWidth : 400);
-  useEffect(() => {
-    const h = () => setW(window.innerWidth);
-    window.addEventListener("resize", h);
-    return () => window.removeEventListener("resize", h);
-  }, []);
-  return w;
-}
+/* ═══════════════════════════════════════════
+   GLOBAL STYLES — injected once
+   ═══════════════════════════════════════════ */
+const GLOBAL_CSS = `
+@keyframes fadeUp { from { opacity:0; transform:translateY(16px) } to { opacity:1; transform:translateY(0) } }
+@keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
+@keyframes slideDown { from { opacity:0; max-height:0; padding-top:0; padding-bottom:0 } to { opacity:1; max-height:2000px } }
+@keyframes glow { 0%,100% { box-shadow:0 0 20px rgba(220,38,38,0.08) } 50% { box-shadow:0 0 30px rgba(220,38,38,0.15) } }
+@keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+@keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
 
+*{margin:0;padding:0;box-sizing:border-box}
+html,body,#root{min-height:100dvh;background:#050507}
+body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden}
+::selection{background:rgba(220,38,38,0.25);color:#fff}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#1a1a1e;border-radius:10px}
+::-webkit-scrollbar-thumb:hover{background:#2a2a2e}
+input::placeholder{color:#2a2a2e}
+
+.dotgrid {
+  background-image: radial-gradient(circle, #ffffff06 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+.card-hover { transition: all 0.3s cubic-bezier(0.4,0,0.2,1) }
+.card-hover:hover { transform:translateY(-3px); border-color:#222 !important; box-shadow:0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(220,38,38,0.08) }
+.acc-btn { transition: all 0.25s ease }
+.acc-btn:hover { background:#101014 !important }
+.back-btn { transition: all 0.2s }
+.back-btn:hover { opacity:0.7; transform:translateX(-2px) }
+.vid-card { transition: all 0.3s ease }
+.vid-card:hover { border-color:#DC2626 !important; box-shadow:0 0 24px rgba(220,38,38,0.15) }
+.play-pulse { animation: pulse 2s ease-in-out infinite }
+`;
+
+/* ═══════════════════════════════════════════
+   RICH TEXT RENDERER
+   ═══════════════════════════════════════════ */
 function RichText({ text }) {
   const lines = text.split("\n");
   return (
-    <div style={{ fontSize: 13.5, color: "#C8C8CC", lineHeight: 1.8, fontFamily: "'DM Sans', system-ui, sans-serif" }}>
+    <div style={{ fontSize:13.5, color:"#b8b8be", lineHeight:1.85 }}>
       {lines.map((line, i) => {
         const t = line.trim();
-        if (!t) return <div key={i} style={{ height: 10 }} />;
+        if (!t) return <div key={i} style={{ height:12 }} />;
+
         if (t.startsWith("→ ") || t.startsWith("• ")) return (
-          <div key={i} style={{ display: "flex", gap: 10, padding: "3px 0", paddingLeft: 4 }}>
-            <span style={{ color: "#DC2626", fontWeight: 700, flexShrink: 0, fontSize: 11, marginTop: 4 }}>▸</span>
-            <span>{t.slice(2)}</span>
+          <div key={i} style={{ display:"flex", gap:12, padding:"4px 0 4px 2px" }}>
+            <span style={{ color:"#DC2626", flexShrink:0, fontSize:8, marginTop:7, width:6, height:6, borderRadius:"50%", background:"#DC2626", display:"inline-block" }}></span>
+            <span style={{ flex:1 }}>{t.slice(2)}</span>
           </div>
         );
-        if (/^[1-9]️⃣/.test(t)) return (
-          <div key={i} style={{ display: "flex", gap: 10, padding: "4px 0", paddingLeft: 2 }}>
-            <span style={{ flexShrink: 0 }}>{t.slice(0, t.indexOf(" "))}</span>
-            <span style={{ fontWeight: 600, color: "#E8E8EC" }}>{t.slice(t.indexOf(" ") + 1)}</span>
-          </div>
-        );
-        if (t.startsWith("⚠️") || t.startsWith("⚠")) return (
-          <div key={i} style={{ background: "#1A1208", border: "1px solid #332810", borderRadius: 8, padding: "10px 14px", margin: "6px 0", fontSize: 12, color: "#F59E0B" }}>{t}</div>
-        );
-        if (t.startsWith("💡")) return (
-          <div key={i} style={{ background: "#0A1218", border: "1px solid #0F2030", borderRadius: 8, padding: "10px 14px", margin: "6px 0", fontSize: 12, color: "#60A5FA" }}>{t}</div>
-        );
-        const isSub = /^[A-Z][A-Z\s&\/\-—:()]{6,}$/.test(t) || (/^[A-Z🔵🔴🔥✅📌]/.test(t) && t.endsWith(":") && t.length < 60);
-        if (isSub) return (
-          <div key={i} style={{ fontSize: 11, fontWeight: 700, color: "#DC2626", letterSpacing: 1.5, marginTop: 16, marginBottom: 4, textTransform: "uppercase" }}>{t.replace(/:$/, "")}</div>
-        );
-        if (/^[^\w\s]/.test(t) && t.length < 80 && /[A-Z]{3,}/.test(t.slice(0, 20))) {
-          const parts = t.split(/\s[—–-]\s/);
-          if (parts.length === 2) return (
-            <div key={i} style={{ padding: "4px 0" }}>
-              <span style={{ fontWeight: 700, color: "#E8E8EC" }}>{parts[0]}</span>
-              <span style={{ color: "#888" }}> — </span><span>{parts[1]}</span>
+
+        if (/^[1-9]️⃣/.test(t)) {
+          const sp = t.indexOf(" ");
+          return (
+            <div key={i} style={{ display:"flex", gap:12, padding:"6px 0", alignItems:"flex-start" }}>
+              <span style={{ background:"#DC262615", color:"#DC2626", width:28, height:28, borderRadius:8, display:"flex", alignItems:"center", justifyContent:"center", fontSize:13, flexShrink:0, fontWeight:700 }}>{t.slice(0,sp)}</span>
+              <span style={{ fontWeight:600, color:"#e0e0e4", paddingTop:3 }}>{t.slice(sp+1)}</span>
             </div>
           );
         }
+
+        if (t.startsWith("⚠️") || t.startsWith("⚠")) return (
+          <div key={i} style={{ background:"linear-gradient(135deg,#1a120805,#1a120815)", border:"1px solid #33281018", borderRadius:10, padding:"12px 16px", margin:"8px 0", fontSize:12.5, color:"#F59E0B", display:"flex", gap:10, alignItems:"flex-start" }}>
+            <span style={{ fontSize:16, flexShrink:0, marginTop:1 }}>⚠️</span><span style={{flex:1}}>{t.replace(/^⚠️?\s*/, "")}</span>
+          </div>
+        );
+
+        if (t.startsWith("💡")) return (
+          <div key={i} style={{ background:"linear-gradient(135deg,#0a121805,#0a121815)", border:"1px solid #0f203018", borderRadius:10, padding:"12px 16px", margin:"8px 0", fontSize:12.5, color:"#60A5FA", display:"flex", gap:10, alignItems:"flex-start" }}>
+            <span style={{ fontSize:16, flexShrink:0, marginTop:1 }}>💡</span><span style={{flex:1}}>{t.replace(/^💡\s*/, "")}</span>
+          </div>
+        );
+
+        const isSub = /^[A-Z][A-Z\s&\/\-—:()]{6,}$/.test(t) || (/^[A-Z🔵🔴🔥✅📌]/.test(t) && t.endsWith(":") && t.length < 60);
+        if (isSub) return (
+          <div key={i} style={{ fontSize:10.5, fontWeight:700, color:"#DC2626", letterSpacing:2, marginTop:20, marginBottom:6, textTransform:"uppercase", display:"flex", alignItems:"center", gap:8 }}>
+            <span style={{ width:12, height:1, background:"#DC262650" }}></span>
+            {t.replace(/:$/, "")}
+          </div>
+        );
+
+        if (/^[^\w\s]/.test(t) && t.length < 80 && /[A-Z]{3,}/.test(t.slice(0,20))) {
+          const parts = t.split(/\s[—–-]\s/);
+          if (parts.length === 2) return (
+            <div key={i} style={{ padding:"5px 0", display:"flex", gap:6 }}>
+              <span style={{ fontWeight:700, color:"#e8e8ec" }}>{parts[0]}</span>
+              <span style={{ color:"#555" }}>—</span>
+              <span style={{flex:1}}>{parts[1]}</span>
+            </div>
+          );
+        }
+
         if (/https?:\/\//.test(t)) {
           const urlMatch = t.match(/(https?:\/\/[^\s]+)/);
           if (urlMatch) {
             const label = t.replace(urlMatch[0], "").replace(/^[▶\s]+/, "").trim();
             return (
-              <div key={i} style={{ padding: "4px 0" }}>
-                {label && <span style={{ color: "#E8E8EC", fontWeight: 500 }}>{label} </span>}
-                <a href={urlMatch[0]} target="_blank" rel="noreferrer" style={{ color: "#DC2626", wordBreak: "break-all", fontSize: 12 }}>{urlMatch[0]}</a>
+              <div key={i} style={{ padding:"4px 0" }}>
+                {label && <span style={{ color:"#e8e8ec", fontWeight:500 }}>{label} </span>}
+                <a href={urlMatch[0]} target="_blank" rel="noreferrer" style={{ color:"#DC2626", wordBreak:"break-all", fontSize:12, textDecoration:"none", borderBottom:"1px solid #DC262640" }}>{urlMatch[0]}</a>
               </div>
             );
           }
         }
-        if (t.includes("$") && (t.includes("T1") || t.includes("Starter") || t.includes("Pro "))) return (
-          <div key={i} style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: "#AAA", padding: "2px 0", whiteSpace: "pre" }}>{line}</div>
+
+        if (t.includes("$") && (t.includes("T1") || t.includes("Starter") || t.includes("Pro ") || t.includes("Elite"))) return (
+          <div key={i} style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:11, color:"#888", padding:"2px 0", whiteSpace:"pre", background:"#0a0a0c", borderRadius:6, padding:"8px 12px", margin:"4px 0", border:"1px solid #141416" }}>{line}</div>
         );
-        return <div key={i} style={{ padding: "2px 0" }}>{t}</div>;
+
+        return <div key={i} style={{ padding:"2px 0" }}>{t}</div>;
       })}
     </div>
   );
 }
 
-const anim = `@keyframes fi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}`;
+/* ═══════════════════════════════════════════
+   HOOK
+   ═══════════════════════════════════════════ */
+function useW() {
+  const [w, setW] = useState(typeof window!=="undefined"?window.innerWidth:400);
+  useEffect(() => { const h=()=>setW(window.innerWidth); window.addEventListener("resize",h); return ()=>window.removeEventListener("resize",h); }, []);
+  return w;
+}
 
+/* ═══════════════════════════════════════════
+   LOGIN
+   ═══════════════════════════════════════════ */
 function Login({ onLogin, err }) {
   const [p, setP] = useState("");
   const [ld, setLd] = useState(false);
-  const go = () => { setLd(true); setTimeout(() => { onLogin(p); setLd(false); }, 400); };
+  const go = () => { setLd(true); setTimeout(() => { onLogin(p); setLd(false); }, 500); };
+
   return (
-    <div style={{ minHeight: "100dvh", background: "#060608", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'DM Sans', system-ui, sans-serif", padding: 20 }}>
-      <style>{anim}</style>
-      <div style={{ width: "100%", maxWidth: 420, textAlign: "center", animation: "fi 0.6s ease" }}>
-        <div style={{ marginBottom: 32 }}>
-          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 28, letterSpacing: 12, color: "#DC2626", marginBottom: 4 }}>REDLINE</div>
-          <h1 style={{ fontSize: 20, fontWeight: 600, color: "#FFF", margin: "0 0 4px", letterSpacing: 3, textTransform: "uppercase" }}>Sales Academy</h1>
-          <div style={{ width: 40, height: 2, background: "#DC2626", margin: "12px auto 0", borderRadius: 1 }} />
+    <div className="dotgrid" style={{ minHeight:"100dvh", background:"#050507", display:"flex", alignItems:"center", justifyContent:"center", padding:20, position:"relative" }}>
+      {/* Ambient glow */}
+      <div style={{ position:"absolute", top:"30%", left:"50%", transform:"translate(-50%,-50%)", width:400, height:400, background:"radial-gradient(circle, rgba(220,38,38,0.06) 0%, transparent 70%)", pointerEvents:"none" }} />
+
+      <div style={{ width:"100%", maxWidth:400, textAlign:"center", animation:"fadeUp 0.8s cubic-bezier(0.4,0,0.2,1)", position:"relative", zIndex:1 }}>
+        <div style={{ marginBottom:40 }}>
+          <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:36, letterSpacing:14, color:"#DC2626", marginBottom:4 }}>REDLINE</div>
+          <div style={{ fontSize:13, fontWeight:500, color:"#444", letterSpacing:6, textTransform:"uppercase" }}>Sales Academy</div>
+          <div style={{ width:48, height:2, background:"linear-gradient(90deg,transparent,#DC2626,transparent)", margin:"16px auto 0" }} />
         </div>
-        <div style={{ background: "#0C0C0E", border: "1px solid #1A1A1E", borderRadius: 16, padding: "36px 28px" }}>
-          <label style={{ display: "block", textAlign: "left", fontSize: 10, fontWeight: 600, color: "#555", letterSpacing: 2, marginBottom: 8, textTransform: "uppercase" }}>Access Code</label>
-          <input type="password" value={p} onChange={e => setP(e.target.value)} onKeyDown={e => e.key === "Enter" && go()}
-            placeholder="••••••••" autoFocus
-            style={{ width: "100%", padding: "16px 18px", background: "#060608", border: err ? "1px solid #DC2626" : "1px solid #1A1A1E", borderRadius: 12, color: "#FFF", fontSize: 15, outline: "none", boxSizing: "border-box", transition: "all 0.3s", fontFamily: "inherit" }}
-            onFocus={e => { if (!err) { e.target.style.borderColor = "#DC2626"; e.target.style.boxShadow = "0 0 0 3px rgba(220,38,38,0.1)"; }}}
-            onBlur={e => { e.target.style.borderColor = err ? "#DC2626" : "#1A1A1E"; e.target.style.boxShadow = "none"; }} />
-          {err && <p style={{ color: "#DC2626", fontSize: 12, margin: "10px 0 0", fontWeight: 500, textAlign: "left" }}>Invalid access code</p>}
+
+        <div style={{ background:"#0a0a0c", border:"1px solid #161618", borderRadius:20, padding:"40px 32px", boxShadow:"0 16px 64px rgba(0,0,0,0.5)" }}>
+          <label style={{ display:"block", textAlign:"left", fontSize:10, fontWeight:600, color:"#444", letterSpacing:2.5, marginBottom:10, textTransform:"uppercase" }}>Access Code</label>
+          <input type="password" value={p} onChange={e=>setP(e.target.value)} onKeyDown={e=>e.key==="Enter"&&go()}
+            placeholder="Enter code" autoFocus
+            style={{ width:"100%", padding:"16px 20px", background:"#050507", border:err?"1.5px solid #DC2626":"1.5px solid #1a1a1e", borderRadius:14, color:"#FFF", fontSize:15, outline:"none", boxSizing:"border-box", transition:"all 0.3s", fontFamily:"inherit", letterSpacing:2 }}
+            onFocus={e=>{if(!err){e.target.style.borderColor="#DC2626";e.target.style.boxShadow="0 0 0 4px rgba(220,38,38,0.08)"}}}
+            onBlur={e=>{e.target.style.borderColor=err?"#DC2626":"#1a1a1e";e.target.style.boxShadow="none"}} />
+          {err && <p style={{ color:"#DC2626", fontSize:12, margin:"12px 0 0", fontWeight:500, textAlign:"left" }}>Invalid code. Try again.</p>}
           <button onClick={go} disabled={ld}
-            style={{ width: "100%", padding: "16px", background: ld ? "#991B1B" : "#DC2626", color: "#FFF", border: "none", borderRadius: 12, fontSize: 13, fontWeight: 700, letterSpacing: 3, cursor: ld ? "wait" : "pointer", marginTop: 16, textTransform: "uppercase", transition: "all 0.2s" }}
-            onMouseOver={e => !ld && (e.target.style.background = "#B91C1C")} onMouseOut={e => !ld && (e.target.style.background = "#DC2626")}>
-            {ld ? "···" : "Enter Academy"}
+            style={{ width:"100%", padding:"16px", background:ld?"#7f1d1d":"linear-gradient(135deg,#DC2626,#991B1B)", color:"#FFF", border:"none", borderRadius:14, fontSize:12, fontWeight:700, letterSpacing:4, cursor:ld?"wait":"pointer", marginTop:18, textTransform:"uppercase", transition:"all 0.3s", boxShadow:"0 4px 24px rgba(220,38,38,0.2)" }}>
+            {ld ? "Verifying..." : "Enter Academy"}
           </button>
         </div>
-        <p style={{ color: "#1A1A1A", fontSize: 10, marginTop: 32, letterSpacing: 1.5 }}>© 2026 REDLINE WEB SERVICES LLC</p>
+
+        <p style={{ color:"#161618", fontSize:9, marginTop:36, letterSpacing:2, textTransform:"uppercase" }}>© 2026 Redline Web Services LLC</p>
       </div>
     </div>
   );
 }
 
-function Viewer({ contentKey, onBack, w }) {
+/* ═══════════════════════════════════════════
+   CONTENT VIEWER
+   ═══════════════════════════════════════════ */
+function Viewer({ ck, onBack, w }) {
   const [oi, setOi] = useState(0);
   const ref = useRef(null);
-  const c = C[contentKey];
-  const desk = w >= 768;
-  const accent = contentKey.includes("bc") ? "#F59E0B" : contentKey.includes("call") || contentKey.includes("comp") || contentKey.includes("onboard") ? "#3B82F6" : "#DC2626";
+  const c = C[ck];
+  const dk = w >= 768;
+  const accent = ck.includes("bc")?"#F59E0B":ck.includes("call")||ck.includes("comp")||ck.includes("onboard")?"#3B82F6":"#DC2626";
 
-  useEffect(() => { ref.current?.scrollIntoView({ behavior: "smooth" }); setOi(0); }, [contentKey]);
+  useEffect(() => { ref.current?.scrollIntoView({behavior:"smooth"}); setOi(0); }, [ck]);
 
   return (
-    <div ref={ref} style={{ maxWidth: desk ? 760 : "100%", margin: "0 auto" }}>
-      <style>{anim}</style>
-      <div style={{ position: "sticky", top: 0, zIndex: 10, background: "rgba(6,6,8,0.92)", backdropFilter: "blur(16px)", borderBottom: "1px solid #141416", padding: desk ? "14px 32px" : "14px 20px" }}>
-        <button onClick={onBack} style={{ background: "none", border: "none", color: "#DC2626", fontSize: 13, fontWeight: 600, cursor: "pointer", padding: "4px 0", display: "flex", alignItems: "center", gap: 6, fontFamily: "inherit" }}>← Back to Academy</button>
+    <div ref={ref}>
+      {/* Sticky nav */}
+      <div style={{ position:"sticky", top:0, zIndex:20, background:"rgba(5,5,7,0.88)", backdropFilter:"blur(20px)", WebkitBackdropFilter:"blur(20px)", borderBottom:"1px solid #111114", padding:dk?"12px 0":"12px 0" }}>
+        <div style={{ maxWidth:800, margin:"0 auto", padding:dk?"0 40px":"0 20px" }}>
+          <button className="back-btn" onClick={onBack} style={{ background:"none", border:"none", color:"#DC2626", fontSize:13, fontWeight:600, cursor:"pointer", padding:"6px 0", display:"flex", alignItems:"center", gap:8, fontFamily:"inherit" }}>
+            <span style={{ fontSize:18, lineHeight:1 }}>‹</span> Back to Academy
+          </button>
+        </div>
       </div>
-      <div style={{ padding: desk ? "28px 32px 20px" : "24px 20px 20px", animation: "fi 0.4s ease" }}>
-        <div style={{ width: 36, height: 3, background: accent, borderRadius: 2, marginBottom: 14 }} />
-        <h2 style={{ fontSize: desk ? 26 : 22, fontWeight: 800, color: "#FFF", margin: "0 0 6px", letterSpacing: "-0.03em", lineHeight: 1.2 }}>{c.t}</h2>
-        <p style={{ fontSize: 13, color: "#666", margin: 0 }}>{c.st}</p>
-      </div>
-      {c.vid && (
-        <div style={{ padding: desk ? "0 32px 8px" : "0 20px 8px", animation: "fi 0.5s ease" }}>
-          <a href={c.vid} target="_blank" rel="noreferrer"
-            style={{ display: "flex", alignItems: "center", gap: 14, background: "linear-gradient(135deg,#160808,#0C0C0E)", border: "1px solid #2A1212", borderRadius: 14, padding: "16px 18px", textDecoration: "none", transition: "border-color 0.2s" }}
-            onMouseOver={e => e.currentTarget.style.borderColor = "#DC2626"} onMouseOut={e => e.currentTarget.style.borderColor = "#2A1212"}>
-            <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg,#DC2626,#991B1B)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0, boxShadow: "0 4px 12px rgba(220,38,38,0.3)" }}>▶</div>
+
+      <div style={{ maxWidth:800, margin:"0 auto", padding:dk?"0 40px":"0 20px" }}>
+        {/* Hero */}
+        <div style={{ padding:"36px 0 28px", animation:"fadeUp 0.5s ease", position:"relative" }}>
+          <div style={{ width:40, height:3, background:accent, borderRadius:2, marginBottom:20 }} />
+          <h2 style={{ fontSize:dk?30:24, fontWeight:800, color:"#FFF", margin:"0 0 8px", letterSpacing:"-0.04em", lineHeight:1.15 }}>{c.t}</h2>
+          <p style={{ fontSize:14, color:"#555", margin:0, lineHeight:1.5 }}>{c.st}</p>
+        </div>
+
+        {/* Video */}
+        {c.vid && (
+          <a href={c.vid} target="_blank" rel="noreferrer" className="vid-card"
+            style={{ display:"flex", alignItems:"center", gap:16, background:"linear-gradient(135deg,#0c0608,#0a0a0c)", border:"1px solid #1e1218", borderRadius:16, padding:"20px 22px", textDecoration:"none", marginBottom:24, animation:"fadeUp 0.6s ease" }}>
+            <div className="play-pulse" style={{ width:52, height:52, borderRadius:14, background:"linear-gradient(135deg,#DC2626,#991B1B)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:18, flexShrink:0, boxShadow:"0 4px 20px rgba(220,38,38,0.3)", color:"#fff" }}>▶</div>
             <div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: "#E8E8EC", marginBottom: 2 }}>Watch Training Video</div>
-              <div style={{ fontSize: 11, color: "#555" }}>Required before continuing</div>
+              <div style={{ fontSize:13, fontWeight:700, color:"#FFF", marginBottom:3 }}>Watch Training Video</div>
+              <div style={{ fontSize:11, color:"#555" }}>Complete before continuing with this module</div>
             </div>
           </a>
+        )}
+
+        {/* Sections */}
+        <div style={{ paddingBottom:80 }}>
+          {c.s.map((s, i) => {
+            const open = oi === i;
+            return (
+              <div key={i} style={{ marginBottom:6, animation:`fadeUp 0.4s ease ${0.05*i}s both` }}>
+                <button className="acc-btn" onClick={() => setOi(open ? null : i)}
+                  style={{
+                    width:"100%", textAlign:"left",
+                    background: open ? "#0c0c0e" : "#08080a",
+                    border: "1px solid " + (open ? "#1e1e22" : "#111114"),
+                    borderRadius: open ? "16px 16px 0 0" : 16,
+                    padding: dk ? "20px 24px" : "18px 20px",
+                    cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"space-between",
+                    fontFamily:"inherit", minHeight:56
+                  }}>
+                  <span style={{ fontSize:dk?15:14, fontWeight:700, color:open?"#FFF":"#c0c0c4", lineHeight:1.35, paddingRight:16 }}>{s.h}</span>
+                  <div style={{ width:28, height:28, borderRadius:8, background:open?accent+"18":"#ffffff06", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, transition:"all 0.3s" }}>
+                    <span style={{ color:open?accent:"#333", fontSize:11, transform:open?"rotate(180deg)":"none", transition:"transform 0.3s ease", display:"block" }}>▾</span>
+                  </div>
+                </button>
+                {open && (
+                  <div style={{
+                    background:"#070709", border:"1px solid #1e1e22", borderTop:"none",
+                    borderRadius:"0 0 16px 16px", padding:dk?"28px 24px":"22px 20px",
+                    animation:"fadeIn 0.3s ease"
+                  }}>
+                    <RichText text={s.b} />
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
-      )}
-      <div style={{ padding: desk ? "10px 32px 60px" : "10px 20px 60px" }}>
-        {c.s.map((s, i) => {
-          const open = oi === i;
-          return (
-            <div key={i} style={{ marginBottom: 4, animation: `fi 0.3s ease ${i * 0.03}s both` }}>
-              <button onClick={() => setOi(open ? null : i)}
-                style={{ width: "100%", textAlign: "left", background: open ? "#0E0E10" : "#0A0A0C", border: "1px solid " + (open ? "#1E1E22" : "#141416"), borderRadius: open ? "14px 14px 0 0" : 14, padding: desk ? "18px 22px" : "16px 18px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", transition: "all 0.2s", fontFamily: "inherit", minHeight: 52 }}
-                onMouseOver={e => e.currentTarget.style.background = "#101012"} onMouseOut={e => e.currentTarget.style.background = open ? "#0E0E10" : "#0A0A0C"}>
-                <span style={{ fontSize: desk ? 14.5 : 13.5, fontWeight: 700, color: open ? "#FFF" : "#D0D0D4", lineHeight: 1.3, paddingRight: 12 }}>{s.h}</span>
-                <span style={{ color: "#333", fontSize: 12, transform: open ? "rotate(180deg)" : "none", transition: "transform 0.3s ease", flexShrink: 0 }}>▾</span>
-              </button>
-              {open && (
-                <div style={{ background: "#080809", border: "1px solid #1E1E22", borderTop: "none", borderRadius: "0 0 14px 14px", padding: desk ? "24px 22px" : "20px 18px", animation: "fi 0.25s ease" }}>
-                  <RichText text={s.b} />
-                </div>
-              )}
-            </div>
-          );
-        })}
       </div>
     </div>
   );
 }
 
+/* ═══════════════════════════════════════════
+   MAIN APP
+   ═══════════════════════════════════════════ */
 export default function App() {
   const [auth, setAuth] = useState(false);
   const [err, setErr] = useState(false);
   const [view, setView] = useState(null);
   const ref = useRef(null);
-  const w = useWidth();
-  const desk = w >= 768;
-  const wide = w >= 1024;
+  const w = useW();
+  const dk = w >= 768;
+  const wd = w >= 1100;
 
-  const scrollTop = useCallback(() => { ref.current?.scrollIntoView({ behavior: "smooth" }); }, []);
+  const top = useCallback(() => { ref.current?.scrollIntoView({behavior:"smooth"}); }, []);
+
+  const bc = { MODULE:"#DC2626", BOOTCAMP:"#F59E0B", REFERENCE:"#3B82F6" };
+  const groups = [
+    { label:null, color:"#DC2626", items:CATS.filter(x=>x.t==="MODULE") },
+    { label:"BOOTCAMPS", color:"#F59E0B", items:CATS.filter(x=>x.t==="BOOTCAMP") },
+    { label:"QUICK REFERENCE", color:"#3B82F6", items:CATS.filter(x=>x.t==="REFERENCE") },
+  ];
 
   if (!auth) return (
-    <div><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono&display=swap" rel="stylesheet" />
-    <Login onLogin={p => p === PW ? (setAuth(true), setErr(false)) : setErr(true)} err={err} /></div>
+    <>
+      <style>{GLOBAL_CSS}</style>
+      <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+      <div style={{fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif"}}><Login onLogin={p=>p===PW?(setAuth(true),setErr(false)):setErr(true)} err={err} /></div>
+    </>
   );
 
   if (view) return (
-    <div ref={ref} style={{ minHeight: "100dvh", background: "#060608", fontFamily: "'DM Sans', system-ui, sans-serif", color: "#FFF" }}>
-      <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono&display=swap" rel="stylesheet" />
-      <Viewer contentKey={view} onBack={() => { setView(null); setTimeout(scrollTop, 50); }} w={w} />
+    <div ref={ref} style={{ minHeight:"100dvh", background:"#050507", fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif", color:"#FFF" }}>
+      <style>{GLOBAL_CSS}</style>
+      <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+      <Viewer ck={view} onBack={()=>{setView(null);setTimeout(top,50)}} w={w} />
     </div>
   );
 
-  const groups = [
-    { label: null, items: CATS.filter(x => x.t === "MODULE") },
-    { label: "BOOTCAMPS", items: CATS.filter(x => x.t === "BOOTCAMP") },
-    { label: "QUICK REFERENCE", items: CATS.filter(x => x.t === "REFERENCE") },
-  ];
-  const bc = { MODULE: "#DC2626", BOOTCAMP: "#F59E0B", REFERENCE: "#3B82F6" };
-
   return (
-    <div ref={ref} style={{ minHeight: "100dvh", background: "#060608", fontFamily: "'DM Sans', system-ui, sans-serif", color: "#FFF" }}>
-      <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono&display=swap" rel="stylesheet" />
-      <style>{anim}</style>
+    <div ref={ref} className="dotgrid" style={{ minHeight:"100dvh", background:"#050507", fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif", color:"#FFF", position:"relative" }}>
+      <style>{GLOBAL_CSS}</style>
+      <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+      {/* Ambient glow */}
+      <div style={{ position:"fixed", top:0, left:"50%", transform:"translateX(-50%)", width:800, height:500, background:"radial-gradient(ellipse, rgba(220,38,38,0.04) 0%, transparent 70%)", pointerEvents:"none", zIndex:0 }} />
 
       {/* Header */}
-      <div style={{ background: "linear-gradient(180deg,#0C0C0E 0%,#060608 100%)", borderBottom: "1px solid #111", padding: wide ? "48px 48px 32px" : desk ? "40px 32px 28px" : "36px 20px 24px" }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-            <div>
-              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: desk ? 26 : 22, letterSpacing: 10, color: "#DC2626" }}>REDLINE</div>
-              <h1 style={{ fontSize: desk ? 26 : 22, fontWeight: 800, color: "#FFF", margin: "2px 0 0", letterSpacing: "-0.03em" }}>Sales Academy</h1>
+      <div style={{ position:"relative", zIndex:1, borderBottom:"1px solid #0e0e10", padding:wd?"52px 56px 36px":dk?"44px 36px 32px":"36px 20px 28px" }}>
+        <div style={{ maxWidth:1280, margin:"0 auto" }}>
+          <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:dk?24:20 }}>
+            <div style={{ animation:"fadeUp 0.6s ease" }}>
+              <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?30:24, letterSpacing:12, color:"#DC2626", lineHeight:1 }}>REDLINE</div>
+              <h1 style={{ fontSize:dk?14:12, fontWeight:600, color:"#444", margin:"6px 0 0", letterSpacing:dk?6:4, textTransform:"uppercase" }}>Sales Academy</h1>
             </div>
-            <div style={{ width: 48, height: 48, borderRadius: 14, background: "linear-gradient(135deg,#DC2626,#991B1B)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 800, color: "#FFF", letterSpacing: 1, boxShadow: "0 4px 16px rgba(220,38,38,0.25)" }}>R</div>
+            <div style={{ animation:"fadeUp 0.6s ease 0.1s both" }}>
+              <div style={{ width:dk?52:44, height:dk?52:44, borderRadius:14, background:"linear-gradient(135deg,#DC2626,#7f1d1d)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?20:16, color:"#FFF", letterSpacing:2, boxShadow:"0 4px 24px rgba(220,38,38,0.2)", animation:"glow 3s ease-in-out infinite" }}>R</div>
+            </div>
           </div>
-          <p style={{ fontSize: 13, color: "#555", margin: "0 0 20px" }}>Everything you need to close deals and drive revenue.</p>
-          <div style={{ display: "grid", gridTemplateColumns: desk ? "repeat(3, 140px)" : "1fr 1fr 1fr", gap: 10 }}>
-            {[["12", "Modules"], ["2", "Bootcamps"], ["3", "References"]].map(([n, l]) => (
-              <div key={l} style={{ background: "#0A0A0C", border: "1px solid #141416", borderRadius: 12, padding: "14px 16px", textAlign: "center" }}>
-                <div style={{ fontSize: 24, fontWeight: 800, color: "#DC2626", lineHeight: 1 }}>{n}</div>
-                <div style={{ fontSize: 9, color: "#555", textTransform: "uppercase", letterSpacing: 1.5, fontWeight: 600, marginTop: 4 }}>{l}</div>
+
+          <p style={{ fontSize:dk?14:13, color:"#444", margin:"0 0 24px", maxWidth:500, lineHeight:1.5, animation:"fadeUp 0.6s ease 0.15s both" }}>
+            Your complete training system. Master every module, close more deals.
+          </p>
+
+          {/* Stats */}
+          <div style={{ display:"flex", gap:dk?12:8, animation:"fadeUp 0.6s ease 0.2s both" }}>
+            {[["12","Modules","#DC2626"],["2","Bootcamps","#F59E0B"],["3","Reference","#3B82F6"]].map(([n,l,col]) => (
+              <div key={l} style={{ background:"#0a0a0c", border:"1px solid #111114", borderRadius:14, padding:dk?"16px 24px":"14px 16px", textAlign:"center", minWidth:dk?120:0, flex:dk?"none":1 }}>
+                <div style={{ fontSize:dk?28:22, fontWeight:800, color:col, lineHeight:1 }}>{n}</div>
+                <div style={{ fontSize:9, color:"#444", textTransform:"uppercase", letterSpacing:2, fontWeight:600, marginTop:6 }}>{l}</div>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Content grid */}
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: wide ? "16px 48px 60px" : desk ? "16px 32px 60px" : "12px 20px 60px" }}>
+      {/* Cards */}
+      <div style={{ position:"relative", zIndex:1, maxWidth:1280, margin:"0 auto", padding:wd?"24px 56px 80px":dk?"20px 36px 80px":"16px 20px 80px" }}>
         {groups.map((g, gi) => (
           <div key={gi}>
             {g.label && (
-              <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "28px 0 12px" }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: gi === 1 ? "#F59E0B" : "#3B82F6", letterSpacing: 2, textTransform: "uppercase" }}>{g.label}</div>
-                <div style={{ flex: 1, height: 1, background: "#141416" }} />
+              <div style={{ display:"flex", alignItems:"center", gap:12, padding:"32px 0 14px", animation:`fadeUp 0.5s ease ${0.3+gi*0.1}s both` }}>
+                <div style={{ width:8, height:8, borderRadius:4, background:g.color }} />
+                <div style={{ fontSize:10, fontWeight:700, color:g.color, letterSpacing:3, textTransform:"uppercase" }}>{g.label}</div>
+                <div style={{ flex:1, height:1, background:"#111114" }} />
               </div>
             )}
-            <div style={{ display: "grid", gridTemplateColumns: wide ? "1fr 1fr 1fr" : desk ? "1fr 1fr" : "1fr", gap: 8 }}>
+            <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr 1fr":dk?"1fr 1fr":"1fr", gap:dk?10:8 }}>
               {g.items.map((x, i) => (
-                <div key={x.id} onClick={() => { setView(x.k); setTimeout(scrollTop, 50); }}
+                <div key={x.id} className="card-hover" onClick={()=>{setView(x.k);setTimeout(top,50)}}
                   style={{
-                    background: "#0A0A0C", border: "1px solid #141416", borderLeft: `3px solid ${bc[x.t]}`,
-                    borderRadius: 14, padding: desk ? "20px 18px" : "18px 16px", cursor: "pointer",
-                    transition: "all 0.2s ease", animation: `fi 0.4s ease ${(gi * 3 + i) * 0.04}s both`,
-                  }}
-                  onMouseOver={e => { e.currentTarget.style.background = "#0E0E10"; e.currentTarget.style.borderColor = "#1E1E22"; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,0.3)"; }}
-                  onMouseOut={e => { e.currentTarget.style.background = "#0A0A0C"; e.currentTarget.style.borderColor = "#141416"; e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "none"; }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                    <div style={{ fontSize: 22, width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center", background: "#0E0E10", borderRadius: 12, flexShrink: 0 }}>{x.ic}</div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 9, fontWeight: 700, color: bc[x.t], letterSpacing: 1.5, marginBottom: 3 }}>{x.n || x.t}</div>
-                      <h3 style={{ fontSize: 14, fontWeight: 700, color: "#FFF", margin: "0 0 2px" }}>{x.sub}</h3>
-                      <p style={{ fontSize: 11, color: "#555", margin: 0, lineHeight: 1.3 }}>{x.d}</p>
+                    background:"#08080a", border:"1px solid #111114",
+                    borderRadius:16, padding:dk?"22px 20px":"18px 16px", cursor:"pointer",
+                    animation:`fadeUp 0.5s cubic-bezier(0.4,0,0.2,1) ${0.05*(gi*4+i)}s both`,
+                    position:"relative", overflow:"hidden"
+                  }}>
+                  {/* Accent strip */}
+                  <div style={{ position:"absolute", top:0, left:0, width:3, height:"100%", background:bc[x.t], borderRadius:"3px 0 0 3px" }} />
+
+                  <div style={{ display:"flex", alignItems:"center", gap:14, paddingLeft:8 }}>
+                    <div style={{ fontSize:24, width:48, height:48, display:"flex", alignItems:"center", justifyContent:"center", background:"#0c0c0e", borderRadius:14, flexShrink:0, border:"1px solid #141416" }}>{x.ic}</div>
+                    <div style={{ flex:1, minWidth:0 }}>
+                      <div style={{ fontSize:9, fontWeight:700, color:bc[x.t], letterSpacing:2, marginBottom:4, textTransform:"uppercase" }}>{x.n||x.t}</div>
+                      <h3 style={{ fontSize:14.5, fontWeight:700, color:"#e8e8ec", margin:"0 0 3px", lineHeight:1.3 }}>{x.sub}</h3>
+                      <p style={{ fontSize:11.5, color:"#4a4a50", margin:0, lineHeight:1.35 }}>{x.d}</p>
                     </div>
-                    <div style={{ color: "#222", fontSize: 16, flexShrink: 0 }}>›</div>
+                    <div style={{ width:32, height:32, borderRadius:10, background:"#0c0c0e", border:"1px solid #141416", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, color:"#2a2a2e", fontSize:14 }}>›</div>
                   </div>
                 </div>
               ))}
