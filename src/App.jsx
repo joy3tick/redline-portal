@@ -153,17 +153,17 @@ const GLOBAL_CSS = `
 @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
 
 *{margin:0;padding:0;box-sizing:border-box}
-html,body,#root{min-height:100dvh;background:#050507}
+html,body,#root{min-height:100dvh;background:#101114}
 body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden}
-::selection{background:rgba(220,38,38,0.25);color:#fff}
+::selection{background:rgba(220,38,38,0.2);color:#fff}
 ::-webkit-scrollbar{width:5px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:#1a1a1e;border-radius:10px}
-::-webkit-scrollbar-thumb:hover{background:#2a2a2e}
+::-webkit-scrollbar-track{background:#101114}
+::-webkit-scrollbar-thumb{background:#2A2D35;border-radius:10px}
+::-webkit-scrollbar-thumb:hover{background:#3A3D45}
 input::placeholder{color:#2a2a2e}
 
 .dotgrid {
-  background-image: radial-gradient(circle, #ffffff06 1px, transparent 1px);
+  background-image: radial-gradient(circle, #ffffff08 1px, transparent 1px);
   background-size: 24px 24px;
 }
 .card-hover { transition: all 0.3s cubic-bezier(0.4,0,0.2,1) }
@@ -183,7 +183,7 @@ input::placeholder{color:#2a2a2e}
 function RichText({ text }) {
   const lines = text.split("\n");
   return (
-    <div style={{ fontSize:13.5, color:"#b8b8be", lineHeight:1.85 }}>
+    <div style={{ fontSize:13.5, color:"#C4C8D0", lineHeight:1.85 }}>
       {lines.map((line, i) => {
         const t = line.trim();
         if (!t) return <div key={i} style={{ height:12 }} />;
@@ -200,19 +200,19 @@ function RichText({ text }) {
           return (
             <div key={i} style={{ display:"flex", gap:12, padding:"6px 0", alignItems:"flex-start" }}>
               <span style={{ background:"#DC262615", color:"#DC2626", width:28, height:28, borderRadius:8, display:"flex", alignItems:"center", justifyContent:"center", fontSize:13, flexShrink:0, fontWeight:700 }}>{t.slice(0,sp)}</span>
-              <span style={{ fontWeight:600, color:"#e0e0e4", paddingTop:3 }}>{t.slice(sp+1)}</span>
+              <span style={{ fontWeight:600, color:"#E8ECF0", paddingTop:3 }}>{t.slice(sp+1)}</span>
             </div>
           );
         }
 
         if (t.startsWith("⚠️") || t.startsWith("⚠")) return (
-          <div key={i} style={{ background:"linear-gradient(135deg,#1a120805,#1a120815)", border:"1px solid #33281018", borderRadius:10, padding:"12px 16px", margin:"8px 0", fontSize:12.5, color:"#F59E0B", display:"flex", gap:10, alignItems:"flex-start" }}>
+          <div key={i} style={{ background:"linear-gradient(135deg,#1a120810,#1a120820)", border:"1px solid #33281025", borderRadius:10, padding:"12px 16px", margin:"8px 0", fontSize:12.5, color:"#F59E0B", display:"flex", gap:10, alignItems:"flex-start" }}>
             <span style={{ fontSize:16, flexShrink:0, marginTop:1 }}>⚠️</span><span style={{flex:1}}>{t.replace(/^⚠️?\s*/, "")}</span>
           </div>
         );
 
         if (t.startsWith("💡")) return (
-          <div key={i} style={{ background:"linear-gradient(135deg,#0a121805,#0a121815)", border:"1px solid #0f203018", borderRadius:10, padding:"12px 16px", margin:"8px 0", fontSize:12.5, color:"#60A5FA", display:"flex", gap:10, alignItems:"flex-start" }}>
+          <div key={i} style={{ background:"linear-gradient(135deg,#0a121810,#0a121820)", border:"1px solid #0f203025", borderRadius:10, padding:"12px 16px", margin:"8px 0", fontSize:12.5, color:"#60A5FA", display:"flex", gap:10, alignItems:"flex-start" }}>
             <span style={{ fontSize:16, flexShrink:0, marginTop:1 }}>💡</span><span style={{flex:1}}>{t.replace(/^💡\s*/, "")}</span>
           </div>
         );
@@ -229,8 +229,8 @@ function RichText({ text }) {
           const parts = t.split(/\s[—–-]\s/);
           if (parts.length === 2) return (
             <div key={i} style={{ padding:"5px 0", display:"flex", gap:6 }}>
-              <span style={{ fontWeight:700, color:"#e8e8ec" }}>{parts[0]}</span>
-              <span style={{ color:"#555" }}>—</span>
+              <span style={{ fontWeight:700, color:"#EEF0F4" }}>{parts[0]}</span>
+              <span style={{ color:"#6A6E78" }}>—</span>
               <span style={{flex:1}}>{parts[1]}</span>
             </div>
           );
@@ -242,7 +242,7 @@ function RichText({ text }) {
             const label = t.replace(urlMatch[0], "").replace(/^[▶\s]+/, "").trim();
             return (
               <div key={i} style={{ padding:"4px 0" }}>
-                {label && <span style={{ color:"#e8e8ec", fontWeight:500 }}>{label} </span>}
+                {label && <span style={{ color:"#EEF0F4", fontWeight:500 }}>{label} </span>}
                 <a href={urlMatch[0]} target="_blank" rel="noreferrer" style={{ color:"#DC2626", wordBreak:"break-all", fontSize:12, textDecoration:"none", borderBottom:"1px solid #DC262640" }}>{urlMatch[0]}</a>
               </div>
             );
@@ -250,7 +250,7 @@ function RichText({ text }) {
         }
 
         if (t.includes("$") && (t.includes("T1") || t.includes("Starter") || t.includes("Pro ") || t.includes("Elite"))) return (
-          <div key={i} style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:11, color:"#888", padding:"2px 0", whiteSpace:"pre", background:"#0a0a0c", borderRadius:6, padding:"8px 12px", margin:"4px 0", border:"1px solid #141416" }}>{line}</div>
+          <div key={i} style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:11, color:"#8A8E98", padding:"2px 0", whiteSpace:"pre", background:"#181B20", borderRadius:6, padding:"8px 12px", margin:"4px 0", border:"1px solid #282B33" }}>{line}</div>
         );
 
         return <div key={i} style={{ padding:"2px 0" }}>{t}</div>;
@@ -277,22 +277,22 @@ function Login({ onLogin, err }) {
   const go = () => { setLd(true); setTimeout(() => { onLogin(p); setLd(false); }, 500); };
 
   return (
-    <div className="dotgrid" style={{ minHeight:"100dvh", background:"#050507", display:"flex", alignItems:"center", justifyContent:"center", padding:20, position:"relative" }}>
+    <div className="dotgrid" style={{ minHeight:"100dvh", background:"#101114", display:"flex", alignItems:"center", justifyContent:"center", padding:20, position:"relative" }}>
       {/* Ambient glow */}
-      <div style={{ position:"absolute", top:"30%", left:"50%", transform:"translate(-50%,-50%)", width:400, height:400, background:"radial-gradient(circle, rgba(220,38,38,0.06) 0%, transparent 70%)", pointerEvents:"none" }} />
+      <div style={{ position:"absolute", top:"30%", left:"50%", transform:"translate(-50%,-50%)", width:400, height:400, background:"radial-gradient(circle, rgba(220,38,38,0.07) 0%, transparent 70%)", pointerEvents:"none" }} />
 
       <div style={{ width:"100%", maxWidth:400, textAlign:"center", animation:"fadeUp 0.8s cubic-bezier(0.4,0,0.2,1)", position:"relative", zIndex:1 }}>
         <div style={{ marginBottom:40 }}>
           <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:36, letterSpacing:14, color:"#DC2626", marginBottom:4 }}>REDLINE</div>
-          <div style={{ fontSize:13, fontWeight:500, color:"#444", letterSpacing:6, textTransform:"uppercase" }}>Sales Academy</div>
+          <div style={{ fontSize:13, fontWeight:500, color:"#5A5E68", letterSpacing:6, textTransform:"uppercase" }}>Sales Academy</div>
           <div style={{ width:48, height:2, background:"linear-gradient(90deg,transparent,#DC2626,transparent)", margin:"16px auto 0" }} />
         </div>
 
-        <div style={{ background:"#0a0a0c", border:"1px solid #161618", borderRadius:20, padding:"40px 32px", boxShadow:"0 16px 64px rgba(0,0,0,0.5)" }}>
-          <label style={{ display:"block", textAlign:"left", fontSize:10, fontWeight:600, color:"#444", letterSpacing:2.5, marginBottom:10, textTransform:"uppercase" }}>Access Code</label>
+        <div style={{ background:"#181B20", border:"1px solid #2A2D35", borderRadius:20, padding:"40px 32px", boxShadow:"0 16px 64px rgba(0,0,0,0.5)" }}>
+          <label style={{ display:"block", textAlign:"left", fontSize:10, fontWeight:600, color:"#5A5E68", letterSpacing:2.5, marginBottom:10, textTransform:"uppercase" }}>Access Code</label>
           <input type="password" value={p} onChange={e=>setP(e.target.value)} onKeyDown={e=>e.key==="Enter"&&go()}
             placeholder="Enter code" autoFocus
-            style={{ width:"100%", padding:"16px 20px", background:"#050507", border:err?"1.5px solid #DC2626":"1.5px solid #1a1a1e", borderRadius:14, color:"#FFF", fontSize:15, outline:"none", boxSizing:"border-box", transition:"all 0.3s", fontFamily:"inherit", letterSpacing:2 }}
+            style={{ width:"100%", padding:"16px 20px", background:"#101114", border:err?"1.5px solid #DC2626":"1.5px solid #1a1a1e", borderRadius:14, color:"#FFF", fontSize:15, outline:"none", boxSizing:"border-box", transition:"all 0.3s", fontFamily:"inherit", letterSpacing:2 }}
             onFocus={e=>{if(!err){e.target.style.borderColor="#DC2626";e.target.style.boxShadow="0 0 0 4px rgba(220,38,38,0.08)"}}}
             onBlur={e=>{e.target.style.borderColor=err?"#DC2626":"#1a1a1e";e.target.style.boxShadow="none"}} />
           {err && <p style={{ color:"#DC2626", fontSize:12, margin:"12px 0 0", fontWeight:500, textAlign:"left" }}>Invalid code. Try again.</p>}
@@ -302,7 +302,7 @@ function Login({ onLogin, err }) {
           </button>
         </div>
 
-        <p style={{ color:"#161618", fontSize:9, marginTop:36, letterSpacing:2, textTransform:"uppercase" }}>© 2026 Redline Web Services LLC</p>
+        <p style={{ color:"#252830", fontSize:9, marginTop:36, letterSpacing:2, textTransform:"uppercase" }}>© 2026 Redline Web Services LLC</p>
       </div>
     </div>
   );
@@ -323,7 +323,7 @@ function Viewer({ ck, onBack, w }) {
   return (
     <div ref={ref}>
       {/* Sticky nav */}
-      <div style={{ position:"sticky", top:0, zIndex:20, background:"rgba(5,5,7,0.88)", backdropFilter:"blur(20px)", WebkitBackdropFilter:"blur(20px)", borderBottom:"1px solid #111114", padding:dk?"12px 0":"12px 0" }}>
+      <div style={{ position:"sticky", top:0, zIndex:20, background:"rgba(5,5,7,0.88)", backdropFilter:"blur(20px)", WebkitBackdropFilter:"blur(20px)", borderBottom:"1px solid #252830", padding:dk?"12px 0":"12px 0" }}>
         <div style={{ maxWidth:800, margin:"0 auto", padding:dk?"0 40px":"0 20px" }}>
           <button className="back-btn" onClick={onBack} style={{ background:"none", border:"none", color:"#DC2626", fontSize:13, fontWeight:600, cursor:"pointer", padding:"6px 0", display:"flex", alignItems:"center", gap:8, fontFamily:"inherit" }}>
             <span style={{ fontSize:18, lineHeight:1 }}>‹</span> Back to Academy
@@ -336,17 +336,17 @@ function Viewer({ ck, onBack, w }) {
         <div style={{ padding:"36px 0 28px", animation:"fadeUp 0.5s ease", position:"relative" }}>
           <div style={{ width:40, height:3, background:accent, borderRadius:2, marginBottom:20 }} />
           <h2 style={{ fontSize:dk?30:24, fontWeight:800, color:"#FFF", margin:"0 0 8px", letterSpacing:"-0.04em", lineHeight:1.15 }}>{c.t}</h2>
-          <p style={{ fontSize:14, color:"#555", margin:0, lineHeight:1.5 }}>{c.st}</p>
+          <p style={{ fontSize:14, color:"#6A6E78", margin:0, lineHeight:1.5 }}>{c.st}</p>
         </div>
 
         {/* Video */}
         {c.vid && (
           <a href={c.vid} target="_blank" rel="noreferrer" className="vid-card"
-            style={{ display:"flex", alignItems:"center", gap:16, background:"linear-gradient(135deg,#0c0608,#0a0a0c)", border:"1px solid #1e1218", borderRadius:16, padding:"20px 22px", textDecoration:"none", marginBottom:24, animation:"fadeUp 0.6s ease" }}>
+            style={{ display:"flex", alignItems:"center", gap:16, background:"linear-gradient(135deg,#1A1518,#181B20)", border:"1px solid #2E2530", borderRadius:16, padding:"20px 22px", textDecoration:"none", marginBottom:24, animation:"fadeUp 0.6s ease" }}>
             <div className="play-pulse" style={{ width:52, height:52, borderRadius:14, background:"linear-gradient(135deg,#DC2626,#991B1B)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:18, flexShrink:0, boxShadow:"0 4px 20px rgba(220,38,38,0.3)", color:"#fff" }}>▶</div>
             <div>
               <div style={{ fontSize:13, fontWeight:700, color:"#FFF", marginBottom:3 }}>Watch Training Video</div>
-              <div style={{ fontSize:11, color:"#555" }}>Complete before continuing with this module</div>
+              <div style={{ fontSize:11, color:"#6A6E78" }}>Complete before continuing with this module</div>
             </div>
           </a>
         )}
@@ -360,7 +360,7 @@ function Viewer({ ck, onBack, w }) {
                 <button className="acc-btn" onClick={() => setOi(open ? null : i)}
                   style={{
                     width:"100%", textAlign:"left",
-                    background: open ? "#0c0c0e" : "#08080a",
+                    background: open ? "#1A1D24" : "#08080a",
                     border: "1px solid " + (open ? "#1e1e22" : "#111114"),
                     borderRadius: open ? "16px 16px 0 0" : 16,
                     padding: dk ? "20px 24px" : "18px 20px",
@@ -368,13 +368,13 @@ function Viewer({ ck, onBack, w }) {
                     fontFamily:"inherit", minHeight:56
                   }}>
                   <span style={{ fontSize:dk?15:14, fontWeight:700, color:open?"#FFF":"#c0c0c4", lineHeight:1.35, paddingRight:16 }}>{s.h}</span>
-                  <div style={{ width:28, height:28, borderRadius:8, background:open?accent+"18":"#ffffff06", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, transition:"all 0.3s" }}>
+                  <div style={{ width:28, height:28, borderRadius:8, background:open?accent+"18":"#ffffff08", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, transition:"all 0.3s" }}>
                     <span style={{ color:open?accent:"#333", fontSize:11, transform:open?"rotate(180deg)":"none", transition:"transform 0.3s ease", display:"block" }}>▾</span>
                   </div>
                 </button>
                 {open && (
                   <div style={{
-                    background:"#070709", border:"1px solid #1e1e22", borderTop:"none",
+                    background:"#131317", border:"1px solid #32353D", borderTop:"none",
                     borderRadius:"0 0 16px 16px", padding:dk?"28px 24px":"22px 20px",
                     animation:"fadeIn 0.3s ease"
                   }}>
@@ -414,50 +414,50 @@ export default function App() {
   if (!auth) return (
     <>
       <style>{GLOBAL_CSS}</style>
-      <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-      <div style={{fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif"}}><Login onLogin={p=>p===PW?(setAuth(true),setErr(false)):setErr(true)} err={err} /></div>
+      <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+      <div style={{fontFamily:"'Outfit',system-ui,sans-serif"}}><Login onLogin={p=>p===PW?(setAuth(true),setErr(false)):setErr(true)} err={err} /></div>
     </>
   );
 
   if (view) return (
-    <div ref={ref} style={{ minHeight:"100dvh", background:"#050507", fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif", color:"#FFF" }}>
+    <div ref={ref} style={{ minHeight:"100dvh", background:"#101114", fontFamily:"'Outfit',system-ui,sans-serif", color:"#FFF" }}>
       <style>{GLOBAL_CSS}</style>
-      <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+      <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
       <Viewer ck={view} onBack={()=>{setView(null);setTimeout(top,50)}} w={w} />
     </div>
   );
 
   return (
-    <div ref={ref} className="dotgrid" style={{ minHeight:"100dvh", background:"#050507", fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif", color:"#FFF", position:"relative" }}>
+    <div ref={ref} className="dotgrid" style={{ minHeight:"100dvh", background:"#101114", fontFamily:"'Outfit',system-ui,sans-serif", color:"#FFF", position:"relative" }}>
       <style>{GLOBAL_CSS}</style>
-      <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+      <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
 
       {/* Ambient glow */}
-      <div style={{ position:"fixed", top:0, left:"50%", transform:"translateX(-50%)", width:800, height:500, background:"radial-gradient(ellipse, rgba(220,38,38,0.04) 0%, transparent 70%)", pointerEvents:"none", zIndex:0 }} />
+      <div style={{ position:"fixed", top:0, left:"50%", transform:"translateX(-50%)", width:800, height:500, background:"radial-gradient(ellipse, rgba(220,38,38,0.05) 0%, transparent 70%)", pointerEvents:"none", zIndex:0 }} />
 
       {/* Header */}
-      <div style={{ position:"relative", zIndex:1, borderBottom:"1px solid #0e0e10", padding:wd?"52px 56px 36px":dk?"44px 36px 32px":"36px 20px 28px" }}>
+      <div style={{ position:"relative", zIndex:1, borderBottom:"1px solid #1E2128", padding:wd?"52px 56px 36px":dk?"44px 36px 32px":"36px 20px 28px" }}>
         <div style={{ maxWidth:1280, margin:"0 auto" }}>
           <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:dk?24:20 }}>
             <div style={{ animation:"fadeUp 0.6s ease" }}>
               <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?30:24, letterSpacing:12, color:"#DC2626", lineHeight:1 }}>REDLINE</div>
-              <h1 style={{ fontSize:dk?14:12, fontWeight:600, color:"#444", margin:"6px 0 0", letterSpacing:dk?6:4, textTransform:"uppercase" }}>Sales Academy</h1>
+              <h1 style={{ fontSize:dk?14:12, fontWeight:600, color:"#5A5E68", margin:"6px 0 0", letterSpacing:dk?6:4, textTransform:"uppercase" }}>Sales Academy</h1>
             </div>
             <div style={{ animation:"fadeUp 0.6s ease 0.1s both" }}>
               <div style={{ width:dk?52:44, height:dk?52:44, borderRadius:14, background:"linear-gradient(135deg,#DC2626,#7f1d1d)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?20:16, color:"#FFF", letterSpacing:2, boxShadow:"0 4px 24px rgba(220,38,38,0.2)", animation:"glow 3s ease-in-out infinite" }}>R</div>
             </div>
           </div>
 
-          <p style={{ fontSize:dk?14:13, color:"#444", margin:"0 0 24px", maxWidth:500, lineHeight:1.5, animation:"fadeUp 0.6s ease 0.15s both" }}>
+          <p style={{ fontSize:dk?14:13, color:"#5A5E68", margin:"0 0 24px", maxWidth:500, lineHeight:1.5, animation:"fadeUp 0.6s ease 0.15s both" }}>
             Your complete training system. Master every module, close more deals.
           </p>
 
           {/* Stats */}
           <div style={{ display:"flex", gap:dk?12:8, animation:"fadeUp 0.6s ease 0.2s both" }}>
             {[["12","Modules","#DC2626"],["2","Bootcamps","#F59E0B"],["3","Reference","#3B82F6"]].map(([n,l,col]) => (
-              <div key={l} style={{ background:"#0a0a0c", border:"1px solid #111114", borderRadius:14, padding:dk?"16px 24px":"14px 16px", textAlign:"center", minWidth:dk?120:0, flex:dk?"none":1 }}>
+              <div key={l} style={{ background:"#181B20", border:"1px solid #252830", borderRadius:14, padding:dk?"16px 24px":"14px 16px", textAlign:"center", minWidth:dk?120:0, flex:dk?"none":1 }}>
                 <div style={{ fontSize:dk?28:22, fontWeight:800, color:col, lineHeight:1 }}>{n}</div>
-                <div style={{ fontSize:9, color:"#444", textTransform:"uppercase", letterSpacing:2, fontWeight:600, marginTop:6 }}>{l}</div>
+                <div style={{ fontSize:9, color:"#5A5E68", textTransform:"uppercase", letterSpacing:2, fontWeight:600, marginTop:6 }}>{l}</div>
               </div>
             ))}
           </div>
@@ -479,7 +479,7 @@ export default function App() {
               {g.items.map((x, i) => (
                 <div key={x.id} className="card-hover" onClick={()=>{setView(x.k);setTimeout(top,50)}}
                   style={{
-                    background:"#08080a", border:"1px solid #111114",
+                    background:"#141519", border:"1px solid #252830",
                     borderRadius:16, padding:dk?"22px 20px":"18px 16px", cursor:"pointer",
                     animation:`fadeUp 0.5s cubic-bezier(0.4,0,0.2,1) ${0.05*(gi*4+i)}s both`,
                     position:"relative", overflow:"hidden"
@@ -488,13 +488,13 @@ export default function App() {
                   <div style={{ position:"absolute", top:0, left:0, width:3, height:"100%", background:bc[x.t], borderRadius:"3px 0 0 3px" }} />
 
                   <div style={{ display:"flex", alignItems:"center", gap:14, paddingLeft:8 }}>
-                    <div style={{ fontSize:24, width:48, height:48, display:"flex", alignItems:"center", justifyContent:"center", background:"#0c0c0e", borderRadius:14, flexShrink:0, border:"1px solid #141416" }}>{x.ic}</div>
+                    <div style={{ fontSize:24, width:48, height:48, display:"flex", alignItems:"center", justifyContent:"center", background:"#1C1F25", borderRadius:14, flexShrink:0, border:"1px solid #282B33" }}>{x.ic}</div>
                     <div style={{ flex:1, minWidth:0 }}>
                       <div style={{ fontSize:9, fontWeight:700, color:bc[x.t], letterSpacing:2, marginBottom:4, textTransform:"uppercase" }}>{x.n||x.t}</div>
-                      <h3 style={{ fontSize:14.5, fontWeight:700, color:"#e8e8ec", margin:"0 0 3px", lineHeight:1.3 }}>{x.sub}</h3>
-                      <p style={{ fontSize:11.5, color:"#4a4a50", margin:0, lineHeight:1.35 }}>{x.d}</p>
+                      <h3 style={{ fontSize:14.5, fontWeight:700, color:"#EEF0F4", margin:"0 0 3px", lineHeight:1.3 }}>{x.sub}</h3>
+                      <p style={{ fontSize:11.5, color:"#5A5E68", margin:0, lineHeight:1.35 }}>{x.d}</p>
                     </div>
-                    <div style={{ width:32, height:32, borderRadius:10, background:"#0c0c0e", border:"1px solid #141416", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, color:"#2a2a2e", fontSize:14 }}>›</div>
+                    <div style={{ width:32, height:32, borderRadius:10, background:"#1C1F25", border:"1px solid #282B33", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, color:"#3A3E48", fontSize:14 }}>›</div>
                   </div>
                 </div>
               ))}
