@@ -143,7 +143,76 @@ const CATS = [
   { id: "d3", t: "REFERENCE", n: "REFERENCE", sub: "Call Script & Objections", d: "Scripts and objection playbook", ic: "📞", k: "call-script" },
   { id: "d4", t: "REFERENCE", n: "REFERENCE", sub: "Compensation Plan", d: "Full commission breakdown", ic: "💰", k: "comp-plan" },
   { id: "d5", t: "REFERENCE", n: "REFERENCE", sub: "Onboarding Email Template", d: "Payment links and forms", ic: "📧", k: "onboard-email" },
+  { id: "qz1", t: "QUIZ", n: "QUIZ", sub: "Modules 1–4", d: "Onboarding, targeting, positioning, cold calls", ic: "🧪", k: "q-m1-4" },
+  { id: "qz2", t: "QUIZ", n: "QUIZ", sub: "Modules 5–8", d: "Replies, sales calls, value prop, pricing", ic: "🧪", k: "q-m5-8" },
+  { id: "qz3", t: "QUIZ", n: "QUIZ", sub: "Modules 9–12", d: "Post-close, comp, deal cycle, onboarding", ic: "🧪", k: "q-m9-12" },
+  { id: "qz4", t: "QUIZ", n: "QUIZ", sub: "Technical Bootcamp", d: "Web design, SEO, CRO, speed, AI", ic: "🧪", k: "q-tech" },
+  { id: "qz5", t: "QUIZ", n: "QUIZ", sub: "Sales Bootcamp", d: "Value equation, SPIN, objections, daily system", ic: "🧪", k: "q-sales" },
 ];
+
+const QUIZZES = {
+  "q-m1-4": { title:"Modules 1–4 Quiz", subtitle:"Onboarding, Target Market, Positioning & Cold Calls", qs: [
+    { q:"What is the ONE objective of every cold call?", o:["Close the deal on the phone","Book the free video audit","Get them to visit our website","Send them a pricing sheet"], a:1 },
+    { q:"What is the minimum number of cold calls expected per week?", o:["50","75","100","200"], a:2 },
+    { q:"Which of these is NOT a target niche for Redline?", o:["HVAC contractors","SaaS startups","Plumbers","Electricians"], a:1 },
+    { q:"What is the primary lead generation tool taught in Module 2?", o:["LinkedIn Sales Navigator","Google Maps","Facebook Ads","Cold email lists"], a:1 },
+    { q:"When cold calling, who should you try to reach?", o:["The receptionist","The marketing manager","The business owner directly","Anyone who answers"], a:2 },
+    { q:"How should you position yourself on calls?", o:["As a freelancer looking for work","As a revenue consultant diagnosing a problem","As a web designer","As a student doing a project"], a:1 },
+    { q:"What is the 'Redline Trigger' before a cold call?", o:["Checking if they have a website","Taking 90 seconds to find one clear issue with their site","Googling their revenue","Reading their reviews"], a:1 },
+    { q:"What should you NEVER say on a cold call?", o:["\"I noticed your site has no quote form\"","\"I promise I'm not selling a warranty\"","\"Hope you're doing well\"","\"Do you have 30 seconds?\""], a:2 },
+    { q:"What is the ideal CTA at the end of a cold call?", o:["\"Can I send a 30-page proposal?\"","\"Want a 1-hour meeting?\"","\"Open to a 2-min video showing what I'd change?\"","\"Can I give you pricing?\""], a:2 },
+    { q:"Why skip general front-desk phone lines?", o:["They cost more","Receptionists won't pass on your message","It's against policy","Owners never have front desks"], a:1 },
+  ]},
+  "q-m5-8": { title:"Modules 5–8 Quiz", subtitle:"Reply Handling, Sales Calls, Value Prop & Pricing", qs: [
+    { q:"When a prospect replies 'Sounds interesting,' what does it mean?", o:["Ready to buy","Open but needs a leader to direct them","Wants a brochure","Not interested"], a:1 },
+    { q:"What is the response formula for warm replies?", o:["Send PDF + pricing + calendar","Acknowledge + Short Value + Call Invitation","Write detailed feature email","Wait 48 hours"], a:1 },
+    { q:"What should you NEVER do over email?", o:["Confirm a meeting time","Send contact info","Negotiate or justify pricing","Say thank you"], a:2 },
+    { q:"What is step 3 in the 6-Step Sales Call Structure?", o:["Redline Positioning","The Close","Pain Identification","Business Discovery"], a:2 },
+    { q:"What is the 80/20 listening rule?", o:["Close 80% within 20 min","Listen 80%, talk 20%","80% revenue from 20% clients","80% calls, 20% email"], a:1 },
+    { q:"What is the key shift in Module 7's value proposition?", o:["Cheapest websites","Design and aesthetics","Business outcomes — leads, calls, revenue","Maintenance plans"], a:2 },
+    { q:"What is 'The Golden Rule' when presenting price?", o:["Always offer a discount","First person to speak after the price loses leverage","Never state price directly","Round down"], a:1 },
+    { q:"What is the 3-step objection framework?", o:["Deny, Deflect, Close","Acknowledge, Re-anchor, Ask","Agree, Discount, Close","Listen, Pitch, Follow-up"], a:1 },
+    { q:"'That's too expensive' really means:", o:["They can't afford it","You haven't built enough value","They want a different package","They're lying"], a:1 },
+    { q:"When should you walk away from a deal?", o:["Never","When they want a discount that destroys positioning","When they take 24hrs to respond","When they mention a competitor"], a:1 },
+  ]},
+  "q-m9-12": { title:"Modules 9–12 Quiz", subtitle:"Post-Close, Compensation, Deal Cycle & Onboarding", qs: [
+    { q:"Why does the post-close experience matter?", o:["It doesn't — sale is made","Clients judge us most intensely after they pay","Required by law","Build team handles it"], a:1 },
+    { q:"What are the handoff checklist steps?", o:["Design, Build, Launch, Invoice","Confirm Payment, Restate Expectations, Document Details, Explain Timeline","Send Email, Wait, Build, Deliver","Call, Contract, Pay, Start"], a:1 },
+    { q:"What should you NEVER do in client comms?", o:["Use their first name","Be direct","Speak negatively about competitors","Send a follow-up"], a:2 },
+    { q:"What commission tier do new reps start at?", o:["10%","20%","25%","30%"], a:2 },
+    { q:"How many deals unlock Tier 2 (30%)?", o:["10","20","50","100"], a:1 },
+    { q:"Correct order of the full deal cycle?", o:["Call, Locate, Book, Close, Pitch","Locate, Call, Book, Pitch, Close","Book, Call, Locate, Pitch, Close","Pitch, Call, Book, Locate, Close"], a:1 },
+    { q:"How soon should the onboarding email be sent?", o:["Within 24 hours","Within 1 hour","Within 1 week","After contract signing"], a:1 },
+    { q:"What must you receive BEFORE starting build work?", o:["A signed NDA","Payment AND completed onboarding form","Three references","A detailed brief"], a:1 },
+    { q:"Monthly recurring commission for a maintenance client?", o:["$10/mo","$25/mo","$50/mo","$99/mo"], a:1 },
+    { q:"Year 1 earning projection for a high performer?", o:["$25,000+","$52,000+","$78,000+","$104,000+"], a:3 },
+  ]},
+  "q-tech": { title:"Technical Bootcamp Quiz", subtitle:"Web design, SEO, CRO, speed, AI & maintenance", qs: [
+    { q:"What % of consumers judge credibility by website design?", o:["25%","50%","75%","90%"], a:2 },
+    { q:"What % of traffic is typically mobile?", o:["20%+","40%+","60%+","80%+"], a:2 },
+    { q:"What does the '5-Second Test' measure?", o:["Page load speed","Whether a visitor understands the site in 5 seconds","Time on page","Time to first click"], a:1 },
+    { q:"What is NAP consistency in Local SEO?", o:["Number of Ads Placed","Name, Address, Phone matching everywhere","New Audience Penetration","National Ad Program"], a:1 },
+    { q:"What % of visitors leave if load time exceeds 3 seconds?", o:["10%","20%","40%","60%"], a:2 },
+    { q:"Average conversion rate for most websites?", o:["0.5-1%","2-3%","8-10%","15-20%"], a:1 },
+    { q:"Why is SEO 'equity' vs paid ads 'rent'?", o:["SEO costs more","SEO compounds; ads stop when you stop paying","Ads are illegal for contractors","SEO only works for big companies"], a:1 },
+    { q:"What should a CTA say instead of 'Submit'?", o:["Click Here","Send Form","Get My Free Quote","Go"], a:2 },
+    { q:"What is Redline's biggest technical differentiator?", o:["Custom fonts","AI integration (chatbots, lead qualification, scheduling)","WordPress themes","Social media management"], a:1 },
+    { q:"How to frame a maintenance plan?", o:["An upsell they don't need","Protecting and growing their investment","Optional but recommended","A legal requirement"], a:1 },
+  ]},
+  "q-sales": { title:"Sales Bootcamp Quiz", subtitle:"Value equation, SPIN, objections & the daily system", qs: [
+    { q:"In the Value Equation, what's in the NUMERATOR?", o:["Time Delay × Effort","Dream Outcome × Perceived Likelihood","Price × Features","Objections × Competitors"], a:1 },
+    { q:"To increase perceived value, you should:", o:["Lower the price","Increase dream outcome and reduce time/effort","Add more features","Send more emails"], a:1 },
+    { q:"What does 'S' stand for in SPIN?", o:["Sales","Strategy","Situation","Solution"], a:2 },
+    { q:"Purpose of 'Implication' questions in SPIN?", o:["Close the deal","Make them feel the cost of the problem","Explain pricing","Build rapport"], a:1 },
+    { q:"In objection handling, after 'Acknowledge' comes:", o:["Close","Discount","Isolate","Pitch"], a:2 },
+    { q:"Which trigger uses 'people fear losing more than gaining'?", o:["Status & Identity","Social Proof","Fear of Loss / Loss Aversion","The Future Self"], a:2 },
+    { q:"Daily contact target in the Daily System?", o:["10 prospects","20 prospects/day","50 prospects","100 per week"], a:1 },
+    { q:"What % of sales require 5+ touches?", o:["20%","40%","60%","80%"], a:3 },
+    { q:"Step 5 of Stack the Value framework?", o:["Identify the problem","Paint the dream","Create honest urgency","Reduce risk"], a:2 },
+    { q:"When someone says 'too expensive,' the #1 rule is:", o:["Offer a discount","Re-stack the value — you haven't built enough","Walk away","Send a comparison chart"], a:1 },
+  ]},
+};
+
 
 /* ═══════════════════════════════════════════
    GLOBAL STYLES — injected once
@@ -404,6 +473,91 @@ function Viewer({ ck, onBack, w }) {
 /* ═══════════════════════════════════════════
    MAIN APP
    ═══════════════════════════════════════════ */
+
+function Quiz({ quizKey, onBack, w }) {
+  const [ci, setCi] = useState(0);
+  const [sel, setSel] = useState(null);
+  const [locked, setLocked] = useState(false);
+  const [score, setScore] = useState(0);
+  const [done, setDone] = useState(false);
+  const ref = useRef(null);
+  const q = QUIZZES[quizKey];
+  const dk = w >= 768;
+  useEffect(() => { ref.current?.scrollIntoView({behavior:"smooth"}); setCi(0); setSel(null); setLocked(false); setScore(0); setDone(false); }, [quizKey]);
+  const cur = q.qs[ci], tot = q.qs.length, pct = done ? 100 : Math.round((ci/tot)*100);
+  const pick = (idx) => { if(locked) return; setSel(idx); setLocked(true); if(idx===cur.a) setScore(s=>s+1); };
+  const nxt = () => { if(ci+1>=tot){setDone(true);return} setCi(ci+1); setSel(null); setLocked(false); };
+  const retry = () => { setCi(0); setSel(null); setLocked(false); setScore(0); setDone(false); };
+  const grade = score/tot;
+  const gc = grade>=0.9?"#22C55E":grade>=0.7?"#F59E0B":"#DC2626";
+  const gl = grade>=0.9?"Excellent — you're ready":grade>=0.7?"Good — review weak areas":"Needs work — re-study the modules";
+  return (
+    <div ref={ref}>
+      <div style={{ position:"sticky",top:0,zIndex:20,background:"rgba(16,17,20,0.92)",backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",borderBottom:"1px solid #252830",padding:"12px 0" }}>
+        <div style={{ maxWidth:800,margin:"0 auto",padding:dk?"0 40px":"0 20px" }}>
+          <button className="back-btn" onClick={onBack} style={{ background:"none",border:"none",color:"#DC2626",fontSize:13,fontWeight:600,cursor:"pointer",padding:"6px 0",display:"flex",alignItems:"center",gap:8,fontFamily:"inherit" }}>
+            <span style={{ fontSize:18,lineHeight:1 }}>‹</span> Back to Academy
+          </button>
+        </div>
+      </div>
+      <div style={{ maxWidth:640,margin:"0 auto",padding:dk?"0 40px":"0 20px" }}>
+        <div style={{ padding:"32px 0 24px",animation:"fadeUp 0.5s ease" }}>
+          <div style={{ width:40,height:3,background:"#10B981",borderRadius:2,marginBottom:16 }} />
+          <h2 style={{ fontSize:dk?26:22,fontWeight:800,color:"#FFF",margin:"0 0 6px",letterSpacing:"-0.03em" }}>{q.title}</h2>
+          <p style={{ fontSize:13,color:"#6A6E78",margin:0 }}>{q.subtitle}</p>
+        </div>
+        <div style={{ marginBottom:32,animation:"fadeUp 0.5s ease 0.1s both" }}>
+          <div style={{ display:"flex",justifyContent:"space-between",marginBottom:8 }}>
+            <span style={{ fontSize:11,fontWeight:600,color:"#6A6E78" }}>{done?"Complete":`Question ${ci+1} of ${tot}`}</span>
+            <span style={{ fontSize:11,fontWeight:700,color:done?gc:"#6A6E78" }}>{pct}%</span>
+          </div>
+          <div style={{ height:4,background:"#1C1F25",borderRadius:4,overflow:"hidden" }}>
+            <div style={{ height:"100%",width:`${pct}%`,background:done?gc:"linear-gradient(90deg,#DC2626,#F59E0B)",borderRadius:4,transition:"width 0.5s cubic-bezier(0.4,0,0.2,1)" }} />
+          </div>
+        </div>
+        {done ? (
+          <div style={{ textAlign:"center",padding:"40px 0 80px",animation:"fadeUp 0.5s ease" }}>
+            <div style={{ width:100,height:100,borderRadius:28,background:`${gc}15`,border:`2px solid ${gc}30`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 24px",fontSize:36,fontWeight:800,color:gc }}>{score}/{tot}</div>
+            <h3 style={{ fontSize:22,fontWeight:800,color:"#FFF",margin:"0 0 8px" }}>{Math.round(grade*100)}%</h3>
+            <p style={{ fontSize:14,color:gc,fontWeight:600,margin:"0 0 32px" }}>{gl}</p>
+            <div style={{ display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap" }}>
+              <button onClick={retry} style={{ padding:"14px 28px",background:"#1C1F25",border:"1px solid #282B33",borderRadius:12,color:"#FFF",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"inherit" }}>Retake Quiz</button>
+              <button onClick={onBack} style={{ padding:"14px 28px",background:"linear-gradient(135deg,#DC2626,#991B1B)",border:"none",borderRadius:12,color:"#FFF",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"inherit",boxShadow:"0 4px 16px rgba(220,38,38,0.2)" }}>Back to Academy</button>
+            </div>
+          </div>
+        ) : (
+          <div style={{ paddingBottom:80,animation:"fadeUp 0.35s ease" }}>
+            <h3 style={{ fontSize:dk?18:16,fontWeight:700,color:"#FFF",margin:"0 0 24px",lineHeight:1.4 }}>{cur.q}</h3>
+            <div style={{ display:"flex",flexDirection:"column",gap:10 }}>
+              {cur.o.map((opt,idx) => {
+                const isSel=sel===idx, isCor=idx===cur.a, showG=locked&&isCor, showR=locked&&isSel&&!isCor;
+                let bg="#141519",bd="#252830",tc="#D0D4DC";
+                if(showG){bg="#22C55E12";bd="#22C55E40";tc="#22C55E"}
+                if(showR){bg="#DC262612";bd="#DC262640";tc="#DC2626"}
+                if(!locked&&isSel){bg="#1C1F25";bd="#DC2626"}
+                return (
+                  <button key={idx} onClick={()=>pick(idx)}
+                    style={{ width:"100%",textAlign:"left",padding:"16px 18px",background:bg,border:`1.5px solid ${bd}`,borderRadius:14,cursor:locked?"default":"pointer",display:"flex",alignItems:"center",gap:14,transition:"all 0.2s",fontFamily:"inherit",fontSize:14,color:tc,fontWeight:isSel?600:400 }}>
+                    <div style={{ width:32,height:32,borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:700,flexShrink:0,background:showG?"#22C55E20":showR?"#DC262620":"#1C1F25",color:showG?"#22C55E":showR?"#DC2626":"#6A6E78",border:`1px solid ${showG?"#22C55E30":showR?"#DC262630":"#282B33"}` }}>
+                      {showG?"✓":showR?"✗":String.fromCharCode(65+idx)}
+                    </div>
+                    <span>{opt}</span>
+                  </button>
+                );
+              })}
+            </div>
+            {locked && (
+              <button onClick={nxt} style={{ width:"100%",padding:"16px",background:"linear-gradient(135deg,#DC2626,#991B1B)",color:"#FFF",border:"none",borderRadius:14,fontSize:13,fontWeight:700,letterSpacing:2,cursor:"pointer",fontFamily:"inherit",textTransform:"uppercase",marginTop:20,boxShadow:"0 4px 16px rgba(220,38,38,0.2)",animation:"fadeUp 0.3s ease" }}>
+                {ci+1>=tot?"See Results":"Next Question →"}
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [auth, setAuth] = useState(false);
   const [err, setErr] = useState(false);
@@ -415,11 +569,12 @@ export default function App() {
 
   const top = useCallback(() => { ref.current?.scrollIntoView({behavior:"smooth"}); }, []);
 
-  const bc = { MODULE:"#DC2626", BOOTCAMP:"#F59E0B", REFERENCE:"#3B82F6" };
+  const bc = { MODULE:"#DC2626", BOOTCAMP:"#F59E0B", REFERENCE:"#3B82F6", QUIZ:"#10B981" };
   const groups = [
     { label:null, color:"#DC2626", items:CATS.filter(x=>x.t==="MODULE") },
     { label:"BOOTCAMPS", color:"#F59E0B", items:CATS.filter(x=>x.t==="BOOTCAMP") },
     { label:"QUICK REFERENCE", color:"#3B82F6", items:CATS.filter(x=>x.t==="REFERENCE") },
+    { label:"PRACTICE QUIZZES", color:"#10B981", items:CATS.filter(x=>x.t==="QUIZ") },
   ];
 
   if (!auth) return (
@@ -428,6 +583,14 @@ export default function App() {
       <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
       <div style={{fontFamily:"'Outfit',system-ui,sans-serif"}}><Login onLogin={p=>p===PW?(setAuth(true),setErr(false)):setErr(true)} err={err} /></div>
     </>
+  );
+
+  if (view && QUIZZES[view]) return (
+    <div ref={ref} style={{ minHeight:"100dvh", background:"#101114", fontFamily:"'Outfit',system-ui,sans-serif", color:"#FFF" }}>
+      <style>{GLOBAL_CSS}</style>
+      <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+      <Quiz quizKey={view} onBack={()=>{setView(null);setTimeout(top,50)}} w={w} />
+    </div>
   );
 
   if (view) return (
@@ -465,7 +628,7 @@ export default function App() {
 
           {/* Stats */}
           <div style={{ display:"flex", gap:dk?12:8, animation:"fadeUp 0.6s ease 0.2s both" }}>
-            {[["12","Modules","#DC2626"],["2","Bootcamps","#F59E0B"],["3","Reference","#3B82F6"]].map(([n,l,col]) => (
+            {[["12","Modules","#DC2626"],["2","Bootcamps","#F59E0B"],["3","Reference","#3B82F6"],["5","Quizzes","#10B981"]].map(([n,l,col]) => (
               <div key={l} style={{ background:"#181B20", border:"1px solid #252830", borderRadius:14, padding:dk?"16px 24px":"14px 16px", textAlign:"center", minWidth:dk?120:0, flex:dk?"none":1 }}>
                 <div style={{ fontSize:dk?28:22, fontWeight:800, color:col, lineHeight:1 }}>{n}</div>
                 <div style={{ fontSize:9, color:"#5A5E68", textTransform:"uppercase", letterSpacing:2, fontWeight:600, marginTop:6 }}>{l}</div>
