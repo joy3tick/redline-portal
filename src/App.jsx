@@ -235,6 +235,13 @@ const QUIZZES = {
   ]},
 };
 
+const LINKS = [
+  { label: "Redline CRM", desc: "Pipeline tracking sheet", url: "https://docs.google.com/spreadsheets/d/1CXPnhfQYXoQ9XKRuaA6dWjwpV8Ga2zPs/edit?usp=sharing&ouid=110338344597415049477&rtpof=true&sd=true", ic: "📊" },
+  { label: "Weekly Office Scheduling", desc: "Book your office days", url: "https://docs.google.com/spreadsheets/d/1HtVfIS11tMoQr3TgM_bxKv62-8yaVnUI/edit?usp=sharing&ouid=110338344597415049477&rtpof=true&sd=true", ic: "📅" },
+  { label: "Redline Homepage", desc: "redlinewebservices.net", url: "https://www.redlinewebservices.net/", ic: "🌐" },
+];
+
+
 
 /* ═══════════════════════════════════════════
    GLOBAL STYLES — injected once
@@ -386,7 +393,7 @@ function Login({ onLogin, err }) {
       <div style={{ width:"100%", maxWidth:400, textAlign:"center", animation:"fadeUp 0.8s cubic-bezier(0.4,0,0.2,1)", position:"relative", zIndex:1 }}>
         <div style={{ marginBottom:40 }}>
           <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:36, letterSpacing:14, color:"#DC2626", marginBottom:4 }}>REDLINE</div>
-          <div style={{ fontSize:13, fontWeight:500, color:"#5A5E68", letterSpacing:6, textTransform:"uppercase" }}>Sales Academy</div>
+          <div style={{ fontSize:13, fontWeight:500, color:"#5A5E68", letterSpacing:6, textTransform:"uppercase" }}>Rep Portal</div>
           <div style={{ width:48, height:2, background:"linear-gradient(90deg,transparent,#DC2626,transparent)", margin:"16px auto 0" }} />
         </div>
 
@@ -637,7 +644,7 @@ export default function App() {
           <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:dk?24:20 }}>
             <div style={{ animation:"fadeUp 0.6s ease" }}>
               <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?30:24, letterSpacing:12, color:"#DC2626", lineHeight:1 }}>REDLINE</div>
-              <h1 style={{ fontSize:dk?14:12, fontWeight:600, color:"#5A5E68", margin:"6px 0 0", letterSpacing:dk?6:4, textTransform:"uppercase" }}>Sales Academy</h1>
+              <h1 style={{ fontSize:dk?14:12, fontWeight:600, color:"#5A5E68", margin:"6px 0 0", letterSpacing:dk?6:4, textTransform:"uppercase" }}>Rep Portal</h1>
             </div>
             <div style={{ animation:"fadeUp 0.6s ease 0.1s both" }}>
               <div style={{ width:dk?52:44, height:dk?52:44, borderRadius:14, background:"linear-gradient(135deg,#DC2626,#7f1d1d)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?20:16, color:"#FFF", letterSpacing:2, boxShadow:"0 4px 24px rgba(220,38,38,0.2)", animation:"glow 3s ease-in-out infinite" }}>R</div>
@@ -662,6 +669,33 @@ export default function App() {
 
       {/* Cards */}
       <div style={{ position:"relative", zIndex:1, maxWidth:1280, margin:"0 auto", padding:wd?"24px 56px 80px":dk?"20px 36px 80px":"16px 20px 80px" }}>
+
+        {/* Quick Links */}
+        <div style={{ marginBottom:8, animation:"fadeUp 0.5s ease 0.15s both" }}>
+          <div style={{ display:"flex", alignItems:"center", gap:10, padding:"8px 0 12px" }}>
+            <div style={{ width:8, height:8, borderRadius:4, background:"#8B5CF6" }} />
+            <div style={{ fontSize:10, fontWeight:700, color:"#8B5CF6", letterSpacing:3, textTransform:"uppercase" }}>Quick Links</div>
+            <div style={{ flex:1, height:1, background:"#141416" }} />
+          </div>
+          <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr 1fr":dk?"1fr 1fr 1fr":"1fr", gap:dk?10:8 }}>
+            {LINKS.map((lk,i) => (
+              <a key={i} href={lk.url} target="_blank" rel="noreferrer" className="card-hover"
+                style={{
+                  background:"#141519", border:"1px solid #252830", borderLeft:"3px solid #8B5CF6",
+                  borderRadius:16, padding:dk?"18px 18px":"16px 14px", textDecoration:"none",
+                  display:"flex", alignItems:"center", gap:14, animation:`fadeUp 0.4s ease ${0.05*i}s both`,
+                }}>
+                <div style={{ fontSize:22, width:44, height:44, display:"flex", alignItems:"center", justifyContent:"center", background:"#1A1D24", borderRadius:12, flexShrink:0, border:"1px solid #282B33" }}>{lk.ic}</div>
+                <div style={{ flex:1, minWidth:0 }}>
+                  <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF0F4", margin:"0 0 2px" }}>{lk.label}</h3>
+                  <p style={{ fontSize:11, color:"#6A6E78", margin:0 }}>{lk.desc}</p>
+                </div>
+                <div style={{ width:32, height:32, borderRadius:10, background:"#1A1D24", border:"1px solid #282B33", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, color:"#3A3E48", fontSize:12 }}>↗</div>
+              </a>
+            ))}
+          </div>
+        </div>
+
         {groups.map((g, gi) => (
           <div key={gi}>
             {g.label && (
