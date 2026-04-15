@@ -247,37 +247,175 @@ const LINKS = [
    GLOBAL STYLES — injected once
    ═══════════════════════════════════════════ */
 const GLOBAL_CSS = `
-@keyframes fadeUp { from { opacity:0; transform:translateY(16px) } to { opacity:1; transform:translateY(0) } }
+@keyframes fadeUp { from { opacity:0; transform:translateY(20px) } to { opacity:1; transform:translateY(0) } }
 @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
 @keyframes slideDown { from { opacity:0; max-height:0; padding-top:0; padding-bottom:0 } to { opacity:1; max-height:2000px } }
-@keyframes glow { 0%,100% { box-shadow:0 0 20px rgba(220,38,38,0.08) } 50% { box-shadow:0 0 30px rgba(220,38,38,0.15) } }
-@keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+@keyframes glow {
+  0%,100% { box-shadow:0 0 30px rgba(220,38,38,0.18), 0 0 60px rgba(220,38,38,0.08), inset 0 0 20px rgba(220,38,38,0.1) }
+  50%     { box-shadow:0 0 50px rgba(220,38,38,0.32), 0 0 100px rgba(220,38,38,0.18), inset 0 0 25px rgba(220,38,38,0.15) }
+}
+@keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.06)} }
 @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
-@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+@keyframes auroraDrift1 {
+  0%,100% { transform:translate(0,0) scale(1) }
+  33%     { transform:translate(80px,-40px) scale(1.15) }
+  66%     { transform:translate(-50px,60px) scale(0.95) }
+}
+@keyframes auroraDrift2 {
+  0%,100% { transform:translate(0,0) scale(1) }
+  50%     { transform:translate(-100px,80px) scale(1.2) }
+}
+@keyframes auroraDrift3 {
+  0%,100% { transform:translate(0,0) scale(1.1) }
+  50%     { transform:translate(60px,-80px) scale(0.9) }
+}
+@keyframes pingRing {
+  0%   { transform:scale(0.9); opacity:0.7 }
+  100% { transform:scale(1.7); opacity:0 }
+}
+@keyframes shineLine {
+  0%   { transform:translateX(-150%) skewX(-20deg) }
+  100% { transform:translateX(280%) skewX(-20deg) }
+}
+@keyframes gradientShift {
+  0%,100% { background-position:0% 50% }
+  50%     { background-position:100% 50% }
+}
+@keyframes spinSlow { from { transform:rotate(0deg) } to { transform:rotate(360deg) } }
+@keyframes blink { 0%,100% { opacity:1 } 50% { opacity:0.3 } }
 
 *{margin:0;padding:0;box-sizing:border-box}
-html,body,#root{min-height:100dvh;background:#101114}
+html,body,#root{min-height:100dvh;background:#08080b}
 body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden}
-::selection{background:rgba(220,38,38,0.2);color:#fff}
-::-webkit-scrollbar{width:5px}
-::-webkit-scrollbar-track{background:#101114}
-::-webkit-scrollbar-thumb{background:#2A2D35;border-radius:10px}
-::-webkit-scrollbar-thumb:hover{background:#3A3D45}
+::selection{background:rgba(220,38,38,0.35);color:#fff}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:#08080b}
+::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#DC2626,#7f1d1d);border-radius:10px}
+::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,#ef4444,#991B1B)}
 input::placeholder{color:#2a2a2e}
 
 .dotgrid {
-  background-image: radial-gradient(circle, #ffffff08 1px, transparent 1px);
-  background-size: 24px 24px;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.045) 1px, transparent 1px);
+  background-size: 28px 28px;
 }
-.card-hover { transition: all 0.3s cubic-bezier(0.4,0,0.2,1) }
-.card-hover:hover { transform:translateY(-3px); border-color:#222 !important; box-shadow:0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(220,38,38,0.08) }
-.acc-btn { transition: all 0.25s ease }
-.acc-btn:hover { background:#101014 !important }
-.back-btn { transition: all 0.2s }
-.back-btn:hover { opacity:0.7; transform:translateX(-2px) }
-.vid-card { transition: all 0.3s ease }
-.vid-card:hover { border-color:#DC2626 !important; box-shadow:0 0 24px rgba(220,38,38,0.15) }
-.play-pulse { animation: pulse 2s ease-in-out infinite }
+.gridlines {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.022) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+.noise-overlay {
+  position:fixed; inset:0; pointer-events:none; z-index:2; opacity:0.04; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg viewBox='0 0 240 240' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+.aurora-blob {
+  position:fixed; border-radius:50%; filter:blur(90px); pointer-events:none; z-index:0; will-change:transform;
+}
+
+.gradient-text-white {
+  background: linear-gradient(135deg, #ffffff 0%, #d4d6dc 100%);
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+}
+.gradient-text-red {
+  background: linear-gradient(135deg, #ff5757, #DC2626 50%, #7f1d1d);
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+}
+.gradient-text-hero {
+  background: linear-gradient(120deg, #ffffff 0%, #ffffff 30%, #ff5757 70%, #DC2626 100%);
+  background-size: 200% 200%;
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+  animation: gradientShift 8s ease-in-out infinite;
+}
+
+.brand-glow {
+  text-shadow: 0 0 40px rgba(220,38,38,0.5), 0 0 80px rgba(220,38,38,0.25);
+}
+
+.card-hover {
+  transition: transform 0.4s cubic-bezier(0.16,1,0.3,1), border-color 0.4s, box-shadow 0.4s;
+  position:relative; overflow:hidden;
+}
+.card-hover::before {
+  content:""; position:absolute; inset:0; border-radius:inherit; padding:1px; pointer-events:none;
+  background: linear-gradient(135deg, rgba(220,38,38,0.6) 0%, rgba(220,38,38,0.0) 50%, rgba(220,38,38,0.0) 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  opacity:0; transition: opacity 0.4s;
+}
+.card-hover::after {
+  content:""; position:absolute; top:-50%; left:-100%; width:50%; height:200%; pointer-events:none;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+  transform: skewX(-20deg);
+}
+.card-hover:hover {
+  transform: translateY(-5px);
+  border-color: transparent !important;
+  box-shadow: 0 18px 50px rgba(0,0,0,0.55), 0 0 0 1px rgba(220,38,38,0.18), 0 0 40px rgba(220,38,38,0.12);
+}
+.card-hover:hover::before { opacity:1; }
+.card-hover:hover::after { animation: shineLine 0.85s ease-out; }
+
+.card-amber:hover { box-shadow: 0 18px 50px rgba(0,0,0,0.55), 0 0 0 1px rgba(245,158,11,0.18), 0 0 40px rgba(245,158,11,0.12); }
+.card-amber::before { background: linear-gradient(135deg, rgba(245,158,11,0.6) 0%, transparent 60%) !important; }
+.card-blue:hover { box-shadow: 0 18px 50px rgba(0,0,0,0.55), 0 0 0 1px rgba(59,130,246,0.18), 0 0 40px rgba(59,130,246,0.12); }
+.card-blue::before { background: linear-gradient(135deg, rgba(59,130,246,0.6) 0%, transparent 60%) !important; }
+.card-green:hover { box-shadow: 0 18px 50px rgba(0,0,0,0.55), 0 0 0 1px rgba(16,185,129,0.18), 0 0 40px rgba(16,185,129,0.12); }
+.card-green::before { background: linear-gradient(135deg, rgba(16,185,129,0.6) 0%, transparent 60%) !important; }
+.card-purple:hover { box-shadow: 0 18px 50px rgba(0,0,0,0.55), 0 0 0 1px rgba(139,92,246,0.18), 0 0 40px rgba(139,92,246,0.12); }
+.card-purple::before { background: linear-gradient(135deg, rgba(139,92,246,0.6) 0%, transparent 60%) !important; }
+
+.acc-btn { transition: all 0.3s cubic-bezier(0.4,0,0.2,1) }
+.acc-btn:hover { background:#15161b !important; transform:translateX(3px) }
+.back-btn { transition: all 0.25s cubic-bezier(0.4,0,0.2,1) }
+.back-btn:hover { transform:translateX(-3px); color:#ef4444 !important }
+
+.vid-card { transition: all 0.4s cubic-bezier(0.16,1,0.3,1); position:relative; overflow:hidden }
+.vid-card::after {
+  content:""; position:absolute; top:-50%; left:-100%; width:50%; height:200%;
+  background: linear-gradient(90deg, transparent, rgba(220,38,38,0.18), transparent);
+  transform: skewX(-20deg); pointer-events:none;
+}
+.vid-card:hover { border-color:#DC2626 !important; box-shadow:0 0 40px rgba(220,38,38,0.25), 0 0 80px rgba(220,38,38,0.1); transform:translateY(-3px) }
+.vid-card:hover::after { animation: shineLine 1s ease-out; }
+
+.play-btn { position:relative; }
+.play-btn::before, .play-btn::after {
+  content:""; position:absolute; inset:0; border-radius:inherit; border:2px solid #DC2626; pointer-events:none;
+  animation: pingRing 2.4s cubic-bezier(0,0,0.2,1) infinite;
+}
+.play-btn::after { animation-delay: 1.2s; }
+
+.stat-card {
+  position:relative; overflow:hidden;
+  transition: transform 0.4s cubic-bezier(0.16,1,0.3,1), border-color 0.3s;
+}
+.stat-card::before {
+  content:""; position:absolute; inset:0; opacity:0; transition:opacity 0.4s;
+  background: radial-gradient(circle at 50% 110%, var(--accent, #DC2626) 0%, transparent 60%);
+}
+.stat-card:hover { transform:translateY(-4px); border-color: var(--accent, #DC2626) !important; }
+.stat-card:hover::before { opacity:0.18; }
+
+.dot-blink { animation: blink 1.6s ease-in-out infinite }
+
+.btn-primary {
+  background: linear-gradient(135deg, #ef4444, #DC2626 50%, #991B1B);
+  background-size: 200% 200%;
+  transition: background-position 0.5s, transform 0.2s, box-shadow 0.4s;
+  box-shadow: 0 6px 20px rgba(220,38,38,0.3), 0 0 0 1px rgba(220,38,38,0.1) inset;
+}
+.btn-primary:hover { background-position: 100% 0; box-shadow: 0 8px 28px rgba(220,38,38,0.45), 0 0 0 1px rgba(255,255,255,0.1) inset; transform:translateY(-1px) }
+
+.section-divider {
+  height:1px;
+  background: linear-gradient(90deg, var(--accent, #DC2626) 0%, transparent 100%);
+  opacity:0.3;
+}
+
+@media (max-width: 640px) {
+  .aurora-blob { filter:blur(60px); }
+}
 `;
 
 /* ═══════════════════════════════════════════
@@ -386,32 +524,58 @@ function Login({ onLogin, err }) {
   const go = () => { setLd(true); setTimeout(() => { onLogin(p); setLd(false); }, 500); };
 
   return (
-    <div className="dotgrid" style={{ minHeight:"100dvh", background:"#101114", display:"flex", alignItems:"center", justifyContent:"center", padding:20, position:"relative" }}>
-      {/* Ambient glow */}
-      <div style={{ position:"absolute", top:"30%", left:"50%", transform:"translate(-50%,-50%)", width:400, height:400, background:"radial-gradient(circle, rgba(220,38,38,0.07) 0%, transparent 70%)", pointerEvents:"none" }} />
+    <div className="gridlines" style={{ minHeight:"100dvh", background:"#08080b", display:"flex", alignItems:"center", justifyContent:"center", padding:20, position:"relative", overflow:"hidden" }}>
+      {/* Aurora blobs */}
+      <div className="aurora-blob" style={{ top:"-10%", left:"-10%", width:520, height:520, background:"radial-gradient(circle, rgba(220,38,38,0.35) 0%, transparent 70%)", animation:"auroraDrift1 18s ease-in-out infinite" }} />
+      <div className="aurora-blob" style={{ bottom:"-15%", right:"-10%", width:480, height:480, background:"radial-gradient(circle, rgba(127,29,29,0.4) 0%, transparent 70%)", animation:"auroraDrift2 22s ease-in-out infinite" }} />
+      <div className="aurora-blob" style={{ top:"40%", left:"50%", transform:"translate(-50%,-50%)", width:600, height:600, background:"radial-gradient(circle, rgba(239,68,68,0.12) 0%, transparent 70%)", animation:"auroraDrift3 25s ease-in-out infinite" }} />
 
-      <div style={{ width:"100%", maxWidth:400, textAlign:"center", animation:"fadeUp 0.8s cubic-bezier(0.4,0,0.2,1)", position:"relative", zIndex:1 }}>
-        <div style={{ marginBottom:40 }}>
-          <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:36, letterSpacing:14, color:"#DC2626", marginBottom:4 }}>REDLINE</div>
-          <div style={{ fontSize:13, fontWeight:500, color:"#5A5E68", letterSpacing:6, textTransform:"uppercase" }}>Rep Portal</div>
-          <div style={{ width:48, height:2, background:"linear-gradient(90deg,transparent,#DC2626,transparent)", margin:"16px auto 0" }} />
+      {/* Noise overlay */}
+      <div className="noise-overlay" />
+
+      <div style={{ width:"100%", maxWidth:420, textAlign:"center", animation:"fadeUp 0.9s cubic-bezier(0.16,1,0.3,1)", position:"relative", zIndex:3 }}>
+        <div style={{ marginBottom:36 }}>
+          <div style={{ display:"inline-flex", alignItems:"center", gap:8, padding:"6px 14px", background:"rgba(220,38,38,0.08)", border:"1px solid rgba(220,38,38,0.25)", borderRadius:99, marginBottom:20 }}>
+            <span className="dot-blink" style={{ width:6, height:6, borderRadius:"50%", background:"#DC2626", boxShadow:"0 0 8px #DC2626" }} />
+            <span style={{ fontSize:10, fontWeight:700, color:"#ef4444", letterSpacing:3, textTransform:"uppercase" }}>Secure Access</span>
+          </div>
+          <div className="brand-glow" style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:56, letterSpacing:18, lineHeight:1, marginBottom:6 }}>
+            <span className="gradient-text-red">REDLINE</span>
+          </div>
+          <div style={{ fontSize:12, fontWeight:600, color:"#7A7E88", letterSpacing:8, textTransform:"uppercase" }}>Rep Portal</div>
+          <div style={{ width:60, height:2, background:"linear-gradient(90deg,transparent,#DC2626,transparent)", margin:"18px auto 0", borderRadius:2 }} />
         </div>
 
-        <div style={{ background:"#181B20", border:"1px solid #2A2D35", borderRadius:20, padding:"40px 32px", boxShadow:"0 16px 64px rgba(0,0,0,0.5)" }}>
-          <label style={{ display:"block", textAlign:"left", fontSize:10, fontWeight:600, color:"#5A5E68", letterSpacing:2.5, marginBottom:10, textTransform:"uppercase" }}>Access Code</label>
+        <div style={{
+          position:"relative",
+          background:"linear-gradient(180deg, rgba(24,27,32,0.85), rgba(16,17,20,0.85))",
+          backdropFilter:"blur(20px)",
+          WebkitBackdropFilter:"blur(20px)",
+          border:"1px solid rgba(255,255,255,0.06)",
+          borderRadius:24,
+          padding:"40px 32px",
+          boxShadow:"0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(220,38,38,0.05) inset"
+        }}>
+          {/* Glow border at top */}
+          <div style={{ position:"absolute", top:0, left:"15%", right:"15%", height:1, background:"linear-gradient(90deg, transparent, rgba(220,38,38,0.6), transparent)" }} />
+
+          <label style={{ display:"flex", alignItems:"center", gap:8, textAlign:"left", fontSize:10, fontWeight:700, color:"#7A7E88", letterSpacing:3, marginBottom:12, textTransform:"uppercase" }}>
+            <span style={{ width:4, height:4, borderRadius:"50%", background:"#DC2626" }} />
+            Access Code
+          </label>
           <input type="password" value={p} onChange={e=>setP(e.target.value)} onKeyDown={e=>e.key==="Enter"&&go()}
             placeholder="Enter code" autoFocus
-            style={{ width:"100%", padding:"16px 20px", background:"#101114", border:err?"1.5px solid #DC2626":"1.5px solid #1a1a1e", borderRadius:14, color:"#FFF", fontSize:15, outline:"none", boxSizing:"border-box", transition:"all 0.3s", fontFamily:"inherit", letterSpacing:2 }}
-            onFocus={e=>{if(!err){e.target.style.borderColor="#DC2626";e.target.style.boxShadow="0 0 0 4px rgba(220,38,38,0.08)"}}}
-            onBlur={e=>{e.target.style.borderColor=err?"#DC2626":"#1a1a1e";e.target.style.boxShadow="none"}} />
-          {err && <p style={{ color:"#DC2626", fontSize:12, margin:"12px 0 0", fontWeight:500, textAlign:"left" }}>Invalid code. Try again.</p>}
-          <button onClick={go} disabled={ld}
-            style={{ width:"100%", padding:"16px", background:ld?"#7f1d1d":"linear-gradient(135deg,#DC2626,#991B1B)", color:"#FFF", border:"none", borderRadius:14, fontSize:12, fontWeight:700, letterSpacing:4, cursor:ld?"wait":"pointer", marginTop:18, textTransform:"uppercase", transition:"all 0.3s", boxShadow:"0 4px 24px rgba(220,38,38,0.2)" }}>
-            {ld ? "Verifying..." : "Enter Academy"}
+            style={{ width:"100%", padding:"18px 20px", background:"rgba(8,8,11,0.8)", border:err?"1.5px solid #DC2626":"1.5px solid rgba(255,255,255,0.06)", borderRadius:14, color:"#FFF", fontSize:15, outline:"none", boxSizing:"border-box", transition:"all 0.3s", fontFamily:"inherit", letterSpacing:3 }}
+            onFocus={e=>{if(!err){e.target.style.borderColor="#DC2626";e.target.style.boxShadow="0 0 0 4px rgba(220,38,38,0.12), 0 0 24px rgba(220,38,38,0.15)"}}}
+            onBlur={e=>{e.target.style.borderColor=err?"#DC2626":"rgba(255,255,255,0.06)";e.target.style.boxShadow="none"}} />
+          {err && <p style={{ color:"#DC2626", fontSize:12, margin:"12px 0 0", fontWeight:500, textAlign:"left", display:"flex", alignItems:"center", gap:6 }}><span>⚠</span> Invalid code. Try again.</p>}
+          <button onClick={go} disabled={ld} className={ld?"":"btn-primary"}
+            style={{ width:"100%", padding:"18px", background:ld?"#7f1d1d":undefined, color:"#FFF", border:"none", borderRadius:14, fontSize:12, fontWeight:700, letterSpacing:5, cursor:ld?"wait":"pointer", marginTop:18, textTransform:"uppercase", fontFamily:"inherit" }}>
+            {ld ? "Verifying..." : "Enter Academy →"}
           </button>
         </div>
 
-        <p style={{ color:"#252830", fontSize:9, marginTop:36, letterSpacing:2, textTransform:"uppercase" }}>© 2026 Redline Web Services LLC</p>
+        <p style={{ color:"#3A3E48", fontSize:10, marginTop:32, letterSpacing:3, textTransform:"uppercase", fontWeight:500 }}>© 2026 Redline Web Services LLC</p>
       </div>
     </div>
   );
@@ -430,62 +594,85 @@ function Viewer({ ck, onBack, w }) {
   useEffect(() => { ref.current?.scrollIntoView({behavior:"smooth"}); setOi(0); }, [ck]);
 
   return (
-    <div ref={ref}>
+    <div ref={ref} style={{ position:"relative", overflow:"hidden" }}>
+      {/* Aurora blob */}
+      <div className="aurora-blob" style={{ top:"-15%", right:"-10%", width:500, height:500, background:`radial-gradient(circle, ${accent}25 0%, transparent 70%)`, animation:"auroraDrift1 28s ease-in-out infinite" }} />
+      <div className="noise-overlay" />
+
       {/* Sticky nav */}
-      <div style={{ position:"sticky", top:0, zIndex:20, background:"rgba(5,5,7,0.88)", backdropFilter:"blur(20px)", WebkitBackdropFilter:"blur(20px)", borderBottom:"1px solid #252830", padding:dk?"12px 0":"12px 0" }}>
-        <div style={{ maxWidth:800, margin:"0 auto", padding:dk?"0 40px":"0 20px" }}>
-          <button className="back-btn" onClick={onBack} style={{ background:"none", border:"none", color:"#DC2626", fontSize:13, fontWeight:600, cursor:"pointer", padding:"6px 0", display:"flex", alignItems:"center", gap:8, fontFamily:"inherit" }}>
+      <div style={{ position:"sticky", top:0, zIndex:20, background:"rgba(8,8,11,0.75)", backdropFilter:"blur(20px) saturate(180%)", WebkitBackdropFilter:"blur(20px) saturate(180%)", borderBottom:"1px solid rgba(255,255,255,0.05)", padding:dk?"14px 0":"12px 0" }}>
+        <div style={{ maxWidth:800, margin:"0 auto", padding:dk?"0 40px":"0 20px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+          <button className="back-btn" onClick={onBack} style={{ background:"none", border:"none", color:accent, fontSize:13, fontWeight:700, cursor:"pointer", padding:"6px 0", display:"flex", alignItems:"center", gap:8, fontFamily:"inherit", letterSpacing:0.5 }}>
             <span style={{ fontSize:18, lineHeight:1 }}>‹</span> Back to Academy
           </button>
+          <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+            <span className="dot-blink" style={{ width:6, height:6, borderRadius:"50%", background:accent, boxShadow:`0 0 8px ${accent}` }} />
+            <span style={{ fontSize:10, fontWeight:700, color:"#5A5E68", letterSpacing:2.5, textTransform:"uppercase" }}>Reading</span>
+          </div>
         </div>
       </div>
 
-      <div style={{ maxWidth:800, margin:"0 auto", padding:dk?"0 40px":"0 20px" }}>
+      <div style={{ maxWidth:800, margin:"0 auto", padding:dk?"0 40px":"0 20px", position:"relative", zIndex:3 }}>
         {/* Hero */}
-        <div style={{ padding:"36px 0 28px", animation:"fadeUp 0.5s ease", position:"relative" }}>
-          <div style={{ width:40, height:3, background:accent, borderRadius:2, marginBottom:20 }} />
-          <h2 style={{ fontSize:dk?30:24, fontWeight:800, color:"#FFF", margin:"0 0 8px", letterSpacing:"-0.04em", lineHeight:1.15 }}>{c.t}</h2>
-          <p style={{ fontSize:14, color:"#6A6E78", margin:0, lineHeight:1.5 }}>{c.st}</p>
+        <div style={{ padding:"44px 0 32px", animation:"fadeUp 0.6s cubic-bezier(0.16,1,0.3,1)", position:"relative" }}>
+          <div style={{ display:"inline-flex", alignItems:"center", gap:8, padding:"5px 12px", background:`${accent}15`, border:`1px solid ${accent}30`, borderRadius:99, marginBottom:18 }}>
+            <span style={{ width:5, height:5, borderRadius:"50%", background:accent, boxShadow:`0 0 8px ${accent}` }} />
+            <span style={{ fontSize:10, fontWeight:700, color:accent, letterSpacing:3, textTransform:"uppercase" }}>{ck.includes("bc")?"Bootcamp":ck.includes("call")||ck.includes("comp")||ck.includes("onboard")?"Reference":"Module"}</span>
+          </div>
+          <h2 style={{ fontSize:dk?38:28, fontWeight:800, color:"#FFF", margin:"0 0 12px", letterSpacing:"-0.04em", lineHeight:1.1 }}>
+            <span className="gradient-text-white">{c.t}</span>
+          </h2>
+          <p style={{ fontSize:dk?16:14, color:"#9094A0", margin:0, lineHeight:1.55, fontWeight:400 }}>{c.st}</p>
+          <div style={{ width:60, height:3, background:`linear-gradient(90deg, ${accent}, transparent)`, borderRadius:2, marginTop:24, boxShadow:`0 0 12px ${accent}60` }} />
         </div>
 
         {/* Video */}
         {c.vid && (
           <a href={c.vid} target="_blank" rel="noreferrer" className="vid-card"
-            style={{ display:"flex", alignItems:"center", gap:16, background:"linear-gradient(135deg,#1A1518,#181B20)", border:"1px solid #2E2530", borderRadius:16, padding:"20px 22px", textDecoration:"none", marginBottom:24, animation:"fadeUp 0.6s ease" }}>
-            <div className="play-pulse" style={{ width:52, height:52, borderRadius:14, background:"linear-gradient(135deg,#DC2626,#991B1B)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:18, flexShrink:0, boxShadow:"0 4px 20px rgba(220,38,38,0.3)", color:"#fff" }}>▶</div>
-            <div>
-              <div style={{ fontSize:13, fontWeight:700, color:"#FFF", marginBottom:3 }}>Watch Training Video</div>
-              <div style={{ fontSize:11, color:"#6A6E78" }}>Complete before continuing with this module</div>
+            style={{ display:"flex", alignItems:"center", gap:18, background:"linear-gradient(135deg, rgba(26,21,24,0.7), rgba(24,27,32,0.7))", backdropFilter:"blur(12px)", WebkitBackdropFilter:"blur(12px)", border:"1px solid rgba(220,38,38,0.2)", borderRadius:18, padding:dk?"22px 24px":"20px 18px", textDecoration:"none", marginBottom:28, animation:"fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.1s both", position:"relative" }}>
+            <div className="play-btn" style={{ width:56, height:56, borderRadius:16, background:"linear-gradient(135deg,#ef4444,#DC2626 50%,#7f1d1d)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:18, flexShrink:0, boxShadow:"0 6px 24px rgba(220,38,38,0.4)", color:"#fff", border:"1px solid rgba(255,255,255,0.15)" }}>▶</div>
+            <div style={{ flex:1 }}>
+              <div style={{ fontSize:14, fontWeight:700, color:"#FFF", marginBottom:4 }}>Watch Training Video</div>
+              <div style={{ fontSize:12, color:"#7A7E88" }}>Complete before continuing with this module</div>
             </div>
+            <div style={{ fontSize:11, fontWeight:700, color:"#DC2626", letterSpacing:2, textTransform:"uppercase", display:dk?"flex":"none", alignItems:"center", gap:6 }}>YouTube ↗</div>
           </a>
         )}
 
         {/* Sections */}
-        <div style={{ paddingBottom:80 }}>
+        <div style={{ paddingBottom:100 }}>
           {c.s.map((s, i) => {
             const open = oi === i;
             return (
-              <div key={i} style={{ marginBottom:6, animation:`fadeUp 0.4s ease ${0.05*i}s both` }}>
+              <div key={i} style={{ marginBottom:8, animation:`fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) ${0.05*i+0.15}s both` }}>
                 <button className="acc-btn" onClick={() => setOi(open ? null : i)}
                   style={{
                     width:"100%", textAlign:"left",
-                    background: open ? "#1A1D24" : "#08080a",
-                    border: "1px solid " + (open ? "#1e1e22" : "#111114"),
+                    background: open ? "linear-gradient(180deg, rgba(26,29,36,0.8), rgba(20,21,25,0.8))" : "rgba(20,21,25,0.5)",
+                    backdropFilter:"blur(12px)", WebkitBackdropFilter:"blur(12px)",
+                    border: "1px solid " + (open ? `${accent}30` : "rgba(255,255,255,0.05)"),
                     borderRadius: open ? "16px 16px 0 0" : 16,
-                    padding: dk ? "20px 24px" : "18px 20px",
+                    borderBottom: open ? "none" : `1px solid rgba(255,255,255,0.05)`,
+                    padding: dk ? "22px 24px" : "18px 20px",
                     cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"space-between",
-                    fontFamily:"inherit", minHeight:56
+                    fontFamily:"inherit", minHeight:60, position:"relative", overflow:"hidden"
                   }}>
-                  <span style={{ fontSize:dk?15:14, fontWeight:700, color:open?"#FFF":"#c0c0c4", lineHeight:1.35, paddingRight:16 }}>{s.h}</span>
-                  <div style={{ width:28, height:28, borderRadius:8, background:open?accent+"18":"#ffffff08", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, transition:"all 0.3s" }}>
-                    <span style={{ color:open?accent:"#333", fontSize:11, transform:open?"rotate(180deg)":"none", transition:"transform 0.3s ease", display:"block" }}>▾</span>
+                  {open && <div style={{ position:"absolute", top:0, left:0, width:3, height:"100%", background:`linear-gradient(180deg, ${accent}, ${accent}40)`, boxShadow:`0 0 12px ${accent}60` }} />}
+                  <div style={{ display:"flex", alignItems:"center", gap:14, flex:1, paddingLeft: open ? 8 : 0 }}>
+                    <div style={{ fontSize:11, fontWeight:800, color: open ? accent : "#3A3E48", fontFamily:"'JetBrains Mono',monospace", letterSpacing:1, minWidth:24 }}>{String(i+1).padStart(2,"0")}</div>
+                    <span style={{ fontSize:dk?15:14, fontWeight:700, color:open?"#FFF":"#c0c0c4", lineHeight:1.35, paddingRight:16, flex:1 }}>{s.h}</span>
+                  </div>
+                  <div style={{ width:32, height:32, borderRadius:10, background:open?`${accent}20`:"rgba(255,255,255,0.04)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, transition:"all 0.3s", border: open ? `1px solid ${accent}40` : "1px solid rgba(255,255,255,0.04)" }}>
+                    <span style={{ color:open?accent:"#5A5E68", fontSize:12, transform:open?"rotate(180deg)":"none", transition:"transform 0.3s ease", display:"block" }}>▾</span>
                   </div>
                 </button>
                 {open && (
                   <div style={{
-                    background:"#131317", border:"1px solid #32353D", borderTop:"none",
-                    borderRadius:"0 0 16px 16px", padding:dk?"28px 24px":"22px 20px",
-                    animation:"fadeIn 0.3s ease"
+                    background:"linear-gradient(180deg, rgba(19,19,23,0.85), rgba(15,15,19,0.85))",
+                    backdropFilter:"blur(12px)", WebkitBackdropFilter:"blur(12px)",
+                    border:`1px solid ${accent}30`, borderTop:"none",
+                    borderRadius:"0 0 16px 16px", padding:dk?"28px 28px":"22px 20px",
+                    animation:"fadeIn 0.35s ease"
                   }}>
                     <RichText text={s.b} />
                   </div>
@@ -521,63 +708,79 @@ function Quiz({ quizKey, onBack, w }) {
   const gc = grade>=0.9?"#22C55E":grade>=0.7?"#F59E0B":"#DC2626";
   const gl = grade>=0.9?"Excellent — you're ready":grade>=0.7?"Good — review weak areas":"Needs work — re-study the modules";
   return (
-    <div ref={ref}>
-      <div style={{ position:"sticky",top:0,zIndex:20,background:"rgba(16,17,20,0.92)",backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",borderBottom:"1px solid #252830",padding:"12px 0" }}>
-        <div style={{ maxWidth:800,margin:"0 auto",padding:dk?"0 40px":"0 20px" }}>
-          <button className="back-btn" onClick={onBack} style={{ background:"none",border:"none",color:"#DC2626",fontSize:13,fontWeight:600,cursor:"pointer",padding:"6px 0",display:"flex",alignItems:"center",gap:8,fontFamily:"inherit" }}>
+    <div ref={ref} style={{ position:"relative", overflow:"hidden" }}>
+      {/* Aurora background */}
+      <div className="aurora-blob" style={{ top:"-15%", right:"-10%", width:500, height:500, background:"radial-gradient(circle, rgba(16,185,129,0.15) 0%, transparent 70%)", animation:"auroraDrift1 28s ease-in-out infinite" }} />
+      <div className="noise-overlay" />
+
+      <div style={{ position:"sticky",top:0,zIndex:20,background:"rgba(8,8,11,0.75)",backdropFilter:"blur(20px) saturate(180%)",WebkitBackdropFilter:"blur(20px) saturate(180%)",borderBottom:"1px solid rgba(255,255,255,0.05)",padding:"14px 0" }}>
+        <div style={{ maxWidth:800,margin:"0 auto",padding:dk?"0 40px":"0 20px",display:"flex",alignItems:"center",justifyContent:"space-between" }}>
+          <button className="back-btn" onClick={onBack} style={{ background:"none",border:"none",color:"#10B981",fontSize:13,fontWeight:700,cursor:"pointer",padding:"6px 0",display:"flex",alignItems:"center",gap:8,fontFamily:"inherit",letterSpacing:0.5 }}>
             <span style={{ fontSize:18,lineHeight:1 }}>‹</span> Back to Academy
           </button>
+          <div style={{ display:"flex",alignItems:"center",gap:8 }}>
+            <span className="dot-blink" style={{ width:6, height:6, borderRadius:"50%", background:"#10B981", boxShadow:"0 0 8px #10B981" }} />
+            <span style={{ fontSize:10, fontWeight:700, color:"#5A5E68", letterSpacing:2.5, textTransform:"uppercase" }}>Quiz</span>
+          </div>
         </div>
       </div>
-      <div style={{ maxWidth:640,margin:"0 auto",padding:dk?"0 40px":"0 20px" }}>
-        <div style={{ padding:"32px 0 24px",animation:"fadeUp 0.5s ease" }}>
-          <div style={{ width:40,height:3,background:"#10B981",borderRadius:2,marginBottom:16 }} />
-          <h2 style={{ fontSize:dk?26:22,fontWeight:800,color:"#FFF",margin:"0 0 6px",letterSpacing:"-0.03em" }}>{q.title}</h2>
-          <p style={{ fontSize:13,color:"#6A6E78",margin:0 }}>{q.subtitle}</p>
-        </div>
-        <div style={{ marginBottom:32,animation:"fadeUp 0.5s ease 0.1s both" }}>
-          <div style={{ display:"flex",justifyContent:"space-between",marginBottom:8 }}>
-            <span style={{ fontSize:11,fontWeight:600,color:"#6A6E78" }}>{done?"Complete":`Question ${ci+1} of ${tot}`}</span>
-            <span style={{ fontSize:11,fontWeight:700,color:done?gc:"#6A6E78" }}>{pct}%</span>
+      <div style={{ maxWidth:640,margin:"0 auto",padding:dk?"0 40px":"0 20px", position:"relative", zIndex:3 }}>
+        <div style={{ padding:"40px 0 28px",animation:"fadeUp 0.6s cubic-bezier(0.16,1,0.3,1)" }}>
+          <div style={{ display:"inline-flex", alignItems:"center", gap:8, padding:"5px 12px", background:"rgba(16,185,129,0.12)", border:"1px solid rgba(16,185,129,0.3)", borderRadius:99, marginBottom:18 }}>
+            <span style={{ width:5, height:5, borderRadius:"50%", background:"#10B981", boxShadow:"0 0 8px #10B981" }} />
+            <span style={{ fontSize:10, fontWeight:700, color:"#10B981", letterSpacing:3, textTransform:"uppercase" }}>Practice Quiz</span>
           </div>
-          <div style={{ height:4,background:"#1C1F25",borderRadius:4,overflow:"hidden" }}>
-            <div style={{ height:"100%",width:`${pct}%`,background:done?gc:"linear-gradient(90deg,#DC2626,#F59E0B)",borderRadius:4,transition:"width 0.5s cubic-bezier(0.4,0,0.2,1)" }} />
+          <h2 style={{ fontSize:dk?32:24,fontWeight:800,color:"#FFF",margin:"0 0 8px",letterSpacing:"-0.03em",lineHeight:1.1 }}>
+            <span className="gradient-text-white">{q.title}</span>
+          </h2>
+          <p style={{ fontSize:dk?15:13,color:"#9094A0",margin:0,lineHeight:1.5 }}>{q.subtitle}</p>
+        </div>
+        <div style={{ marginBottom:36,animation:"fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.1s both" }}>
+          <div style={{ display:"flex",justifyContent:"space-between",marginBottom:10,alignItems:"center" }}>
+            <span style={{ fontSize:11,fontWeight:700,color:"#7A7E88",letterSpacing:1.5,textTransform:"uppercase" }}>{done?"Complete":`Question ${ci+1} / ${tot}`}</span>
+            <span style={{ fontSize:13,fontWeight:800,color:done?gc:"#10B981",fontFamily:"'JetBrains Mono',monospace" }}>{pct}%</span>
+          </div>
+          <div style={{ height:6,background:"rgba(28,31,37,0.8)",borderRadius:6,overflow:"hidden",border:"1px solid rgba(255,255,255,0.04)" }}>
+            <div style={{ height:"100%",width:`${pct}%`,background:done?`linear-gradient(90deg,${gc},${gc}cc)`:"linear-gradient(90deg,#10B981,#22C55E,#F59E0B,#DC2626)",borderRadius:6,transition:"width 0.6s cubic-bezier(0.16,1,0.3,1)",boxShadow:done?`0 0 12px ${gc}80`:"0 0 12px rgba(16,185,129,0.5)" }} />
           </div>
         </div>
         {done ? (
-          <div style={{ textAlign:"center",padding:"40px 0 80px",animation:"fadeUp 0.5s ease" }}>
-            <div style={{ width:100,height:100,borderRadius:28,background:`${gc}15`,border:`2px solid ${gc}30`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 24px",fontSize:36,fontWeight:800,color:gc }}>{score}/{tot}</div>
-            <h3 style={{ fontSize:22,fontWeight:800,color:"#FFF",margin:"0 0 8px" }}>{Math.round(grade*100)}%</h3>
-            <p style={{ fontSize:14,color:gc,fontWeight:600,margin:"0 0 32px" }}>{gl}</p>
+          <div style={{ textAlign:"center",padding:"48px 0 100px",animation:"fadeUp 0.6s cubic-bezier(0.16,1,0.3,1)" }}>
+            <div style={{ position:"relative", display:"inline-block", marginBottom:28 }}>
+              <div style={{ width:140,height:140,borderRadius:32,background:`linear-gradient(135deg, ${gc}20, ${gc}08)`,border:`2px solid ${gc}40`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto",fontSize:42,fontWeight:900,color:gc,boxShadow:`0 0 40px ${gc}30, 0 0 80px ${gc}15` }}>{score}/{tot}</div>
+              <div style={{ position:"absolute", inset:-8, borderRadius:36, border:`2px solid ${gc}30`, animation:"pingRing 2.5s ease-out infinite", pointerEvents:"none" }} />
+            </div>
+            <h3 style={{ fontSize:36,fontWeight:900,color:gc,margin:"0 0 8px",letterSpacing:"-0.02em",textShadow:`0 0 24px ${gc}40` }}>{Math.round(grade*100)}%</h3>
+            <p style={{ fontSize:15,color:"#A0A4AE",fontWeight:500,margin:"0 0 36px",letterSpacing:0.3 }}>{gl}</p>
             <div style={{ display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap" }}>
-              <button onClick={retry} style={{ padding:"14px 28px",background:"#1C1F25",border:"1px solid #282B33",borderRadius:12,color:"#FFF",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"inherit" }}>Retake Quiz</button>
-              <button onClick={onBack} style={{ padding:"14px 28px",background:"linear-gradient(135deg,#DC2626,#991B1B)",border:"none",borderRadius:12,color:"#FFF",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"inherit",boxShadow:"0 4px 16px rgba(220,38,38,0.2)" }}>Back to Academy</button>
+              <button onClick={retry} style={{ padding:"15px 32px",background:"rgba(28,31,37,0.8)",backdropFilter:"blur(12px)",WebkitBackdropFilter:"blur(12px)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:14,color:"#FFF",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:"inherit",letterSpacing:1.5,textTransform:"uppercase" }}>↻ Retake Quiz</button>
+              <button onClick={onBack} className="btn-primary" style={{ padding:"15px 32px",border:"none",borderRadius:14,color:"#FFF",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:"inherit",letterSpacing:1.5,textTransform:"uppercase" }}>Back to Academy →</button>
             </div>
           </div>
         ) : (
-          <div style={{ paddingBottom:80,animation:"fadeUp 0.35s ease" }}>
-            <h3 style={{ fontSize:dk?18:16,fontWeight:700,color:"#FFF",margin:"0 0 24px",lineHeight:1.4 }}>{cur.q}</h3>
+          <div style={{ paddingBottom:100,animation:"fadeUp 0.4s cubic-bezier(0.16,1,0.3,1)" }}>
+            <h3 style={{ fontSize:dk?20:17,fontWeight:700,color:"#FFF",margin:"0 0 28px",lineHeight:1.45,letterSpacing:"-0.01em" }}>{cur.q}</h3>
             <div style={{ display:"flex",flexDirection:"column",gap:10 }}>
               {cur.o.map((opt,idx) => {
                 const isSel=sel===idx, isCor=idx===cur.a, showG=locked&&isCor, showR=locked&&isSel&&!isCor;
-                let bg="#141519",bd="#252830",tc="#D0D4DC";
-                if(showG){bg="#22C55E12";bd="#22C55E40";tc="#22C55E"}
-                if(showR){bg="#DC262612";bd="#DC262640";tc="#DC2626"}
-                if(!locked&&isSel){bg="#1C1F25";bd="#DC2626"}
+                let bg="rgba(20,21,25,0.7)",bd="rgba(255,255,255,0.06)",tc="#D0D4DC", boxShadow="none";
+                if(showG){bg="rgba(34,197,94,0.08)";bd="rgba(34,197,94,0.4)";tc="#22C55E";boxShadow="0 0 24px rgba(34,197,94,0.15)"}
+                if(showR){bg="rgba(220,38,38,0.08)";bd="rgba(220,38,38,0.4)";tc="#DC2626";boxShadow="0 0 24px rgba(220,38,38,0.15)"}
+                if(!locked&&isSel){bg="rgba(28,31,37,0.9)";bd="#10B981";boxShadow="0 0 20px rgba(16,185,129,0.2)"}
                 return (
                   <button key={idx} onClick={()=>pick(idx)}
-                    style={{ width:"100%",textAlign:"left",padding:"16px 18px",background:bg,border:`1.5px solid ${bd}`,borderRadius:14,cursor:locked?"default":"pointer",display:"flex",alignItems:"center",gap:14,transition:"all 0.2s",fontFamily:"inherit",fontSize:14,color:tc,fontWeight:isSel?600:400 }}>
-                    <div style={{ width:32,height:32,borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:700,flexShrink:0,background:showG?"#22C55E20":showR?"#DC262620":"#1C1F25",color:showG?"#22C55E":showR?"#DC2626":"#6A6E78",border:`1px solid ${showG?"#22C55E30":showR?"#DC262630":"#282B33"}` }}>
+                    style={{ width:"100%",textAlign:"left",padding:"18px 20px",background:bg,backdropFilter:"blur(12px)",WebkitBackdropFilter:"blur(12px)",border:`1.5px solid ${bd}`,borderRadius:16,cursor:locked?"default":"pointer",display:"flex",alignItems:"center",gap:16,transition:"all 0.25s cubic-bezier(0.16,1,0.3,1)",fontFamily:"inherit",fontSize:14,color:tc,fontWeight:isSel?600:500,boxShadow,transform:locked&&!isSel&&!isCor?"none":"none" }}>
+                    <div style={{ width:36,height:36,borderRadius:12,display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:800,flexShrink:0,background:showG?"rgba(34,197,94,0.15)":showR?"rgba(220,38,38,0.15)":"rgba(16,185,129,0.08)",color:showG?"#22C55E":showR?"#DC2626":"#7A7E88",border:`1px solid ${showG?"rgba(34,197,94,0.3)":showR?"rgba(220,38,38,0.3)":"rgba(255,255,255,0.05)"}` }}>
                       {showG?"✓":showR?"✗":String.fromCharCode(65+idx)}
                     </div>
-                    <span>{opt}</span>
+                    <span style={{ flex:1, lineHeight:1.4 }}>{opt}</span>
                   </button>
                 );
               })}
             </div>
             {locked && (
-              <button onClick={nxt} style={{ width:"100%",padding:"16px",background:"linear-gradient(135deg,#DC2626,#991B1B)",color:"#FFF",border:"none",borderRadius:14,fontSize:13,fontWeight:700,letterSpacing:2,cursor:"pointer",fontFamily:"inherit",textTransform:"uppercase",marginTop:20,boxShadow:"0 4px 16px rgba(220,38,38,0.2)",animation:"fadeUp 0.3s ease" }}>
-                {ci+1>=tot?"See Results":"Next Question →"}
+              <button onClick={nxt} className="btn-primary" style={{ width:"100%",padding:"18px",color:"#FFF",border:"none",borderRadius:14,fontSize:13,fontWeight:700,letterSpacing:3,cursor:"pointer",fontFamily:"inherit",textTransform:"uppercase",marginTop:24,animation:"fadeUp 0.35s cubic-bezier(0.16,1,0.3,1)" }}>
+                {ci+1>=tot?"See Results →":"Next Question →"}
               </button>
             )}
           </div>
@@ -615,7 +818,7 @@ export default function App() {
   );
 
   if (view && QUIZZES[view]) return (
-    <div ref={ref} style={{ minHeight:"100dvh", background:"#101114", fontFamily:"'Outfit',system-ui,sans-serif", color:"#FFF" }}>
+    <div ref={ref} style={{ minHeight:"100dvh", background:"#08080b", fontFamily:"'Outfit',system-ui,sans-serif", color:"#FFF", position:"relative", overflow:"hidden" }}>
       <style>{GLOBAL_CSS}</style>
       <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
       <Quiz quizKey={view} onBack={()=>{setView(null);setTimeout(top,50)}} w={w} />
@@ -623,7 +826,7 @@ export default function App() {
   );
 
   if (view) return (
-    <div ref={ref} style={{ minHeight:"100dvh", background:"#101114", fontFamily:"'Outfit',system-ui,sans-serif", color:"#FFF" }}>
+    <div ref={ref} style={{ minHeight:"100dvh", background:"#08080b", fontFamily:"'Outfit',system-ui,sans-serif", color:"#FFF", position:"relative", overflow:"hidden" }}>
       <style>{GLOBAL_CSS}</style>
       <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
       <Viewer ck={view} onBack={()=>{setView(null);setTimeout(top,50)}} w={w} />
@@ -631,36 +834,58 @@ export default function App() {
   );
 
   return (
-    <div ref={ref} className="dotgrid" style={{ minHeight:"100dvh", background:"#101114", fontFamily:"'Outfit',system-ui,sans-serif", color:"#FFF", position:"relative" }}>
+    <div ref={ref} className="gridlines" style={{ minHeight:"100dvh", background:"#08080b", fontFamily:"'Outfit',system-ui,sans-serif", color:"#FFF", position:"relative", overflow:"hidden" }}>
       <style>{GLOBAL_CSS}</style>
-      <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+      <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
 
-      {/* Ambient glow */}
-      <div style={{ position:"fixed", top:0, left:"50%", transform:"translateX(-50%)", width:800, height:500, background:"radial-gradient(ellipse, rgba(220,38,38,0.05) 0%, transparent 70%)", pointerEvents:"none", zIndex:0 }} />
+      {/* Aurora background blobs */}
+      <div className="aurora-blob" style={{ top:"-15%", left:"-10%", width:600, height:600, background:"radial-gradient(circle, rgba(220,38,38,0.22) 0%, transparent 70%)", animation:"auroraDrift1 25s ease-in-out infinite" }} />
+      <div className="aurora-blob" style={{ top:"20%", right:"-15%", width:550, height:550, background:"radial-gradient(circle, rgba(127,29,29,0.22) 0%, transparent 70%)", animation:"auroraDrift2 30s ease-in-out infinite" }} />
+      <div className="aurora-blob" style={{ top:"60%", left:"30%", width:500, height:500, background:"radial-gradient(circle, rgba(139,92,246,0.06) 0%, transparent 70%)", animation:"auroraDrift3 35s ease-in-out infinite" }} />
+
+      {/* Noise overlay */}
+      <div className="noise-overlay" />
 
       {/* Header */}
-      <div style={{ position:"relative", zIndex:1, borderBottom:"1px solid #1E2128", padding:wd?"52px 56px 36px":dk?"44px 36px 32px":"36px 20px 28px" }}>
+      <div style={{ position:"relative", zIndex:3, borderBottom:"1px solid rgba(255,255,255,0.04)", padding:wd?"60px 56px 44px":dk?"52px 36px 36px":"40px 20px 32px" }}>
         <div style={{ maxWidth:1280, margin:"0 auto" }}>
-          <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:dk?24:20 }}>
-            <div style={{ animation:"fadeUp 0.6s ease" }}>
-              <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?30:24, letterSpacing:12, color:"#DC2626", lineHeight:1 }}>REDLINE</div>
-              <h1 style={{ fontSize:dk?14:12, fontWeight:600, color:"#5A5E68", margin:"6px 0 0", letterSpacing:dk?6:4, textTransform:"uppercase" }}>Rep Portal</h1>
+          <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:dk?32:24 }}>
+            <div style={{ animation:"fadeUp 0.7s cubic-bezier(0.16,1,0.3,1)" }}>
+              {/* Live badge */}
+              <div style={{ display:"inline-flex", alignItems:"center", gap:8, padding:"5px 12px", background:"rgba(220,38,38,0.08)", border:"1px solid rgba(220,38,38,0.2)", borderRadius:99, marginBottom:18 }}>
+                <span className="dot-blink" style={{ width:6, height:6, borderRadius:"50%", background:"#22C55E", boxShadow:"0 0 8px #22C55E" }} />
+                <span style={{ fontSize:10, fontWeight:700, color:"#A0A4AE", letterSpacing:2.5, textTransform:"uppercase" }}>Academy · Live</span>
+              </div>
+
+              {/* Massive REDLINE wordmark */}
+              <div className="brand-glow" style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:wd?72:dk?56:42, letterSpacing:wd?14:dk?10:6, lineHeight:0.95, marginBottom:6 }}>
+                <span className="gradient-text-red">REDLINE</span>
+              </div>
+              <h1 style={{ fontSize:dk?15:12, fontWeight:700, color:"#7A7E88", margin:"4px 0 0", letterSpacing:dk?8:5, textTransform:"uppercase" }}>Rep Portal · v2026</h1>
             </div>
-            <div style={{ animation:"fadeUp 0.6s ease 0.1s both" }}>
-              <div style={{ width:dk?52:44, height:dk?52:44, borderRadius:14, background:"linear-gradient(135deg,#DC2626,#7f1d1d)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?20:16, color:"#FFF", letterSpacing:2, boxShadow:"0 4px 24px rgba(220,38,38,0.2)", animation:"glow 3s ease-in-out infinite" }}>R</div>
+
+            <div style={{ animation:"fadeUp 0.7s cubic-bezier(0.16,1,0.3,1) 0.1s both", position:"relative" }}>
+              <div style={{ width:dk?64:50, height:dk?64:50, borderRadius:18, background:"linear-gradient(135deg,#ef4444,#DC2626 50%,#7f1d1d)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?28:22, color:"#FFF", letterSpacing:2, animation:"glow 3.5s ease-in-out infinite", border:"1px solid rgba(255,255,255,0.1)" }}>R</div>
             </div>
           </div>
 
-          <p style={{ fontSize:dk?14:13, color:"#5A5E68", margin:"0 0 24px", maxWidth:500, lineHeight:1.5, animation:"fadeUp 0.6s ease 0.15s both" }}>
-            Your complete training system. Master every module, close more deals.
+          <p style={{ fontSize:dk?16:14, color:"#9094A0", margin:"0 0 32px", maxWidth:560, lineHeight:1.6, animation:"fadeUp 0.7s cubic-bezier(0.16,1,0.3,1) 0.15s both", fontWeight:400 }}>
+            Your complete training system. <span style={{color:"#E8ECF0", fontWeight:600}}>Master every module</span>, sharpen the script, <span style={{color:"#ef4444", fontWeight:600}}>close more deals.</span>
           </p>
 
           {/* Stats */}
-          <div style={{ display:"flex", gap:dk?12:8, animation:"fadeUp 0.6s ease 0.2s both" }}>
-            {[["13","Modules","#DC2626"],["2","Bootcamps","#F59E0B"],["3","Reference","#3B82F6"],["6","Quizzes","#10B981"]].map(([n,l,col]) => (
-              <div key={l} style={{ background:"#181B20", border:"1px solid #252830", borderRadius:14, padding:dk?"16px 24px":"14px 16px", textAlign:"center", minWidth:dk?120:0, flex:dk?"none":1 }}>
-                <div style={{ fontSize:dk?28:22, fontWeight:800, color:col, lineHeight:1 }}>{n}</div>
-                <div style={{ fontSize:9, color:"#5A5E68", textTransform:"uppercase", letterSpacing:2, fontWeight:600, marginTop:6 }}>{l}</div>
+          <div style={{ display:"grid", gridTemplateColumns:dk?"repeat(4,1fr)":"repeat(2,1fr)", gap:dk?14:10, animation:"fadeUp 0.7s cubic-bezier(0.16,1,0.3,1) 0.25s both" }}>
+            {[["13","Modules","#DC2626","📚"],["2","Bootcamps","#F59E0B","⚡"],["3","Reference","#3B82F6","📖"],["6","Quizzes","#10B981","🧪"]].map(([n,l,col,ic]) => (
+              <div key={l} className="stat-card" style={{ "--accent":col, background:"linear-gradient(180deg, rgba(24,27,32,0.6), rgba(16,17,20,0.6))", backdropFilter:"blur(12px)", WebkitBackdropFilter:"blur(12px)", border:"1px solid rgba(255,255,255,0.05)", borderRadius:16, padding:dk?"20px 22px":"16px 14px", position:"relative", overflow:"hidden" }}>
+                <div style={{ position:"relative", zIndex:2, display:"flex", alignItems:"center", justifyContent:"space-between", gap:10 }}>
+                  <div>
+                    <div style={{ fontSize:dk?36:28, fontWeight:900, lineHeight:1, color:col, textShadow:`0 0 24px ${col}40` }}>{n}</div>
+                    <div style={{ fontSize:9.5, color:"#7A7E88", textTransform:"uppercase", letterSpacing:2.5, fontWeight:700, marginTop:8 }}>{l}</div>
+                  </div>
+                  <div style={{ fontSize:dk?22:18, opacity:0.5 }}>{ic}</div>
+                </div>
+                {/* Top accent line */}
+                <div style={{ position:"absolute", top:0, left:0, right:0, height:2, background:`linear-gradient(90deg, ${col}, transparent)`, opacity:0.7 }} />
               </div>
             ))}
           </div>
@@ -668,69 +893,99 @@ export default function App() {
       </div>
 
       {/* Cards */}
-      <div style={{ position:"relative", zIndex:1, maxWidth:1280, margin:"0 auto", padding:wd?"24px 56px 80px":dk?"20px 36px 80px":"16px 20px 80px" }}>
+      <div style={{ position:"relative", zIndex:3, maxWidth:1280, margin:"0 auto", padding:wd?"32px 56px 100px":dk?"28px 36px 100px":"24px 20px 100px" }}>
 
         {/* Quick Links */}
-        <div style={{ marginBottom:8, animation:"fadeUp 0.5s ease 0.15s both" }}>
-          <div style={{ display:"flex", alignItems:"center", gap:10, padding:"8px 0 12px" }}>
-            <div style={{ width:8, height:8, borderRadius:4, background:"#8B5CF6" }} />
-            <div style={{ fontSize:10, fontWeight:700, color:"#8B5CF6", letterSpacing:3, textTransform:"uppercase" }}>Quick Links</div>
-            <div style={{ flex:1, height:1, background:"#141416" }} />
+        <div style={{ marginBottom:8, animation:"fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.3s both" }}>
+          <div style={{ display:"flex", alignItems:"center", gap:14, padding:"8px 0 16px" }}>
+            <div style={{ width:10, height:10, borderRadius:3, background:"#8B5CF6", boxShadow:"0 0 12px rgba(139,92,246,0.6)" }} />
+            <div style={{ fontSize:11, fontWeight:800, color:"#8B5CF6", letterSpacing:3.5, textTransform:"uppercase" }}>Quick Links</div>
+            <div className="section-divider" style={{ "--accent":"#8B5CF6", flex:1 }} />
           </div>
-          <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr 1fr":dk?"1fr 1fr 1fr":"1fr", gap:dk?10:8 }}>
+          <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr 1fr":dk?"1fr 1fr 1fr":"1fr", gap:dk?12:10 }}>
             {LINKS.map((lk,i) => (
-              <a key={i} href={lk.url} target="_blank" rel="noreferrer" className="card-hover"
+              <a key={i} href={lk.url} target="_blank" rel="noreferrer" className="card-hover card-purple"
                 style={{
-                  background:"#141519", border:"1px solid #252830", borderLeft:"3px solid #8B5CF6",
-                  borderRadius:16, padding:dk?"18px 18px":"16px 14px", textDecoration:"none",
-                  display:"flex", alignItems:"center", gap:14, animation:`fadeUp 0.4s ease ${0.05*i}s both`,
+                  background:"linear-gradient(180deg, rgba(24,27,32,0.7), rgba(16,17,20,0.7))",
+                  backdropFilter:"blur(12px)", WebkitBackdropFilter:"blur(12px)",
+                  border:"1px solid rgba(255,255,255,0.05)",
+                  borderRadius:18, padding:dk?"20px 20px":"18px 16px", textDecoration:"none",
+                  display:"flex", alignItems:"center", gap:14, animation:`fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) ${0.35+0.06*i}s both`,
+                  position:"relative",
                 }}>
-                <div style={{ fontSize:22, width:44, height:44, display:"flex", alignItems:"center", justifyContent:"center", background:"#1A1D24", borderRadius:12, flexShrink:0, border:"1px solid #282B33" }}>{lk.ic}</div>
+                {/* Top accent gradient */}
+                <div style={{ position:"absolute", top:0, left:16, right:16, height:1, background:"linear-gradient(90deg, transparent, rgba(139,92,246,0.5), transparent)" }} />
+                <div style={{ fontSize:22, width:46, height:46, display:"flex", alignItems:"center", justifyContent:"center", background:"linear-gradient(135deg, rgba(139,92,246,0.15), rgba(139,92,246,0.05))", borderRadius:13, flexShrink:0, border:"1px solid rgba(139,92,246,0.2)" }}>{lk.ic}</div>
                 <div style={{ flex:1, minWidth:0 }}>
-                  <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF0F4", margin:"0 0 2px" }}>{lk.label}</h3>
-                  <p style={{ fontSize:11, color:"#6A6E78", margin:0 }}>{lk.desc}</p>
+                  <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF0F4", margin:"0 0 3px" }}>{lk.label}</h3>
+                  <p style={{ fontSize:11.5, color:"#7A7E88", margin:0 }}>{lk.desc}</p>
                 </div>
-                <div style={{ width:32, height:32, borderRadius:10, background:"#1A1D24", border:"1px solid #282B33", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, color:"#3A3E48", fontSize:12 }}>↗</div>
+                <div style={{ width:34, height:34, borderRadius:11, background:"rgba(28,31,37,0.8)", border:"1px solid rgba(255,255,255,0.06)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, color:"#8B5CF6", fontSize:13, fontWeight:700 }}>↗</div>
               </a>
             ))}
           </div>
         </div>
 
-        {groups.map((g, gi) => (
-          <div key={gi}>
-            {g.label && (
-              <div style={{ display:"flex", alignItems:"center", gap:12, padding:"32px 0 14px", animation:`fadeUp 0.5s ease ${0.3+gi*0.1}s both` }}>
-                <div style={{ width:8, height:8, borderRadius:4, background:g.color }} />
-                <div style={{ fontSize:10, fontWeight:700, color:g.color, letterSpacing:3, textTransform:"uppercase" }}>{g.label}</div>
-                <div style={{ flex:1, height:1, background:"#111114" }} />
-              </div>
-            )}
-            <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr 1fr":dk?"1fr 1fr":"1fr", gap:dk?10:8 }}>
-              {g.items.map((x, i) => (
-                <div key={x.id} className="card-hover" onClick={()=>{setView(x.k);setTimeout(top,50)}}
-                  style={{
-                    background:"#141519", border:"1px solid #252830",
-                    borderRadius:16, padding:dk?"22px 20px":"18px 16px", cursor:"pointer",
-                    animation:`fadeUp 0.5s cubic-bezier(0.4,0,0.2,1) ${0.05*(gi*4+i)}s both`,
-                    position:"relative", overflow:"hidden"
-                  }}>
-                  {/* Accent strip */}
-                  <div style={{ position:"absolute", top:0, left:0, width:3, height:"100%", background:bc[x.t], borderRadius:"3px 0 0 3px" }} />
-
-                  <div style={{ display:"flex", alignItems:"center", gap:14, paddingLeft:8 }}>
-                    <div style={{ fontSize:24, width:48, height:48, display:"flex", alignItems:"center", justifyContent:"center", background:"#1C1F25", borderRadius:14, flexShrink:0, border:"1px solid #282B33" }}>{x.ic}</div>
-                    <div style={{ flex:1, minWidth:0 }}>
-                      <div style={{ fontSize:9, fontWeight:700, color:bc[x.t], letterSpacing:2, marginBottom:4, textTransform:"uppercase" }}>{x.n||x.t}</div>
-                      <h3 style={{ fontSize:14.5, fontWeight:700, color:"#EEF0F4", margin:"0 0 3px", lineHeight:1.3 }}>{x.sub}</h3>
-                      <p style={{ fontSize:11.5, color:"#5A5E68", margin:0, lineHeight:1.35 }}>{x.d}</p>
-                    </div>
-                    <div style={{ width:32, height:32, borderRadius:10, background:"#1C1F25", border:"1px solid #282B33", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, color:"#3A3E48", fontSize:14 }}>›</div>
-                  </div>
+        {groups.map((g, gi) => {
+          const cardClass = g.color === "#F59E0B" ? "card-amber" : g.color === "#3B82F6" ? "card-blue" : g.color === "#10B981" ? "card-green" : "";
+          return (
+            <div key={gi}>
+              {g.label && (
+                <div style={{ display:"flex", alignItems:"center", gap:14, padding:"40px 0 16px", animation:`fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) ${0.4+gi*0.1}s both` }}>
+                  <div style={{ width:10, height:10, borderRadius:3, background:g.color, boxShadow:`0 0 12px ${g.color}90` }} />
+                  <div style={{ fontSize:11, fontWeight:800, color:g.color, letterSpacing:3.5, textTransform:"uppercase" }}>{g.label}</div>
+                  <div className="section-divider" style={{ "--accent":g.color, flex:1 }} />
+                  <div style={{ fontSize:10, fontWeight:700, color:"#5A5E68", letterSpacing:2 }}>{String(g.items.length).padStart(2,"0")}</div>
                 </div>
-              ))}
+              )}
+              {!g.label && (
+                <div style={{ display:"flex", alignItems:"center", gap:14, padding:"32px 0 16px", animation:`fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) ${0.4}s both` }}>
+                  <div style={{ width:10, height:10, borderRadius:3, background:"#DC2626", boxShadow:"0 0 12px rgba(220,38,38,0.6)" }} />
+                  <div style={{ fontSize:11, fontWeight:800, color:"#DC2626", letterSpacing:3.5, textTransform:"uppercase" }}>Core Modules</div>
+                  <div className="section-divider" style={{ "--accent":"#DC2626", flex:1 }} />
+                  <div style={{ fontSize:10, fontWeight:700, color:"#5A5E68", letterSpacing:2 }}>{String(g.items.length).padStart(2,"0")}</div>
+                </div>
+              )}
+              <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr 1fr":dk?"1fr 1fr":"1fr", gap:dk?12:10 }}>
+                {g.items.map((x, i) => (
+                  <div key={x.id} className={`card-hover ${cardClass}`} onClick={()=>{setView(x.k);setTimeout(top,50)}}
+                    style={{
+                      background:"linear-gradient(180deg, rgba(24,27,32,0.7), rgba(16,17,20,0.7))",
+                      backdropFilter:"blur(12px)", WebkitBackdropFilter:"blur(12px)",
+                      border:"1px solid rgba(255,255,255,0.05)",
+                      borderRadius:18, padding:dk?"22px 20px":"18px 16px", cursor:"pointer",
+                      animation:`fadeUp 0.55s cubic-bezier(0.16,1,0.3,1) ${0.45+0.04*(gi*4+i)}s both`,
+                      position:"relative", overflow:"hidden"
+                    }}>
+                    {/* Left accent strip */}
+                    <div style={{ position:"absolute", top:0, left:0, width:3, height:"100%", background:`linear-gradient(180deg, ${bc[x.t]}, ${bc[x.t]}40)`, borderRadius:"3px 0 0 3px", boxShadow:`0 0 12px ${bc[x.t]}50` }} />
+                    {/* Top accent line */}
+                    <div style={{ position:"absolute", top:0, left:16, right:16, height:1, background:`linear-gradient(90deg, transparent, ${bc[x.t]}50, transparent)` }} />
+
+                    <div style={{ display:"flex", alignItems:"center", gap:14, paddingLeft:8 }}>
+                      <div style={{ fontSize:24, width:50, height:50, display:"flex", alignItems:"center", justifyContent:"center", background:`linear-gradient(135deg, ${bc[x.t]}20, ${bc[x.t]}08)`, borderRadius:14, flexShrink:0, border:`1px solid ${bc[x.t]}25` }}>{x.ic}</div>
+                      <div style={{ flex:1, minWidth:0 }}>
+                        <div style={{ fontSize:9, fontWeight:800, color:bc[x.t], letterSpacing:2.5, marginBottom:4, textTransform:"uppercase" }}>{x.n||x.t}</div>
+                        <h3 style={{ fontSize:15, fontWeight:700, color:"#EEF0F4", margin:"0 0 4px", lineHeight:1.3 }}>{x.sub}</h3>
+                        <p style={{ fontSize:11.5, color:"#7A7E88", margin:0, lineHeight:1.4 }}>{x.d}</p>
+                      </div>
+                      <div style={{ width:34, height:34, borderRadius:11, background:"rgba(28,31,37,0.8)", border:"1px solid rgba(255,255,255,0.06)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, color:bc[x.t], fontSize:16, fontWeight:700 }}>›</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
+          );
+        })}
+
+        {/* Footer signature */}
+        <div style={{ marginTop:60, padding:"32px 0 0", borderTop:"1px solid rgba(255,255,255,0.04)", display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:16 }}>
+          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+            <span className="dot-blink" style={{ width:6, height:6, borderRadius:"50%", background:"#DC2626", boxShadow:"0 0 8px #DC2626" }} />
+            <span style={{ fontSize:10, fontWeight:700, color:"#5A5E68", letterSpacing:3, textTransform:"uppercase" }}>System Online</span>
           </div>
-        ))}
+          <p style={{ color:"#3A3E48", fontSize:10, letterSpacing:2.5, textTransform:"uppercase", fontWeight:600, margin:0 }}>© 2026 Redline Web Services LLC</p>
+        </div>
       </div>
     </div>
   );
