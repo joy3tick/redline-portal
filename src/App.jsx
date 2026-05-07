@@ -1337,14 +1337,34 @@ function AdminPanel({ profile, onBack, w, onSignOut }) {
 
   const toggleRole = async (userId, currentRole) => {
     const newRole = currentRole === "admin" ? "rep" : "admin";
-    await supabase.from("profiles").update({ role: newRole }).eq("id", userId);
-    setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
+    const { data, error } = await supabase
+      .from("profiles")
+      .update({ role: newRole })
+      .eq("id", userId)
+      .select()
+      .single();
+    if (error || !data) {
+      console.error("toggleRole failed:", error);
+      alert(`Couldn't update role: ${error?.message ?? "no row updated (likely RLS)"}`);
+      return;
+    }
+    setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: data.role } : u));
   };
 
   const setTier = async (userId, tier) => {
     const next = tier || null;
-    await supabase.from("profiles").update({ tier: next }).eq("id", userId);
-    setUsers(prev => prev.map(u => u.id === userId ? { ...u, tier: next } : u));
+    const { data, error } = await supabase
+      .from("profiles")
+      .update({ tier: next })
+      .eq("id", userId)
+      .select()
+      .single();
+    if (error || !data) {
+      console.error("setTier failed:", error);
+      alert(`Couldn't save tier: ${error?.message ?? "no row updated (likely RLS or missing 'tier' column)"}`);
+      return;
+    }
+    setUsers(prev => prev.map(u => u.id === userId ? { ...u, tier: data.tier } : u));
   };
 
   return (
@@ -1816,9 +1836,14 @@ export default function App() {
             <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:dk?18:14, animation:"fadeUp 0.5s ease" }}>
 
               {/* Logo */}
-              <div>
-                <div className="title-display" style={{ fontSize:dk?24:19, color:"#DC2626" }}>REDLINE</div>
-                <div style={{ fontSize:9, fontWeight:800, color:"#CCFF00", letterSpacing:3.5, textTransform:"uppercase", marginTop:3 }}>Portal</div>
+              <div style={{ display:"flex", alignItems:"center", gap:14 }}>
+                <div style={{ width:42, height:42, borderRadius:12, background:"linear-gradient(135deg,#CCFF00,#88AB00)", display:"flex", alignItems:"center", justifyContent:"center", boxShadow:"0 6px 22px rgba(204,255,0,0.4), inset 0 1px 0 rgba(255,255,255,0.4)", animation:"glow 3.5s ease-in-out infinite", flexShrink:0 }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#15171E" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                </div>
+                <div>
+                  <div className="title-display" style={{ fontSize:dk?24:19, color:"#F2F4F8" }}>REDLINE</div>
+                  <div style={{ fontSize:9, fontWeight:800, color:"#CCFF00", letterSpacing:3.5, textTransform:"uppercase", marginTop:3 }}>Rep Portal</div>
+                </div>
               </div>
 
               {/* Right actions */}
