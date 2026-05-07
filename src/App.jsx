@@ -982,6 +982,16 @@ export default function App() {
   };
 
   const [tab, setTab] = useState("training");
+  const [showNameEdit, setShowNameEdit] = useState(false);
+  const [nameEdit, setNameEdit] = useState("");
+
+  const saveName = async () => {
+    const trimmed = nameEdit.trim();
+    if (!trimmed) return;
+    await supabase.from("profiles").update({ name: trimmed }).eq("id", session.user.id);
+    setProfile(prev => ({ ...prev, name: trimmed }));
+    setShowNameEdit(false);
+  };
 
   const signOut = async () => { await supabase.auth.signOut(); setView(null); };
 
@@ -1068,8 +1078,27 @@ export default function App() {
               {profile?.role === "admin" && (
                 <button onClick={() => setView("__admin")} style={{ background:"rgba(245,158,11,0.1)", border:"1px solid rgba(245,158,11,0.2)", color:"#F59E0B", fontSize:9.5, fontWeight:800, cursor:"pointer", padding:"9px 14px", borderRadius:10, fontFamily:"inherit", letterSpacing:2, textTransform:"uppercase", transition:"all 0.2s" }}>Admin</button>
               )}
-              <div style={{ width:dk?50:44, height:dk?50:44, borderRadius:14, background:"linear-gradient(135deg,#DC2626,#7F1D1D)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?20:16, color:"#FFF", letterSpacing:2, boxShadow:"0 6px 28px rgba(220,38,38,0.3)", animation:"glow 3.5s ease-in-out infinite" }}>
-                {profile?.name?.[0]?.toUpperCase() ?? "R"}
+              <div style={{ position:"relative" }}>
+                <div onClick={() => { setShowNameEdit(v => !v); setNameEdit(profile?.name ?? ""); }} style={{ width:dk?50:44, height:dk?50:44, borderRadius:14, background:"linear-gradient(135deg,#DC2626,#7F1D1D)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?20:16, color:"#FFF", letterSpacing:2, boxShadow:"0 6px 28px rgba(220,38,38,0.3)", animation:"glow 3.5s ease-in-out infinite", cursor:"pointer" }}>
+                  {profile?.name?.[0]?.toUpperCase() ?? "R"}
+                </div>
+                {showNameEdit && (
+                  <div style={{ position:"absolute", top:"calc(100% + 10px)", right:0, background:"#111318", border:"1px solid rgba(255,255,255,0.1)", borderRadius:14, padding:16, width:220, zIndex:100, boxShadow:"0 12px 40px rgba(0,0,0,0.6)" }}>
+                    <div style={{ fontSize:10, fontWeight:700, color:"#3A4050", letterSpacing:2, textTransform:"uppercase", marginBottom:10 }}>Display Name</div>
+                    <input
+                      autoFocus
+                      value={nameEdit}
+                      onChange={e => setNameEdit(e.target.value)}
+                      onKeyDown={e => { if (e.key === "Enter") saveName(); if (e.key === "Escape") setShowNameEdit(false); }}
+                      placeholder="Your name…"
+                      style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:500, padding:"9px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }}
+                    />
+                    <div style={{ display:"flex", gap:8, marginTop:10 }}>
+                      <button onClick={saveName} style={{ flex:1, background:"#DC2626", border:"none", borderRadius:8, color:"#FFF", fontSize:11, fontWeight:800, letterSpacing:1.5, padding:"9px 0", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Save</button>
+                      <button onClick={() => setShowNameEdit(false)} style={{ flex:1, background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.07)", borderRadius:8, color:"#3A4050", fontSize:11, fontWeight:700, letterSpacing:1.5, padding:"9px 0", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Cancel</button>
+                    </div>
+                  </div>
+                )}
               </div>
               <button onClick={signOut} style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.07)", color:"#3A4050", fontSize:10, fontWeight:700, cursor:"pointer", padding:"9px 14px", borderRadius:10, fontFamily:"inherit", letterSpacing:1.5, textTransform:"uppercase", transition:"all 0.2s" }}>Sign Out</button>
             </div>
