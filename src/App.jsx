@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-
-const PW = "redline2026";
+import { supabase } from "./lib/supabase";
 const C = {
   "m1": { t: "Module 1 — Onboarding & Training", st: "Your foundation for closing deals and driving revenue.", vid: "https://youtu.be/Xfhpyj7Fhdw", s: [
     { h: "🏢  WHAT WE DO", b: "We deliver a premium experience for service-based small businesses — HVAC, plumbing, electrical, roofing, landscaping, and more.\n\n⚡ End-to-End Execution\nWe don't just \"help with a website.\" We handle strategy, design, development, optimization, and launch. The client's only job is to fill out a 5-minute form and keep answering their phone.\n\n⚡ Streamlined Process\nEvery project follows the same proven system: Onboarding Form → Discovery → Design → Build → Optimize → Launch. No scope creep. No surprises.\n\n⚡ Business Growth Focus\nWe don't sell pixels. We sell leads, calls, and revenue. If a site looks beautiful but doesn't convert, it's a liability. Every design choice we make is tied to a business outcome." },
@@ -405,76 +404,181 @@ function useW() {
 /* ═══════════════════════════════════════════
    LOGIN
    ═══════════════════════════════════════════ */
-function Login({ onLogin, err }) {
-  const [p, setP] = useState("");
+function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [err, setErr] = useState(null);
   const [ld, setLd] = useState(false);
-  const [focused, setFocused] = useState(false);
-  const go = () => { setLd(true); setTimeout(() => { onLogin(p); setLd(false); }, 500); };
+
+  const go = async () => {
+    if (!email || !password) return;
+    setLd(true); setErr(null);
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) setErr("Invalid email or password.");
+    setLd(false);
+  };
+
+  const fieldStyle = (hasErr) => ({
+    width:"100%", padding:"15px 20px",
+    background:"rgba(7,8,12,0.9)",
+    border: `1.5px solid ${hasErr ? "#DC2626" : "rgba(255,255,255,0.07)"}`,
+    borderRadius:14, color:"#F2F4F8", fontSize:15, outline:"none",
+    boxSizing:"border-box", fontFamily:"inherit", transition:"all 0.22s ease",
+  });
+
+  const onFocus = e => { e.target.style.borderColor = "rgba(220,38,38,0.6)"; e.target.style.boxShadow = "0 0 0 4px rgba(220,38,38,0.08)"; };
+  const onBlur  = (e, hasErr) => { e.target.style.borderColor = hasErr ? "#DC2626" : "rgba(255,255,255,0.07)"; e.target.style.boxShadow = "none"; };
 
   return (
     <div className="dotgrid" style={{ minHeight:"100dvh", background:"#07080C", display:"flex", alignItems:"center", justifyContent:"center", padding:24, position:"relative", overflow:"hidden" }}>
-      {/* Deep ambient glow */}
-      <div style={{ position:"absolute", top:"20%", left:"50%", transform:"translate(-50%,-50%)", width:600, height:600, background:"radial-gradient(circle, rgba(220,38,38,0.09) 0%, transparent 65%)", pointerEvents:"none" }} />
-      <div style={{ position:"absolute", bottom:0, left:"50%", transform:"translateX(-50%)", width:900, height:300, background:"radial-gradient(ellipse, rgba(220,38,38,0.04) 0%, transparent 70%)", pointerEvents:"none" }} />
+      <div style={{ position:"absolute", top:"20%", left:"50%", transform:"translate(-50%,-50%)", width:700, height:700, background:"radial-gradient(circle, rgba(220,38,38,0.08) 0%, transparent 65%)", pointerEvents:"none" }} />
+      <div style={{ position:"absolute", bottom:0, left:"50%", transform:"translateX(-50%)", width:900, height:280, background:"radial-gradient(ellipse, rgba(220,38,38,0.04) 0%, transparent 70%)", pointerEvents:"none" }} />
 
       <div style={{ width:"100%", maxWidth:420, animation:"fadeUp 0.7s cubic-bezier(0.4,0,0.2,1)", position:"relative", zIndex:1 }}>
-        {/* Logo block */}
         <div style={{ textAlign:"center", marginBottom:36 }}>
-          {/* Icon */}
-          <div style={{ width:72, height:72, borderRadius:22, background:"linear-gradient(135deg,#DC2626,#7F1D1D)", display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 20px", boxShadow:"0 8px 32px rgba(220,38,38,0.35)", animation:"glow 3s ease-in-out infinite" }}>
-            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-            </svg>
+          <div style={{ width:72, height:72, borderRadius:22, background:"linear-gradient(135deg,#DC2626,#7F1D1D)", display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 20px", boxShadow:"0 8px 36px rgba(220,38,38,0.4)", animation:"glow 3s ease-in-out infinite" }}>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
           </div>
-          <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:40, letterSpacing:14, color:"#DC2626", lineHeight:1, textShadow:"0 0 40px rgba(220,38,38,0.3)" }}>REDLINE</div>
-          <div style={{ fontSize:11, fontWeight:600, color:"#3A3E4A", letterSpacing:6, textTransform:"uppercase", marginTop:6 }}>Rep Portal</div>
+          <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:40, letterSpacing:14, color:"#DC2626", lineHeight:1, textShadow:"0 0 50px rgba(220,38,38,0.3)" }}>REDLINE</div>
+          <div style={{ fontSize:11, fontWeight:700, color:"#2E3240", letterSpacing:6, textTransform:"uppercase", marginTop:7 }}>Rep Portal</div>
           <div style={{ width:56, height:1.5, background:"linear-gradient(90deg,transparent,#DC2626,transparent)", margin:"14px auto 0" }} />
         </div>
 
-        {/* Card */}
-        <div style={{ background:"linear-gradient(145deg,rgba(18,20,26,0.98),rgba(12,14,18,0.98))", border:"1px solid rgba(255,255,255,0.07)", borderRadius:24, padding:"36px 32px 32px", boxShadow:"0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(220,38,38,0.06)" }}>
-          <label style={{ display:"block", fontSize:9.5, fontWeight:700, color:"#3A3E4A", letterSpacing:3, marginBottom:10, textTransform:"uppercase" }}>Access Code</label>
-          <input
-            type="password" value={p}
-            onChange={e=>setP(e.target.value)}
-            onKeyDown={e=>e.key==="Enter"&&go()}
-            onFocus={()=>setFocused(true)}
-            onBlur={()=>setFocused(false)}
-            placeholder="••••••••••"
-            autoFocus
-            style={{
-              width:"100%", padding:"15px 20px",
-              background:"rgba(7,8,12,0.8)",
-              border: err ? "1.5px solid #DC2626" : focused ? "1.5px solid rgba(220,38,38,0.6)" : "1.5px solid rgba(255,255,255,0.06)",
-              borderRadius:14, color:"#F2F4F8", fontSize:16, outline:"none",
-              boxSizing:"border-box", fontFamily:"inherit", letterSpacing:3,
-              boxShadow: focused && !err ? "0 0 0 4px rgba(220,38,38,0.08)" : "none",
-              transition:"all 0.25s ease"
-            }}
-          />
+        <div style={{ background:"linear-gradient(145deg,rgba(16,18,24,0.99),rgba(11,12,17,0.99))", border:"1px solid rgba(255,255,255,0.07)", borderRadius:24, padding:"36px 32px 32px", boxShadow:"0 24px 80px rgba(0,0,0,0.65), 0 0 0 1px rgba(220,38,38,0.06)" }}>
+          <div style={{ marginBottom:16 }}>
+            <label style={{ display:"block", fontSize:9.5, fontWeight:700, color:"#2E3240", letterSpacing:3, marginBottom:10, textTransform:"uppercase" }}>Email</label>
+            <input type="email" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&go()} placeholder="you@redline.com" autoFocus style={fieldStyle(!!err)} onFocus={onFocus} onBlur={e=>onBlur(e,!!err)} />
+          </div>
+          <div>
+            <label style={{ display:"block", fontSize:9.5, fontWeight:700, color:"#2E3240", letterSpacing:3, marginBottom:10, textTransform:"uppercase" }}>Password</label>
+            <input type="password" value={password} onChange={e=>setPassword(e.target.value)} onKeyDown={e=>e.key==="Enter"&&go()} placeholder="••••••••" style={fieldStyle(!!err)} onFocus={onFocus} onBlur={e=>onBlur(e,!!err)} />
+          </div>
           {err && (
-            <div style={{ display:"flex", alignItems:"center", gap:6, marginTop:10 }}>
+            <div style={{ display:"flex", alignItems:"center", gap:7, marginTop:12 }}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              <p style={{ color:"#DC2626", fontSize:12, fontWeight:600 }}>Invalid code — try again</p>
+              <p style={{ color:"#DC2626", fontSize:12, fontWeight:600 }}>{err}</p>
             </div>
           )}
-          <button onClick={go} disabled={ld}
-            style={{
-              width:"100%", padding:"16px",
-              background: ld ? "#5A0A0A" : "linear-gradient(135deg,#E5222B,#991B1B)",
-              color:"#FFF", border:"none", borderRadius:14,
-              fontSize:11, fontWeight:800, letterSpacing:4,
-              cursor: ld ? "wait" : "pointer",
-              marginTop:20, textTransform:"uppercase",
-              boxShadow: ld ? "none" : "0 6px 28px rgba(220,38,38,0.3)",
-              transition:"all 0.25s ease",
-              fontFamily:"inherit"
-            }}>
-            {ld ? "Verifying…" : "Enter Academy"}
+          <button onClick={go} disabled={ld} style={{ width:"100%", padding:"16px", background: ld ? "#5A0A0A" : "linear-gradient(135deg,#E5222B,#991B1B)", color:"#FFF", border:"none", borderRadius:14, fontSize:11, fontWeight:800, letterSpacing:4, cursor: ld ? "wait" : "pointer", marginTop:20, textTransform:"uppercase", boxShadow: ld ? "none" : "0 6px 28px rgba(220,38,38,0.3)", transition:"all 0.25s ease", fontFamily:"inherit" }}>
+            {ld ? "Signing In…" : "Enter Academy"}
           </button>
         </div>
+        <p style={{ color:"#1A1D25", fontSize:9, marginTop:32, letterSpacing:2, textTransform:"uppercase", textAlign:"center" }}>© 2026 Redline Web Services LLC</p>
+      </div>
+    </div>
+  );
+}
 
-        <p style={{ color:"#1E2028", fontSize:9, marginTop:32, letterSpacing:2, textTransform:"uppercase", textAlign:"center" }}>© 2026 Redline Web Services LLC</p>
+/* ═══════════════════════════════════════════
+   ADMIN PANEL
+   ═══════════════════════════════════════════ */
+const SUPABASE_USERS_URL = "https://supabase.com/dashboard/project/xhowrnywnbotzlyovxgs/auth/users";
+
+function AdminPanel({ profile, onBack, w, onSignOut }) {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const dk = w >= 768;
+
+  useEffect(() => {
+    const load = async () => {
+      const [profilesRes, progressRes, scoresRes] = await Promise.all([
+        supabase.from("profiles").select("*").order("created_at"),
+        supabase.from("module_progress").select("user_id"),
+        supabase.from("quiz_scores").select("user_id, quiz_id, score, total"),
+      ]);
+      const byUser = {};
+      for (const p of progressRes.data ?? []) byUser[p.user_id] = (byUser[p.user_id] ?? 0) + 1;
+      const quizByUser = {};
+      for (const s of scoresRes.data ?? []) {
+        if (!quizByUser[s.user_id]) quizByUser[s.user_id] = {};
+        const ex = quizByUser[s.user_id][s.quiz_id];
+        if (!ex || s.score / s.total > ex.score / ex.total) quizByUser[s.user_id][s.quiz_id] = s;
+      }
+      setUsers((profilesRes.data ?? []).map(u => ({
+        ...u,
+        modulesCompleted: byUser[u.id] ?? 0,
+        quizzesAttempted: Object.keys(quizByUser[u.id] ?? {}).length,
+        avgScore: Object.values(quizByUser[u.id] ?? {}).reduce((a, s) => a + s.score / s.total, 0) /
+          Math.max(Object.keys(quizByUser[u.id] ?? {}).length, 1) * 100,
+      })));
+      setLoading(false);
+    };
+    load();
+  }, []);
+
+  const toggleRole = async (userId, currentRole) => {
+    const newRole = currentRole === "admin" ? "rep" : "admin";
+    await supabase.from("profiles").update({ role: newRole }).eq("id", userId);
+    setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
+  };
+
+  return (
+    <div>
+      <div style={{ position:"sticky", top:0, zIndex:20, background:"rgba(7,8,12,0.92)", backdropFilter:"blur(24px)", WebkitBackdropFilter:"blur(24px)", borderBottom:"1px solid rgba(255,255,255,0.05)" }}>
+        <div style={{ maxWidth:1000, margin:"0 auto", padding:dk?"0 44px":"0 20px", height:52, display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+          <button className="back-btn" onClick={onBack} style={{ background:"none", border:"none", color:"#DC2626", fontSize:13, fontWeight:700, cursor:"pointer", padding:"6px 0", display:"flex", alignItems:"center", gap:8, fontFamily:"inherit" }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            Back to Academy
+          </button>
+          <button onClick={onSignOut} style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", color:"#5A6070", fontSize:10, fontWeight:700, cursor:"pointer", padding:"8px 16px", borderRadius:9, fontFamily:"inherit", letterSpacing:1.5, textTransform:"uppercase" }}>Sign Out</button>
+        </div>
+      </div>
+
+      <div style={{ maxWidth:1000, margin:"0 auto", padding:dk?"0 44px 90px":"0 20px 90px" }}>
+        <div style={{ padding:"40px 0 28px", animation:"fadeUp 0.5s ease" }}>
+          <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:18 }}>
+            <div style={{ width:32, height:4, background:"linear-gradient(90deg,#F59E0B,transparent)", borderRadius:4 }} />
+            <div style={{ fontSize:9.5, fontWeight:800, color:"#F59E0B", letterSpacing:3.5, textTransform:"uppercase" }}>Admin</div>
+          </div>
+          <h2 style={{ fontSize:dk?30:24, fontWeight:800, color:"#F2F4F8", margin:"0 0 8px", letterSpacing:"-0.03em" }}>Admin Panel</h2>
+          <p style={{ fontSize:14, color:"#5A6070", margin:0, fontWeight:500 }}>Rep accounts, progress, and access management.</p>
+        </div>
+
+        <a href={SUPABASE_USERS_URL} target="_blank" rel="noreferrer" className="card-hover vid-card"
+          style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:16, background:"linear-gradient(135deg,rgba(20,16,8,0.95),rgba(14,12,6,0.95))", border:"1px solid rgba(245,158,11,0.2)", borderRadius:18, padding:"20px 24px", marginBottom:28, textDecoration:"none", animation:"fadeUp 0.5s ease 0.1s both", boxShadow:"0 4px 24px rgba(0,0,0,0.35)" }}>
+          <div>
+            <div style={{ fontSize:9.5, fontWeight:800, color:"#F59E0B", letterSpacing:3, marginBottom:6, textTransform:"uppercase" }}>Add New Rep</div>
+            <div style={{ fontSize:13, color:"#5A6070", lineHeight:1.6, fontWeight:500 }}>Open Supabase → Authentication → Users → Add User. New accounts appear here automatically.</div>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </a>
+
+        {loading ? (
+          <div style={{ textAlign:"center", padding:60, color:"#3A4050", fontSize:13 }}>Loading reps…</div>
+        ) : users.length === 0 ? (
+          <div style={{ textAlign:"center", padding:60, color:"#3A4050", fontSize:13 }}>No users yet.</div>
+        ) : (
+          <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+            {users.map((u, i) => (
+              <div key={u.id} style={{ background:"linear-gradient(135deg,rgba(16,18,24,0.98),rgba(11,12,16,0.98))", border:"1px solid rgba(255,255,255,0.055)", borderRadius:16, padding:dk?"20px 24px":"16px 18px", display:"flex", alignItems:"center", gap:16, flexWrap:"wrap", animation:`fadeUp 0.4s ease ${0.05*i}s both`, boxShadow:"0 4px 20px rgba(0,0,0,0.3)" }}>
+                <div style={{ width:46, height:46, borderRadius:14, background:"linear-gradient(135deg,#DC2626,#7F1D1D)", display:"flex", alignItems:"center", justifyContent:"center", fontWeight:800, color:"#fff", fontSize:18, flexShrink:0, boxShadow:"0 4px 14px rgba(220,38,38,0.35)" }}>
+                  {u.name?.[0]?.toUpperCase() ?? "?"}
+                </div>
+                <div style={{ flex:1, minWidth:140 }}>
+                  <div style={{ fontSize:15, fontWeight:700, color:"#EEF2F8" }}>{u.name || "—"}</div>
+                  <span style={{ display:"inline-block", marginTop:4, fontSize:9, fontWeight:800, color: u.role === "admin" ? "#F59E0B" : "#6366F1", letterSpacing:2, textTransform:"uppercase", background: u.role === "admin" ? "rgba(245,158,11,0.1)" : "rgba(99,102,241,0.1)", padding:"3px 9px", borderRadius:5, border:`1px solid ${u.role === "admin" ? "rgba(245,158,11,0.2)" : "rgba(99,102,241,0.2)"}` }}>{u.role}</span>
+                </div>
+                <div style={{ display:"flex", gap:dk?24:16, flexWrap:"wrap" }}>
+                  {[
+                    [u.modulesCompleted, "Completed", "#22C55E"],
+                    [u.quizzesAttempted, "Quizzes", "#10B981"],
+                    ...(u.quizzesAttempted > 0 ? [[Math.round(u.avgScore)+"%", "Avg Score", u.avgScore>=90?"#22C55E":u.avgScore>=70?"#F59E0B":"#DC2626"]] : []),
+                  ].map(([val, lab, col]) => (
+                    <div key={lab} style={{ textAlign:"center" }}>
+                      <div style={{ fontSize:20, fontWeight:900, color:col, lineHeight:1, letterSpacing:"-0.02em" }}>{val}</div>
+                      <div style={{ fontSize:9, color:"#3A4050", textTransform:"uppercase", letterSpacing:1.5, marginTop:3, fontWeight:700 }}>{lab}</div>
+                    </div>
+                  ))}
+                </div>
+                {u.id !== profile.id && (
+                  <button onClick={() => toggleRole(u.id, u.role)} style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", color:"#5A6070", fontSize:10, fontWeight:700, cursor:"pointer", padding:"9px 16px", borderRadius:10, fontFamily:"inherit", letterSpacing:1.5, flexShrink:0, textTransform:"uppercase", transition:"all 0.2s" }}>
+                    {u.role === "admin" ? "Make Rep" : "Make Admin"}
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -483,7 +587,7 @@ function Login({ onLogin, err }) {
 /* ═══════════════════════════════════════════
    CONTENT VIEWER
    ═══════════════════════════════════════════ */
-function Viewer({ ck, onBack, w }) {
+function Viewer({ ck, onBack, w, onComplete }) {
   const [oi, setOi] = useState(0);
   const ref = useRef(null);
   const c = C[ck];
@@ -491,7 +595,11 @@ function Viewer({ ck, onBack, w }) {
   const accent = ck.includes("bc") ? "#F59E0B" : ck.includes("call") || ck.includes("comp") || ck.includes("onboard") ? "#6366F1" : "#DC2626";
   const accentBg = ck.includes("bc") ? "rgba(245,158,11,0.08)" : ck.includes("call") || ck.includes("comp") || ck.includes("onboard") ? "rgba(99,102,241,0.08)" : "rgba(220,38,38,0.08)";
 
-  useEffect(() => { ref.current?.scrollIntoView({ behavior:"smooth" }); setOi(0); }, [ck]);
+  useEffect(() => {
+    ref.current?.scrollIntoView({ behavior:"smooth" });
+    setOi(0);
+    if (onComplete) onComplete(ck);
+  }, [ck]);
 
   return (
     <div ref={ref}>
@@ -578,7 +686,7 @@ function Viewer({ ck, onBack, w }) {
    MAIN APP
    ═══════════════════════════════════════════ */
 
-function Quiz({ quizKey, onBack, w }) {
+function Quiz({ quizKey, onBack, w, onComplete }) {
   const [ci, setCi] = useState(0);
   const [sel, setSel] = useState(null);
   const [locked, setLocked] = useState(false);
@@ -590,7 +698,7 @@ function Quiz({ quizKey, onBack, w }) {
   useEffect(() => { ref.current?.scrollIntoView({ behavior:"smooth" }); setCi(0); setSel(null); setLocked(false); setScore(0); setDone(false); }, [quizKey]);
   const cur = q.qs[ci], tot = q.qs.length, pct = done ? 100 : Math.round((ci / tot) * 100);
   const pick = (idx) => { if (locked) return; setSel(idx); setLocked(true); if (idx === cur.a) setScore(s => s + 1); };
-  const nxt = () => { if (ci + 1 >= tot) { setDone(true); return; } setCi(ci + 1); setSel(null); setLocked(false); };
+  const nxt = () => { if (ci + 1 >= tot) { setDone(true); if (onComplete) onComplete(score, tot); return; } setCi(ci + 1); setSel(null); setLocked(false); };
   const retry = () => { setCi(0); setSel(null); setLocked(false); setScore(0); setDone(false); };
   const grade = score / tot;
   const gc = grade >= 0.9 ? "#22C55E" : grade >= 0.7 ? "#F59E0B" : "#DC2626";
@@ -676,6 +784,10 @@ function Quiz({ quizKey, onBack, w }) {
   );
 }
 
+/* ═══════════════════════════════════════════
+   MAIN APP
+   ═══════════════════════════════════════════ */
+
 /* Icon gradient per category */
 const IC_GRAD = {
   MODULE:    "linear-gradient(135deg,#DC2626,#7F1D1D)",
@@ -696,8 +808,11 @@ const LINK_ICONS = [
 ];
 
 export default function App() {
-  const [auth, setAuth] = useState(false);
-  const [err, setErr] = useState(false);
+  const [session, setSession] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [completedModules, setCompletedModules] = useState(new Set());
+  const [quizScores, setQuizScores] = useState({});
   const [view, setView] = useState(null);
   const ref = useRef(null);
   const w = useW();
@@ -705,6 +820,57 @@ export default function App() {
   const wd = w >= 1100;
 
   const top = useCallback(() => { ref.current?.scrollIntoView({ behavior:"smooth" }); }, []);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session) loadUserData(session.user.id);
+      else setLoading(false);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      if (session) loadUserData(session.user.id);
+      else { setProfile(null); setCompletedModules(new Set()); setQuizScores({}); setLoading(false); }
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const loadUserData = async (userId) => {
+    const [profileRes, progressRes, scoresRes] = await Promise.all([
+      supabase.from("profiles").select("*").eq("id", userId).single(),
+      supabase.from("module_progress").select("module_id").eq("user_id", userId),
+      supabase.from("quiz_scores").select("quiz_id, score, total").eq("user_id", userId),
+    ]);
+    setProfile(profileRes.data);
+    setCompletedModules(new Set(progressRes.data?.map(r => r.module_id) ?? []));
+    const best = {};
+    for (const s of scoresRes.data ?? []) {
+      if (!best[s.quiz_id] || s.score / s.total > best[s.quiz_id].score / best[s.quiz_id].total) best[s.quiz_id] = s;
+    }
+    setQuizScores(best);
+    setLoading(false);
+  };
+
+  const markComplete = async (moduleId) => {
+    if (completedModules.has(moduleId) || !session) return;
+    setCompletedModules(prev => new Set([...prev, moduleId]));
+    await supabase.from("module_progress").upsert({ user_id: session.user.id, module_id: moduleId });
+  };
+
+  const saveScore = async (quizId, score, total) => {
+    if (!session) return;
+    await supabase.from("quiz_scores").insert({ user_id: session.user.id, quiz_id: quizId, score, total });
+    setQuizScores(prev => {
+      const ex = prev[quizId];
+      if (!ex || score / total > ex.score / ex.total) return { ...prev, [quizId]: { quiz_id: quizId, score, total } };
+      return prev;
+    });
+  };
+
+  const signOut = async () => { await supabase.auth.signOut(); setView(null); };
+
+  const FONT_LINK = "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap";
+  const baseStyle = { minHeight:"100dvh", background:"#07080C", color:"#FFF" };
 
   const bc = { MODULE:"#DC2626", BOOTCAMP:"#F59E0B", REFERENCE:"#6366F1", QUIZ:"#10B981" };
   const groups = [
@@ -714,71 +880,91 @@ export default function App() {
     { label:"PRACTICE QUIZZES", color:"#10B981", items:CATS.filter(x=>x.t==="QUIZ") },
   ];
 
-  const FONT_LINK = "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap";
-
-  if (!auth) return (
-    <>
+  if (loading) return (
+    <div style={{ ...baseStyle, display:"flex", alignItems:"center", justifyContent:"center" }}>
       <style>{GLOBAL_CSS}</style>
       <link href={FONT_LINK} rel="stylesheet" />
-      <Login onLogin={p => p === PW ? (setAuth(true), setErr(false)) : setErr(true)} err={err} />
-    </>
+      <div style={{ textAlign:"center", animation:"fadeUp 0.6s ease" }}>
+        <div style={{ width:60, height:60, borderRadius:18, background:"linear-gradient(135deg,#DC2626,#7F1D1D)", display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 20px", boxShadow:"0 6px 28px rgba(220,38,38,0.35)", animation:"glow 3s ease-in-out infinite" }}>
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+        <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:28, letterSpacing:12, color:"#DC2626" }}>REDLINE</div>
+        <div style={{ fontSize:10, color:"#2A2E38", letterSpacing:3, textTransform:"uppercase", marginTop:8, fontWeight:700 }}>Loading…</div>
+      </div>
+    </div>
+  );
+
+  if (!session) return (
+    <div style={baseStyle}>
+      <style>{GLOBAL_CSS}</style>
+      <link href={FONT_LINK} rel="stylesheet" />
+      <Login />
+    </div>
+  );
+
+  if (view === "__admin" && profile?.role === "admin") return (
+    <div ref={ref} style={baseStyle}>
+      <style>{GLOBAL_CSS}</style>
+      <link href={FONT_LINK} rel="stylesheet" />
+      <AdminPanel profile={profile} onBack={() => setView(null)} w={w} onSignOut={signOut} />
+    </div>
   );
 
   if (view && QUIZZES[view]) return (
-    <div ref={ref} style={{ minHeight:"100dvh", background:"#07080C", color:"#FFF" }}>
+    <div ref={ref} style={baseStyle}>
       <style>{GLOBAL_CSS}</style>
       <link href={FONT_LINK} rel="stylesheet" />
-      <Quiz quizKey={view} onBack={() => { setView(null); setTimeout(top, 50); }} w={w} />
+      <Quiz quizKey={view} onBack={() => { setView(null); setTimeout(top, 50); }} w={w} onComplete={(sc, tot) => saveScore(view, sc, tot)} />
     </div>
   );
 
   if (view) return (
-    <div ref={ref} style={{ minHeight:"100dvh", background:"#07080C", color:"#FFF" }}>
+    <div ref={ref} style={baseStyle}>
       <style>{GLOBAL_CSS}</style>
       <link href={FONT_LINK} rel="stylesheet" />
-      <Viewer ck={view} onBack={() => { setView(null); setTimeout(top, 50); }} w={w} />
+      <Viewer ck={view} onBack={() => { setView(null); setTimeout(top, 50); }} w={w} onComplete={markComplete} />
     </div>
   );
 
   return (
-    <div ref={ref} className="dotgrid" style={{ minHeight:"100dvh", background:"#07080C", color:"#FFF", position:"relative" }}>
+    <div ref={ref} className="dotgrid" style={{ ...baseStyle, position:"relative" }}>
       <style>{GLOBAL_CSS}</style>
       <link href={FONT_LINK} rel="stylesheet" />
 
-      {/* Ambient top glow */}
       <div style={{ position:"fixed", top:0, left:"50%", transform:"translateX(-50%)", width:1000, height:600, background:"radial-gradient(ellipse 60% 50% at 50% 0%, rgba(220,38,38,0.07) 0%, transparent 70%)", pointerEvents:"none", zIndex:0 }} />
 
       {/* Header */}
       <div style={{ position:"relative", zIndex:1, borderBottom:"1px solid rgba(255,255,255,0.05)", padding:wd?"52px 56px 40px":dk?"44px 36px 34px":"32px 20px 26px" }}>
         <div style={{ maxWidth:1300, margin:"0 auto" }}>
-          {/* Brand row */}
           <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:dk?20:18 }}>
             <div style={{ animation:"fadeUp 0.55s ease" }}>
               <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?32:26, letterSpacing:12, color:"#DC2626", lineHeight:1, textShadow:"0 0 50px rgba(220,38,38,0.25)" }}>REDLINE</div>
               <div style={{ fontSize:dk?11:10, fontWeight:700, color:"#2A2E38", margin:"7px 0 0", letterSpacing:dk?5:4, textTransform:"uppercase" }}>Rep Portal</div>
             </div>
-            <div style={{ animation:"fadeUp 0.55s ease 0.08s both" }}>
-              <div style={{ width:dk?54:46, height:dk?54:46, borderRadius:16, background:"linear-gradient(135deg,#DC2626,#7F1D1D)", display:"flex", alignItems:"center", justifyContent:"center", boxShadow:"0 6px 28px rgba(220,38,38,0.3)", animation:"glow 3.5s ease-in-out infinite" }}>
-                <svg width={dk?22:18} height={dk?22:18} viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-                </svg>
+            <div style={{ display:"flex", alignItems:"center", gap:10, animation:"fadeUp 0.55s ease 0.08s both" }}>
+              {profile?.role === "admin" && (
+                <button onClick={() => setView("__admin")} style={{ background:"rgba(245,158,11,0.1)", border:"1px solid rgba(245,158,11,0.2)", color:"#F59E0B", fontSize:9.5, fontWeight:800, cursor:"pointer", padding:"9px 14px", borderRadius:10, fontFamily:"inherit", letterSpacing:2, textTransform:"uppercase", transition:"all 0.2s" }}>Admin</button>
+              )}
+              <div style={{ width:dk?50:44, height:dk?50:44, borderRadius:14, background:"linear-gradient(135deg,#DC2626,#7F1D1D)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?20:16, color:"#FFF", letterSpacing:2, boxShadow:"0 6px 28px rgba(220,38,38,0.3)", animation:"glow 3.5s ease-in-out infinite" }}>
+                {profile?.name?.[0]?.toUpperCase() ?? "R"}
               </div>
+              <button onClick={signOut} style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.07)", color:"#3A4050", fontSize:10, fontWeight:700, cursor:"pointer", padding:"9px 14px", borderRadius:10, fontFamily:"inherit", letterSpacing:1.5, textTransform:"uppercase", transition:"all 0.2s" }}>Sign Out</button>
             </div>
           </div>
 
-          <p style={{ fontSize:dk?14:13, color:"#3A4050", margin:"0 0 28px", maxWidth:480, lineHeight:1.6, fontWeight:500, animation:"fadeUp 0.55s ease 0.12s both" }}>
-            Your complete training system. Master every module, close more deals.
+          <p style={{ fontSize:dk?14:13, color:"#3A4050", margin:"0 0 28px", maxWidth:500, lineHeight:1.6, fontWeight:500, animation:"fadeUp 0.55s ease 0.12s both" }}>
+            {profile?.name ? `Welcome back, ${profile.name}. ` : ""}Your complete training system. Master every module, close more deals.
           </p>
 
           {/* Stats */}
           <div style={{ display:"flex", gap:dk?10:7, animation:"fadeUp 0.55s ease 0.18s both" }}>
             {[
-              ["13","Modules","#DC2626","linear-gradient(135deg,rgba(220,38,38,0.12),rgba(220,38,38,0.04))"],
-              ["2","Bootcamps","#F59E0B","linear-gradient(135deg,rgba(245,158,11,0.12),rgba(245,158,11,0.04))"],
-              ["3","Reference","#6366F1","linear-gradient(135deg,rgba(99,102,241,0.12),rgba(99,102,241,0.04))"],
-              ["6","Quizzes","#10B981","linear-gradient(135deg,rgba(16,185,129,0.12),rgba(16,185,129,0.04))"],
+              [completedModules.size, "Completed", "#22C55E", "linear-gradient(135deg,rgba(34,197,94,0.12),rgba(34,197,94,0.04))"],
+              ["13", "Modules", "#DC2626", "linear-gradient(135deg,rgba(220,38,38,0.12),rgba(220,38,38,0.04))"],
+              ["2", "Bootcamps", "#F59E0B", "linear-gradient(135deg,rgba(245,158,11,0.12),rgba(245,158,11,0.04))"],
+              ["6", "Quizzes", "#10B981", "linear-gradient(135deg,rgba(16,185,129,0.12),rgba(16,185,129,0.04))"],
             ].map(([n, l, col, grad]) => (
-              <div key={l} className="stat-card" style={{ background:grad, border:`1px solid ${col}20`, borderRadius:14, padding:dk?"16px 22px":"12px 14px", textAlign:"center", minWidth:dk?110:0, flex:dk?"none":1, boxShadow:`0 4px 20px ${col}10` }}>
+              <div key={l} className="stat-card" style={{ background:grad, border:`1px solid ${col}22`, borderRadius:14, padding:dk?"16px 22px":"12px 14px", textAlign:"center", minWidth:dk?110:0, flex:dk?"none":1, boxShadow:`0 4px 20px ${col}10` }}>
                 <div style={{ fontSize:dk?30:22, fontWeight:900, color:col, lineHeight:1, letterSpacing:"-0.02em" }}>{n}</div>
                 <div style={{ fontSize:9, color:col+"80", textTransform:"uppercase", letterSpacing:2, fontWeight:700, marginTop:6 }}>{l}</div>
               </div>
@@ -787,19 +973,16 @@ export default function App() {
         </div>
       </div>
 
-      {/* Content */}
+      {/* Cards */}
       <div style={{ position:"relative", zIndex:1, maxWidth:1300, margin:"0 auto", padding:wd?"28px 56px 90px":dk?"24px 36px 90px":"18px 20px 90px" }}>
 
-        {/* Quick Links */}
         <div style={{ marginBottom:10, animation:"fadeUp 0.5s ease 0.2s both" }}>
           <SectionLabel color="#8B5CF6" label="Quick Links" />
           <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr 1fr":dk?"1fr 1fr 1fr":"1fr", gap:dk?10:8 }}>
             {LINKS.map((lk, i) => (
               <a key={i} href={lk.url} target="_blank" rel="noreferrer" className="card-hover"
                 style={{ background:"linear-gradient(135deg,rgba(16,18,24,0.98),rgba(11,12,17,0.98))", border:"1px solid rgba(255,255,255,0.055)", borderRadius:16, padding:dk?"18px":"15px 14px", textDecoration:"none", display:"flex", alignItems:"center", gap:14, animation:`fadeUp 0.4s ease ${0.06*i}s both`, boxShadow:"0 4px 20px rgba(0,0,0,0.3)" }}>
-                <div style={{ width:44, height:44, borderRadius:13, background:"linear-gradient(135deg,#8B5CF6,#5B21B6)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, boxShadow:"0 4px 14px rgba(139,92,246,0.35)" }}>
-                  {LINK_ICONS[i]}
-                </div>
+                <div style={{ width:44, height:44, borderRadius:13, background:"linear-gradient(135deg,#8B5CF6,#5B21B6)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, boxShadow:"0 4px 14px rgba(139,92,246,0.35)" }}>{LINK_ICONS[i]}</div>
                 <div style={{ flex:1, minWidth:0 }}>
                   <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF2F8", margin:"0 0 2px" }}>{lk.label}</h3>
                   <p style={{ fontSize:11.5, color:"#4A5060", margin:0, fontWeight:500 }}>{lk.desc}</p>
@@ -817,25 +1000,34 @@ export default function App() {
               : <div style={{ height:28 }} />
             }
             <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr 1fr":dk?"1fr 1fr":"1fr", gap:dk?10:8 }}>
-              {g.items.map((x, i) => (
-                <div key={x.id} className="card-hover" onClick={() => { setView(x.k); setTimeout(top, 50); }}
-                  style={{ background:"linear-gradient(135deg,rgba(16,18,24,0.98),rgba(11,12,16,0.98))", border:"1px solid rgba(255,255,255,0.055)", borderRadius:16, padding:dk?"20px 18px":"17px 15px", cursor:"pointer", animation:`fadeUp 0.48s cubic-bezier(0.4,0,0.2,1) ${0.05*(gi*3+i)}s both`, boxShadow:"0 4px 20px rgba(0,0,0,0.3)" }}>
-                  <div style={{ display:"flex", alignItems:"center", gap:14 }}>
-                    {/* iOS-style gradient icon */}
-                    <div style={{ width:50, height:50, borderRadius:14, background:IC_GRAD[x.t], display:"flex", alignItems:"center", justifyContent:"center", fontSize:22, flexShrink:0, boxShadow:IC_SHADOW[x.t] }}>
-                      {x.ic}
-                    </div>
-                    <div style={{ flex:1, minWidth:0 }}>
-                      <div style={{ fontSize:9, fontWeight:800, color:bc[x.t], letterSpacing:2.5, marginBottom:4, textTransform:"uppercase" }}>{x.n || x.t}</div>
-                      <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF2F8", margin:"0 0 3px", lineHeight:1.3 }}>{x.sub}</h3>
-                      <p style={{ fontSize:11.5, color:"#3A4050", margin:0, lineHeight:1.4, fontWeight:500 }}>{x.d}</p>
-                    </div>
-                    <div style={{ width:32, height:32, borderRadius:10, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.06)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3A4050" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              {g.items.map((x, i) => {
+                const done = completedModules.has(x.k);
+                const qs = quizScores[x.k];
+                const isQuiz = x.t === "QUIZ";
+                const borderCol = done && !isQuiz ? "rgba(34,197,94,0.15)" : qs ? "rgba(16,185,129,0.15)" : "rgba(255,255,255,0.055)";
+                return (
+                  <div key={x.id} className="card-hover" onClick={() => { setView(x.k); setTimeout(top, 50); }}
+                    style={{ background:"linear-gradient(135deg,rgba(16,18,24,0.98),rgba(11,12,16,0.98))", border:`1px solid ${borderCol}`, borderRadius:16, padding:dk?"20px 18px":"17px 15px", cursor:"pointer", animation:`fadeUp 0.48s cubic-bezier(0.4,0,0.2,1) ${0.05*(gi*3+i)}s both`, boxShadow:"0 4px 20px rgba(0,0,0,0.3)" }}>
+                    <div style={{ display:"flex", alignItems:"center", gap:14 }}>
+                      <div style={{ width:50, height:50, borderRadius:14, background:IC_GRAD[x.t], display:"flex", alignItems:"center", justifyContent:"center", fontSize:22, flexShrink:0, boxShadow:IC_SHADOW[x.t] }}>{x.ic}</div>
+                      <div style={{ flex:1, minWidth:0 }}>
+                        <div style={{ fontSize:9, fontWeight:800, color:bc[x.t], letterSpacing:2.5, marginBottom:4, textTransform:"uppercase" }}>{x.n || x.t}</div>
+                        <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF2F8", margin:"0 0 3px", lineHeight:1.3 }}>{x.sub}</h3>
+                        <p style={{ fontSize:11.5, color: qs ? "#10B981" : "#3A4050", margin:0, lineHeight:1.4, fontWeight: qs ? 600 : 500 }}>
+                          {qs ? `Best: ${Math.round(qs.score/qs.total*100)}%` : x.d}
+                        </p>
+                      </div>
+                      <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6 }}>
+                        {(done && !isQuiz) && <div style={{ width:20, height:20, borderRadius:6, background:"rgba(34,197,94,0.12)", border:"1px solid rgba(34,197,94,0.3)", display:"flex", alignItems:"center", justifyContent:"center" }}><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>}
+                        {qs && <div style={{ width:20, height:20, borderRadius:6, background:"rgba(16,185,129,0.12)", border:"1px solid rgba(16,185,129,0.3)", display:"flex", alignItems:"center", justifyContent:"center" }}><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>}
+                        <div style={{ width:32, height:32, borderRadius:10, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.06)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3A4050" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         ))}
