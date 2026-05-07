@@ -447,6 +447,120 @@ function Login() {
    ═══════════════════════════════════════════ */
 const SUPABASE_USERS_URL = "https://supabase.com/dashboard/project/xhowrnywnbotzlyovxgs/auth/users";
 
+/* ═══════════════════════════════════════════
+   OFFICE SCHEDULER
+   ═══════════════════════════════════════════ */
+function Scheduler({ session, profile, w }) {
+  const [entries, setEntries] = useState([]);
+  const [repProfiles, setRepProfiles] = useState({});
+  const [loading, setLoading] = useState(true);
+  const dk = w >= 768;
+
+  const getMonday = (d) => {
+    const date = new Date(d); date.setHours(0,0,0,0);
+    const day = date.getDay();
+    date.setDate(date.getDate() - day + (day === 0 ? -6 : 1));
+    return date;
+  };
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  const weekStart = getMonday(today);
+  const nextWeekEnd = new Date(weekStart); nextWeekEnd.setDate(nextWeekEnd.getDate() + 11); // Fri of next week
+
+  const days = [];
+  for (let i = 0; i < 10; i++) {
+    const d = new Date(weekStart); d.setDate(d.getDate() + Math.floor(i/5)*7 + (i%5));
+    days.push(d);
+  }
+
+  const ds = (d) => d.toISOString().split("T")[0];
+  const startStr = ds(weekStart), endStr = ds(nextWeekEnd);
+
+  const load = async () => {
+    const [schedRes, profRes] = await Promise.all([
+      supabase.from("schedule").select("id, user_id, date").gte("date", startStr).lte("date", endStr),
+      supabase.from("profiles").select("id, name"),
+    ]);
+    setEntries(schedRes.data ?? []);
+    const pm = {};
+    for (const p of profRes.data ?? []) pm[p.id] = p.name || "Rep";
+    setRepProfiles(pm);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    load();
+    const ch = supabase.channel("schedule-rt")
+      .on("postgres_changes", { event: "*", schema: "public", table: "schedule" }, load)
+      .subscribe();
+    return () => supabase.removeChannel(ch);
+  }, []);
+
+  const toggle = async (day) => {
+    const dateStr = ds(day);
+    const mine = entries.find(e => e.user_id === session.user.id && e.date === dateStr);
+    if (mine) {
+      await supabase.from("schedule").delete().eq("id", mine.id);
+      setEntries(prev => prev.filter(e => e.id !== mine.id));
+    } else {
+      const { data } = await supabase.from("schedule").insert({ user_id: session.user.id, date: dateStr }).select().single();
+      if (data) setEntries(prev => [...prev, data]);
+    }
+  };
+
+  const DAY_NAMES = ["MON","TUE","WED","THU","FRI"];
+  const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const byDate = {};
+  for (const e of entries) { if (!byDate[e.date]) byDate[e.date] = []; byDate[e.date].push(e); }
+
+  if (loading) return <div style={{ textAlign:"center", padding:60, color:"#5A5E68", fontSize:13 }}>Loading schedule...</div>;
+
+  return (
+    <div>
+      {[0,1].map(week => (
+        <div key={week} style={{ marginBottom:32, animation:"fadeUp 0.4s ease" }}>
+          <div style={{ display:"flex", alignItems:"center", gap:12, paddingBottom:14 }}>
+            <div style={{ width:8, height:8, borderRadius:4, background: week===0?"#DC2626":"#F59E0B" }} />
+            <div style={{ fontSize:10, fontWeight:700, color: week===0?"#DC2626":"#F59E0B", letterSpacing:3, textTransform:"uppercase" }}>{week===0?"This Week":"Next Week"}</div>
+            <div style={{ flex:1, height:1, background:"#111114" }} />
+          </div>
+          <div style={{ display:"grid", gridTemplateColumns:dk?"repeat(5,1fr)":"repeat(2,1fr)", gap:10 }}>
+            {days.slice(week*5, week*5+5).map((day, di) => {
+              const dateStr = ds(day);
+              const dayEntries = byDate[dateStr] ?? [];
+              const isPast = day < today;
+              const isToday = dateStr === ds(today);
+              const isMine = dayEntries.some(e => e.user_id === session.user.id);
+              return (
+                <div key={dateStr} onClick={() => !isPast && toggle(day)}
+                  className={isPast ? "" : "card-hover"}
+                  style={{ background: isMine?"#DC262608":"#141519", border:"1px solid "+(isMine?"#DC262630":isToday?"#2A2D35":"#1E2128"), borderRadius:16, padding:"16px 14px", cursor:isPast?"default":"pointer", opacity:isPast?0.35:1, transition:"all 0.2s", minHeight:140, position:"relative" }}>
+                  {isToday && <div style={{ position:"absolute", top:10, right:12, fontSize:8, fontWeight:700, color:"#DC2626", letterSpacing:2, textTransform:"uppercase" }}>Today</div>}
+                  <div style={{ fontSize:9, fontWeight:700, color:isToday?"#DC2626":"#5A5E68", letterSpacing:2, marginBottom:4 }}>{DAY_NAMES[di]}</div>
+                  <div style={{ fontSize:22, fontWeight:800, color:isToday?"#FFF":"#8A8E98", marginBottom:4, lineHeight:1 }}>
+                    {day.getDate()} <span style={{ fontSize:12, fontWeight:500, color:"#5A5E68" }}>{MONTHS[day.getMonth()]}</span>
+                  </div>
+                  <div style={{ fontSize:9, color:"#3A3E48", marginBottom:12, letterSpacing:1 }}>9:00 AM – 5:00 PM</div>
+                  <div style={{ display:"flex", flexDirection:"column", gap:5 }}>
+                    {dayEntries.map(e => (
+                      <div key={e.id} style={{ fontSize:11, fontWeight:600, color:e.user_id===session.user.id?"#DC2626":"#C4C8D0", background:e.user_id===session.user.id?"#DC262612":"#1C1F25", border:"1px solid "+(e.user_id===session.user.id?"#DC262625":"#282B33"), borderRadius:6, padding:"4px 8px" }}>
+                        {repProfiles[e.user_id] || "Rep"}
+                      </div>
+                    ))}
+                    {dayEntries.length === 0 && !isPast && (
+                      <div style={{ fontSize:10, color:"#3A3E48" }}>+ Add yourself</div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function AdminPanel({ profile, onBack, w, onSignOut }) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -950,16 +1064,7 @@ export default function App() {
 
         {/* SCHEDULING TAB */}
         {tab === "scheduling" && (
-          <div style={{ animation:"fadeUp 0.4s ease" }}>
-            <div style={{ display:"flex", justifyContent:"flex-end", marginBottom:12 }}>
-              <a href={SCHED_URL + "/edit"} target="_blank" rel="noreferrer"
-                style={{ display:"inline-flex", alignItems:"center", gap:8, background:"#1C1F25", border:"1px solid #282B33", color:"#F59E0B", fontSize:11, fontWeight:700, padding:"8px 16px", borderRadius:10, textDecoration:"none", letterSpacing:1 }}>
-                Open in Sheets ↗
-              </a>
-            </div>
-            <iframe src={SCHED_URL + "/preview"} title="Office Scheduling"
-              style={{ width:"100%", height:"calc(100dvh - 300px)", minHeight:500, border:"1px solid #252830", borderRadius:16, background:"#141519" }} />
-          </div>
+          <Scheduler session={session} profile={profile} w={w} />
         )}
 
         {/* TRAINING TAB */}

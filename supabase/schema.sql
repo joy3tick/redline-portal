@@ -112,3 +112,23 @@ create policy "Admins read all scores"
 --   update public.profiles set role = 'admin' where id = '<your-user-uuid>';
 --
 -- Find your UUID in Supabase Dashboard → Authentication → Users.
+
+
+-- ─── OFFICE SCHEDULE ────────────────────────────────────────
+create table if not exists public.schedule (
+  id         uuid default gen_random_uuid() primary key,
+  user_id    uuid references auth.users(id) on delete cascade not null,
+  date       date not null,
+  created_at timestamptz default now(),
+  unique(user_id, date)
+);
+
+alter table public.schedule enable row level security;
+
+create policy "Authenticated users read schedule"
+  on public.schedule for select
+  using (auth.role() = 'authenticated');
+
+create policy "Users manage own schedule"
+  on public.schedule for all
+  using (auth.uid() = user_id);
