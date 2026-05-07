@@ -655,7 +655,6 @@ function Scheduler({ session, profile, w }) {
       {[0,1].map(week => (
         <div key={week} style={{ marginBottom:32, animation:"fadeUp 0.4s ease" }}>
           <div style={{ display:"flex", alignItems:"center", gap:12, paddingBottom:14 }}>
-            <div style={{ width:8, height:8, borderRadius:4, background: week===0?"#CCFF00":"#F59E0B" }} />
             <div style={{ fontSize:10, fontWeight:700, color: week===0?"#CCFF00":"#F59E0B", letterSpacing:3, textTransform:"uppercase" }}>{week===0?"This Week":"Next Week"}</div>
             <div style={{ flex:1, height:1, background:"#1F2229" }} />
           </div>
@@ -776,10 +775,7 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
     <div className="dash-card" onMouseMove={onCardMove} style={{ padding:dk?"22px 24px":"18px 20px" }}>
       <div style={{ position:"absolute", top:0, left:0, right:0, height:2, background:`linear-gradient(90deg,transparent,${accent}80,transparent)`, opacity:0.4 }} />
       <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:16, position:"relative" }}>
-        <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-          <div style={{ width:7, height:7, borderRadius:4, background:accent, boxShadow:`0 0 12px ${accent}` }} />
-          <div style={{ fontSize:10, fontWeight:800, color:accent, letterSpacing:2.5, textTransform:"uppercase" }}>{title}</div>
-        </div>
+        <div style={{ fontSize:10, fontWeight:800, color:accent, letterSpacing:2.5, textTransform:"uppercase" }}>{title}</div>
         {action && (
           <button onClick={actionOnClick}
             style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.06)", color:"#9098A8", fontSize:9.5, fontWeight:700, letterSpacing:1.5, cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", padding:"6px 10px", borderRadius:8, transition:"all 0.18s" }}
@@ -2062,7 +2058,6 @@ export default function App() {
 function SectionLabel({ color, label, delay = 0 }) {
   return (
     <div style={{ display:"flex", alignItems:"center", gap:12, padding:"28px 0 13px", animation:`fadeUp 0.5s ease ${delay}s both` }}>
-      <div style={{ width:6, height:6, borderRadius:3, background:color, boxShadow:`0 0 8px ${color}60` }} />
       <div style={{ fontSize:9.5, fontWeight:800, color:color, letterSpacing:3.5, textTransform:"uppercase" }}>{label}</div>
       <div style={{ flex:1, height:1, background:"linear-gradient(90deg,rgba(255,255,255,0.05),transparent)" }} />
     </div>
