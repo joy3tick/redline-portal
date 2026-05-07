@@ -829,22 +829,35 @@ function Leaderboard({ session, profile, w }) {
         <div style={{ marginTop:32 }}>
           <div style={{ fontSize:9.5, fontWeight:800, color:"#444856", letterSpacing:3, textTransform:"uppercase", marginBottom:14 }}>Recent Activity</div>
           <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
-            {filtered.slice(0, 10).map(s => (
-              <div key={s.id} style={{ display:"flex", alignItems:"center", gap:12, padding:"10px 16px", background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.05)", borderRadius:10 }}>
-                <div style={{ width:28, height:28, borderRadius:7, background: s.user_id===session.user.id ? "linear-gradient(135deg,#CCFF00,#6E9100)" : "rgba(255,255,255,0.05)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, fontWeight:800, color: s.user_id===session.user.id ? "#15171E" : "#666C7E", flexShrink:0 }}>
-                  {(repProfiles[s.user_id] || "R")[0]?.toUpperCase()}
+            {filtered.slice(0, 10).map(s => {
+              const isOwn = s.user_id === session.user.id;
+              return (
+                <div key={s.id} style={{ display:"flex", alignItems:"center", gap:12, padding:"10px 16px", background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.05)", borderRadius:10 }}>
+                  <div style={{ width:28, height:28, borderRadius:7, background: isOwn ? "linear-gradient(135deg,#CCFF00,#6E9100)" : "rgba(255,255,255,0.05)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, fontWeight:800, color: isOwn ? "#15171E" : "#666C7E", flexShrink:0 }}>
+                    {(repProfiles[s.user_id] || "R")[0]?.toUpperCase()}
+                  </div>
+                  <div style={{ flex:1, minWidth:0 }}>
+                    <span style={{ fontSize:12, fontWeight:600, color:"#C4C8D4" }}>{repProfiles[s.user_id] || "Rep"}</span>
+                    {s.note && <span style={{ fontSize:11, color:"#444856" }}> — {s.note}</span>}
+                  </div>
+                  <div style={{ display:"flex", flexDirection:"column", alignItems:"flex-end", gap:2, flexShrink:0 }}>
+                    {s.amount > 0 && <div style={{ fontSize:13, fontWeight:700, color:"#22C55E" }}>${Number(s.amount).toLocaleString()}</div>}
+                    {s.retainer > 0 && <div style={{ fontSize:10, fontWeight:600, color:"#6366F1" }}>+${Number(s.retainer).toLocaleString()}/mo</div>}
+                  </div>
+                  <div style={{ fontSize:10, color:"#3A3E4A", flexShrink:0 }}>{new Date(s.sale_date).toLocaleDateString("en-US",{month:"short",day:"numeric"})}</div>
+                  {isOwn && (
+                    <button onClick={async () => {
+                      await supabase.from("sales").delete().eq("id", s.id);
+                      setSales(prev => prev.filter(x => x.id !== s.id));
+                    }} style={{ background:"none", border:"none", color:"#3A3E4A", fontSize:16, cursor:"pointer", padding:"0 2px", lineHeight:1, flexShrink:0, transition:"color 0.15s" }}
+                      onMouseEnter={e => e.target.style.color="#DC2626"}
+                      onMouseLeave={e => e.target.style.color="#3A3E4A"}>
+                      ×
+                    </button>
+                  )}
                 </div>
-                <div style={{ flex:1, minWidth:0 }}>
-                  <span style={{ fontSize:12, fontWeight:600, color:"#C4C8D4" }}>{repProfiles[s.user_id] || "Rep"}</span>
-                  {s.note && <span style={{ fontSize:11, color:"#444856" }}> — {s.note}</span>}
-                </div>
-                <div style={{ display:"flex", flexDirection:"column", alignItems:"flex-end", gap:2, flexShrink:0 }}>
-                  {s.amount > 0 && <div style={{ fontSize:13, fontWeight:700, color:"#22C55E" }}>${Number(s.amount).toLocaleString()}</div>}
-                  {s.retainer > 0 && <div style={{ fontSize:10, fontWeight:600, color:"#6366F1" }}>+${Number(s.retainer).toLocaleString()}/mo</div>}
-                </div>
-                <div style={{ fontSize:10, color:"#3A3E4A", flexShrink:0 }}>{new Date(s.sale_date).toLocaleDateString("en-US",{month:"short",day:"numeric"})}</div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
