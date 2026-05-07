@@ -9,8 +9,15 @@ create table if not exists public.profiles (
   id   uuid references auth.users(id) on delete cascade primary key,
   name text,
   role text not null default 'rep' check (role in ('rep', 'admin')),
+  tier text check (tier is null or tier in ('trial', 'bronze', 'silver', 'gold', 'platinum', 'diamond')),
   created_at timestamptz default now()
 );
+
+-- For existing deployments
+alter table public.profiles add column if not exists tier text;
+alter table public.profiles drop constraint if exists profiles_tier_check;
+alter table public.profiles add constraint profiles_tier_check
+  check (tier is null or tier in ('trial', 'bronze', 'silver', 'gold', 'platinum', 'diamond'));
 
 alter table public.profiles enable row level security;
 
