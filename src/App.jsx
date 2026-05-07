@@ -606,9 +606,13 @@ function Leaderboard({ session, profile, w }) {
   const [repProfiles, setRepProfiles] = useState({});
   const [period, setPeriod] = useState("all");
   const [showAdd, setShowAdd] = useState(false);
-  const [amount, setAmount] = useState("");
+  const [dealAmt, setDealAmt] = useState(null);
+  const [customAmt, setCustomAmt] = useState("");
+  const [retainer, setRetainer] = useState(null);
   const [note, setNote] = useState("");
   const [saving, setSaving] = useState(false);
+  const DEAL_OPTS = [1497, 2497, 4497];
+  const RETAINER_OPTS = [49, 197, 297];
   const dk = w >= 768;
 
   const load = async () => {
@@ -630,18 +634,22 @@ function Leaderboard({ session, profile, w }) {
     return () => supabase.removeChannel(ch);
   }, []);
 
+  const resetForm = () => { setDealAmt(null); setCustomAmt(""); setRetainer(null); setNote(""); setShowAdd(false); };
+
   const addSale = async () => {
-    const parsed = parseFloat(amount);
-    if (!amount || isNaN(parsed) || parsed <= 0) return;
+    const finalAmt = dealAmt === "custom" ? parseFloat(customAmt) : dealAmt;
+    if (!finalAmt || isNaN(finalAmt) || finalAmt <= 0) return;
+    if (retainer === null) return;
     setSaving(true);
     const { data } = await supabase.from("sales").insert({
       user_id: session.user.id,
-      amount: parsed,
+      amount: finalAmt,
+      retainer: retainer || null,
       note: note.trim() || null,
       sale_date: new Date().toISOString().split("T")[0],
     }).select().single();
     if (data) setSales(prev => [data, ...prev]);
-    setAmount(""); setNote(""); setShowAdd(false); setSaving(false);
+    resetForm(); setSaving(false);
   };
 
   const now = new Date();
@@ -660,9 +668,10 @@ function Leaderboard({ session, profile, w }) {
 
   const byRep = {};
   for (const s of filtered) {
-    if (!byRep[s.user_id]) byRep[s.user_id] = { count: 0, total: 0 };
+    if (!byRep[s.user_id]) byRep[s.user_id] = { count: 0, total: 0, retainerTotal: 0 };
     byRep[s.user_id].count++;
     byRep[s.user_id].total += s.amount ?? 0;
+    byRep[s.user_id].retainerTotal += s.retainer ?? 0;
   }
   const ranked = Object.entries(byRep)
     .map(([uid, stats]) => ({ uid, name: repProfiles[uid] || "Rep", ...stats }))
@@ -699,44 +708,72 @@ function Leaderboard({ session, profile, w }) {
 
       {/* Add sale form */}
       {showAdd && (
-        <div style={{ background:"#1A1C24", border:"1px solid rgba(255,255,255,0.08)", borderRadius:14, padding:20, marginBottom:20, animation:"fadeUp 0.2s ease" }}>
-          <div style={{ fontSize:10, fontWeight:700, color:"#666C7E", letterSpacing:2.5, textTransform:"uppercase", marginBottom:14 }}>Log a Sale</div>
-          <div style={{ display:"flex", gap:10, flexWrap:"wrap" }}>
-            <div style={{ flex:"1 1 140px" }}>
-              <div style={{ fontSize:9.5, fontWeight:700, color:"#444856", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Deal Value ($)</div>
-              <input
-                autoFocus
-                type="number"
-                min="0"
-                value={amount}
-                onChange={e => setAmount(e.target.value)}
-                onKeyDown={e => e.key === "Enter" && addSale()}
-                placeholder="e.g. 4500"
-                style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:14, fontWeight:600, padding:"10px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }}
-              />
-            </div>
-            <div style={{ flex:"2 1 200px" }}>
-              <div style={{ fontSize:9.5, fontWeight:700, color:"#444856", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Note (optional)</div>
-              <input
-                type="text"
-                value={note}
-                onChange={e => setNote(e.target.value)}
-                onKeyDown={e => e.key === "Enter" && addSale()}
-                placeholder="Client, product, etc."
-                style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:500, padding:"10px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }}
-              />
-            </div>
-            <div style={{ display:"flex", gap:8, alignItems:"flex-end", flex:"0 0 auto" }}>
-              <button onClick={addSale} disabled={saving}
-                style={{ background:"#DC2626", border:"none", borderRadius:8, color:"#FFF", fontSize:12, fontWeight:800, letterSpacing:1, padding:"10px 22px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", opacity:saving?0.6:1 }}>
-                {saving ? "Saving…" : "Save"}
-              </button>
-              <button onClick={() => { setShowAdd(false); setAmount(""); setNote(""); }}
-                style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:8, color:"#666C7E", fontSize:12, fontWeight:700, padding:"10px 16px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>
-                Cancel
-              </button>
-            </div>
+        <div style={{ background:"#1A1C24", border:"1px solid rgba(255,255,255,0.08)", borderRadius:16, padding:22, marginBottom:20, animation:"fadeUp 0.2s ease" }}>
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:20 }}>
+            <div style={{ fontSize:10, fontWeight:800, color:"#666C7E", letterSpacing:2.5, textTransform:"uppercase" }}>Log a Sale</div>
+            <button onClick={resetForm} style={{ background:"none", border:"none", color:"#444856", fontSize:18, cursor:"pointer", lineHeight:1, padding:0 }}>×</button>
           </div>
+
+          {/* Step 1: Deal Value */}
+          <div style={{ marginBottom:20 }}>
+            <div style={{ fontSize:9.5, fontWeight:700, color: dealAmt ? "#22C55E" : "#F59E0B", letterSpacing:2, textTransform:"uppercase", marginBottom:10, display:"flex", alignItems:"center", gap:8 }}>
+              {dealAmt ? "✓ " : "1 · "}Deal Value
+            </div>
+            <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+              {DEAL_OPTS.map(v => (
+                <button key={v} onClick={() => setDealAmt(v)}
+                  style={{ background: dealAmt===v ? "rgba(220,38,38,0.15)" : "rgba(255,255,255,0.04)", border:`1px solid ${dealAmt===v ? "rgba(220,38,38,0.4)" : "rgba(255,255,255,0.08)"}`, borderRadius:10, color: dealAmt===v ? "#F87171" : "#9CA3AF", fontSize:14, fontWeight:700, padding:"12px 20px", cursor:"pointer", fontFamily:"inherit", transition:"all 0.15s" }}>
+                  ${v.toLocaleString()}
+                </button>
+              ))}
+              <button onClick={() => setDealAmt("custom")}
+                style={{ background: dealAmt==="custom" ? "rgba(220,38,38,0.15)" : "rgba(255,255,255,0.04)", border:`1px solid ${dealAmt==="custom" ? "rgba(220,38,38,0.4)" : "rgba(255,255,255,0.08)"}`, borderRadius:10, color: dealAmt==="custom" ? "#F87171" : "#9CA3AF", fontSize:13, fontWeight:700, padding:"12px 16px", cursor:"pointer", fontFamily:"inherit", transition:"all 0.15s" }}>
+                Custom
+              </button>
+            </div>
+            {dealAmt === "custom" && (
+              <input autoFocus type="number" min="0" value={customAmt} onChange={e => setCustomAmt(e.target.value)}
+                placeholder="Enter amount…"
+                style={{ marginTop:10, width:"100%", maxWidth:200, background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:8, color:"#F2F4F8", fontSize:14, fontWeight:600, padding:"10px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }} />
+            )}
+          </div>
+
+          {/* Step 2: Retainer (only shown after deal value picked) */}
+          {dealAmt && (
+            <div style={{ marginBottom:20, animation:"fadeUp 0.2s ease" }}>
+              <div style={{ fontSize:9.5, fontWeight:700, color: retainer !== null ? "#22C55E" : "#F59E0B", letterSpacing:2, textTransform:"uppercase", marginBottom:10 }}>
+                {retainer !== null ? "✓ " : "2 · "}Maintenance Retainer
+              </div>
+              <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+                {RETAINER_OPTS.map(v => (
+                  <button key={v} onClick={() => setRetainer(v)}
+                    style={{ background: retainer===v ? "rgba(99,102,241,0.15)" : "rgba(255,255,255,0.04)", border:`1px solid ${retainer===v ? "rgba(99,102,241,0.4)" : "rgba(255,255,255,0.08)"}`, borderRadius:10, color: retainer===v ? "#A5B4FC" : "#9CA3AF", fontSize:14, fontWeight:700, padding:"12px 20px", cursor:"pointer", fontFamily:"inherit", transition:"all 0.15s" }}>
+                    ${v}/mo
+                  </button>
+                ))}
+                <button onClick={() => setRetainer(0)}
+                  style={{ background: retainer===0 ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.04)", border:`1px solid ${retainer===0 ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.08)"}`, borderRadius:10, color: retainer===0 ? "#C4C8D4" : "#9CA3AF", fontSize:13, fontWeight:700, padding:"12px 16px", cursor:"pointer", fontFamily:"inherit", transition:"all 0.15s" }}>
+                  No Retainer
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Note + Save (only shown after both steps done) */}
+          {dealAmt && retainer !== null && (
+            <div style={{ animation:"fadeUp 0.2s ease" }}>
+              <div style={{ fontSize:9.5, fontWeight:700, color:"#444856", letterSpacing:2, textTransform:"uppercase", marginBottom:8 }}>Note (optional)</div>
+              <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+                <input type="text" value={note} onChange={e => setNote(e.target.value)} onKeyDown={e => e.key === "Enter" && addSale()}
+                  placeholder="Client name, product, etc."
+                  style={{ flex:"1 1 200px", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:500, padding:"10px 12px", fontFamily:"inherit", outline:"none" }} />
+                <button onClick={addSale} disabled={saving}
+                  style={{ background:"#DC2626", border:"none", borderRadius:8, color:"#FFF", fontSize:12, fontWeight:800, letterSpacing:1, padding:"10px 24px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", opacity:saving?0.6:1, flexShrink:0 }}>
+                  {saving ? "Saving…" : "Save"}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -772,7 +809,10 @@ function Leaderboard({ session, profile, w }) {
                 </div>
                 <div style={{ flex:1, minWidth:0 }}>
                   <div style={{ fontSize:14, fontWeight:700, color: isMe ? "#F2F4F8" : "#C4C8D4", lineHeight:1 }}>{rep.name}{isMe ? <span style={{ fontSize:9, fontWeight:700, color:"#DC2626", letterSpacing:1.5, marginLeft:8, textTransform:"uppercase" }}>you</span> : ""}</div>
-                  {rep.total > 0 && <div style={{ fontSize:11, color:"#444856", marginTop:3 }}>${rep.total.toLocaleString()} total</div>}
+                  <div style={{ fontSize:11, color:"#444856", marginTop:3, display:"flex", gap:8 }}>
+                    {rep.total > 0 && <span style={{ color:"#22C55E66" }}>${rep.total.toLocaleString()}</span>}
+                    {rep.retainerTotal > 0 && <span style={{ color:"#6366F166" }}>+${rep.retainerTotal.toLocaleString()}/mo retainer</span>}
+                  </div>
                 </div>
                 <div style={{ textAlign:"right", flexShrink:0 }}>
                   <div style={{ fontSize:dk?26:22, fontWeight:900, color: i===0 ? "#FFD700" : isMe ? "#DC2626" : "#666C7E", lineHeight:1, letterSpacing:"-0.02em" }}>{rep.count}</div>
@@ -798,7 +838,10 @@ function Leaderboard({ session, profile, w }) {
                   <span style={{ fontSize:12, fontWeight:600, color:"#C4C8D4" }}>{repProfiles[s.user_id] || "Rep"}</span>
                   {s.note && <span style={{ fontSize:11, color:"#444856" }}> — {s.note}</span>}
                 </div>
-                {s.amount > 0 && <div style={{ fontSize:13, fontWeight:700, color:"#22C55E", flexShrink:0 }}>${Number(s.amount).toLocaleString()}</div>}
+                <div style={{ display:"flex", flexDirection:"column", alignItems:"flex-end", gap:2, flexShrink:0 }}>
+                  {s.amount > 0 && <div style={{ fontSize:13, fontWeight:700, color:"#22C55E" }}>${Number(s.amount).toLocaleString()}</div>}
+                  {s.retainer > 0 && <div style={{ fontSize:10, fontWeight:600, color:"#6366F1" }}>+${Number(s.retainer).toLocaleString()}/mo</div>}
+                </div>
                 <div style={{ fontSize:10, color:"#3A3E4A", flexShrink:0 }}>{new Date(s.sale_date).toLocaleDateString("en-US",{month:"short",day:"numeric"})}</div>
               </div>
             ))}
