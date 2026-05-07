@@ -821,7 +821,7 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
             </div>
             <div>
               <div style={{ fontSize:9, fontWeight:800, color:"#5E6376", letterSpacing:2.5, textTransform:"uppercase", marginBottom:4 }}>Current Tier</div>
-              <div style={{ fontSize:dk?30:24, fontWeight:900, color: tierObj ? tierObj.color : "#3A3E4A", letterSpacing:"-0.03em", lineHeight:1, textShadow: tierObj ? `0 0 24px ${TIER_GLOW[tierObj.v]}` : undefined }}>
+              <div style={{ fontSize:dk?30:24, fontWeight:900, color: tierObj ? tierObj.color : "#5E6376", letterSpacing:"-0.03em", lineHeight:1, textShadow: tierObj ? `0 0 24px ${TIER_GLOW[tierObj.v]}` : undefined }}>
                 {tierObj ? tierObj.label.toUpperCase() : "—"}
               </div>
               {!tierObj && <div style={{ fontSize:11, color:"#444856", marginTop:4 }}>No tier assigned yet</div>}
@@ -837,7 +837,7 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
                   <div style={{ width:dk?34:26, height:dk?34:26, borderRadius:9, background: active ? `radial-gradient(circle, ${t.color}30, ${t.color}10)` : passed ? `${t.color}15` : "rgba(255,255,255,0.03)", border:`1.5px solid ${active ? t.color : passed ? t.color+"50" : "rgba(255,255,255,0.07)"}`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:dk?13:11, transition:"all 0.2s", boxShadow: active ? `0 0 14px ${TIER_GLOW[t.v]}` : undefined }}>
                     {active ? <span style={{ fontSize:dk?15:13 }}>{t.emoji}</span> : passed ? <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={t.color} strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> : <div style={{ width:5, height:5, borderRadius:"50%", background:"rgba(255,255,255,0.12)" }} />}
                   </div>
-                  {dk && <div style={{ fontSize:7.5, fontWeight:800, color: active ? t.color : passed ? t.color+"80" : "#3A3E4A", letterSpacing:1, textTransform:"uppercase" }}>{t.label}</div>}
+                  {dk && <div style={{ fontSize:7.5, fontWeight:800, color: active ? t.color : passed ? t.color+"80" : "#5E6376", letterSpacing:1, textTransform:"uppercase" }}>{t.label}</div>}
                 </div>
               );
             })}
@@ -872,7 +872,7 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
         {rankedWeek.length === 0 ? (
           <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:8, padding:"16px 0", color:"#2E3140" }}>
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
-            <span style={{ fontSize:11, color:"#3A3E4A" }}>No sales yet this week</span>
+            <span style={{ fontSize:11, color:"#5E6376" }}>No sales yet this week</span>
           </div>
         ) : (
           <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
@@ -928,7 +928,7 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
         {todaysReps.length === 0 ? (
           <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:8, padding:"16px 0", color:"#2E3140" }}>
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            <span style={{ fontSize:11, color:"#3A3E4A" }}>Nobody in today</span>
+            <span style={{ fontSize:11, color:"#5E6376" }}>Nobody in today</span>
           </div>
         ) : (
           <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
@@ -952,7 +952,7 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
         {recentSales.length === 0 ? (
           <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:8, padding:"16px 0", color:"#2E3140" }}>
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-            <span style={{ fontSize:11, color:"#3A3E4A" }}>No sales logged yet</span>
+            <span style={{ fontSize:11, color:"#5E6376" }}>No sales logged yet</span>
           </div>
         ) : (
           <div style={{ display:"flex", flexDirection:"column", gap:5 }}>
@@ -988,14 +988,14 @@ function Leaderboard({ session, profile, w }) {
   const [saving, setSaving] = useState(false);
   const [editingBonus, setEditingBonus] = useState(null);
   const [showAddBonus, setShowAddBonus] = useState(false);
-  const [bonusForm, setBonusForm] = useState({ label:"", threshold:"", amount:"", description:"" });
+  const [bonusForm, setBonusForm] = useState({ label:"", threshold:"", amount:"", period:"month", description:"" });
   const DEAL_OPTS = [1497, 2497, 4497];
   const RETAINER_OPTS = [49, 197, 297];
   const dk = w >= 768;
   const isAdmin = profile?.role === "admin";
 
   const loadBonuses = async () => {
-    const { data } = await supabase.from("monthly_bonuses").select("*").order("threshold", { ascending: true, nullsFirst: false }).order("amount");
+    const { data } = await supabase.from("monthly_bonuses").select("*").order("created_at", { ascending: false }).limit(1);
     setBonuses(data ?? []);
   };
 
@@ -1021,19 +1021,24 @@ function Leaderboard({ session, profile, w }) {
   }, []);
 
   const resetForm = () => { setDealAmt(null); setCustomAmt(""); setRetainer(null); setNote(""); setShowAdd(false); };
-  const resetBonusForm = () => { setBonusForm({ label:"", threshold:"", amount:"", description:"" }); setShowAddBonus(false); setEditingBonus(null); };
+  const resetBonusForm = () => { setBonusForm({ label:"", threshold:"", amount:"", period:"month", description:"" }); setShowAddBonus(false); setEditingBonus(null); };
 
   const saveBonus = async () => {
+    const threshold = parseInt(bonusForm.threshold);
+    const amount = parseFloat(bonusForm.amount);
+    if (isNaN(threshold) || threshold <= 0 || isNaN(amount) || amount <= 0) return;
     const payload = {
-      label: bonusForm.label.trim(),
-      threshold: bonusForm.threshold !== "" ? parseInt(bonusForm.threshold) : null,
-      amount: parseFloat(bonusForm.amount),
+      label: bonusForm.label.trim() || null,
+      threshold,
+      amount,
+      period: bonusForm.period === "week" ? "week" : "month",
       description: bonusForm.description.trim() || null,
     };
-    if (!payload.label || isNaN(payload.amount)) return;
     if (editingBonus) {
       await supabase.from("monthly_bonuses").update(payload).eq("id", editingBonus.id);
     } else {
+      // Replace any prior active bonus with the new one.
+      await supabase.from("monthly_bonuses").delete().not("id", "is", null);
       await supabase.from("monthly_bonuses").insert(payload);
     }
     resetBonusForm();
@@ -1269,90 +1274,117 @@ function Leaderboard({ session, profile, w }) {
         </div>
       )}
 
-      {/* Monthly Bonuses */}
-      <div style={{ marginTop:40 }}>
-        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:16 }}>
-          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-            <div style={{ fontSize:16 }}>🏆</div>
-            <div style={{ fontSize:10, fontWeight:800, color:"#FFD700", letterSpacing:3, textTransform:"uppercase" }}>Monthly Bonuses</div>
-          </div>
-          {isAdmin && (
-            <button onClick={() => { resetBonusForm(); setShowAddBonus(true); }}
-              style={{ background:"rgba(255,215,0,0.08)", border:"1px solid rgba(255,215,0,0.2)", borderRadius:8, color:"#FFD700", fontSize:10, fontWeight:700, letterSpacing:1.5, padding:"7px 14px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>
-              + Add Tier
-            </button>
-          )}
-        </div>
+      {/* Active Bonus */}
+      {(() => {
+        const activeBonus = bonuses[0] ?? null;
+        const computeMyCount = (b) => sales.filter(s => {
+          if (s.user_id !== session.user.id) return false;
+          const d = new Date(s.sale_date);
+          if (b.period === "week") {
+            const mon = new Date(now); mon.setHours(0,0,0,0);
+            mon.setDate(now.getDate() - (now.getDay() === 0 ? 6 : now.getDay() - 1));
+            const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+            return d >= mon && d <= sun;
+          }
+          return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+        }).length;
+        return (
+          <div style={{ marginTop:40 }}>
+            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:16 }}>
+              <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                <div style={{ fontSize:16 }}>🏆</div>
+                <div style={{ fontSize:10, fontWeight:800, color:"#FFD700", letterSpacing:3, textTransform:"uppercase" }}>Active Bonus</div>
+              </div>
+              {isAdmin && !activeBonus && !showAddBonus && (
+                <button onClick={() => { resetBonusForm(); setShowAddBonus(true); }}
+                  style={{ background:"rgba(255,215,0,0.08)", border:"1px solid rgba(255,215,0,0.2)", borderRadius:8, color:"#FFD700", fontSize:10, fontWeight:700, letterSpacing:1.5, padding:"7px 14px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>
+                  + Set Bonus
+                </button>
+              )}
+            </div>
 
-        {/* Add / Edit bonus form (admin only) */}
-        {isAdmin && (showAddBonus || editingBonus) && (
-          <div style={{ background:"#1A1C24", border:"1px solid rgba(255,215,0,0.12)", borderRadius:14, padding:18, marginBottom:16, animation:"fadeUp 0.2s ease" }}>
-            <div style={{ fontSize:10, fontWeight:700, color:"#666C7E", letterSpacing:2, textTransform:"uppercase", marginBottom:14 }}>{editingBonus ? "Edit Bonus Tier" : "New Bonus Tier"}</div>
-            <div style={{ display:"flex", gap:10, flexWrap:"wrap", marginBottom:10 }}>
-              <div style={{ flex:"2 1 160px" }}>
-                <div style={{ fontSize:9, fontWeight:700, color:"#444856", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Label</div>
-                <input value={bonusForm.label} onChange={e => setBonusForm(p=>({...p, label:e.target.value}))} placeholder="e.g. Bronze, 5-Sale Bonus…"
-                  style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:500, padding:"9px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }} />
+            {/* Add / Edit bonus form (admin only) */}
+            {isAdmin && (showAddBonus || editingBonus) && (
+              <div style={{ background:"#1A1C24", border:"1px solid rgba(255,215,0,0.12)", borderRadius:14, padding:18, marginBottom:16, animation:"fadeUp 0.2s ease" }}>
+                <div style={{ fontSize:10, fontWeight:700, color:"#666C7E", letterSpacing:2, textTransform:"uppercase", marginBottom:14 }}>{editingBonus ? "Edit Active Bonus" : "Set Active Bonus"}</div>
+                <div style={{ marginBottom:12 }}>
+                  <div style={{ fontSize:9, fontWeight:700, color:"#444856", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Period</div>
+                  <div style={{ display:"flex", gap:6 }}>
+                    {[{v:"week", l:"This Week"}, {v:"month", l:"This Month"}].map(p => (
+                      <button key={p.v} type="button" onClick={() => setBonusForm(f => ({...f, period:p.v}))}
+                        style={{ flex:1, background: bonusForm.period===p.v ? "rgba(255,215,0,0.15)" : "rgba(255,255,255,0.04)", border:`1px solid ${bonusForm.period===p.v ? "rgba(255,215,0,0.4)" : "rgba(255,255,255,0.08)"}`, borderRadius:8, color: bonusForm.period===p.v ? "#FFD700" : "#9CA3AF", fontSize:12, fontWeight:700, padding:"10px 0", cursor:"pointer", fontFamily:"inherit" }}>
+                        {p.l}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div style={{ display:"flex", gap:10, flexWrap:"wrap", marginBottom:10 }}>
+                  <div style={{ flex:"1 1 120px" }}>
+                    <div style={{ fontSize:9, fontWeight:700, color:"#444856", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Sales Needed</div>
+                    <input type="number" min="1" value={bonusForm.threshold} onChange={e => setBonusForm(p=>({...p, threshold:e.target.value}))} placeholder="e.g. 5"
+                      style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:600, padding:"9px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }} />
+                  </div>
+                  <div style={{ flex:"1 1 120px" }}>
+                    <div style={{ fontSize:9, fontWeight:700, color:"#444856", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Bonus ($)</div>
+                    <input type="number" min="1" value={bonusForm.amount} onChange={e => setBonusForm(p=>({...p, amount:e.target.value}))} placeholder="e.g. 500"
+                      style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:600, padding:"9px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }} />
+                  </div>
+                </div>
+                <div style={{ marginBottom:8, fontSize:11, color:"#7E8595", fontWeight:500 }}>
+                  Hit <span style={{ color:"#FFD700", fontWeight:700 }}>{bonusForm.threshold || "?"} sale{bonusForm.threshold==="1"?"":"s"}</span> {bonusForm.period === "week" ? "this week" : "this month"} to earn <span style={{ color:"#FFD700", fontWeight:700 }}>${bonusForm.amount ? Number(bonusForm.amount).toLocaleString() : "?"}</span>.
+                </div>
+                <div style={{ marginBottom:12 }}>
+                  <div style={{ fontSize:9, fontWeight:700, color:"#444856", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Description (optional)</div>
+                  <input value={bonusForm.description} onChange={e => setBonusForm(p=>({...p, description:e.target.value}))} placeholder="Any extra details…"
+                    style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:500, padding:"9px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }} />
+                </div>
+                <div style={{ display:"flex", gap:8 }}>
+                  <button onClick={saveBonus} style={{ background:"#FFD700", border:"none", borderRadius:8, color:"#111", fontSize:12, fontWeight:800, letterSpacing:1, padding:"10px 22px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Save</button>
+                  <button onClick={resetBonusForm} style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:8, color:"#666C7E", fontSize:12, fontWeight:700, padding:"10px 16px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Cancel</button>
+                </div>
               </div>
-              <div style={{ flex:"1 1 100px" }}>
-                <div style={{ fontSize:9, fontWeight:700, color:"#444856", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Sales Needed</div>
-                <input type="number" min="0" value={bonusForm.threshold} onChange={e => setBonusForm(p=>({...p, threshold:e.target.value}))} placeholder="e.g. 5"
-                  style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:600, padding:"9px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }} />
-              </div>
-              <div style={{ flex:"1 1 100px" }}>
-                <div style={{ fontSize:9, fontWeight:700, color:"#444856", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Bonus ($)</div>
-                <input type="number" min="0" value={bonusForm.amount} onChange={e => setBonusForm(p=>({...p, amount:e.target.value}))} placeholder="e.g. 500"
-                  style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:600, padding:"9px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }} />
-              </div>
-            </div>
-            <div style={{ marginBottom:12 }}>
-              <div style={{ fontSize:9, fontWeight:700, color:"#444856", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Description (optional)</div>
-              <input value={bonusForm.description} onChange={e => setBonusForm(p=>({...p, description:e.target.value}))} placeholder="Any extra details…"
-                style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:500, padding:"9px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }} />
-            </div>
-            <div style={{ display:"flex", gap:8 }}>
-              <button onClick={saveBonus} style={{ background:"#FFD700", border:"none", borderRadius:8, color:"#111", fontSize:12, fontWeight:800, letterSpacing:1, padding:"10px 22px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Save</button>
-              <button onClick={resetBonusForm} style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:8, color:"#666C7E", fontSize:12, fontWeight:700, padding:"10px 16px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Cancel</button>
-            </div>
-          </div>
-        )}
+            )}
 
-        {/* Bonus tier cards */}
-        {bonuses.length === 0 && !showAddBonus ? (
-          <div style={{ fontSize:12, color:"#5E6376", padding:"20px 0" }}>{isAdmin ? "No bonus tiers set yet. Add one above." : "No bonuses set this month yet."}</div>
-        ) : (
-          <div style={{ display:"grid", gridTemplateColumns:dk?"repeat(auto-fill, minmax(220px, 1fr))":"1fr", gap:10 }}>
-            {bonuses.map(b => {
-              const myCount = sales.filter(s => {
-                if (s.user_id !== session.user.id) return false;
-                const d = new Date(s.sale_date);
-                return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
-              }).length;
-              const reached = b.threshold != null ? myCount >= b.threshold : false;
+            {/* Active bonus card */}
+            {!activeBonus && !showAddBonus ? (
+              <div style={{ fontSize:12, color:"#5E6376", padding:"20px 0" }}>{isAdmin ? "No active bonus. Click + Set Bonus to create one." : "No active bonus right now."}</div>
+            ) : activeBonus ? (() => {
+              const b = activeBonus;
+              const myCount = computeMyCount(b);
+              const reached = myCount >= (b.threshold ?? Infinity);
+              const pct = Math.min(100, b.threshold ? (myCount / b.threshold) * 100 : 0);
+              const periodLabel = b.period === "week" ? "this week" : "this month";
               return (
-                <div key={b.id} style={{ background: reached ? "rgba(255,215,0,0.06)" : "rgba(255,255,255,0.025)", border:`1px solid ${reached ? "rgba(255,215,0,0.2)" : "rgba(255,255,255,0.07)"}`, borderRadius:14, padding:"16px 18px", position:"relative" }}>
-                  {reached && <div style={{ position:"absolute", top:12, right:12, fontSize:9, fontWeight:800, color:"#FFD700", letterSpacing:1.5, textTransform:"uppercase" }}>✓ Reached</div>}
-                  <div style={{ fontSize:22, fontWeight:900, color: reached ? "#FFD700" : "#D6DAE2", lineHeight:1, marginBottom:4 }}>${Number(b.amount).toLocaleString()}</div>
-                  <div style={{ fontSize:12, fontWeight:700, color: reached ? "#FFD700" : "#9CA3AF", marginBottom:b.description?4:0 }}>{b.label}</div>
-                  {b.threshold != null && (
-                    <div style={{ fontSize:10, color:"#444856", marginBottom:b.description?4:0 }}>{b.threshold} {b.threshold===1?"sale":"sales"} needed{b.threshold != null && ` · ${myCount}/${b.threshold} this month`}</div>
-                  )}
-                  {b.description && <div style={{ fontSize:11, color:"#5E6376" }}>{b.description}</div>}
+                <div style={{ background: reached ? "linear-gradient(180deg,rgba(255,215,0,0.10),rgba(255,215,0,0.04))" : "rgba(255,255,255,0.03)", border:`1px solid ${reached ? "rgba(255,215,0,0.32)" : "rgba(255,255,255,0.08)"}`, borderRadius:16, padding:dk?"22px 26px":"18px 20px", position:"relative" }}>
+                  {reached && <div style={{ position:"absolute", top:14, right:16, fontSize:10, fontWeight:800, color:"#FFD700", letterSpacing:1.5, textTransform:"uppercase" }}>✓ Reached</div>}
+                  <div style={{ fontSize:9.5, fontWeight:800, color:"#FFD700", letterSpacing:2.5, textTransform:"uppercase", marginBottom:6 }}>{b.period === "week" ? "Weekly Goal" : "Monthly Goal"}</div>
+                  <div style={{ display:"flex", alignItems:"baseline", gap:10, flexWrap:"wrap", marginBottom:10 }}>
+                    <div style={{ fontSize:dk?34:28, fontWeight:900, color: reached ? "#FFD700" : "#F2F4F8", lineHeight:1, letterSpacing:"-0.02em" }}>${Number(b.amount).toLocaleString()}</div>
+                    <div style={{ fontSize:13, fontWeight:600, color:"#9CA3AF" }}>for {b.threshold} {b.threshold===1?"sale":"sales"} {periodLabel}</div>
+                  </div>
+                  {b.label && <div style={{ fontSize:13, fontWeight:600, color:"#D6DAE2", marginBottom:b.description?4:10 }}>{b.label}</div>}
+                  {b.description && <div style={{ fontSize:12, color:"#7E8595", marginBottom:10 }}>{b.description}</div>}
+                  <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:6 }}>
+                    <div style={{ flex:1, height:6, background:"rgba(255,255,255,0.06)", borderRadius:4, overflow:"hidden" }}>
+                      <div style={{ height:"100%", width:`${pct}%`, background:"linear-gradient(90deg,#CCFF00,#FFD700)", borderRadius:4, transition:"width 0.4s" }} />
+                    </div>
+                    <div style={{ fontSize:12, fontWeight:700, color: reached ? "#FFD700" : "#D6DAE2", whiteSpace:"nowrap" }}>{myCount} / {b.threshold}</div>
+                  </div>
                   {isAdmin && (
-                    <div style={{ display:"flex", gap:8, marginTop:12 }}>
-                      <button onClick={() => { setEditingBonus(b); setBonusForm({ label:b.label, threshold:b.threshold??'', amount:b.amount, description:b.description??'' }); setShowAddBonus(false); }}
-                        style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:6, color:"#666C7E", fontSize:10, fontWeight:700, padding:"5px 12px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", letterSpacing:1 }}>Edit</button>
+                    <div style={{ display:"flex", gap:8, marginTop:14 }}>
+                      <button onClick={() => { setEditingBonus(b); setBonusForm({ label:b.label??'', threshold:b.threshold??'', amount:b.amount, period:b.period||"month", description:b.description??'' }); setShowAddBonus(false); }}
+                        style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:6, color:"#9CA3AF", fontSize:10, fontWeight:700, padding:"6px 14px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", letterSpacing:1 }}>Edit</button>
                       <button onClick={() => deleteBonus(b.id)}
-                        style={{ background:"none", border:"none", color:"#5E6376", fontSize:10, fontWeight:700, padding:"5px 8px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", letterSpacing:1, transition:"color 0.15s" }}
-                        onMouseEnter={e=>e.target.style.color="#CCFF00"} onMouseLeave={e=>e.target.style.color="#5E6376"}>Delete</button>
+                        style={{ background:"none", border:"none", color:"#5E6376", fontSize:10, fontWeight:700, padding:"6px 10px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", letterSpacing:1, transition:"color 0.15s" }}
+                        onMouseEnter={e=>e.target.style.color="#FF3370"} onMouseLeave={e=>e.target.style.color="#5E6376"}>End Bonus</button>
                     </div>
                   )}
                 </div>
               );
-            })}
+            })() : null}
           </div>
-        )}
-      </div>
+        );
+      })()}
 
     </div>
   );
