@@ -413,6 +413,14 @@ button{font-family:inherit}
 /* ═══════════════════════════════════════════
    RICH TEXT RENDERER
    ═══════════════════════════════════════════ */
+function RedlineLogo({ height = 28, color = "#CCFF00", style }) {
+  return (
+    <svg height={height} viewBox="0 0 100 60" fill={color} style={{ flexShrink: 0, ...style }}>
+      <path d="M 94 14 L 74 30 L 64 56 L 54 38 Q 28 36 4 50 Q 48 4 94 14 Z"/>
+    </svg>
+  );
+}
+
 function RichText({ text }) {
   const lines = text.split("\n");
   return (
@@ -542,8 +550,8 @@ function Login() {
 
       <div style={{ width:"100%", maxWidth:420, animation:"fadeUp 0.7s cubic-bezier(0.4,0,0.2,1)", position:"relative", zIndex:1 }}>
         <div style={{ textAlign:"center", marginBottom:36 }}>
-          <div style={{ width:72, height:72, borderRadius:22, background:"linear-gradient(135deg,#CCFF00,#5C7A00)", display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 20px", boxShadow:"0 8px 36px rgba(204,255,0,0.4)", animation:"glow 3s ease-in-out infinite" }}>
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#15171E" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <div style={{ display:"flex", justifyContent:"center", margin:"0 auto 24px", filter:"drop-shadow(0 8px 36px rgba(204,255,0,0.45))" }}>
+            <RedlineLogo height={56} />
           </div>
           <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:40, letterSpacing:14, color:"#DC2626", lineHeight:1, textShadow:"0 0 50px rgba(220,38,38,0.3)" }}>REDLINE</div>
           <div style={{ fontSize:11, fontWeight:700, color:"#4D5260", letterSpacing:6, textTransform:"uppercase", marginTop:7 }}>Portal</div>
@@ -1770,8 +1778,8 @@ export default function App() {
       <style>{GLOBAL_CSS}</style>
       <link href={FONT_LINK} rel="stylesheet" />
       <div style={{ textAlign:"center", animation:"fadeUp 0.6s ease" }}>
-        <div style={{ width:60, height:60, borderRadius:18, background:"linear-gradient(135deg,#CCFF00,#5C7A00)", display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 20px", boxShadow:"0 6px 28px rgba(204,255,0,0.35)", animation:"glow 3s ease-in-out infinite" }}>
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#15171E" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        <div style={{ display:"flex", justifyContent:"center", margin:"0 auto 20px", filter:"drop-shadow(0 6px 28px rgba(204,255,0,0.4))" }}>
+          <RedlineLogo height={48} />
         </div>
         <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:28, letterSpacing:12, color:"#DC2626" }}>REDLINE</div>
         <div style={{ fontSize:10, color:"#444856", letterSpacing:3, textTransform:"uppercase", marginTop:8, fontWeight:700 }}>Loading…</div>
@@ -1832,10 +1840,8 @@ export default function App() {
             <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:dk?18:14, animation:"fadeUp 0.5s ease" }}>
 
               {/* Logo */}
-              <div style={{ display:"flex", alignItems:"center", gap:14 }}>
-                <div style={{ width:42, height:42, borderRadius:12, background:"linear-gradient(135deg,#CCFF00,#88AB00)", display:"flex", alignItems:"center", justifyContent:"center", boxShadow:"0 6px 22px rgba(204,255,0,0.4), inset 0 1px 0 rgba(255,255,255,0.4)", animation:"glow 3.5s ease-in-out infinite", flexShrink:0 }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#15171E" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                </div>
+              <div style={{ display:"flex", alignItems:"center", gap:dk?14:10 }}>
+                <RedlineLogo height={dk?32:26} />
                 <div>
                   <div className="title-display" style={{ fontSize:dk?24:19, color:"#F2F4F8" }}>REDLINE</div>
                   <div style={{ fontSize:9, fontWeight:800, color:"#CCFF00", letterSpacing:3.5, textTransform:"uppercase", marginTop:3 }}>Rep Portal</div>
