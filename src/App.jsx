@@ -794,23 +794,6 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
         )}
       </Card>
 
-      {/* Quick Links */}
-      <Card title="Quick Links" accent="#6366F1">
-        <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
-          {LINKS.map(l => (
-            <a key={l.url} href={l.url} target="_blank" rel="noreferrer"
-              style={{ display:"flex", alignItems:"center", gap:12, padding:"10px 12px", background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:10, textDecoration:"none", transition:"all 0.15s" }}>
-              <div style={{ width:32, height:32, borderRadius:8, background:"rgba(99,102,241,0.1)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:16, flexShrink:0 }}>{l.ic}</div>
-              <div style={{ flex:1, minWidth:0 }}>
-                <div style={{ fontSize:12.5, fontWeight:700, color:"#EEF2F8" }}>{l.label}</div>
-                <div style={{ fontSize:10.5, color:"#666C7E", marginTop:2 }}>{l.desc}</div>
-              </div>
-              <div style={{ fontSize:11, color:"#444856" }}>↗</div>
-            </a>
-          ))}
-        </div>
-      </Card>
-
     </div>
   );
 }
