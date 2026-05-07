@@ -445,70 +445,44 @@ function Login() {
 /* ═══════════════════════════════════════════
    ADMIN PANEL
    ═══════════════════════════════════════════ */
+const SUPABASE_USERS_URL = "https://supabase.com/dashboard/project/xhowrnywnbotzlyovxgs/auth/users";
+
 function AdminPanel({ profile, onBack, w, onSignOut }) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [newName, setNewName] = useState("");
-  const [newEmail, setNewEmail] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [creating, setCreating] = useState(false);
-  const [createMsg, setCreateMsg] = useState(null);
   const dk = w >= 768;
 
-  const loadUsers = async () => {
-    const [profilesRes, progressRes, scoresRes] = await Promise.all([
-      supabase.from("profiles").select("*").order("created_at"),
-      supabase.from("module_progress").select("user_id"),
-      supabase.from("quiz_scores").select("user_id, quiz_id, score, total"),
-    ]);
-    const byUser = {};
-    for (const p of progressRes.data ?? []) byUser[p.user_id] = (byUser[p.user_id] ?? 0) + 1;
-    const quizByUser = {};
-    for (const s of scoresRes.data ?? []) {
-      if (!quizByUser[s.user_id]) quizByUser[s.user_id] = {};
-      const ex = quizByUser[s.user_id][s.quiz_id];
-      if (!ex || s.score / s.total > ex.score / ex.total) quizByUser[s.user_id][s.quiz_id] = s;
-    }
-    setUsers((profilesRes.data ?? []).map(u => ({
-      ...u,
-      modulesCompleted: byUser[u.id] ?? 0,
-      quizzesAttempted: Object.keys(quizByUser[u.id] ?? {}).length,
-      avgScore: Object.values(quizByUser[u.id] ?? {}).reduce((a, s) => a + s.score / s.total, 0) /
-        Math.max(Object.keys(quizByUser[u.id] ?? {}).length, 1) * 100,
-    })));
-    setLoading(false);
-  };
-
-  useEffect(() => { loadUsers(); }, []);
+  useEffect(() => {
+    const load = async () => {
+      const [profilesRes, progressRes, scoresRes] = await Promise.all([
+        supabase.from("profiles").select("*").order("created_at"),
+        supabase.from("module_progress").select("user_id"),
+        supabase.from("quiz_scores").select("user_id, quiz_id, score, total"),
+      ]);
+      const byUser = {};
+      for (const p of progressRes.data ?? []) byUser[p.user_id] = (byUser[p.user_id] ?? 0) + 1;
+      const quizByUser = {};
+      for (const s of scoresRes.data ?? []) {
+        if (!quizByUser[s.user_id]) quizByUser[s.user_id] = {};
+        const ex = quizByUser[s.user_id][s.quiz_id];
+        if (!ex || s.score / s.total > ex.score / ex.total) quizByUser[s.user_id][s.quiz_id] = s;
+      }
+      setUsers((profilesRes.data ?? []).map(u => ({
+        ...u,
+        modulesCompleted: byUser[u.id] ?? 0,
+        quizzesAttempted: Object.keys(quizByUser[u.id] ?? {}).length,
+        avgScore: Object.values(quizByUser[u.id] ?? {}).reduce((a, s) => a + s.score / s.total, 0) /
+          Math.max(Object.keys(quizByUser[u.id] ?? {}).length, 1) * 100,
+      })));
+      setLoading(false);
+    };
+    load();
+  }, []);
 
   const toggleRole = async (userId, currentRole) => {
     const newRole = currentRole === "admin" ? "rep" : "admin";
     await supabase.from("profiles").update({ role: newRole }).eq("id", userId);
     setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
-  };
-
-  const createRep = async () => {
-    if (!newEmail || !newPassword) { setCreateMsg({ type: "err", text: "Email and password required" }); return; }
-    if (newPassword.length < 6) { setCreateMsg({ type: "err", text: "Password must be at least 6 characters" }); return; }
-    setCreating(true);
-    setCreateMsg(null);
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const { data, error } = await supabase.functions.invoke("create-rep", {
-        body: { email: newEmail.trim().toLowerCase(), password: newPassword, name: newName.trim() },
-        headers: { Authorization: `Bearer ${session?.access_token}` },
-      });
-      if (error || data?.error) {
-        setCreateMsg({ type: "err", text: data?.error || error?.message || "Failed to create rep" });
-      } else {
-        setCreateMsg({ type: "ok", text: `Created ${newEmail}` });
-        setNewName(""); setNewEmail(""); setNewPassword("");
-        await loadUsers();
-      }
-    } catch (e) {
-      setCreateMsg({ type: "err", text: e.message });
-    }
-    setCreating(false);
   };
 
   return (
@@ -531,28 +505,16 @@ function AdminPanel({ profile, onBack, w, onSignOut }) {
           <p style={{ fontSize:13, color:"#6A6E78" }}>Rep accounts, progress, and access management.</p>
         </div>
 
-        <div style={{ background:"#181B20", border:"1px solid #252830", borderLeft:"3px solid #F59E0B", borderRadius:16, padding:"22px 24px", marginBottom:24, animation:"fadeUp 0.5s ease 0.1s both" }}>
-          <div style={{ fontSize:10, fontWeight:700, color:"#F59E0B", letterSpacing:3, marginBottom:14, textTransform:"uppercase" }}>Add New Rep</div>
-          <div style={{ display:"grid", gridTemplateColumns:dk?"1fr 1fr 1fr":"1fr", gap:10, marginBottom:12 }}>
-            <input value={newName} onChange={e=>setNewName(e.target.value)} placeholder="Name (optional)"
-              style={{ padding:"12px 14px", background:"#101114", border:"1px solid #252830", borderRadius:10, color:"#FFF", fontSize:13, outline:"none", fontFamily:"inherit" }} />
-            <input value={newEmail} onChange={e=>setNewEmail(e.target.value)} placeholder="rep@redline.com" type="email"
-              style={{ padding:"12px 14px", background:"#101114", border:"1px solid #252830", borderRadius:10, color:"#FFF", fontSize:13, outline:"none", fontFamily:"inherit" }} />
-            <input value={newPassword} onChange={e=>setNewPassword(e.target.value)} placeholder="Temporary password" type="text"
-              style={{ padding:"12px 14px", background:"#101114", border:"1px solid #252830", borderRadius:10, color:"#FFF", fontSize:13, outline:"none", fontFamily:"inherit" }} />
+        <a href={SUPABASE_USERS_URL} target="_blank" rel="noreferrer" className="card-hover"
+          style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:16, background:"#181B20", border:"1px solid #252830", borderLeft:"3px solid #F59E0B", borderRadius:16, padding:"20px 24px", marginBottom:24, textDecoration:"none", animation:"fadeUp 0.5s ease 0.1s both" }}>
+          <div>
+            <div style={{ fontSize:10, fontWeight:700, color:"#F59E0B", letterSpacing:3, marginBottom:6, textTransform:"uppercase" }}>Add New Rep</div>
+            <div style={{ fontSize:13, color:"#8A8E98", lineHeight:1.5 }}>
+              Open Supabase → Authentication → Users → Add User. New accounts appear here automatically.
+            </div>
           </div>
-          <div style={{ display:"flex", alignItems:"center", gap:14 }}>
-            <button onClick={createRep} disabled={creating}
-              style={{ padding:"10px 20px", background: creating ? "#7f1d1d" : "linear-gradient(135deg,#DC2626,#991B1B)", color:"#FFF", border:"none", borderRadius:10, fontSize:11, fontWeight:700, letterSpacing:2, cursor: creating ? "wait" : "pointer", textTransform:"uppercase", fontFamily:"inherit" }}>
-              {creating ? "Creating..." : "Create Rep"}
-            </button>
-            {createMsg && (
-              <span style={{ fontSize:12, color: createMsg.type === "ok" ? "#22C55E" : "#DC2626", fontWeight:600 }}>
-                {createMsg.text}
-              </span>
-            )}
-          </div>
-        </div>
+          <div style={{ width:36, height:36, borderRadius:10, background:"#1A1D24", border:"1px solid #282B33", display:"flex", alignItems:"center", justifyContent:"center", color:"#F59E0B", fontSize:14, flexShrink:0 }}>↗</div>
+        </a>
 
         {loading ? (
           <div style={{ textAlign:"center", padding:60, color:"#5A5E68", fontSize:13 }}>Loading reps...</div>
