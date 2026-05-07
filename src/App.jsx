@@ -258,14 +258,14 @@ const GLOBAL_CSS = `
 @keyframes loginGlow { 0%,100%{opacity:.5} 50%{opacity:1} }
 
 *{margin:0;padding:0;box-sizing:border-box}
-html,body,#root{min-height:100dvh;background:#07080C}
+html,body,#root{min-height:100dvh;background:#15171E}
 body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
 ::selection{background:rgba(220,38,38,0.28);color:#fff}
 ::-webkit-scrollbar{width:5px}
-::-webkit-scrollbar-track{background:#07080C}
-::-webkit-scrollbar-thumb{background:#22252E;border-radius:10px}
-::-webkit-scrollbar-thumb:hover{background:#32353E}
-input::placeholder{color:#252830}
+::-webkit-scrollbar-track{background:#15171E}
+::-webkit-scrollbar-thumb{background:#33363F;border-radius:10px}
+::-webkit-scrollbar-thumb:hover{background:#525866}
+input::placeholder{color:#3A3D47}
 
 .dotgrid {
   background-image: radial-gradient(circle, rgba(255,255,255,0.035) 1px, transparent 1px);
@@ -278,7 +278,7 @@ input::placeholder{color:#252830}
 
 /* Accordion */
 .acc-btn { transition: background 0.22s ease }
-.acc-btn:hover { background:#0C0E12 !important }
+.acc-btn:hover { background:#1A1D24 !important }
 
 /* Nav back */
 .back-btn { transition: all 0.2s }
@@ -313,14 +313,14 @@ input::placeholder{color:#252830}
 function RichText({ text }) {
   const lines = text.split("\n");
   return (
-    <div style={{ fontSize:13.5, color:"#C4C8D0", lineHeight:1.85 }}>
+    <div style={{ fontSize:13.5, color:"#D6DAE2", lineHeight:1.85 }}>
       {lines.map((line, i) => {
         const t = line.trim();
         if (!t) return <div key={i} style={{ height:12 }} />;
 
         if (t === "—" || t === "---" || t === "———") return (
           <div key={i} style={{ padding:"8px 0" }}>
-            <div style={{ height:1, background:"linear-gradient(90deg,transparent,#282B33,transparent)" }} />
+            <div style={{ height:1, background:"linear-gradient(90deg,transparent,#3D414B,transparent)" }} />
           </div>
         );
 
@@ -366,7 +366,7 @@ function RichText({ text }) {
           if (parts.length === 2) return (
             <div key={i} style={{ padding:"5px 0", display:"flex", gap:6 }}>
               <span style={{ fontWeight:700, color:"#EEF0F4" }}>{parts[0]}</span>
-              <span style={{ color:"#6A6E78" }}>—</span>
+              <span style={{ color:"#8E929D" }}>—</span>
               <span style={{flex:1}}>{parts[1]}</span>
             </div>
           );
@@ -386,7 +386,7 @@ function RichText({ text }) {
         }
 
         if (t.includes("$") && (t.includes("T1") || t.includes("Starter") || t.includes("Pro ") || t.includes("Elite"))) return (
-          <div key={i} style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:11, color:"#8A8E98", padding:"2px 0", whiteSpace:"pre", background:"#181B20", borderRadius:6, padding:"8px 12px", margin:"4px 0", border:"1px solid #282B33" }}>{line}</div>
+          <div key={i} style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:11, color:"#8A8E98", padding:"2px 0", whiteSpace:"pre", background:"#272A32", borderRadius:6, padding:"8px 12px", margin:"4px 0", border:"1px solid #3D414B" }}>{line}</div>
         );
 
         return <div key={i} style={{ padding:"2px 0" }}>{t}</div>;
@@ -433,7 +433,7 @@ function Login() {
   const onBlur  = (e, hasErr) => { e.target.style.borderColor = hasErr ? "#DC2626" : "rgba(255,255,255,0.07)"; e.target.style.boxShadow = "none"; };
 
   return (
-    <div className="dotgrid" style={{ minHeight:"100dvh", background:"#07080C", display:"flex", alignItems:"center", justifyContent:"center", padding:24, position:"relative", overflow:"hidden" }}>
+    <div className="dotgrid" style={{ minHeight:"100dvh", background:"#15171E", display:"flex", alignItems:"center", justifyContent:"center", padding:24, position:"relative", overflow:"hidden" }}>
       <div style={{ position:"absolute", top:"20%", left:"50%", transform:"translate(-50%,-50%)", width:700, height:700, background:"radial-gradient(circle, rgba(220,38,38,0.08) 0%, transparent 65%)", pointerEvents:"none" }} />
       <div style={{ position:"absolute", bottom:0, left:"50%", transform:"translateX(-50%)", width:900, height:280, background:"radial-gradient(ellipse, rgba(220,38,38,0.04) 0%, transparent 70%)", pointerEvents:"none" }} />
 
@@ -443,17 +443,17 @@ function Login() {
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
           </div>
           <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:40, letterSpacing:14, color:"#DC2626", lineHeight:1, textShadow:"0 0 50px rgba(220,38,38,0.3)" }}>REDLINE</div>
-          <div style={{ fontSize:11, fontWeight:700, color:"#2E3240", letterSpacing:6, textTransform:"uppercase", marginTop:7 }}>Rep Portal</div>
+          <div style={{ fontSize:11, fontWeight:700, color:"#4D5260", letterSpacing:6, textTransform:"uppercase", marginTop:7 }}>Rep Portal</div>
           <div style={{ width:56, height:1.5, background:"linear-gradient(90deg,transparent,#DC2626,transparent)", margin:"14px auto 0" }} />
         </div>
 
         <div style={{ background:"linear-gradient(145deg,rgba(16,18,24,0.99),rgba(11,12,17,0.99))", border:"1px solid rgba(255,255,255,0.07)", borderRadius:24, padding:"36px 32px 32px", boxShadow:"0 24px 80px rgba(0,0,0,0.65), 0 0 0 1px rgba(220,38,38,0.06)" }}>
           <div style={{ marginBottom:16 }}>
-            <label style={{ display:"block", fontSize:9.5, fontWeight:700, color:"#2E3240", letterSpacing:3, marginBottom:10, textTransform:"uppercase" }}>Email</label>
+            <label style={{ display:"block", fontSize:9.5, fontWeight:700, color:"#4D5260", letterSpacing:3, marginBottom:10, textTransform:"uppercase" }}>Email</label>
             <input type="email" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&go()} placeholder="you@redline.com" autoFocus style={fieldStyle(!!err)} onFocus={onFocus} onBlur={e=>onBlur(e,!!err)} />
           </div>
           <div>
-            <label style={{ display:"block", fontSize:9.5, fontWeight:700, color:"#2E3240", letterSpacing:3, marginBottom:10, textTransform:"uppercase" }}>Password</label>
+            <label style={{ display:"block", fontSize:9.5, fontWeight:700, color:"#4D5260", letterSpacing:3, marginBottom:10, textTransform:"uppercase" }}>Password</label>
             <input type="password" value={password} onChange={e=>setPassword(e.target.value)} onKeyDown={e=>e.key==="Enter"&&go()} placeholder="••••••••" style={fieldStyle(!!err)} onFocus={onFocus} onBlur={e=>onBlur(e,!!err)} />
           </div>
           {err && (
@@ -466,7 +466,7 @@ function Login() {
             {ld ? "Signing In…" : "Enter Academy"}
           </button>
         </div>
-        <p style={{ color:"#1A1D25", fontSize:9, marginTop:32, letterSpacing:2, textTransform:"uppercase", textAlign:"center" }}>© 2026 Redline Web Services LLC</p>
+        <p style={{ color:"#292C35", fontSize:9, marginTop:32, letterSpacing:2, textTransform:"uppercase", textAlign:"center" }}>© 2026 Redline Web Services LLC</p>
       </div>
     </div>
   );
@@ -545,7 +545,7 @@ function Scheduler({ session, profile, w }) {
   const byDate = {};
   for (const e of entries) { if (!byDate[e.date]) byDate[e.date] = []; byDate[e.date].push(e); }
 
-  if (loading) return <div style={{ textAlign:"center", padding:60, color:"#5A5E68", fontSize:13 }}>Loading schedule...</div>;
+  if (loading) return <div style={{ textAlign:"center", padding:60, color:"#7E8290", fontSize:13 }}>Loading schedule...</div>;
 
   return (
     <div>
@@ -554,7 +554,7 @@ function Scheduler({ session, profile, w }) {
           <div style={{ display:"flex", alignItems:"center", gap:12, paddingBottom:14 }}>
             <div style={{ width:8, height:8, borderRadius:4, background: week===0?"#DC2626":"#F59E0B" }} />
             <div style={{ fontSize:10, fontWeight:700, color: week===0?"#DC2626":"#F59E0B", letterSpacing:3, textTransform:"uppercase" }}>{week===0?"This Week":"Next Week"}</div>
-            <div style={{ flex:1, height:1, background:"#111114" }} />
+            <div style={{ flex:1, height:1, background:"#1F2229" }} />
           </div>
           <div style={{ display:"grid", gridTemplateColumns:dk?"repeat(5,1fr)":"repeat(2,1fr)", gap:10 }}>
             {days.slice(week*5, week*5+5).map((day, di) => {
@@ -567,25 +567,25 @@ function Scheduler({ session, profile, w }) {
               return (
                 <div key={dateStr} onClick={() => !isPast && !isFull && toggle(day)}
                   className={isPast || isFull ? "" : "card-hover"}
-                  style={{ background: isMine?"#DC262608":"#141519", border:"1px solid "+(isMine?"#DC262630":isToday?"#2A2D35":"#1E2128"), borderRadius:16, padding:"16px 14px", cursor:isPast||isFull?"default":"pointer", opacity:isPast?0.35:1, transition:"all 0.2s", minHeight:140, position:"relative" }}>
+                  style={{ background: isMine?"#DC262608":"#23262E", border:"1px solid "+(isMine?"#DC262630":isToday?"#404450":"#2D3038"), borderRadius:16, padding:"16px 14px", cursor:isPast||isFull?"default":"pointer", opacity:isPast?0.35:1, transition:"all 0.2s", minHeight:140, position:"relative" }}>
                   {isToday && !isFull && <div style={{ position:"absolute", top:10, right:12, fontSize:8, fontWeight:700, color:"#DC2626", letterSpacing:2, textTransform:"uppercase" }}>Today</div>}
                   {isFull && <div style={{ position:"absolute", top:10, right:12, fontSize:8, fontWeight:700, color:"#F59E0B", letterSpacing:2, textTransform:"uppercase" }}>Full</div>}
-                  <div style={{ fontSize:9, fontWeight:700, color:isToday?"#DC2626":"#5A5E68", letterSpacing:2, marginBottom:4 }}>{DAY_NAMES[di]}</div>
+                  <div style={{ fontSize:9, fontWeight:700, color:isToday?"#DC2626":"#7E8290", letterSpacing:2, marginBottom:4 }}>{DAY_NAMES[di]}</div>
                   <div style={{ fontSize:22, fontWeight:800, color:isToday?"#FFF":"#8A8E98", marginBottom:4, lineHeight:1 }}>
-                    {day.getDate()} <span style={{ fontSize:12, fontWeight:500, color:"#5A5E68" }}>{MONTHS[day.getMonth()]}</span>
+                    {day.getDate()} <span style={{ fontSize:12, fontWeight:500, color:"#7E8290" }}>{MONTHS[day.getMonth()]}</span>
                   </div>
-                  <div style={{ fontSize:9, color:"#3A3E48", marginBottom:12, letterSpacing:1, display:"flex", justifyContent:"space-between" }}>
+                  <div style={{ fontSize:9, color:"#5C6175", marginBottom:12, letterSpacing:1, display:"flex", justifyContent:"space-between" }}>
                     <span>9:00 AM – 5:00 PM</span>
-                    <span style={{ color: dayEntries.length >= 6 ? "#F59E0B" : "#3A3E48" }}>{dayEntries.length}/6</span>
+                    <span style={{ color: dayEntries.length >= 6 ? "#F59E0B" : "#5C6175" }}>{dayEntries.length}/6</span>
                   </div>
                   <div style={{ display:"flex", flexDirection:"column", gap:5 }}>
                     {dayEntries.map(e => (
-                      <div key={e.id} style={{ fontSize:11, fontWeight:600, color:e.user_id===session.user.id?"#DC2626":"#C4C8D0", background:e.user_id===session.user.id?"#DC262612":"#1C1F25", border:"1px solid "+(e.user_id===session.user.id?"#DC262625":"#282B33"), borderRadius:6, padding:"4px 8px" }}>
+                      <div key={e.id} style={{ fontSize:11, fontWeight:600, color:e.user_id===session.user.id?"#DC2626":"#D6DAE2", background:e.user_id===session.user.id?"#DC262612":"#2B2E37", border:"1px solid "+(e.user_id===session.user.id?"#DC262625":"#3D414B"), borderRadius:6, padding:"4px 8px" }}>
                         {repProfiles[e.user_id] || "Rep"}
                       </div>
                     ))}
                     {dayEntries.length === 0 && !isPast && (
-                      <div style={{ fontSize:10, color:"#3A3E48" }}>+ Add yourself</div>
+                      <div style={{ fontSize:10, color:"#5C6175" }}>+ Add yourself</div>
                     )}
                     {isFull && !isMine && (
                       <div style={{ fontSize:10, color:"#F59E0B88" }}>Day is full</div>
@@ -647,7 +647,7 @@ function AdminPanel({ profile, onBack, w, onSignOut }) {
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
             Back to Academy
           </button>
-          <button onClick={onSignOut} style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", color:"#5A6070", fontSize:10, fontWeight:700, cursor:"pointer", padding:"8px 16px", borderRadius:9, fontFamily:"inherit", letterSpacing:1.5, textTransform:"uppercase" }}>Sign Out</button>
+          <button onClick={onSignOut} style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", color:"#7E8595", fontSize:10, fontWeight:700, cursor:"pointer", padding:"8px 16px", borderRadius:9, fontFamily:"inherit", letterSpacing:1.5, textTransform:"uppercase" }}>Sign Out</button>
         </div>
       </div>
 
@@ -658,22 +658,22 @@ function AdminPanel({ profile, onBack, w, onSignOut }) {
             <div style={{ fontSize:9.5, fontWeight:800, color:"#F59E0B", letterSpacing:3.5, textTransform:"uppercase" }}>Admin</div>
           </div>
           <h2 style={{ fontSize:dk?30:24, fontWeight:800, color:"#F2F4F8", margin:"0 0 8px", letterSpacing:"-0.03em" }}>Admin Panel</h2>
-          <p style={{ fontSize:14, color:"#5A6070", margin:0, fontWeight:500 }}>Rep accounts, progress, and access management.</p>
+          <p style={{ fontSize:14, color:"#7E8595", margin:0, fontWeight:500 }}>Rep accounts, progress, and access management.</p>
         </div>
 
         <a href={SUPABASE_USERS_URL} target="_blank" rel="noreferrer" className="card-hover vid-card"
           style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:16, background:"linear-gradient(135deg,rgba(20,16,8,0.95),rgba(14,12,6,0.95))", border:"1px solid rgba(245,158,11,0.2)", borderRadius:18, padding:"20px 24px", marginBottom:28, textDecoration:"none", animation:"fadeUp 0.5s ease 0.1s both", boxShadow:"0 4px 24px rgba(0,0,0,0.35)" }}>
           <div>
             <div style={{ fontSize:9.5, fontWeight:800, color:"#F59E0B", letterSpacing:3, marginBottom:6, textTransform:"uppercase" }}>Add New Rep</div>
-            <div style={{ fontSize:13, color:"#5A6070", lineHeight:1.6, fontWeight:500 }}>Open Supabase → Authentication → Users → Add User. New accounts appear here automatically.</div>
+            <div style={{ fontSize:13, color:"#7E8595", lineHeight:1.6, fontWeight:500 }}>Open Supabase → Authentication → Users → Add User. New accounts appear here automatically.</div>
           </div>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
         </a>
 
         {loading ? (
-          <div style={{ textAlign:"center", padding:60, color:"#3A4050", fontSize:13 }}>Loading reps…</div>
+          <div style={{ textAlign:"center", padding:60, color:"#666C7E", fontSize:13 }}>Loading reps…</div>
         ) : users.length === 0 ? (
-          <div style={{ textAlign:"center", padding:60, color:"#3A4050", fontSize:13 }}>No users yet.</div>
+          <div style={{ textAlign:"center", padding:60, color:"#666C7E", fontSize:13 }}>No users yet.</div>
         ) : (
           <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
             {users.map((u, i) => (
@@ -693,12 +693,12 @@ function AdminPanel({ profile, onBack, w, onSignOut }) {
                   ].map(([val, lab, col]) => (
                     <div key={lab} style={{ textAlign:"center" }}>
                       <div style={{ fontSize:20, fontWeight:900, color:col, lineHeight:1, letterSpacing:"-0.02em" }}>{val}</div>
-                      <div style={{ fontSize:9, color:"#3A4050", textTransform:"uppercase", letterSpacing:1.5, marginTop:3, fontWeight:700 }}>{lab}</div>
+                      <div style={{ fontSize:9, color:"#666C7E", textTransform:"uppercase", letterSpacing:1.5, marginTop:3, fontWeight:700 }}>{lab}</div>
                     </div>
                   ))}
                 </div>
                 {u.id !== profile.id && (
-                  <button onClick={() => toggleRole(u.id, u.role)} style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", color:"#5A6070", fontSize:10, fontWeight:700, cursor:"pointer", padding:"9px 16px", borderRadius:10, fontFamily:"inherit", letterSpacing:1.5, flexShrink:0, textTransform:"uppercase", transition:"all 0.2s" }}>
+                  <button onClick={() => toggleRole(u.id, u.role)} style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", color:"#7E8595", fontSize:10, fontWeight:700, cursor:"pointer", padding:"9px 16px", borderRadius:10, fontFamily:"inherit", letterSpacing:1.5, flexShrink:0, textTransform:"uppercase", transition:"all 0.2s" }}>
                     {u.role === "admin" ? "Make Rep" : "Make Admin"}
                   </button>
                 )}
@@ -750,7 +750,7 @@ function Viewer({ ck, onBack, w, onComplete }) {
             </div>
           </div>
           <h2 style={{ fontSize:dk?32:24, fontWeight:800, color:"#F2F4F8", margin:"0 0 10px", letterSpacing:"-0.03em", lineHeight:1.15 }}>{c.t}</h2>
-          <p style={{ fontSize:14, color:"#5A6070", margin:0, lineHeight:1.6, fontWeight:500 }}>{c.st}</p>
+          <p style={{ fontSize:14, color:"#7E8595", margin:0, lineHeight:1.6, fontWeight:500 }}>{c.st}</p>
         </div>
 
         {/* Video */}
@@ -762,7 +762,7 @@ function Viewer({ ck, onBack, w, onComplete }) {
             </div>
             <div style={{ flex:1 }}>
               <div style={{ fontSize:14, fontWeight:700, color:"#F2F4F8", marginBottom:3 }}>Watch Training Video</div>
-              <div style={{ fontSize:12, color:"#5A6070" }}>Complete before continuing with this module</div>
+              <div style={{ fontSize:12, color:"#7E8595" }}>Complete before continuing with this module</div>
             </div>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           </a>
@@ -786,7 +786,7 @@ function Viewer({ ck, onBack, w, onComplete }) {
                   }}>
                   <span style={{ fontSize:dk?14.5:13.5, fontWeight:700, color: open ? "#F2F4F8" : "#8892A0", lineHeight:1.35, paddingRight:16 }}>{s.h}</span>
                   <div style={{ width:30, height:30, borderRadius:9, background: open ? accentBg : "rgba(255,255,255,0.04)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, transition:"all 0.25s", border:`1px solid ${open ? accent+"25" : "transparent"}` }}>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={open ? accent : "#3A3E4A"} strokeWidth="2.5" strokeLinecap="round" style={{ transition:"transform 0.25s ease", transform: open ? "rotate(180deg)" : "none" }}><polyline points="6 9 12 15 18 9"/></svg>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={open ? accent : "#5E6376"} strokeWidth="2.5" strokeLinecap="round" style={{ transition:"transform 0.25s ease", transform: open ? "rotate(180deg)" : "none" }}><polyline points="6 9 12 15 18 9"/></svg>
                   </div>
                 </button>
                 {open && (
@@ -848,14 +848,14 @@ function Quiz({ quizKey, onBack, w, onComplete }) {
             <span style={{ fontSize:9.5, fontWeight:800, color:"#10B981", letterSpacing:3.5, textTransform:"uppercase" }}>Practice Quiz</span>
           </div>
           <h2 style={{ fontSize:dk?27:22, fontWeight:800, color:"#F2F4F8", margin:"0 0 6px", letterSpacing:"-0.03em" }}>{q.title}</h2>
-          <p style={{ fontSize:13, color:"#5A6070", margin:0, fontWeight:500 }}>{q.subtitle}</p>
+          <p style={{ fontSize:13, color:"#7E8595", margin:0, fontWeight:500 }}>{q.subtitle}</p>
         </div>
 
         {/* Progress */}
         <div style={{ marginBottom:28, animation:"fadeUp 0.5s ease 0.1s both" }}>
           <div style={{ display:"flex", justifyContent:"space-between", marginBottom:8, alignItems:"center" }}>
-            <span style={{ fontSize:11, fontWeight:600, color:"#3A4050", letterSpacing:0.5 }}>{done ? "Complete" : `Question ${ci + 1} of ${tot}`}</span>
-            <span style={{ fontSize:11, fontWeight:800, color: done ? gc : "#3A4050" }}>{pct}%</span>
+            <span style={{ fontSize:11, fontWeight:600, color:"#666C7E", letterSpacing:0.5 }}>{done ? "Complete" : `Question ${ci + 1} of ${tot}`}</span>
+            <span style={{ fontSize:11, fontWeight:800, color: done ? gc : "#666C7E" }}>{pct}%</span>
           </div>
           <div style={{ height:5, background:"rgba(255,255,255,0.05)", borderRadius:6, overflow:"hidden" }}>
             <div style={{ height:"100%", width:`${pct}%`, background: done ? `linear-gradient(90deg,${gc},${gc}90)` : "linear-gradient(90deg,#DC2626,#F59E0B,#10B981)", borderRadius:6, transition:"width 0.55s cubic-bezier(0.4,0,0.2,1)" }} />
@@ -891,7 +891,7 @@ function Quiz({ quizKey, onBack, w, onComplete }) {
                 return (
                   <button key={idx} className="quiz-opt" onClick={() => pick(idx)} disabled={locked}
                     style={{ width:"100%", textAlign:"left", padding:"15px 18px", background:bg, border:`1.5px solid ${bd}`, borderRadius:14, cursor: locked ? "default" : "pointer", display:"flex", alignItems:"center", gap:14, fontFamily:"inherit", fontSize:14, color:tc, fontWeight: isSel || showG ? 600 : 400, boxShadow: showG ? "0 0 20px rgba(34,197,94,0.1)" : showR ? "0 0 20px rgba(220,38,38,0.08)" : "none" }}>
-                    <div style={{ width:34, height:34, borderRadius:10, display:"flex", alignItems:"center", justifyContent:"center", fontSize:12, fontWeight:800, flexShrink:0, background: showG ? "rgba(34,197,94,0.15)" : showR ? "rgba(220,38,38,0.15)" : "rgba(255,255,255,0.04)", color: showG ? "#22C55E" : showR ? "#DC2626" : "#3A4050", border:`1px solid ${showG ? "rgba(34,197,94,0.25)" : showR ? "rgba(220,38,38,0.25)" : "rgba(255,255,255,0.06)"}` }}>
+                    <div style={{ width:34, height:34, borderRadius:10, display:"flex", alignItems:"center", justifyContent:"center", fontSize:12, fontWeight:800, flexShrink:0, background: showG ? "rgba(34,197,94,0.15)" : showR ? "rgba(220,38,38,0.15)" : "rgba(255,255,255,0.04)", color: showG ? "#22C55E" : showR ? "#DC2626" : "#666C7E", border:`1px solid ${showG ? "rgba(34,197,94,0.25)" : showR ? "rgba(220,38,38,0.25)" : "rgba(255,255,255,0.06)"}` }}>
                       {showG ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> : showR ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> : String.fromCharCode(65 + idx)}
                     </div>
                     <span style={{ flex:1 }}>{opt}</span>
@@ -1009,7 +1009,7 @@ export default function App() {
   const signOut = async () => { await supabase.auth.signOut(); setView(null); };
 
   const FONT_LINK = "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap";
-  const baseStyle = { minHeight:"100dvh", background:"#07080C", color:"#FFF" };
+  const baseStyle = { minHeight:"100dvh", background:"#15171E", color:"#FFF" };
 
   const bc = { MODULE:"#DC2626", BOOTCAMP:"#F59E0B", REFERENCE:"#6366F1", QUIZ:"#10B981" };
   const trainingGroups = [
@@ -1035,7 +1035,7 @@ export default function App() {
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
         </div>
         <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:28, letterSpacing:12, color:"#DC2626" }}>REDLINE</div>
-        <div style={{ fontSize:10, color:"#2A2E38", letterSpacing:3, textTransform:"uppercase", marginTop:8, fontWeight:700 }}>Loading…</div>
+        <div style={{ fontSize:10, color:"#444856", letterSpacing:3, textTransform:"uppercase", marginTop:8, fontWeight:700 }}>Loading…</div>
       </div>
     </div>
   );
@@ -1085,7 +1085,7 @@ export default function App() {
           <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:dk?20:18 }}>
             <div style={{ animation:"fadeUp 0.55s ease" }}>
               <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?32:26, letterSpacing:12, color:"#DC2626", lineHeight:1, textShadow:"0 0 50px rgba(220,38,38,0.25)" }}>REDLINE</div>
-              <div style={{ fontSize:dk?11:10, fontWeight:700, color:"#2A2E38", margin:"7px 0 0", letterSpacing:dk?5:4, textTransform:"uppercase" }}>Rep Portal</div>
+              <div style={{ fontSize:dk?11:10, fontWeight:700, color:"#444856", margin:"7px 0 0", letterSpacing:dk?5:4, textTransform:"uppercase" }}>Rep Portal</div>
             </div>
             <div style={{ display:"flex", alignItems:"center", gap:10, animation:"fadeUp 0.55s ease 0.08s both" }}>
               {profile?.role === "admin" && (
@@ -1097,8 +1097,8 @@ export default function App() {
               <div style={{ position:"relative" }}>
                 <button onClick={() => { setShowNameEdit(v => !v); setNameEdit(profile?.name ?? ""); }} style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.07)", color:"#9CA3AF", fontSize:10, fontWeight:700, cursor:"pointer", padding:"9px 14px", borderRadius:10, fontFamily:"inherit", letterSpacing:1.5, textTransform:"uppercase", transition:"all 0.2s" }}>Edit Name</button>
                 {showNameEdit && (
-                  <div style={{ position:"absolute", top:"calc(100% + 10px)", right:0, background:"#111318", border:"1px solid rgba(255,255,255,0.1)", borderRadius:14, padding:16, width:220, zIndex:100, boxShadow:"0 12px 40px rgba(0,0,0,0.6)" }}>
-                    <div style={{ fontSize:10, fontWeight:700, color:"#3A4050", letterSpacing:2, textTransform:"uppercase", marginBottom:10 }}>Display Name</div>
+                  <div style={{ position:"absolute", top:"calc(100% + 10px)", right:0, background:"#1F2229", border:"1px solid rgba(255,255,255,0.1)", borderRadius:14, padding:16, width:220, zIndex:100, boxShadow:"0 12px 40px rgba(0,0,0,0.6)" }}>
+                    <div style={{ fontSize:10, fontWeight:700, color:"#666C7E", letterSpacing:2, textTransform:"uppercase", marginBottom:10 }}>Display Name</div>
                     <input
                       autoFocus
                       value={nameEdit}
@@ -1114,11 +1114,11 @@ export default function App() {
                   </div>
                 )}
               </div>
-              <button onClick={signOut} style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.07)", color:"#3A4050", fontSize:10, fontWeight:700, cursor:"pointer", padding:"9px 14px", borderRadius:10, fontFamily:"inherit", letterSpacing:1.5, textTransform:"uppercase", transition:"all 0.2s" }}>Sign Out</button>
+              <button onClick={signOut} style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.07)", color:"#666C7E", fontSize:10, fontWeight:700, cursor:"pointer", padding:"9px 14px", borderRadius:10, fontFamily:"inherit", letterSpacing:1.5, textTransform:"uppercase", transition:"all 0.2s" }}>Sign Out</button>
             </div>
           </div>
 
-          <p style={{ fontSize:dk?14:13, color:"#3A4050", margin:"0 0 28px", maxWidth:500, lineHeight:1.6, fontWeight:500, animation:"fadeUp 0.55s ease 0.12s both" }}>
+          <p style={{ fontSize:dk?14:13, color:"#666C7E", margin:"0 0 28px", maxWidth:500, lineHeight:1.6, fontWeight:500, animation:"fadeUp 0.55s ease 0.12s both" }}>
             {profile?.name ? `Welcome back, ${profile.name}. ` : ""}Your complete training system. Master every module, close more deals.
           </p>
 
@@ -1144,7 +1144,7 @@ export default function App() {
         <div style={{ maxWidth:1300, margin:"0 auto", padding:wd?"0 56px":dk?"0 36px":"0 20px", display:"flex", gap:0 }}>
           {TABS.map(t => (
             <button key={t.key} onClick={() => setTab(t.key)}
-              style={{ background:"none", border:"none", borderBottom: tab===t.key ? `2px solid ${t.color}` : "2px solid transparent", color: tab===t.key ? "#F2F4F8" : "#3A4050", fontSize:11, fontWeight:800, letterSpacing:2.5, cursor:"pointer", padding:"15px 22px", fontFamily:"inherit", textTransform:"uppercase", transition:"all 0.2s", marginBottom:-1, boxShadow: tab===t.key ? `0 1px 0 ${t.color}` : "none" }}>
+              style={{ background:"none", border:"none", borderBottom: tab===t.key ? `2px solid ${t.color}` : "2px solid transparent", color: tab===t.key ? "#F2F4F8" : "#666C7E", fontSize:11, fontWeight:800, letterSpacing:2.5, cursor:"pointer", padding:"15px 22px", fontFamily:"inherit", textTransform:"uppercase", transition:"all 0.2s", marginBottom:-1, boxShadow: tab===t.key ? `0 1px 0 ${t.color}` : "none" }}>
               {t.label}
             </button>
           ))}
@@ -1164,7 +1164,7 @@ export default function App() {
               </a>
             </div>
             <iframe src={CRM_URL + "/preview"} title="Redline CRM"
-              style={{ width:"100%", height:"calc(100dvh - 280px)", minHeight:500, border:"1px solid rgba(255,255,255,0.06)", borderRadius:16, background:"#0a0b0f" }} />
+              style={{ width:"100%", height:"calc(100dvh - 280px)", minHeight:500, border:"1px solid rgba(255,255,255,0.06)", borderRadius:16, background:"#181A21" }} />
           </div>
         )}
 
@@ -1193,12 +1193,12 @@ export default function App() {
                           <div style={{ flex:1, minWidth:0 }}>
                             <div style={{ fontSize:9, fontWeight:800, color:bc[x.t], letterSpacing:2.5, marginBottom:4, textTransform:"uppercase" }}>{x.n || x.t}</div>
                             <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF2F8", margin:"0 0 3px", lineHeight:1.3 }}>{x.sub}</h3>
-                            <p style={{ fontSize:11.5, color:"#3A4050", margin:0, lineHeight:1.4, fontWeight:500 }}>{x.d}</p>
+                            <p style={{ fontSize:11.5, color:"#666C7E", margin:0, lineHeight:1.4, fontWeight:500 }}>{x.d}</p>
                           </div>
                           <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6 }}>
                             {done && <div style={{ width:20, height:20, borderRadius:6, background:"rgba(34,197,94,0.12)", border:"1px solid rgba(34,197,94,0.3)", display:"flex", alignItems:"center", justifyContent:"center" }}><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>}
                             <div style={{ width:32, height:32, borderRadius:10, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.06)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3A4050" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#666C7E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
                             </div>
                           </div>
                         </div>
@@ -1221,7 +1221,7 @@ export default function App() {
                 <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF2F8", margin:"0 0 2px" }}>Redline Homepage</h3>
                 <p style={{ fontSize:11.5, color:"#4A5060", margin:0, fontWeight:500 }}>redlinewebservices.net</p>
               </div>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3A3E4A" strokeWidth="2" strokeLinecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5E6376" strokeWidth="2" strokeLinecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
             </a>
             <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr 1fr":dk?"1fr 1fr":"1fr", gap:dk?10:8 }}>
               {referenceItems.map((x, i) => (
@@ -1232,10 +1232,10 @@ export default function App() {
                     <div style={{ flex:1, minWidth:0 }}>
                       <div style={{ fontSize:9, fontWeight:800, color:"#6366F1", letterSpacing:2.5, marginBottom:4, textTransform:"uppercase" }}>REFERENCE</div>
                       <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF2F8", margin:"0 0 3px", lineHeight:1.3 }}>{x.sub}</h3>
-                      <p style={{ fontSize:11.5, color:"#3A4050", margin:0, lineHeight:1.4, fontWeight:500 }}>{x.d}</p>
+                      <p style={{ fontSize:11.5, color:"#666C7E", margin:0, lineHeight:1.4, fontWeight:500 }}>{x.d}</p>
                     </div>
                     <div style={{ width:32, height:32, borderRadius:10, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.06)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3A4050" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#666C7E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
                     </div>
                   </div>
                 </div>
@@ -1257,14 +1257,14 @@ export default function App() {
                     <div style={{ flex:1, minWidth:0 }}>
                       <div style={{ fontSize:9, fontWeight:800, color:"#10B981", letterSpacing:2.5, marginBottom:4, textTransform:"uppercase" }}>QUIZ</div>
                       <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF2F8", margin:"0 0 3px", lineHeight:1.3 }}>{x.sub}</h3>
-                      <p style={{ fontSize:11.5, color: qs ? "#10B981" : "#3A4050", margin:0, lineHeight:1.4, fontWeight: qs ? 600 : 500 }}>
+                      <p style={{ fontSize:11.5, color: qs ? "#10B981" : "#666C7E", margin:0, lineHeight:1.4, fontWeight: qs ? 600 : 500 }}>
                         {qs ? `Best: ${Math.round(qs.score/qs.total*100)}%` : x.d}
                       </p>
                     </div>
                     <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6 }}>
                       {qs && <div style={{ width:20, height:20, borderRadius:6, background:"rgba(16,185,129,0.12)", border:"1px solid rgba(16,185,129,0.3)", display:"flex", alignItems:"center", justifyContent:"center" }}><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>}
                       <div style={{ width:32, height:32, borderRadius:10, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.06)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3A4050" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#666C7E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
                       </div>
                     </div>
                   </div>
