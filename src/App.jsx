@@ -251,34 +251,87 @@ const LINKS = [
 const GLOBAL_CSS = `
 @keyframes fadeUp { from { opacity:0; transform:translateY(20px) } to { opacity:1; transform:translateY(0) } }
 @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
-@keyframes glow { 0%,100% { box-shadow:0 0 30px rgba(204,255,0,0.15),0 0 60px rgba(204,255,0,0.06) } 50% { box-shadow:0 0 50px rgba(204,255,0,0.28),0 0 90px rgba(204,255,0,0.12) } }
+@keyframes glow { 0%,100% { box-shadow:0 0 30px rgba(204,255,0,0.18),0 0 60px rgba(204,255,0,0.08) } 50% { box-shadow:0 0 60px rgba(204,255,0,0.36),0 0 110px rgba(204,255,0,0.16) } }
 @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.04)} }
 @keyframes gradShift { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
 @keyframes borderSpin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
 @keyframes loginGlow { 0%,100%{opacity:.5} 50%{opacity:1} }
+@keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+@keyframes auroraDrift { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(40px,-30px) scale(1.08)} 66%{transform:translate(-30px,30px) scale(0.95)} }
+@keyframes slideIn { from{opacity:0;transform:translateX(-12px)} to{opacity:1;transform:translateX(0)} }
+@keyframes popIn { from{opacity:0;transform:scale(0.92)} to{opacity:1;transform:scale(1)} }
 
 *{margin:0;padding:0;box-sizing:border-box}
-html,body,#root{min-height:100dvh;background:#15171E}
-body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
-::selection{background:rgba(204,255,0,0.28);color:#fff}
-::-webkit-scrollbar{width:5px}
-::-webkit-scrollbar-track{background:#15171E}
-::-webkit-scrollbar-thumb{background:#33363F;border-radius:10px}
-::-webkit-scrollbar-thumb:hover{background:#525866}
+html,body,#root{min-height:100dvh;background:#0E0F14}
+body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden;font-family:'Plus Jakarta Sans',system-ui,sans-serif;letter-spacing:-0.005em}
+::selection{background:rgba(204,255,0,0.32);color:#15171E}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:10px;transition:background 0.2s}
+::-webkit-scrollbar-thumb:hover{background:rgba(204,255,0,0.3)}
 input::placeholder{color:#3A3D47}
+button{font-family:inherit}
 
+/* Backgrounds */
 .dotgrid {
-  background-image: radial-gradient(circle, rgba(255,255,255,0.035) 1px, transparent 1px);
-  background-size: 28px 28px;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+.aurora-bg {
+  position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden;
+}
+.aurora-blob {
+  position:absolute; border-radius:50%; filter:blur(80px); opacity:0.55; animation:auroraDrift 22s ease-in-out infinite;
+}
+.aurora-1 { width:520px; height:520px; top:-180px; left:-120px; background:radial-gradient(circle,rgba(204,255,0,0.18),transparent 65%); }
+.aurora-2 { width:620px; height:620px; top:30%; right:-200px; background:radial-gradient(circle,rgba(99,102,241,0.13),transparent 65%); animation-delay:-7s; }
+.aurora-3 { width:480px; height:480px; bottom:-160px; left:30%; background:radial-gradient(circle,rgba(245,158,11,0.10),transparent 65%); animation-delay:-14s; }
+
+/* Glass surface */
+.glass {
+  background: linear-gradient(180deg, rgba(24,26,33,0.85), rgba(18,20,26,0.78));
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid rgba(255,255,255,0.07);
+}
+.glass-soft {
+  background: linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0.012));
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+/* Sticky header chrome */
+.app-header {
+  position:sticky; top:0; z-index:30;
+  background: linear-gradient(180deg, rgba(14,15,20,0.92), rgba(14,15,20,0.72));
+  backdrop-filter: blur(22px) saturate(140%);
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
 }
 
 /* Cards */
-.card-hover { transition: transform 0.28s cubic-bezier(0.4,0,0.2,1), box-shadow 0.28s ease, border-color 0.28s ease }
-.card-hover:hover { transform:translateY(-3px); border-color:rgba(255,255,255,0.1) !important; box-shadow:0 16px 48px rgba(0,0,0,0.55), 0 0 0 1px rgba(204,255,0,0.1) !important }
+.card-hover { transition: transform 0.32s cubic-bezier(0.4,0,0.2,1), box-shadow 0.32s ease, border-color 0.32s ease, background 0.32s ease }
+.card-hover:hover { transform:translateY(-4px); border-color:rgba(204,255,0,0.28) !important; box-shadow:0 22px 56px rgba(0,0,0,0.55), 0 0 0 1px rgba(204,255,0,0.12), 0 0 40px rgba(204,255,0,0.08) !important }
+
+/* Dashboard cards */
+.dash-card {
+  position:relative;
+  background: linear-gradient(160deg, rgba(22,24,31,0.92), rgba(14,15,20,0.94));
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 20px;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04);
+  transition: transform 0.32s cubic-bezier(0.4,0,0.2,1), border-color 0.32s ease, box-shadow 0.32s ease;
+  overflow:hidden;
+}
+.dash-card::before {
+  content:""; position:absolute; inset:0; pointer-events:none; opacity:0; transition:opacity 0.32s ease;
+  background: radial-gradient(600px circle at var(--mx,50%) var(--my,0%), rgba(204,255,0,0.08), transparent 40%);
+}
+.dash-card:hover { transform:translateY(-3px); border-color:rgba(255,255,255,0.12); box-shadow:0 18px 48px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06); }
+.dash-card:hover::before { opacity:1; }
 
 /* Accordion */
 .acc-btn { transition: background 0.22s ease }
-.acc-btn:hover { background:#1A1D24 !important }
+.acc-btn:hover { background:rgba(255,255,255,0.04) !important }
 
 /* Nav back */
 .back-btn { transition: all 0.2s }
@@ -290,14 +343,51 @@ input::placeholder{color:#3A3D47}
 .play-pulse { animation: pulse 2.5s ease-in-out infinite }
 
 /* Stat cards */
-.stat-card { transition: transform 0.22s ease, box-shadow 0.22s ease }
-.stat-card:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,0.35) !important }
+.stat-card { transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease }
+.stat-card:hover { transform:translateY(-2px); box-shadow:0 10px 30px rgba(0,0,0,0.4) !important }
 
 /* Quiz options */
 .quiz-opt { transition: all 0.18s ease }
 .quiz-opt:hover:not(:disabled) { transform:translateX(3px) }
 
-/* Gradient text utility */
+/* Tab pills */
+.tab-pill {
+  position:relative; background:none; border:none; cursor:pointer;
+  font-family:inherit; font-weight:700; letter-spacing:1.8px; text-transform:uppercase;
+  color:#5E6376; transition: color 0.22s ease;
+  border-radius:10px;
+}
+.tab-pill:hover { color:#A0A4B0 }
+.tab-pill.active { color:#15171E }
+.tab-pill .tab-bg {
+  position:absolute; inset:0; border-radius:10px; opacity:0;
+  background:linear-gradient(135deg,#CCFF00,#A8D900);
+  box-shadow: 0 4px 16px rgba(204,255,0,0.35), inset 0 1px 0 rgba(255,255,255,0.4);
+  transition: opacity 0.28s ease;
+  z-index:0;
+}
+.tab-pill.active .tab-bg { opacity:1 }
+.tab-pill > span { position:relative; z-index:1 }
+
+/* Buttons */
+.btn-primary {
+  background:linear-gradient(135deg,#CCFF00,#A8D900);
+  color:#15171E; font-weight:800; letter-spacing:1.2px; text-transform:uppercase;
+  border:none; border-radius:10px; cursor:pointer;
+  box-shadow:0 6px 20px rgba(204,255,0,0.32), inset 0 1px 0 rgba(255,255,255,0.4);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.btn-primary:hover { transform:translateY(-1px); box-shadow:0 10px 28px rgba(204,255,0,0.45), inset 0 1px 0 rgba(255,255,255,0.5) }
+.btn-primary:active { transform:translateY(0) }
+
+.btn-ghost {
+  background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);
+  color:#9098A8; font-weight:700; letter-spacing:1.5px; text-transform:uppercase;
+  border-radius:10px; cursor:pointer; transition: all 0.18s ease;
+}
+.btn-ghost:hover { background:rgba(255,255,255,0.07); color:#D6DAE2; border-color:rgba(255,255,255,0.14) }
+
+/* Gradient text */
 .red-gradient-text {
   background: linear-gradient(135deg, #DDFF40 0%, #CCFF00 50%, #E5FF1A 100%);
   background-size: 200% auto;
@@ -305,11 +395,32 @@ input::placeholder{color:#3A3D47}
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+.title-display {
+  font-family:'Bebas Neue',sans-serif; letter-spacing:0.32em; line-height:1;
+}
+
+/* Profile pill */
+.profile-pill {
+  display:flex; align-items:center; gap:10px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px; padding: 6px 14px 6px 6px; cursor:pointer;
+  transition: all 0.2s ease;
+}
+.profile-pill:hover { border-color:rgba(204,255,0,0.25); background:linear-gradient(180deg, rgba(204,255,0,0.05), rgba(204,255,0,0.01)) }
 `;
 
 /* ═══════════════════════════════════════════
    RICH TEXT RENDERER
    ═══════════════════════════════════════════ */
+function RedlineLogo({ height = 28, color = "#CCFF00", style }) {
+  return (
+    <svg height={height} viewBox="0 0 100 60" fill={color} style={{ flexShrink: 0, ...style }}>
+      <path d="M 94 14 L 74 30 L 64 56 L 54 38 Q 28 36 4 50 Q 48 4 94 14 Z"/>
+    </svg>
+  );
+}
+
 function RichText({ text }) {
   const lines = text.split("\n");
   return (
@@ -439,8 +550,8 @@ function Login() {
 
       <div style={{ width:"100%", maxWidth:420, animation:"fadeUp 0.7s cubic-bezier(0.4,0,0.2,1)", position:"relative", zIndex:1 }}>
         <div style={{ textAlign:"center", marginBottom:36 }}>
-          <div style={{ width:72, height:72, borderRadius:22, background:"linear-gradient(135deg,#CCFF00,#5C7A00)", display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 20px", boxShadow:"0 8px 36px rgba(204,255,0,0.4)", animation:"glow 3s ease-in-out infinite" }}>
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#15171E" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <div style={{ display:"flex", justifyContent:"center", margin:"0 auto 24px", filter:"drop-shadow(0 8px 36px rgba(204,255,0,0.45))" }}>
+            <RedlineLogo height={56} />
           </div>
           <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:40, letterSpacing:14, color:"#DC2626", lineHeight:1, textShadow:"0 0 50px rgba(220,38,38,0.3)" }}>REDLINE</div>
           <div style={{ fontSize:11, fontWeight:700, color:"#4D5260", letterSpacing:6, textTransform:"uppercase", marginTop:7 }}>Portal</div>
@@ -663,35 +774,44 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
   const recentSales = sales.slice(0, 5);
   const MEDALS = ["🥇","🥈","🥉"];
 
+  const onCardMove = (e) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    e.currentTarget.style.setProperty("--mx", `${e.clientX - r.left}px`);
+    e.currentTarget.style.setProperty("--my", `${e.clientY - r.top}px`);
+  };
+
   const Card = ({ title, accent, action, actionOnClick, children }) => (
-    <div style={{ background:"linear-gradient(135deg,rgba(16,18,24,0.98),rgba(11,12,16,0.98))", border:"1px solid rgba(255,255,255,0.055)", borderRadius:16, padding:dk?"20px 22px":"16px 18px", boxShadow:"0 4px 20px rgba(0,0,0,0.3)" }}>
-      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:14 }}>
+    <div className="dash-card" onMouseMove={onCardMove} style={{ padding:dk?"22px 24px":"18px 20px" }}>
+      <div style={{ position:"absolute", top:0, left:0, right:0, height:2, background:`linear-gradient(90deg,transparent,${accent}80,transparent)`, opacity:0.4 }} />
+      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:16, position:"relative" }}>
         <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-          <div style={{ width:6, height:6, borderRadius:3, background:accent }} />
+          <div style={{ width:7, height:7, borderRadius:4, background:accent, boxShadow:`0 0 12px ${accent}` }} />
           <div style={{ fontSize:10, fontWeight:800, color:accent, letterSpacing:2.5, textTransform:"uppercase" }}>{title}</div>
         </div>
         {action && (
           <button onClick={actionOnClick}
-            style={{ background:"none", border:"none", color:"#666C7E", fontSize:10, fontWeight:700, letterSpacing:1.5, cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", padding:0 }}>
+            style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.06)", color:"#9098A8", fontSize:9.5, fontWeight:700, letterSpacing:1.5, cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", padding:"6px 10px", borderRadius:8, transition:"all 0.18s" }}
+            onMouseEnter={e => { e.currentTarget.style.color="#F2F4F8"; e.currentTarget.style.background="rgba(204,255,0,0.08)"; e.currentTarget.style.borderColor="rgba(204,255,0,0.25)"; }}
+            onMouseLeave={e => { e.currentTarget.style.color="#9098A8"; e.currentTarget.style.background="rgba(255,255,255,0.04)"; e.currentTarget.style.borderColor="rgba(255,255,255,0.06)"; }}>
             {action} →
           </button>
         )}
       </div>
-      {children}
+      <div style={{ position:"relative" }}>{children}</div>
     </div>
   );
 
   if (loading) return <div style={{ textAlign:"center", padding:60, color:"#7E8290", fontSize:13 }}>Loading dashboard…</div>;
 
   return (
-    <div style={{ animation:"fadeUp 0.35s ease", display:"grid", gridTemplateColumns: wd ? "1fr 1fr" : "1fr", gap:dk?14:12 }}>
+    <div style={{ animation:"fadeUp 0.35s ease", display:"grid", gridTemplateColumns: wd ? "1fr 1fr" : "1fr", gap:dk?18:14 }}>
 
       {/* Your Week */}
-      <Card title="Your Week" accent="#DC2626">
+      <Card title="Your Week" accent="#CCFF00">
         <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:8 }}>
           {[
             { v: myRankWeek >= 0 ? `#${myRankWeek + 1}` : "—", l: "Rank", c: "#FFD700" },
-            { v: myWeek.count, l: myWeek.count === 1 ? "Sale" : "Sales", c: "#DC2626" },
+            { v: myWeek.count, l: myWeek.count === 1 ? "Sale" : "Sales", c: "#CCFF00" },
             { v: `${trainingPct}%`, l: "Training", c: "#22C55E" },
             { v: `${doneQuizzes}/${totalQuizzes}`, l: "Quizzes", c: "#10B981" },
           ].map(s => (
@@ -717,10 +837,10 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
             {rankedWeek.slice(0, 3).map((rep, i) => {
               const isMe = rep.uid === session.user.id;
               return (
-                <div key={rep.uid} style={{ display:"flex", alignItems:"center", gap:12, background: isMe ? "rgba(220,38,38,0.06)" : i===0 ? "rgba(255,215,0,0.04)" : "rgba(255,255,255,0.025)", border:`1px solid ${isMe ? "rgba(220,38,38,0.18)" : i===0 ? "rgba(255,215,0,0.12)" : "rgba(255,255,255,0.06)"}`, borderRadius:10, padding:"10px 12px" }}>
+                <div key={rep.uid} style={{ display:"flex", alignItems:"center", gap:12, background: isMe ? "rgba(204,255,0,0.06)" : i===0 ? "rgba(255,215,0,0.04)" : "rgba(255,255,255,0.025)", border:`1px solid ${isMe ? "rgba(204,255,0,0.18)" : i===0 ? "rgba(255,215,0,0.12)" : "rgba(255,255,255,0.06)"}`, borderRadius:10, padding:"10px 12px" }}>
                   <div style={{ fontSize:18, minWidth:26, textAlign:"center" }}>{MEDALS[i]}</div>
-                  <div style={{ flex:1, minWidth:0, fontSize:13, fontWeight:700, color: isMe ? "#F2F4F8" : "#C4C8D4" }}>
-                    {rep.name}{isMe ? <span style={{ fontSize:9, fontWeight:700, color:"#DC2626", letterSpacing:1.5, marginLeft:8, textTransform:"uppercase" }}>you</span> : ""}
+                  <div style={{ flex:1, minWidth:0, fontSize:13, fontWeight:700, color: isMe ? "#F2F4F8" : "#D6DAE2" }}>
+                    {rep.name}{isMe ? <span style={{ fontSize:9, fontWeight:700, color:"#CCFF00", letterSpacing:1.5, marginLeft:8, textTransform:"uppercase" }}>you</span> : ""}
                   </div>
                   <div style={{ fontSize:18, fontWeight:900, color: i===0 ? "#FFD700" : "#888D9C", lineHeight:1 }}>{rep.count}</div>
                 </div>
@@ -731,13 +851,13 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
       </Card>
 
       {/* Continue Training */}
-      <Card title="Continue Training" accent="#DC2626" action="All Modules" actionOnClick={() => onGoTab("training")}>
+      <Card title="Continue Training" accent="#CCFF00" action="All Modules" actionOnClick={() => onGoTab("training")}>
         {nextModule ? (
           <div className="card-hover" onClick={() => onOpenModule(nextModule.k)}
             style={{ display:"flex", alignItems:"center", gap:14, cursor:"pointer", background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:12, padding:"12px 14px" }}>
             <div style={{ width:46, height:46, borderRadius:12, background:IC_GRAD[nextModule.t], display:"flex", alignItems:"center", justifyContent:"center", fontSize:20, flexShrink:0, boxShadow:IC_SHADOW[nextModule.t] }}>{nextModule.ic}</div>
             <div style={{ flex:1, minWidth:0 }}>
-              <div style={{ fontSize:9, fontWeight:800, color: nextModule.t === "MODULE" ? "#DC2626" : "#F59E0B", letterSpacing:2.5, marginBottom:3, textTransform:"uppercase" }}>{nextModule.n || nextModule.t} · Up Next</div>
+              <div style={{ fontSize:9, fontWeight:800, color: nextModule.t === "MODULE" ? "#CCFF00" : "#F59E0B", letterSpacing:2.5, marginBottom:3, textTransform:"uppercase" }}>{nextModule.n || nextModule.t} · Up Next</div>
               <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF2F8", margin:"0 0 3px", lineHeight:1.3 }}>{nextModule.sub}</h3>
               <p style={{ fontSize:11, color:"#666C7E", margin:0, lineHeight:1.4, fontWeight:500 }}>{nextModule.d}</p>
             </div>
@@ -747,7 +867,7 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
           <div style={{ fontSize:12, color:"#22C55E", padding:"12px 0", fontWeight:600 }}>🎉 All modules complete. You're a closer.</div>
         )}
         <div style={{ marginTop:12, height:6, borderRadius:3, background:"rgba(255,255,255,0.04)", overflow:"hidden" }}>
-          <div style={{ width:`${trainingPct}%`, height:"100%", background:"linear-gradient(90deg,#DC2626,#F59E0B)", transition:"width 0.4s" }} />
+          <div style={{ width:`${trainingPct}%`, height:"100%", background:"linear-gradient(90deg,#CCFF00,#F59E0B)", transition:"width 0.4s" }} />
         </div>
         <div style={{ fontSize:10, color:"#666C7E", marginTop:6, letterSpacing:1, textTransform:"uppercase", fontWeight:700 }}>{doneModules} of {totalModules} done</div>
       </Card>
@@ -761,11 +881,11 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
             {todaysReps.map((name, i) => {
               const isMe = schedule[i]?.user_id === session.user.id;
               return (
-                <div key={i} style={{ display:"flex", alignItems:"center", gap:8, background:isMe?"rgba(220,38,38,0.08)":"rgba(255,255,255,0.04)", border:`1px solid ${isMe?"rgba(220,38,38,0.2)":"rgba(255,255,255,0.07)"}`, borderRadius:8, padding:"6px 10px" }}>
-                  <div style={{ width:22, height:22, borderRadius:6, background: isMe ? "linear-gradient(135deg,#DC2626,#991B1B)" : "linear-gradient(135deg,#2A2D38,#1E2028)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, fontWeight:800, color: isMe?"#FFF":"#888D9C" }}>
+                <div key={i} style={{ display:"flex", alignItems:"center", gap:8, background:isMe?"rgba(204,255,0,0.08)":"rgba(255,255,255,0.04)", border:`1px solid ${isMe?"rgba(204,255,0,0.2)":"rgba(255,255,255,0.07)"}`, borderRadius:8, padding:"6px 10px" }}>
+                  <div style={{ width:22, height:22, borderRadius:6, background: isMe ? "linear-gradient(135deg,#CCFF00,#6E9100)" : "linear-gradient(135deg,#2A2D38,#1E2028)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, fontWeight:800, color: isMe?"#15171E":"#888D9C" }}>
                     {name[0]?.toUpperCase()}
                   </div>
-                  <div style={{ fontSize:12, fontWeight:600, color: isMe?"#F2F4F8":"#C4C8D4" }}>{name}</div>
+                  <div style={{ fontSize:12, fontWeight:600, color: isMe?"#F2F4F8":"#D6DAE2" }}>{name}</div>
                 </div>
               );
             })}
@@ -781,10 +901,10 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
           <div style={{ display:"flex", flexDirection:"column", gap:5 }}>
             {recentSales.map(s => (
               <div key={s.id} style={{ display:"flex", alignItems:"center", gap:10, padding:"8px 12px", background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.05)", borderRadius:9 }}>
-                <div style={{ width:24, height:24, borderRadius:6, background: s.user_id===session.user.id ? "linear-gradient(135deg,#DC2626,#991B1B)" : "rgba(255,255,255,0.05)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, fontWeight:800, color: s.user_id===session.user.id ? "#FFF" : "#666C7E", flexShrink:0 }}>
+                <div style={{ width:24, height:24, borderRadius:6, background: s.user_id===session.user.id ? "linear-gradient(135deg,#CCFF00,#6E9100)" : "rgba(255,255,255,0.05)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, fontWeight:800, color: s.user_id===session.user.id ? "#15171E" : "#666C7E", flexShrink:0 }}>
                   {(repProfiles[s.user_id] || "R")[0]?.toUpperCase()}
                 </div>
-                <div style={{ flex:1, minWidth:0, fontSize:11.5, color:"#C4C8D4", fontWeight:600, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                <div style={{ flex:1, minWidth:0, fontSize:11.5, color:"#D6DAE2", fontWeight:600, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
                   {repProfiles[s.user_id] || "Rep"}{s.note ? <span style={{ color:"#444856", fontWeight:500 }}> — {s.note}</span> : ""}
                 </div>
                 {s.amount > 0 && <div style={{ fontSize:12, fontWeight:700, color:"#22C55E", flexShrink:0 }}>${Number(s.amount).toLocaleString()}</div>}
@@ -792,23 +912,6 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
             ))}
           </div>
         )}
-      </Card>
-
-      {/* Quick Links */}
-      <Card title="Quick Links" accent="#6366F1">
-        <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
-          {LINKS.map(l => (
-            <a key={l.url} href={l.url} target="_blank" rel="noreferrer"
-              style={{ display:"flex", alignItems:"center", gap:12, padding:"10px 12px", background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:10, textDecoration:"none", transition:"all 0.15s" }}>
-              <div style={{ width:32, height:32, borderRadius:8, background:"rgba(99,102,241,0.1)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:16, flexShrink:0 }}>{l.ic}</div>
-              <div style={{ flex:1, minWidth:0 }}>
-                <div style={{ fontSize:12.5, fontWeight:700, color:"#EEF2F8" }}>{l.label}</div>
-                <div style={{ fontSize:10.5, color:"#666C7E", marginTop:2 }}>{l.desc}</div>
-              </div>
-              <div style={{ fontSize:11, color:"#444856" }}>↗</div>
-            </a>
-          ))}
-        </div>
       </Card>
 
     </div>
@@ -999,7 +1102,7 @@ function Leaderboard({ session, profile, w }) {
                   </button>
                 ))}
                 <button onClick={() => setRetainer(0)}
-                  style={{ background: retainer===0 ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.04)", border:`1px solid ${retainer===0 ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.08)"}`, borderRadius:10, color: retainer===0 ? "#C4C8D4" : "#9CA3AF", fontSize:13, fontWeight:700, padding:"12px 16px", cursor:"pointer", fontFamily:"inherit", transition:"all 0.15s" }}>
+                  style={{ background: retainer===0 ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.04)", border:`1px solid ${retainer===0 ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.08)"}`, borderRadius:10, color: retainer===0 ? "#D6DAE2" : "#9CA3AF", fontSize:13, fontWeight:700, padding:"12px 16px", cursor:"pointer", fontFamily:"inherit", transition:"all 0.15s" }}>
                   No Retainer
                 </button>
               </div>
@@ -1030,7 +1133,7 @@ function Leaderboard({ session, profile, w }) {
           <div style={{ fontSize:20 }}>{MEDALS[myRank-1] ?? `#${myRank}`}</div>
           <div>
             <div style={{ fontSize:11, fontWeight:700, color:"#CCFF00", letterSpacing:1.5, textTransform:"uppercase" }}>Your Rank</div>
-            <div style={{ fontSize:13, fontWeight:600, color:"#C4C8D4" }}>{myEntry.count} {myEntry.count === 1 ? "sale" : "sales"}{myEntry.total > 0 ? ` · $${myEntry.total.toLocaleString()}` : ""}</div>
+            <div style={{ fontSize:13, fontWeight:600, color:"#D6DAE2" }}>{myEntry.count} {myEntry.count === 1 ? "sale" : "sales"}{myEntry.total > 0 ? ` · $${myEntry.total.toLocaleString()}` : ""}</div>
           </div>
         </div>
       )}
@@ -1055,7 +1158,7 @@ function Leaderboard({ session, profile, w }) {
                   {rep.name[0]?.toUpperCase()}
                 </div>
                 <div style={{ flex:1, minWidth:0 }}>
-                  <div style={{ fontSize:14, fontWeight:700, color: isMe ? "#F2F4F8" : "#C4C8D4", lineHeight:1 }}>{rep.name}{isMe ? <span style={{ fontSize:9, fontWeight:700, color:"#CCFF00", letterSpacing:1.5, marginLeft:8, textTransform:"uppercase" }}>you</span> : ""}</div>
+                  <div style={{ fontSize:14, fontWeight:700, color: isMe ? "#F2F4F8" : "#D6DAE2", lineHeight:1 }}>{rep.name}{isMe ? <span style={{ fontSize:9, fontWeight:700, color:"#CCFF00", letterSpacing:1.5, marginLeft:8, textTransform:"uppercase" }}>you</span> : ""}</div>
                   <div style={{ fontSize:11, color:"#444856", marginTop:3, display:"flex", gap:8 }}>
                     {rep.total > 0 && <span style={{ color:"#22C55E66" }}>${rep.total.toLocaleString()}</span>}
                     {rep.retainerTotal > 0 && <span style={{ color:"#06D6F066" }}>+${rep.retainerTotal.toLocaleString()}/mo retainer</span>}
@@ -1063,7 +1166,7 @@ function Leaderboard({ session, profile, w }) {
                 </div>
                 <div style={{ textAlign:"right", flexShrink:0 }}>
                   <div style={{ fontSize:dk?26:22, fontWeight:900, color: i===0 ? "#FFD700" : isMe ? "#CCFF00" : "#666C7E", lineHeight:1, letterSpacing:"-0.02em" }}>{rep.count}</div>
-                  <div style={{ fontSize:9, color:"#3A3E4A", textTransform:"uppercase", letterSpacing:1.5, fontWeight:700, marginTop:3 }}>{rep.count === 1 ? "sale" : "sales"}</div>
+                  <div style={{ fontSize:9, color:"#5E6376", textTransform:"uppercase", letterSpacing:1.5, fontWeight:700, marginTop:3 }}>{rep.count === 1 ? "sale" : "sales"}</div>
                 </div>
               </div>
             );
@@ -1084,21 +1187,21 @@ function Leaderboard({ session, profile, w }) {
                     {(repProfiles[s.user_id] || "R")[0]?.toUpperCase()}
                   </div>
                   <div style={{ flex:1, minWidth:0 }}>
-                    <span style={{ fontSize:12, fontWeight:600, color:"#C4C8D4" }}>{repProfiles[s.user_id] || "Rep"}</span>
+                    <span style={{ fontSize:12, fontWeight:600, color:"#D6DAE2" }}>{repProfiles[s.user_id] || "Rep"}</span>
                     {s.note && <span style={{ fontSize:11, color:"#444856" }}> — {s.note}</span>}
                   </div>
                   <div style={{ display:"flex", flexDirection:"column", alignItems:"flex-end", gap:2, flexShrink:0 }}>
                     {s.amount > 0 && <div style={{ fontSize:13, fontWeight:700, color:"#22C55E" }}>${Number(s.amount).toLocaleString()}</div>}
                     {s.retainer > 0 && <div style={{ fontSize:10, fontWeight:600, color:"#06D6F0" }}>+${Number(s.retainer).toLocaleString()}/mo</div>}
                   </div>
-                  <div style={{ fontSize:10, color:"#3A3E4A", flexShrink:0 }}>{new Date(s.sale_date).toLocaleDateString("en-US",{month:"short",day:"numeric"})}</div>
+                  <div style={{ fontSize:10, color:"#5E6376", flexShrink:0 }}>{new Date(s.sale_date).toLocaleDateString("en-US",{month:"short",day:"numeric"})}</div>
                   {isOwn && (
                     <button onClick={async () => {
                       await supabase.from("sales").delete().eq("id", s.id);
                       setSales(prev => prev.filter(x => x.id !== s.id));
-                    }} style={{ background:"none", border:"none", color:"#3A3E4A", fontSize:16, cursor:"pointer", padding:"0 2px", lineHeight:1, flexShrink:0, transition:"color 0.15s" }}
+                    }} style={{ background:"none", border:"none", color:"#5E6376", fontSize:16, cursor:"pointer", padding:"0 2px", lineHeight:1, flexShrink:0, transition:"color 0.15s" }}
                       onMouseEnter={e => e.target.style.color="#FF3370"}
-                      onMouseLeave={e => e.target.style.color="#3A3E4A"}>
+                      onMouseLeave={e => e.target.style.color="#5E6376"}>
                       ×
                     </button>
                   )}
@@ -1159,7 +1262,7 @@ function Leaderboard({ session, profile, w }) {
 
         {/* Bonus tier cards */}
         {bonuses.length === 0 && !showAddBonus ? (
-          <div style={{ fontSize:12, color:"#3A3E4A", padding:"20px 0" }}>{isAdmin ? "No bonus tiers set yet. Add one above." : "No bonuses set this month yet."}</div>
+          <div style={{ fontSize:12, color:"#5E6376", padding:"20px 0" }}>{isAdmin ? "No bonus tiers set yet. Add one above." : "No bonuses set this month yet."}</div>
         ) : (
           <div style={{ display:"grid", gridTemplateColumns:dk?"repeat(auto-fill, minmax(220px, 1fr))":"1fr", gap:10 }}>
             {bonuses.map(b => {
@@ -1172,19 +1275,19 @@ function Leaderboard({ session, profile, w }) {
               return (
                 <div key={b.id} style={{ background: reached ? "rgba(255,215,0,0.06)" : "rgba(255,255,255,0.025)", border:`1px solid ${reached ? "rgba(255,215,0,0.2)" : "rgba(255,255,255,0.07)"}`, borderRadius:14, padding:"16px 18px", position:"relative" }}>
                   {reached && <div style={{ position:"absolute", top:12, right:12, fontSize:9, fontWeight:800, color:"#FFD700", letterSpacing:1.5, textTransform:"uppercase" }}>✓ Reached</div>}
-                  <div style={{ fontSize:22, fontWeight:900, color: reached ? "#FFD700" : "#C4C8D4", lineHeight:1, marginBottom:4 }}>${Number(b.amount).toLocaleString()}</div>
+                  <div style={{ fontSize:22, fontWeight:900, color: reached ? "#FFD700" : "#D6DAE2", lineHeight:1, marginBottom:4 }}>${Number(b.amount).toLocaleString()}</div>
                   <div style={{ fontSize:12, fontWeight:700, color: reached ? "#FFD700" : "#9CA3AF", marginBottom:b.description?4:0 }}>{b.label}</div>
                   {b.threshold != null && (
                     <div style={{ fontSize:10, color:"#444856", marginBottom:b.description?4:0 }}>{b.threshold} {b.threshold===1?"sale":"sales"} needed{b.threshold != null && ` · ${myCount}/${b.threshold} this month`}</div>
                   )}
-                  {b.description && <div style={{ fontSize:11, color:"#3A3E4A" }}>{b.description}</div>}
+                  {b.description && <div style={{ fontSize:11, color:"#5E6376" }}>{b.description}</div>}
                   {isAdmin && (
                     <div style={{ display:"flex", gap:8, marginTop:12 }}>
                       <button onClick={() => { setEditingBonus(b); setBonusForm({ label:b.label, threshold:b.threshold??'', amount:b.amount, description:b.description??'' }); setShowAddBonus(false); }}
                         style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:6, color:"#666C7E", fontSize:10, fontWeight:700, padding:"5px 12px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", letterSpacing:1 }}>Edit</button>
                       <button onClick={() => deleteBonus(b.id)}
-                        style={{ background:"none", border:"none", color:"#3A3E4A", fontSize:10, fontWeight:700, padding:"5px 8px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", letterSpacing:1, transition:"color 0.15s" }}
-                        onMouseEnter={e=>e.target.style.color="#DC2626"} onMouseLeave={e=>e.target.style.color="#3A3E4A"}>Delete</button>
+                        style={{ background:"none", border:"none", color:"#5E6376", fontSize:10, fontWeight:700, padding:"5px 8px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", letterSpacing:1, transition:"color 0.15s" }}
+                        onMouseEnter={e=>e.target.style.color="#CCFF00"} onMouseLeave={e=>e.target.style.color="#5E6376"}>Delete</button>
                     </div>
                   )}
                 </div>
@@ -1197,6 +1300,16 @@ function Leaderboard({ session, profile, w }) {
     </div>
   );
 }
+
+const TIERS = [
+  { v: "trial",    label: "Trial",    short: "TRIAL", emoji: "🆕", color: "#06D6F0" },
+  { v: "bronze",   label: "Bronze",   short: "T1",    emoji: "🟤", color: "#B8732A" },
+  { v: "silver",   label: "Silver",   short: "T2",    emoji: "⚪", color: "#C0C8D8" },
+  { v: "gold",     label: "Gold",     short: "T3",    emoji: "🟡", color: "#FFD700" },
+  { v: "platinum", label: "Platinum", short: "T4",    emoji: "🟣", color: "#A78BFA" },
+  { v: "diamond",  label: "Diamond",  short: "T5",    emoji: "💎", color: "#CCFF00" },
+];
+const TIER_BY_VALUE = Object.fromEntries(TIERS.map(t => [t.v, t]));
 
 function AdminPanel({ profile, onBack, w, onSignOut }) {
   const [users, setUsers] = useState([]);
@@ -1232,8 +1345,34 @@ function AdminPanel({ profile, onBack, w, onSignOut }) {
 
   const toggleRole = async (userId, currentRole) => {
     const newRole = currentRole === "admin" ? "rep" : "admin";
-    await supabase.from("profiles").update({ role: newRole }).eq("id", userId);
-    setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
+    const { data, error } = await supabase
+      .from("profiles")
+      .update({ role: newRole })
+      .eq("id", userId)
+      .select()
+      .single();
+    if (error || !data) {
+      console.error("toggleRole failed:", error);
+      alert(`Couldn't update role: ${error?.message ?? "no row updated (likely RLS)"}`);
+      return;
+    }
+    setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: data.role } : u));
+  };
+
+  const setTier = async (userId, tier) => {
+    const next = tier || null;
+    const { data, error } = await supabase
+      .from("profiles")
+      .update({ tier: next })
+      .eq("id", userId)
+      .select()
+      .single();
+    if (error || !data) {
+      console.error("setTier failed:", error);
+      alert(`Couldn't save tier: ${error?.message ?? "no row updated (likely RLS or missing 'tier' column)"}`);
+      return;
+    }
+    setUsers(prev => prev.map(u => u.id === userId ? { ...u, tier: data.tier } : u));
   };
 
   return (
@@ -1280,7 +1419,14 @@ function AdminPanel({ profile, onBack, w, onSignOut }) {
                 </div>
                 <div style={{ flex:1, minWidth:140 }}>
                   <div style={{ fontSize:15, fontWeight:700, color:"#EEF2F8" }}>{u.name || "—"}</div>
-                  <span style={{ display:"inline-block", marginTop:4, fontSize:9, fontWeight:800, color: u.role === "admin" ? "#F59E0B" : "#06D6F0", letterSpacing:2, textTransform:"uppercase", background: u.role === "admin" ? "rgba(245,158,11,0.1)" : "rgba(6,214,240,0.1)", padding:"3px 9px", borderRadius:5, border:`1px solid ${u.role === "admin" ? "rgba(245,158,11,0.2)" : "rgba(6,214,240,0.2)"}` }}>{u.role}</span>
+                  <div style={{ display:"flex", gap:6, marginTop:4, flexWrap:"wrap" }}>
+                    <span style={{ display:"inline-block", fontSize:9, fontWeight:800, color: u.role === "admin" ? "#F59E0B" : "#06D6F0", letterSpacing:2, textTransform:"uppercase", background: u.role === "admin" ? "rgba(245,158,11,0.1)" : "rgba(6,214,240,0.1)", padding:"3px 9px", borderRadius:5, border:`1px solid ${u.role === "admin" ? "rgba(245,158,11,0.2)" : "rgba(6,214,240,0.2)"}` }}>{u.role}</span>
+                    {u.tier && TIER_BY_VALUE[u.tier] && (
+                      <span style={{ display:"inline-block", fontSize:9, fontWeight:800, color: TIER_BY_VALUE[u.tier].color, letterSpacing:2, textTransform:"uppercase", background:`${TIER_BY_VALUE[u.tier].color}1A`, padding:"3px 9px", borderRadius:5, border:`1px solid ${TIER_BY_VALUE[u.tier].color}33` }}>
+                        {TIER_BY_VALUE[u.tier].emoji} {TIER_BY_VALUE[u.tier].label} · {TIER_BY_VALUE[u.tier].short}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div style={{ display:"flex", gap:dk?24:16, flexWrap:"wrap" }}>
                   {[
@@ -1294,6 +1440,13 @@ function AdminPanel({ profile, onBack, w, onSignOut }) {
                     </div>
                   ))}
                 </div>
+                <select value={u.tier ?? ""} onChange={e => setTier(u.id, e.target.value)}
+                  style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", color:"#D6DAE2", fontSize:11, fontWeight:700, cursor:"pointer", padding:"9px 12px", borderRadius:10, fontFamily:"inherit", letterSpacing:0.5, flexShrink:0, outline:"none" }}>
+                  <option value="">— No tier —</option>
+                  {TIERS.map(t => (
+                    <option key={t.v} value={t.v}>{t.emoji} {t.label} ({t.short})</option>
+                  ))}
+                </select>
                 {u.id !== profile.id && (
                   <button onClick={() => toggleRole(u.id, u.role)} style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", color:"#7E8595", fontSize:10, fontWeight:700, cursor:"pointer", padding:"9px 16px", borderRadius:10, fontFamily:"inherit", letterSpacing:1.5, flexShrink:0, textTransform:"uppercase", transition:"all 0.2s" }}>
                     {u.role === "admin" ? "Make Rep" : "Make Admin"}
@@ -1606,7 +1759,7 @@ export default function App() {
   const signOut = async () => { await supabase.auth.signOut(); setView(null); };
 
   const FONT_LINK = "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap";
-  const baseStyle = { minHeight:"100dvh", background:"#15171E", color:"#FFF" };
+  const baseStyle = { minHeight:"100dvh", background:"#0E0F14", color:"#FFF" };
 
   const bc = { MODULE:"#CCFF00", BOOTCAMP:"#F59E0B", REFERENCE:"#06D6F0", QUIZ:"#10B981" };
   const trainingGroups = [
@@ -1629,8 +1782,8 @@ export default function App() {
       <style>{GLOBAL_CSS}</style>
       <link href={FONT_LINK} rel="stylesheet" />
       <div style={{ textAlign:"center", animation:"fadeUp 0.6s ease" }}>
-        <div style={{ width:60, height:60, borderRadius:18, background:"linear-gradient(135deg,#CCFF00,#5C7A00)", display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 20px", boxShadow:"0 6px 28px rgba(204,255,0,0.35)", animation:"glow 3s ease-in-out infinite" }}>
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#15171E" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        <div style={{ display:"flex", justifyContent:"center", margin:"0 auto 20px", filter:"drop-shadow(0 6px 28px rgba(204,255,0,0.4))" }}>
+          <RedlineLogo height={48} />
         </div>
         <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:28, letterSpacing:12, color:"#DC2626" }}>REDLINE</div>
         <div style={{ fontSize:10, color:"#444856", letterSpacing:3, textTransform:"uppercase", marginTop:8, fontWeight:700 }}>Loading…</div>
@@ -1675,95 +1828,106 @@ export default function App() {
       <style>{GLOBAL_CSS}</style>
       <link href={FONT_LINK} rel="stylesheet" />
 
-      <div style={{ position:"fixed", top:0, left:"50%", transform:"translateX(-50%)", width:1000, height:600, background:"radial-gradient(ellipse 60% 50% at 50% 0%, rgba(204,255,0,0.07) 0%, transparent 70%)", pointerEvents:"none", zIndex:0 }} />
+      {/* Aurora background */}
+      <div className="aurora-bg" aria-hidden="true">
+        <div className="aurora-blob aurora-1" />
+        <div className="aurora-blob aurora-2" />
+        <div className="aurora-blob aurora-3" />
+      </div>
 
-      {/* Header */}
-      <div style={{ position:"relative", zIndex:1, padding:wd?"32px 56px 24px":dk?"24px 36px 20px":"14px 16px 14px" }}>
-        <div style={{ maxWidth:1300, margin:"0 auto" }}>
+      {/* Sticky header */}
+      <div className="app-header">
+        <div style={{ padding:wd?"22px 56px 0":dk?"18px 36px 0":"14px 20px 0" }}>
+          <div style={{ maxWidth:1300, margin:"0 auto" }}>
 
-          {/* Top row: logo + actions */}
-          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:dk?18:12, animation:"fadeUp 0.5s ease" }}>
+            {/* Top row: logo + actions */}
+            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:dk?18:14, animation:"fadeUp 0.5s ease" }}>
 
-            {/* Logo */}
-            <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-              <div style={{ width:dk?36:32, height:dk?36:32, borderRadius:9, background:"linear-gradient(135deg,#CCFF00,#5C7A00)", display:"flex", alignItems:"center", justifyContent:"center", boxShadow:"0 4px 14px rgba(204,255,0,0.3)", animation:"glow 3.5s ease-in-out infinite", flexShrink:0 }}>
-                <svg width={dk?15:13} height={dk?15:13} viewBox="0 0 24 24" fill="none" stroke="#15171E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              {/* Logo */}
+              <div style={{ display:"flex", alignItems:"center", gap:dk?14:10 }}>
+                <RedlineLogo height={dk?32:26} />
+                <div>
+                  <div className="title-display" style={{ fontSize:dk?24:19, color:"#DC2626" }}>REDLINE</div>
+                  <div style={{ fontSize:9, fontWeight:800, color:"#CCFF00", letterSpacing:3.5, textTransform:"uppercase", marginTop:3 }}>Portal</div>
+                </div>
               </div>
-              <div>
-                <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?20:17, letterSpacing:dk?7:6, color:"#DC2626", lineHeight:1 }}>REDLINE</div>
-                {dk && <div style={{ fontSize:8.5, fontWeight:700, color:"#5E6376", letterSpacing:3, textTransform:"uppercase", marginTop:2 }}>Rep Portal</div>}
+
+              {/* Right actions */}
+              <div style={{ display:"flex", alignItems:"center", gap:dk?8:6, animation:"fadeUp 0.5s ease 0.06s both" }}>
+                {profile?.role === "admin" && (
+                  <button onClick={() => setView("__admin")} className="btn-ghost" style={{ fontSize:10, padding:dk?"9px 14px":"7px 10px", color:"#F59E0B", borderColor:"rgba(245,158,11,0.22)", background:"rgba(245,158,11,0.06)" }}>Admin</button>
+                )}
+
+                {/* Avatar + name edit */}
+                <div style={{ position:"relative", display:"flex", alignItems:"center", gap:0 }}>
+                  <div className="profile-pill"
+                    onClick={() => { setShowNameEdit(v => !v); setNameEdit(profile?.name ?? ""); }}>
+                    <div style={{ width:30, height:30, borderRadius:9, background:"linear-gradient(135deg,#CCFF00,#88AB00)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Plus Jakarta Sans',sans-serif", fontSize:13, fontWeight:900, color:"#15171E", flexShrink:0, boxShadow:"0 2px 10px rgba(204,255,0,0.4), inset 0 1px 0 rgba(255,255,255,0.4)" }}>
+                      {profile?.name?.[0]?.toUpperCase() ?? "R"}
+                    </div>
+                    {dk && <span style={{ fontSize:12.5, fontWeight:600, color:"#D6DAE2", letterSpacing:0.2 }}>{profile?.name ?? "Rep"}</span>}
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#5E6376" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft:dk?2:0 }}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  </div>
+                  {showNameEdit && (
+                    <div className="glass" style={{ position:"absolute", top:"calc(100% + 10px)", right:0, borderRadius:14, padding:18, width:240, zIndex:200, boxShadow:"0 24px 60px rgba(0,0,0,0.7)", animation:"popIn 0.18s ease" }}>
+                      <div style={{ fontSize:10, fontWeight:800, color:"#666C7E", letterSpacing:2.5, textTransform:"uppercase", marginBottom:10 }}>Display Name</div>
+                      <input
+                        autoFocus
+                        value={nameEdit}
+                        onChange={e => setNameEdit(e.target.value)}
+                        onKeyDown={e => { if (e.key === "Enter") saveName(); if (e.key === "Escape") setShowNameEdit(false); }}
+                        placeholder="Your name…"
+                        style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:9, color:"#F2F4F8", fontSize:13, fontWeight:500, padding:"11px 13px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }}
+                      />
+                      <div style={{ display:"flex", gap:8, marginTop:10 }}>
+                        <button onClick={saveName} className="btn-primary" style={{ flex:1, fontSize:12, padding:"12px 0" }}>Save</button>
+                        <button onClick={() => setShowNameEdit(false)} className="btn-ghost" style={{ flex:1, fontSize:12, padding:"12px 0" }}>Cancel</button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <button onClick={signOut} className="btn-ghost" style={{ fontSize:10, padding:dk?"9px 14px":"7px 10px" }}>{dk ? "Sign Out" : "Out"}</button>
               </div>
             </div>
 
-            {/* Right actions */}
-            <div style={{ display:"flex", alignItems:"center", gap:6 }}>
-              {profile?.role === "admin" && (
-                <button onClick={() => setView("__admin")} style={{ background:"rgba(245,158,11,0.08)", border:"1px solid rgba(245,158,11,0.18)", color:"#F59E0B", fontSize:9.5, fontWeight:700, cursor:"pointer", padding:dk?"8px 14px":"6px 10px", borderRadius:8, fontFamily:"inherit", letterSpacing:1.5, textTransform:"uppercase", transition:"all 0.18s" }}>Admin</button>
-              )}
-
-              {/* Avatar pill */}
-              <div style={{ position:"relative" }}>
-                <div style={{ display:"flex", alignItems:"center", gap:dk?8:0, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.07)", borderRadius:9, padding:dk?"5px 11px 5px 5px":"5px", cursor:"pointer" }}
-                  onClick={() => { setShowNameEdit(v => !v); setNameEdit(profile?.name ?? ""); }}>
-                  <div style={{ width:dk?28:30, height:dk?28:30, borderRadius:7, background:"linear-gradient(135deg,#CCFF00,#6E9100)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:dk?12:13, fontWeight:800, color:"#15171E", flexShrink:0, boxShadow:"0 2px 8px rgba(204,255,0,0.35)" }}>
-                    {profile?.name?.[0]?.toUpperCase() ?? "R"}
-                  </div>
-                  {dk && <span style={{ fontSize:12, fontWeight:600, color:"#D6DAE2" }}>{profile?.name ?? "Rep"}</span>}
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#5E6376" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft:dk?2:0 }}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                </div>
-                {showNameEdit && (
-                  <div style={{ position:"absolute", top:"calc(100% + 8px)", right:0, background:"#16181F", border:"1px solid rgba(255,255,255,0.09)", borderRadius:14, padding:16, width:220, zIndex:200, boxShadow:"0 16px 48px rgba(0,0,0,0.8)" }}>
-                    <div style={{ fontSize:9.5, fontWeight:700, color:"#444856", letterSpacing:2, textTransform:"uppercase", marginBottom:10 }}>Display Name</div>
-                    <input autoFocus value={nameEdit} onChange={e => setNameEdit(e.target.value)}
-                      onKeyDown={e => { if (e.key === "Enter") saveName(); if (e.key === "Escape") setShowNameEdit(false); }}
-                      placeholder="Your name…"
-                      style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:500, padding:"10px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }} />
-                    <div style={{ display:"flex", gap:8, marginTop:10 }}>
-                      <button onClick={saveName} style={{ flex:1, background:"#CCFF00", border:"none", borderRadius:8, color:"#15171E", fontSize:12, fontWeight:800, padding:"12px 0", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Save</button>
-                      <button onClick={() => setShowNameEdit(false)} style={{ flex:1, background:"rgba(255,255,255,0.06)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:8, color:"#666C7E", fontSize:12, fontWeight:700, padding:"12px 0", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Cancel</button>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <button onClick={signOut} style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.07)", color:"#444856", fontSize:9.5, fontWeight:700, cursor:"pointer", padding:dk?"8px 14px":"6px 10px", borderRadius:8, fontFamily:"inherit", letterSpacing:1, textTransform:"uppercase", transition:"all 0.18s", whiteSpace:"nowrap" }}>
-                {dk ? "Sign Out" : "Out"}
-              </button>
+            {/* Tab Nav — scrollable, no scrollbar */}
+            <div style={{ display:"flex", gap:4, overflowX:"auto", paddingBottom:10, marginBottom:-1, animation:"fadeUp 0.5s ease 0.1s both", scrollbarWidth:"none", msOverflowStyle:"none" }}>
+              {TABS.map(t => (
+                <button key={t.key} onClick={() => setTab(t.key)}
+                  className={"tab-pill" + (tab===t.key ? " active" : "")}
+                  style={{ fontSize:10.5, padding:dk?"10px 18px":"9px 12px", whiteSpace:"nowrap", flexShrink:0 }}>
+                  <span className="tab-bg" />
+                  <span>{dk ? t.label : t.short}</span>
+                </button>
+              ))}
             </div>
           </div>
+        </div>
+      </div>
 
-          {/* Welcome line */}
-          <p style={{ fontSize:dk?14:12.5, color:"#444856", margin:"0 0 12px", lineHeight:1.5, fontWeight:500, animation:"fadeUp 0.5s ease 0.08s both" }}>
-            {profile?.name ? <><span style={{ color:"#D6DAE2", fontWeight:600 }}>{profile.name}</span>{" — "}</> : ""}Master every module. Close more deals.
-          </p>
-
-          {/* Stats row — equal width tiles, always one row */}
-          <div style={{ display:"flex", gap:dk?8:5, animation:"fadeUp 0.5s ease 0.12s both" }}>
+      {/* Welcome + stats row */}
+      <div style={{ position:"relative", zIndex:1, padding:wd?"22px 56px 0":dk?"20px 36px 0":"14px 16px 0" }}>
+        <div style={{ maxWidth:1300, margin:"0 auto", display:"flex", alignItems:"center", justifyContent:"space-between", gap:12, flexWrap:"wrap", animation:"fadeUp 0.5s ease 0.16s both" }}>
+          <div>
+            <div style={{ fontSize:dk?22:17, fontWeight:800, color:"#F2F4F8", letterSpacing:"-0.02em", lineHeight:1.2 }}>
+              {profile?.name ? <>Welcome back, <span className="red-gradient-text">{profile.name}</span></> : "Welcome back"}
+            </div>
+            {dk && <p style={{ fontSize:13, color:"#666C7E", margin:"6px 0 0", fontWeight:500 }}>Master every module. Close more deals.</p>}
+          </div>
+          <div style={{ display:"flex", gap:dk?8:5 }}>
             {[
               [completedModules.size, "Done", "#22C55E"],
               ["13", "Modules", "#CCFF00"],
               ["2", "Camps", "#F59E0B"],
               ["6", "Quizzes", "#10B981"],
             ].map(([n, l, col]) => (
-              <div key={l} style={{ background:`${col}10`, border:`1px solid ${col}18`, borderRadius:9, padding:dk?"10px 16px":"8px 0", textAlign:"center", flex:1 }}>
-                <div style={{ fontSize:dk?20:16, fontWeight:900, color:col, lineHeight:1, letterSpacing:"-0.02em" }}>{n}</div>
-                <div style={{ fontSize:dk?8:7.5, color:`${col}70`, textTransform:"uppercase", letterSpacing:1.5, fontWeight:700, marginTop:3 }}>{l}</div>
+              <div key={l} className="stat-card" style={{ background:`linear-gradient(180deg,${col}14,${col}06)`, border:`1px solid ${col}26`, borderRadius:12, padding:dk?"11px 16px":"8px 10px", textAlign:"center", flex:1, minWidth:dk?62:48 }}>
+                <div style={{ fontSize:dk?22:15, fontWeight:900, color:col, lineHeight:1, letterSpacing:"-0.02em" }}>{n}</div>
+                <div style={{ fontSize:8.5, color:`${col}90`, textTransform:"uppercase", letterSpacing:1.5, fontWeight:800, marginTop:5 }}>{l}</div>
               </div>
             ))}
           </div>
-
-        </div>
-      </div>
-
-      {/* Tab Nav — scrollable on mobile, no scrollbar shown */}
-      <div style={{ position:"relative", zIndex:1, borderBottom:"1px solid rgba(255,255,255,0.06)" }}>
-        <div style={{ maxWidth:1300, margin:"0 auto", paddingLeft:wd?56:dk?36:0, paddingRight:wd?56:dk?36:0, display:"flex", overflowX:"auto", scrollbarWidth:"none", msOverflowStyle:"none" }}>
-          {TABS.map(t => (
-            <button key={t.key} onClick={() => setTab(t.key)}
-              style={{ background: tab===t.key ? `${t.color}12` : "none", border:"none", borderBottom: tab===t.key ? `2px solid ${t.color}` : "2px solid transparent", color: tab===t.key ? t.color : "#4A4E5C", fontSize:dk?10.5:10, fontWeight:700, letterSpacing:dk?2:1.5, cursor:"pointer", padding:dk?"13px 18px":"12px 16px", fontFamily:"inherit", textTransform:"uppercase", transition:"color 0.15s, border-color 0.15s", marginBottom:-1, flexShrink:0, whiteSpace:"nowrap" }}>
-              {dk ? t.label : t.short}
-            </button>
-          ))}
         </div>
       </div>
 
