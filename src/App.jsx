@@ -799,11 +799,11 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
     <div style={{ animation:"fadeUp 0.35s ease", display:"grid", gridTemplateColumns: wd ? "1fr 1fr" : "1fr", gap:dk?18:14 }}>
 
       {/* Your Week */}
-      <Card title="Your Week" accent="#DC2626">
+      <Card title="Your Week" accent="#CCFF00">
         <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:8 }}>
           {[
             { v: myRankWeek >= 0 ? `#${myRankWeek + 1}` : "—", l: "Rank", c: "#FFD700" },
-            { v: myWeek.count, l: myWeek.count === 1 ? "Sale" : "Sales", c: "#DC2626" },
+            { v: myWeek.count, l: myWeek.count === 1 ? "Sale" : "Sales", c: "#CCFF00" },
             { v: `${trainingPct}%`, l: "Training", c: "#22C55E" },
             { v: `${doneQuizzes}/${totalQuizzes}`, l: "Quizzes", c: "#10B981" },
           ].map(s => (
@@ -829,10 +829,10 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
             {rankedWeek.slice(0, 3).map((rep, i) => {
               const isMe = rep.uid === session.user.id;
               return (
-                <div key={rep.uid} style={{ display:"flex", alignItems:"center", gap:12, background: isMe ? "rgba(220,38,38,0.06)" : i===0 ? "rgba(255,215,0,0.04)" : "rgba(255,255,255,0.025)", border:`1px solid ${isMe ? "rgba(220,38,38,0.18)" : i===0 ? "rgba(255,215,0,0.12)" : "rgba(255,255,255,0.06)"}`, borderRadius:10, padding:"10px 12px" }}>
+                <div key={rep.uid} style={{ display:"flex", alignItems:"center", gap:12, background: isMe ? "rgba(204,255,0,0.06)" : i===0 ? "rgba(255,215,0,0.04)" : "rgba(255,255,255,0.025)", border:`1px solid ${isMe ? "rgba(204,255,0,0.18)" : i===0 ? "rgba(255,215,0,0.12)" : "rgba(255,255,255,0.06)"}`, borderRadius:10, padding:"10px 12px" }}>
                   <div style={{ fontSize:18, minWidth:26, textAlign:"center" }}>{MEDALS[i]}</div>
-                  <div style={{ flex:1, minWidth:0, fontSize:13, fontWeight:700, color: isMe ? "#F2F4F8" : "#C4C8D4" }}>
-                    {rep.name}{isMe ? <span style={{ fontSize:9, fontWeight:700, color:"#DC2626", letterSpacing:1.5, marginLeft:8, textTransform:"uppercase" }}>you</span> : ""}
+                  <div style={{ flex:1, minWidth:0, fontSize:13, fontWeight:700, color: isMe ? "#F2F4F8" : "#D6DAE2" }}>
+                    {rep.name}{isMe ? <span style={{ fontSize:9, fontWeight:700, color:"#CCFF00", letterSpacing:1.5, marginLeft:8, textTransform:"uppercase" }}>you</span> : ""}
                   </div>
                   <div style={{ fontSize:18, fontWeight:900, color: i===0 ? "#FFD700" : "#888D9C", lineHeight:1 }}>{rep.count}</div>
                 </div>
@@ -843,13 +843,13 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
       </Card>
 
       {/* Continue Training */}
-      <Card title="Continue Training" accent="#DC2626" action="All Modules" actionOnClick={() => onGoTab("training")}>
+      <Card title="Continue Training" accent="#CCFF00" action="All Modules" actionOnClick={() => onGoTab("training")}>
         {nextModule ? (
           <div className="card-hover" onClick={() => onOpenModule(nextModule.k)}
             style={{ display:"flex", alignItems:"center", gap:14, cursor:"pointer", background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:12, padding:"12px 14px" }}>
             <div style={{ width:46, height:46, borderRadius:12, background:IC_GRAD[nextModule.t], display:"flex", alignItems:"center", justifyContent:"center", fontSize:20, flexShrink:0, boxShadow:IC_SHADOW[nextModule.t] }}>{nextModule.ic}</div>
             <div style={{ flex:1, minWidth:0 }}>
-              <div style={{ fontSize:9, fontWeight:800, color: nextModule.t === "MODULE" ? "#DC2626" : "#F59E0B", letterSpacing:2.5, marginBottom:3, textTransform:"uppercase" }}>{nextModule.n || nextModule.t} · Up Next</div>
+              <div style={{ fontSize:9, fontWeight:800, color: nextModule.t === "MODULE" ? "#CCFF00" : "#F59E0B", letterSpacing:2.5, marginBottom:3, textTransform:"uppercase" }}>{nextModule.n || nextModule.t} · Up Next</div>
               <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF2F8", margin:"0 0 3px", lineHeight:1.3 }}>{nextModule.sub}</h3>
               <p style={{ fontSize:11, color:"#666C7E", margin:0, lineHeight:1.4, fontWeight:500 }}>{nextModule.d}</p>
             </div>
@@ -859,7 +859,7 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
           <div style={{ fontSize:12, color:"#22C55E", padding:"12px 0", fontWeight:600 }}>🎉 All modules complete. You're a closer.</div>
         )}
         <div style={{ marginTop:12, height:6, borderRadius:3, background:"rgba(255,255,255,0.04)", overflow:"hidden" }}>
-          <div style={{ width:`${trainingPct}%`, height:"100%", background:"linear-gradient(90deg,#DC2626,#F59E0B)", transition:"width 0.4s" }} />
+          <div style={{ width:`${trainingPct}%`, height:"100%", background:"linear-gradient(90deg,#CCFF00,#F59E0B)", transition:"width 0.4s" }} />
         </div>
         <div style={{ fontSize:10, color:"#666C7E", marginTop:6, letterSpacing:1, textTransform:"uppercase", fontWeight:700 }}>{doneModules} of {totalModules} done</div>
       </Card>
@@ -873,11 +873,11 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
             {todaysReps.map((name, i) => {
               const isMe = schedule[i]?.user_id === session.user.id;
               return (
-                <div key={i} style={{ display:"flex", alignItems:"center", gap:8, background:isMe?"rgba(220,38,38,0.08)":"rgba(255,255,255,0.04)", border:`1px solid ${isMe?"rgba(220,38,38,0.2)":"rgba(255,255,255,0.07)"}`, borderRadius:8, padding:"6px 10px" }}>
-                  <div style={{ width:22, height:22, borderRadius:6, background: isMe ? "linear-gradient(135deg,#DC2626,#991B1B)" : "linear-gradient(135deg,#2A2D38,#1E2028)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, fontWeight:800, color: isMe?"#FFF":"#888D9C" }}>
+                <div key={i} style={{ display:"flex", alignItems:"center", gap:8, background:isMe?"rgba(204,255,0,0.08)":"rgba(255,255,255,0.04)", border:`1px solid ${isMe?"rgba(204,255,0,0.2)":"rgba(255,255,255,0.07)"}`, borderRadius:8, padding:"6px 10px" }}>
+                  <div style={{ width:22, height:22, borderRadius:6, background: isMe ? "linear-gradient(135deg,#CCFF00,#6E9100)" : "linear-gradient(135deg,#2A2D38,#1E2028)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, fontWeight:800, color: isMe?"#15171E":"#888D9C" }}>
                     {name[0]?.toUpperCase()}
                   </div>
-                  <div style={{ fontSize:12, fontWeight:600, color: isMe?"#F2F4F8":"#C4C8D4" }}>{name}</div>
+                  <div style={{ fontSize:12, fontWeight:600, color: isMe?"#F2F4F8":"#D6DAE2" }}>{name}</div>
                 </div>
               );
             })}
@@ -893,10 +893,10 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
           <div style={{ display:"flex", flexDirection:"column", gap:5 }}>
             {recentSales.map(s => (
               <div key={s.id} style={{ display:"flex", alignItems:"center", gap:10, padding:"8px 12px", background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.05)", borderRadius:9 }}>
-                <div style={{ width:24, height:24, borderRadius:6, background: s.user_id===session.user.id ? "linear-gradient(135deg,#DC2626,#991B1B)" : "rgba(255,255,255,0.05)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, fontWeight:800, color: s.user_id===session.user.id ? "#FFF" : "#666C7E", flexShrink:0 }}>
+                <div style={{ width:24, height:24, borderRadius:6, background: s.user_id===session.user.id ? "linear-gradient(135deg,#CCFF00,#6E9100)" : "rgba(255,255,255,0.05)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, fontWeight:800, color: s.user_id===session.user.id ? "#15171E" : "#666C7E", flexShrink:0 }}>
                   {(repProfiles[s.user_id] || "R")[0]?.toUpperCase()}
                 </div>
-                <div style={{ flex:1, minWidth:0, fontSize:11.5, color:"#C4C8D4", fontWeight:600, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                <div style={{ flex:1, minWidth:0, fontSize:11.5, color:"#D6DAE2", fontWeight:600, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
                   {repProfiles[s.user_id] || "Rep"}{s.note ? <span style={{ color:"#444856", fontWeight:500 }}> — {s.note}</span> : ""}
                 </div>
                 {s.amount > 0 && <div style={{ fontSize:12, fontWeight:700, color:"#22C55E", flexShrink:0 }}>${Number(s.amount).toLocaleString()}</div>}
@@ -1094,7 +1094,7 @@ function Leaderboard({ session, profile, w }) {
                   </button>
                 ))}
                 <button onClick={() => setRetainer(0)}
-                  style={{ background: retainer===0 ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.04)", border:`1px solid ${retainer===0 ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.08)"}`, borderRadius:10, color: retainer===0 ? "#C4C8D4" : "#9CA3AF", fontSize:13, fontWeight:700, padding:"12px 16px", cursor:"pointer", fontFamily:"inherit", transition:"all 0.15s" }}>
+                  style={{ background: retainer===0 ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.04)", border:`1px solid ${retainer===0 ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.08)"}`, borderRadius:10, color: retainer===0 ? "#D6DAE2" : "#9CA3AF", fontSize:13, fontWeight:700, padding:"12px 16px", cursor:"pointer", fontFamily:"inherit", transition:"all 0.15s" }}>
                   No Retainer
                 </button>
               </div>
@@ -1125,7 +1125,7 @@ function Leaderboard({ session, profile, w }) {
           <div style={{ fontSize:20 }}>{MEDALS[myRank-1] ?? `#${myRank}`}</div>
           <div>
             <div style={{ fontSize:11, fontWeight:700, color:"#CCFF00", letterSpacing:1.5, textTransform:"uppercase" }}>Your Rank</div>
-            <div style={{ fontSize:13, fontWeight:600, color:"#C4C8D4" }}>{myEntry.count} {myEntry.count === 1 ? "sale" : "sales"}{myEntry.total > 0 ? ` · $${myEntry.total.toLocaleString()}` : ""}</div>
+            <div style={{ fontSize:13, fontWeight:600, color:"#D6DAE2" }}>{myEntry.count} {myEntry.count === 1 ? "sale" : "sales"}{myEntry.total > 0 ? ` · $${myEntry.total.toLocaleString()}` : ""}</div>
           </div>
         </div>
       )}
@@ -1150,7 +1150,7 @@ function Leaderboard({ session, profile, w }) {
                   {rep.name[0]?.toUpperCase()}
                 </div>
                 <div style={{ flex:1, minWidth:0 }}>
-                  <div style={{ fontSize:14, fontWeight:700, color: isMe ? "#F2F4F8" : "#C4C8D4", lineHeight:1 }}>{rep.name}{isMe ? <span style={{ fontSize:9, fontWeight:700, color:"#CCFF00", letterSpacing:1.5, marginLeft:8, textTransform:"uppercase" }}>you</span> : ""}</div>
+                  <div style={{ fontSize:14, fontWeight:700, color: isMe ? "#F2F4F8" : "#D6DAE2", lineHeight:1 }}>{rep.name}{isMe ? <span style={{ fontSize:9, fontWeight:700, color:"#CCFF00", letterSpacing:1.5, marginLeft:8, textTransform:"uppercase" }}>you</span> : ""}</div>
                   <div style={{ fontSize:11, color:"#444856", marginTop:3, display:"flex", gap:8 }}>
                     {rep.total > 0 && <span style={{ color:"#22C55E66" }}>${rep.total.toLocaleString()}</span>}
                     {rep.retainerTotal > 0 && <span style={{ color:"#06D6F066" }}>+${rep.retainerTotal.toLocaleString()}/mo retainer</span>}
@@ -1158,7 +1158,7 @@ function Leaderboard({ session, profile, w }) {
                 </div>
                 <div style={{ textAlign:"right", flexShrink:0 }}>
                   <div style={{ fontSize:dk?26:22, fontWeight:900, color: i===0 ? "#FFD700" : isMe ? "#CCFF00" : "#666C7E", lineHeight:1, letterSpacing:"-0.02em" }}>{rep.count}</div>
-                  <div style={{ fontSize:9, color:"#3A3E4A", textTransform:"uppercase", letterSpacing:1.5, fontWeight:700, marginTop:3 }}>{rep.count === 1 ? "sale" : "sales"}</div>
+                  <div style={{ fontSize:9, color:"#5E6376", textTransform:"uppercase", letterSpacing:1.5, fontWeight:700, marginTop:3 }}>{rep.count === 1 ? "sale" : "sales"}</div>
                 </div>
               </div>
             );
@@ -1179,21 +1179,21 @@ function Leaderboard({ session, profile, w }) {
                     {(repProfiles[s.user_id] || "R")[0]?.toUpperCase()}
                   </div>
                   <div style={{ flex:1, minWidth:0 }}>
-                    <span style={{ fontSize:12, fontWeight:600, color:"#C4C8D4" }}>{repProfiles[s.user_id] || "Rep"}</span>
+                    <span style={{ fontSize:12, fontWeight:600, color:"#D6DAE2" }}>{repProfiles[s.user_id] || "Rep"}</span>
                     {s.note && <span style={{ fontSize:11, color:"#444856" }}> — {s.note}</span>}
                   </div>
                   <div style={{ display:"flex", flexDirection:"column", alignItems:"flex-end", gap:2, flexShrink:0 }}>
                     {s.amount > 0 && <div style={{ fontSize:13, fontWeight:700, color:"#22C55E" }}>${Number(s.amount).toLocaleString()}</div>}
                     {s.retainer > 0 && <div style={{ fontSize:10, fontWeight:600, color:"#06D6F0" }}>+${Number(s.retainer).toLocaleString()}/mo</div>}
                   </div>
-                  <div style={{ fontSize:10, color:"#3A3E4A", flexShrink:0 }}>{new Date(s.sale_date).toLocaleDateString("en-US",{month:"short",day:"numeric"})}</div>
+                  <div style={{ fontSize:10, color:"#5E6376", flexShrink:0 }}>{new Date(s.sale_date).toLocaleDateString("en-US",{month:"short",day:"numeric"})}</div>
                   {isOwn && (
                     <button onClick={async () => {
                       await supabase.from("sales").delete().eq("id", s.id);
                       setSales(prev => prev.filter(x => x.id !== s.id));
-                    }} style={{ background:"none", border:"none", color:"#3A3E4A", fontSize:16, cursor:"pointer", padding:"0 2px", lineHeight:1, flexShrink:0, transition:"color 0.15s" }}
+                    }} style={{ background:"none", border:"none", color:"#5E6376", fontSize:16, cursor:"pointer", padding:"0 2px", lineHeight:1, flexShrink:0, transition:"color 0.15s" }}
                       onMouseEnter={e => e.target.style.color="#FF3370"}
-                      onMouseLeave={e => e.target.style.color="#3A3E4A"}>
+                      onMouseLeave={e => e.target.style.color="#5E6376"}>
                       ×
                     </button>
                   )}
@@ -1254,7 +1254,7 @@ function Leaderboard({ session, profile, w }) {
 
         {/* Bonus tier cards */}
         {bonuses.length === 0 && !showAddBonus ? (
-          <div style={{ fontSize:12, color:"#3A3E4A", padding:"20px 0" }}>{isAdmin ? "No bonus tiers set yet. Add one above." : "No bonuses set this month yet."}</div>
+          <div style={{ fontSize:12, color:"#5E6376", padding:"20px 0" }}>{isAdmin ? "No bonus tiers set yet. Add one above." : "No bonuses set this month yet."}</div>
         ) : (
           <div style={{ display:"grid", gridTemplateColumns:dk?"repeat(auto-fill, minmax(220px, 1fr))":"1fr", gap:10 }}>
             {bonuses.map(b => {
@@ -1267,19 +1267,19 @@ function Leaderboard({ session, profile, w }) {
               return (
                 <div key={b.id} style={{ background: reached ? "rgba(255,215,0,0.06)" : "rgba(255,255,255,0.025)", border:`1px solid ${reached ? "rgba(255,215,0,0.2)" : "rgba(255,255,255,0.07)"}`, borderRadius:14, padding:"16px 18px", position:"relative" }}>
                   {reached && <div style={{ position:"absolute", top:12, right:12, fontSize:9, fontWeight:800, color:"#FFD700", letterSpacing:1.5, textTransform:"uppercase" }}>✓ Reached</div>}
-                  <div style={{ fontSize:22, fontWeight:900, color: reached ? "#FFD700" : "#C4C8D4", lineHeight:1, marginBottom:4 }}>${Number(b.amount).toLocaleString()}</div>
+                  <div style={{ fontSize:22, fontWeight:900, color: reached ? "#FFD700" : "#D6DAE2", lineHeight:1, marginBottom:4 }}>${Number(b.amount).toLocaleString()}</div>
                   <div style={{ fontSize:12, fontWeight:700, color: reached ? "#FFD700" : "#9CA3AF", marginBottom:b.description?4:0 }}>{b.label}</div>
                   {b.threshold != null && (
                     <div style={{ fontSize:10, color:"#444856", marginBottom:b.description?4:0 }}>{b.threshold} {b.threshold===1?"sale":"sales"} needed{b.threshold != null && ` · ${myCount}/${b.threshold} this month`}</div>
                   )}
-                  {b.description && <div style={{ fontSize:11, color:"#3A3E4A" }}>{b.description}</div>}
+                  {b.description && <div style={{ fontSize:11, color:"#5E6376" }}>{b.description}</div>}
                   {isAdmin && (
                     <div style={{ display:"flex", gap:8, marginTop:12 }}>
                       <button onClick={() => { setEditingBonus(b); setBonusForm({ label:b.label, threshold:b.threshold??'', amount:b.amount, description:b.description??'' }); setShowAddBonus(false); }}
                         style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:6, color:"#666C7E", fontSize:10, fontWeight:700, padding:"5px 12px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", letterSpacing:1 }}>Edit</button>
                       <button onClick={() => deleteBonus(b.id)}
-                        style={{ background:"none", border:"none", color:"#3A3E4A", fontSize:10, fontWeight:700, padding:"5px 8px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", letterSpacing:1, transition:"color 0.15s" }}
-                        onMouseEnter={e=>e.target.style.color="#DC2626"} onMouseLeave={e=>e.target.style.color="#3A3E4A"}>Delete</button>
+                        style={{ background:"none", border:"none", color:"#5E6376", fontSize:10, fontWeight:700, padding:"5px 8px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", letterSpacing:1, transition:"color 0.15s" }}
+                        onMouseEnter={e=>e.target.style.color="#CCFF00"} onMouseLeave={e=>e.target.style.color="#5E6376"}>Delete</button>
                     </div>
                   )}
                 </div>
@@ -1292,6 +1292,16 @@ function Leaderboard({ session, profile, w }) {
     </div>
   );
 }
+
+const TIERS = [
+  { v: "trial",    label: "Trial",    short: "TRIAL", emoji: "🆕", color: "#06D6F0" },
+  { v: "bronze",   label: "Bronze",   short: "T1",    emoji: "🟤", color: "#B8732A" },
+  { v: "silver",   label: "Silver",   short: "T2",    emoji: "⚪", color: "#C0C8D8" },
+  { v: "gold",     label: "Gold",     short: "T3",    emoji: "🟡", color: "#FFD700" },
+  { v: "platinum", label: "Platinum", short: "T4",    emoji: "🟣", color: "#A78BFA" },
+  { v: "diamond",  label: "Diamond",  short: "T5",    emoji: "💎", color: "#CCFF00" },
+];
+const TIER_BY_VALUE = Object.fromEntries(TIERS.map(t => [t.v, t]));
 
 function AdminPanel({ profile, onBack, w, onSignOut }) {
   const [users, setUsers] = useState([]);
@@ -1329,6 +1339,12 @@ function AdminPanel({ profile, onBack, w, onSignOut }) {
     const newRole = currentRole === "admin" ? "rep" : "admin";
     await supabase.from("profiles").update({ role: newRole }).eq("id", userId);
     setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
+  };
+
+  const setTier = async (userId, tier) => {
+    const next = tier || null;
+    await supabase.from("profiles").update({ tier: next }).eq("id", userId);
+    setUsers(prev => prev.map(u => u.id === userId ? { ...u, tier: next } : u));
   };
 
   return (
@@ -1375,7 +1391,14 @@ function AdminPanel({ profile, onBack, w, onSignOut }) {
                 </div>
                 <div style={{ flex:1, minWidth:140 }}>
                   <div style={{ fontSize:15, fontWeight:700, color:"#EEF2F8" }}>{u.name || "—"}</div>
-                  <span style={{ display:"inline-block", marginTop:4, fontSize:9, fontWeight:800, color: u.role === "admin" ? "#F59E0B" : "#06D6F0", letterSpacing:2, textTransform:"uppercase", background: u.role === "admin" ? "rgba(245,158,11,0.1)" : "rgba(6,214,240,0.1)", padding:"3px 9px", borderRadius:5, border:`1px solid ${u.role === "admin" ? "rgba(245,158,11,0.2)" : "rgba(6,214,240,0.2)"}` }}>{u.role}</span>
+                  <div style={{ display:"flex", gap:6, marginTop:4, flexWrap:"wrap" }}>
+                    <span style={{ display:"inline-block", fontSize:9, fontWeight:800, color: u.role === "admin" ? "#F59E0B" : "#06D6F0", letterSpacing:2, textTransform:"uppercase", background: u.role === "admin" ? "rgba(245,158,11,0.1)" : "rgba(6,214,240,0.1)", padding:"3px 9px", borderRadius:5, border:`1px solid ${u.role === "admin" ? "rgba(245,158,11,0.2)" : "rgba(6,214,240,0.2)"}` }}>{u.role}</span>
+                    {u.tier && TIER_BY_VALUE[u.tier] && (
+                      <span style={{ display:"inline-block", fontSize:9, fontWeight:800, color: TIER_BY_VALUE[u.tier].color, letterSpacing:2, textTransform:"uppercase", background:`${TIER_BY_VALUE[u.tier].color}1A`, padding:"3px 9px", borderRadius:5, border:`1px solid ${TIER_BY_VALUE[u.tier].color}33` }}>
+                        {TIER_BY_VALUE[u.tier].emoji} {TIER_BY_VALUE[u.tier].label} · {TIER_BY_VALUE[u.tier].short}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div style={{ display:"flex", gap:dk?24:16, flexWrap:"wrap" }}>
                   {[
@@ -1389,6 +1412,13 @@ function AdminPanel({ profile, onBack, w, onSignOut }) {
                     </div>
                   ))}
                 </div>
+                <select value={u.tier ?? ""} onChange={e => setTier(u.id, e.target.value)}
+                  style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", color:"#D6DAE2", fontSize:11, fontWeight:700, cursor:"pointer", padding:"9px 12px", borderRadius:10, fontFamily:"inherit", letterSpacing:0.5, flexShrink:0, outline:"none" }}>
+                  <option value="">— No tier —</option>
+                  {TIERS.map(t => (
+                    <option key={t.v} value={t.v}>{t.emoji} {t.label} ({t.short})</option>
+                  ))}
+                </select>
                 {u.id !== profile.id && (
                   <button onClick={() => toggleRole(u.id, u.role)} style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", color:"#7E8595", fontSize:10, fontWeight:700, cursor:"pointer", padding:"9px 16px", borderRadius:10, fontFamily:"inherit", letterSpacing:1.5, flexShrink:0, textTransform:"uppercase", transition:"all 0.2s" }}>
                     {u.role === "admin" ? "Make Rep" : "Make Admin"}
