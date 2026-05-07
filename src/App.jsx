@@ -251,34 +251,87 @@ const LINKS = [
 const GLOBAL_CSS = `
 @keyframes fadeUp { from { opacity:0; transform:translateY(20px) } to { opacity:1; transform:translateY(0) } }
 @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
-@keyframes glow { 0%,100% { box-shadow:0 0 30px rgba(204,255,0,0.15),0 0 60px rgba(204,255,0,0.06) } 50% { box-shadow:0 0 50px rgba(204,255,0,0.28),0 0 90px rgba(204,255,0,0.12) } }
+@keyframes glow { 0%,100% { box-shadow:0 0 30px rgba(204,255,0,0.18),0 0 60px rgba(204,255,0,0.08) } 50% { box-shadow:0 0 60px rgba(204,255,0,0.36),0 0 110px rgba(204,255,0,0.16) } }
 @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.04)} }
 @keyframes gradShift { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
 @keyframes borderSpin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
 @keyframes loginGlow { 0%,100%{opacity:.5} 50%{opacity:1} }
+@keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+@keyframes auroraDrift { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(40px,-30px) scale(1.08)} 66%{transform:translate(-30px,30px) scale(0.95)} }
+@keyframes slideIn { from{opacity:0;transform:translateX(-12px)} to{opacity:1;transform:translateX(0)} }
+@keyframes popIn { from{opacity:0;transform:scale(0.92)} to{opacity:1;transform:scale(1)} }
 
 *{margin:0;padding:0;box-sizing:border-box}
-html,body,#root{min-height:100dvh;background:#15171E}
-body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
-::selection{background:rgba(204,255,0,0.28);color:#fff}
-::-webkit-scrollbar{width:5px}
-::-webkit-scrollbar-track{background:#15171E}
-::-webkit-scrollbar-thumb{background:#33363F;border-radius:10px}
-::-webkit-scrollbar-thumb:hover{background:#525866}
+html,body,#root{min-height:100dvh;background:#0E0F14}
+body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden;font-family:'Plus Jakarta Sans',system-ui,sans-serif;letter-spacing:-0.005em}
+::selection{background:rgba(204,255,0,0.32);color:#15171E}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:10px;transition:background 0.2s}
+::-webkit-scrollbar-thumb:hover{background:rgba(204,255,0,0.3)}
 input::placeholder{color:#3A3D47}
+button{font-family:inherit}
 
+/* Backgrounds */
 .dotgrid {
-  background-image: radial-gradient(circle, rgba(255,255,255,0.035) 1px, transparent 1px);
-  background-size: 28px 28px;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+.aurora-bg {
+  position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden;
+}
+.aurora-blob {
+  position:absolute; border-radius:50%; filter:blur(80px); opacity:0.55; animation:auroraDrift 22s ease-in-out infinite;
+}
+.aurora-1 { width:520px; height:520px; top:-180px; left:-120px; background:radial-gradient(circle,rgba(204,255,0,0.18),transparent 65%); }
+.aurora-2 { width:620px; height:620px; top:30%; right:-200px; background:radial-gradient(circle,rgba(99,102,241,0.13),transparent 65%); animation-delay:-7s; }
+.aurora-3 { width:480px; height:480px; bottom:-160px; left:30%; background:radial-gradient(circle,rgba(245,158,11,0.10),transparent 65%); animation-delay:-14s; }
+
+/* Glass surface */
+.glass {
+  background: linear-gradient(180deg, rgba(24,26,33,0.85), rgba(18,20,26,0.78));
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid rgba(255,255,255,0.07);
+}
+.glass-soft {
+  background: linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0.012));
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+/* Sticky header chrome */
+.app-header {
+  position:sticky; top:0; z-index:30;
+  background: linear-gradient(180deg, rgba(14,15,20,0.92), rgba(14,15,20,0.72));
+  backdrop-filter: blur(22px) saturate(140%);
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
 }
 
 /* Cards */
-.card-hover { transition: transform 0.28s cubic-bezier(0.4,0,0.2,1), box-shadow 0.28s ease, border-color 0.28s ease }
-.card-hover:hover { transform:translateY(-3px); border-color:rgba(255,255,255,0.1) !important; box-shadow:0 16px 48px rgba(0,0,0,0.55), 0 0 0 1px rgba(204,255,0,0.1) !important }
+.card-hover { transition: transform 0.32s cubic-bezier(0.4,0,0.2,1), box-shadow 0.32s ease, border-color 0.32s ease, background 0.32s ease }
+.card-hover:hover { transform:translateY(-4px); border-color:rgba(204,255,0,0.28) !important; box-shadow:0 22px 56px rgba(0,0,0,0.55), 0 0 0 1px rgba(204,255,0,0.12), 0 0 40px rgba(204,255,0,0.08) !important }
+
+/* Dashboard cards */
+.dash-card {
+  position:relative;
+  background: linear-gradient(160deg, rgba(22,24,31,0.92), rgba(14,15,20,0.94));
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 20px;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04);
+  transition: transform 0.32s cubic-bezier(0.4,0,0.2,1), border-color 0.32s ease, box-shadow 0.32s ease;
+  overflow:hidden;
+}
+.dash-card::before {
+  content:""; position:absolute; inset:0; pointer-events:none; opacity:0; transition:opacity 0.32s ease;
+  background: radial-gradient(600px circle at var(--mx,50%) var(--my,0%), rgba(204,255,0,0.08), transparent 40%);
+}
+.dash-card:hover { transform:translateY(-3px); border-color:rgba(255,255,255,0.12); box-shadow:0 18px 48px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06); }
+.dash-card:hover::before { opacity:1; }
 
 /* Accordion */
 .acc-btn { transition: background 0.22s ease }
-.acc-btn:hover { background:#1A1D24 !important }
+.acc-btn:hover { background:rgba(255,255,255,0.04) !important }
 
 /* Nav back */
 .back-btn { transition: all 0.2s }
@@ -290,14 +343,51 @@ input::placeholder{color:#3A3D47}
 .play-pulse { animation: pulse 2.5s ease-in-out infinite }
 
 /* Stat cards */
-.stat-card { transition: transform 0.22s ease, box-shadow 0.22s ease }
-.stat-card:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,0.35) !important }
+.stat-card { transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease }
+.stat-card:hover { transform:translateY(-2px); box-shadow:0 10px 30px rgba(0,0,0,0.4) !important }
 
 /* Quiz options */
 .quiz-opt { transition: all 0.18s ease }
 .quiz-opt:hover:not(:disabled) { transform:translateX(3px) }
 
-/* Gradient text utility */
+/* Tab pills */
+.tab-pill {
+  position:relative; background:none; border:none; cursor:pointer;
+  font-family:inherit; font-weight:700; letter-spacing:1.8px; text-transform:uppercase;
+  color:#5E6376; transition: color 0.22s ease;
+  border-radius:10px;
+}
+.tab-pill:hover { color:#A0A4B0 }
+.tab-pill.active { color:#15171E }
+.tab-pill .tab-bg {
+  position:absolute; inset:0; border-radius:10px; opacity:0;
+  background:linear-gradient(135deg,#CCFF00,#A8D900);
+  box-shadow: 0 4px 16px rgba(204,255,0,0.35), inset 0 1px 0 rgba(255,255,255,0.4);
+  transition: opacity 0.28s ease;
+  z-index:0;
+}
+.tab-pill.active .tab-bg { opacity:1 }
+.tab-pill > span { position:relative; z-index:1 }
+
+/* Buttons */
+.btn-primary {
+  background:linear-gradient(135deg,#CCFF00,#A8D900);
+  color:#15171E; font-weight:800; letter-spacing:1.2px; text-transform:uppercase;
+  border:none; border-radius:10px; cursor:pointer;
+  box-shadow:0 6px 20px rgba(204,255,0,0.32), inset 0 1px 0 rgba(255,255,255,0.4);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.btn-primary:hover { transform:translateY(-1px); box-shadow:0 10px 28px rgba(204,255,0,0.45), inset 0 1px 0 rgba(255,255,255,0.5) }
+.btn-primary:active { transform:translateY(0) }
+
+.btn-ghost {
+  background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);
+  color:#9098A8; font-weight:700; letter-spacing:1.5px; text-transform:uppercase;
+  border-radius:10px; cursor:pointer; transition: all 0.18s ease;
+}
+.btn-ghost:hover { background:rgba(255,255,255,0.07); color:#D6DAE2; border-color:rgba(255,255,255,0.14) }
+
+/* Gradient text */
 .red-gradient-text {
   background: linear-gradient(135deg, #DDFF40 0%, #CCFF00 50%, #E5FF1A 100%);
   background-size: 200% auto;
@@ -305,6 +395,19 @@ input::placeholder{color:#3A3D47}
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+.title-display {
+  font-family:'Bebas Neue',sans-serif; letter-spacing:0.32em; line-height:1;
+}
+
+/* Profile pill */
+.profile-pill {
+  display:flex; align-items:center; gap:10px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px; padding: 6px 14px 6px 6px; cursor:pointer;
+  transition: all 0.2s ease;
+}
+.profile-pill:hover { border-color:rgba(204,255,0,0.25); background:linear-gradient(180deg, rgba(204,255,0,0.05), rgba(204,255,0,0.01)) }
 `;
 
 /* ═══════════════════════════════════════════
@@ -663,28 +766,37 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
   const recentSales = sales.slice(0, 5);
   const MEDALS = ["🥇","🥈","🥉"];
 
+  const onCardMove = (e) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    e.currentTarget.style.setProperty("--mx", `${e.clientX - r.left}px`);
+    e.currentTarget.style.setProperty("--my", `${e.clientY - r.top}px`);
+  };
+
   const Card = ({ title, accent, action, actionOnClick, children }) => (
-    <div style={{ background:"linear-gradient(135deg,rgba(16,18,24,0.98),rgba(11,12,16,0.98))", border:"1px solid rgba(255,255,255,0.055)", borderRadius:16, padding:dk?"20px 22px":"16px 18px", boxShadow:"0 4px 20px rgba(0,0,0,0.3)" }}>
-      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:14 }}>
+    <div className="dash-card" onMouseMove={onCardMove} style={{ padding:dk?"22px 24px":"18px 20px" }}>
+      <div style={{ position:"absolute", top:0, left:0, right:0, height:2, background:`linear-gradient(90deg,transparent,${accent}80,transparent)`, opacity:0.4 }} />
+      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:16, position:"relative" }}>
         <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-          <div style={{ width:6, height:6, borderRadius:3, background:accent }} />
+          <div style={{ width:7, height:7, borderRadius:4, background:accent, boxShadow:`0 0 12px ${accent}` }} />
           <div style={{ fontSize:10, fontWeight:800, color:accent, letterSpacing:2.5, textTransform:"uppercase" }}>{title}</div>
         </div>
         {action && (
           <button onClick={actionOnClick}
-            style={{ background:"none", border:"none", color:"#666C7E", fontSize:10, fontWeight:700, letterSpacing:1.5, cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", padding:0 }}>
+            style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.06)", color:"#9098A8", fontSize:9.5, fontWeight:700, letterSpacing:1.5, cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", padding:"6px 10px", borderRadius:8, transition:"all 0.18s" }}
+            onMouseEnter={e => { e.currentTarget.style.color="#F2F4F8"; e.currentTarget.style.background="rgba(204,255,0,0.08)"; e.currentTarget.style.borderColor="rgba(204,255,0,0.25)"; }}
+            onMouseLeave={e => { e.currentTarget.style.color="#9098A8"; e.currentTarget.style.background="rgba(255,255,255,0.04)"; e.currentTarget.style.borderColor="rgba(255,255,255,0.06)"; }}>
             {action} →
           </button>
         )}
       </div>
-      {children}
+      <div style={{ position:"relative" }}>{children}</div>
     </div>
   );
 
   if (loading) return <div style={{ textAlign:"center", padding:60, color:"#7E8290", fontSize:13 }}>Loading dashboard…</div>;
 
   return (
-    <div style={{ animation:"fadeUp 0.35s ease", display:"grid", gridTemplateColumns: wd ? "1fr 1fr" : "1fr", gap:dk?14:12 }}>
+    <div style={{ animation:"fadeUp 0.35s ease", display:"grid", gridTemplateColumns: wd ? "1fr 1fr" : "1fr", gap:dk?18:14 }}>
 
       {/* Your Week */}
       <Card title="Your Week" accent="#CCFF00">
@@ -1619,7 +1731,7 @@ export default function App() {
   const signOut = async () => { await supabase.auth.signOut(); setView(null); };
 
   const FONT_LINK = "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap";
-  const baseStyle = { minHeight:"100dvh", background:"#15171E", color:"#FFF" };
+  const baseStyle = { minHeight:"100dvh", background:"#0E0F14", color:"#FFF" };
 
   const bc = { MODULE:"#CCFF00", BOOTCAMP:"#F59E0B", REFERENCE:"#06D6F0", QUIZ:"#10B981" };
   const trainingGroups = [
@@ -1688,97 +1800,109 @@ export default function App() {
       <style>{GLOBAL_CSS}</style>
       <link href={FONT_LINK} rel="stylesheet" />
 
-      <div style={{ position:"fixed", top:0, left:"50%", transform:"translateX(-50%)", width:1000, height:600, background:"radial-gradient(ellipse 60% 50% at 50% 0%, rgba(204,255,0,0.07) 0%, transparent 70%)", pointerEvents:"none", zIndex:0 }} />
+      {/* Aurora background */}
+      <div className="aurora-bg" aria-hidden="true">
+        <div className="aurora-blob aurora-1" />
+        <div className="aurora-blob aurora-2" />
+        <div className="aurora-blob aurora-3" />
+      </div>
 
-      {/* Header */}
-      <div style={{ position:"relative", zIndex:1, padding:wd?"36px 56px 32px":dk?"28px 36px 26px":"20px 20px 20px" }}>
-        <div style={{ maxWidth:1300, margin:"0 auto" }}>
+      {/* Sticky header */}
+      <div className="app-header">
+        <div style={{ padding:wd?"22px 56px 0":dk?"18px 36px 0":"14px 20px 0" }}>
+          <div style={{ maxWidth:1300, margin:"0 auto" }}>
 
-          {/* Top row: logo + actions */}
-          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:dk?24:20, animation:"fadeUp 0.5s ease" }}>
+            {/* Top row: logo + actions */}
+            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:dk?18:14, animation:"fadeUp 0.5s ease" }}>
 
-            {/* Logo */}
-            <div style={{ display:"flex", alignItems:"center", gap:14 }}>
-              <div style={{ width:38, height:38, borderRadius:10, background:"linear-gradient(135deg,#CCFF00,#5C7A00)", display:"flex", alignItems:"center", justifyContent:"center", boxShadow:"0 4px 16px rgba(204,255,0,0.35)", animation:"glow 3.5s ease-in-out infinite", flexShrink:0 }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15171E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-              </div>
-              <div>
-                <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?22:18, letterSpacing:8, color:"#DC2626", lineHeight:1 }}>REDLINE</div>
-                <div style={{ fontSize:9, fontWeight:700, color:"#5E6376", letterSpacing:3, textTransform:"uppercase", marginTop:3 }}>Portal</div>
-              </div>
-            </div>
-
-            {/* Right actions */}
-            <div style={{ display:"flex", alignItems:"center", gap:8, animation:"fadeUp 0.5s ease 0.06s both" }}>
-              {profile?.role === "admin" && (
-                <button onClick={() => setView("__admin")} style={{ background:"rgba(245,158,11,0.08)", border:"1px solid rgba(245,158,11,0.18)", color:"#F59E0B", fontSize:10, fontWeight:700, cursor:"pointer", padding:"8px 14px", borderRadius:8, fontFamily:"inherit", letterSpacing:1.5, textTransform:"uppercase", transition:"all 0.18s" }}>Admin</button>
-              )}
-
-              {/* Avatar + name edit grouped */}
-              <div style={{ position:"relative", display:"flex", alignItems:"center", gap:0 }}>
-                <div style={{ display:"flex", alignItems:"center", gap:10, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.07)", borderRadius:10, padding:"6px 12px 6px 6px", cursor:"pointer" }}
-                  onClick={() => { setShowNameEdit(v => !v); setNameEdit(profile?.name ?? ""); }}>
-                  <div style={{ width:30, height:30, borderRadius:8, background:"linear-gradient(135deg,#CCFF00,#6E9100)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Plus Jakarta Sans',sans-serif", fontSize:13, fontWeight:800, color:"#15171E", flexShrink:0, boxShadow:"0 2px 10px rgba(204,255,0,0.4)" }}>
-                    {profile?.name?.[0]?.toUpperCase() ?? "R"}
-                  </div>
-                  <span style={{ fontSize:12, fontWeight:600, color:"#D6DAE2", letterSpacing:0.2 }}>{profile?.name ?? "Rep"}</span>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#5E6376" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft:2 }}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              {/* Logo */}
+              <div style={{ display:"flex", alignItems:"center", gap:14 }}>
+                <div style={{ width:42, height:42, borderRadius:12, background:"linear-gradient(135deg,#CCFF00,#88AB00)", display:"flex", alignItems:"center", justifyContent:"center", boxShadow:"0 6px 22px rgba(204,255,0,0.4), inset 0 1px 0 rgba(255,255,255,0.4)", animation:"glow 3.5s ease-in-out infinite", flexShrink:0 }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#15171E" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                 </div>
-                {showNameEdit && (
-                  <div style={{ position:"absolute", top:"calc(100% + 10px)", right:0, background:"#16181F", border:"1px solid rgba(255,255,255,0.09)", borderRadius:14, padding:18, width:230, zIndex:200, boxShadow:"0 16px 48px rgba(0,0,0,0.7)" }}>
-                    <div style={{ fontSize:10, fontWeight:700, color:"#444856", letterSpacing:2.5, textTransform:"uppercase", marginBottom:10 }}>Display Name</div>
-                    <input
-                      autoFocus
-                      value={nameEdit}
-                      onChange={e => setNameEdit(e.target.value)}
-                      onKeyDown={e => { if (e.key === "Enter") saveName(); if (e.key === "Escape") setShowNameEdit(false); }}
-                      placeholder="Your name…"
-                      style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:500, padding:"10px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }}
-                    />
-                    <div style={{ display:"flex", gap:8, marginTop:10 }}>
-                      <button onClick={saveName} style={{ flex:1, background:"#CCFF00", border:"none", borderRadius:8, color:"#15171E", fontSize:12, fontWeight:800, letterSpacing:1, padding:"12px 0", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Save</button>
-                      <button onClick={() => setShowNameEdit(false)} style={{ flex:1, background:"rgba(255,255,255,0.06)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:8, color:"#666C7E", fontSize:12, fontWeight:700, letterSpacing:1, padding:"12px 0", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Cancel</button>
-                    </div>
-                  </div>
+                <div>
+                  <div className="title-display" style={{ fontSize:dk?24:19, color:"#F2F4F8" }}>REDLINE</div>
+                  <div style={{ fontSize:9, fontWeight:800, color:"#CCFF00", letterSpacing:3.5, textTransform:"uppercase", marginTop:3 }}>Rep Portal</div>
+                </div>
+              </div>
+
+              {/* Right actions */}
+              <div style={{ display:"flex", alignItems:"center", gap:8, animation:"fadeUp 0.5s ease 0.06s both" }}>
+                {profile?.role === "admin" && (
+                  <button onClick={() => setView("__admin")} className="btn-ghost" style={{ fontSize:10, padding:"9px 14px", color:"#F59E0B", borderColor:"rgba(245,158,11,0.22)", background:"rgba(245,158,11,0.06)" }}>Admin</button>
                 )}
-              </div>
 
-              <button onClick={signOut} style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.07)", color:"#444856", fontSize:10, fontWeight:700, cursor:"pointer", padding:"8px 14px", borderRadius:8, fontFamily:"inherit", letterSpacing:1.5, textTransform:"uppercase", transition:"all 0.18s" }}>Sign Out</button>
-            </div>
-          </div>
-
-          {/* Welcome + stats row */}
-          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:16, flexWrap:"wrap", animation:"fadeUp 0.5s ease 0.1s both" }}>
-            <p style={{ fontSize:dk?14:13, color:"#444856", margin:0, lineHeight:1.5, fontWeight:500 }}>
-              {profile?.name ? <><span style={{ color:"#D6DAE2", fontWeight:600 }}>{profile.name}</span> — </> : ""}Master every module. Close more deals.
-            </p>
-            <div style={{ display:"flex", gap:8 }}>
-              {[
-                [completedModules.size, "Done", "#22C55E"],
-                ["13", "Modules", "#CCFF00"],
-                ["2", "Camps", "#F59E0B"],
-                ["6", "Quizzes", "#10B981"],
-              ].map(([n, l, col]) => (
-                <div key={l} style={{ background:`${col}10`, border:`1px solid ${col}20`, borderRadius:10, padding:"10px 16px", textAlign:"center", minWidth:60 }}>
-                  <div style={{ fontSize:dk?22:18, fontWeight:900, color:col, lineHeight:1, letterSpacing:"-0.02em" }}>{n}</div>
-                  <div style={{ fontSize:8.5, color:`${col}70`, textTransform:"uppercase", letterSpacing:1.5, fontWeight:700, marginTop:4 }}>{l}</div>
+                {/* Avatar + name edit grouped */}
+                <div style={{ position:"relative", display:"flex", alignItems:"center", gap:0 }}>
+                  <div className="profile-pill"
+                    onClick={() => { setShowNameEdit(v => !v); setNameEdit(profile?.name ?? ""); }}>
+                    <div style={{ width:30, height:30, borderRadius:9, background:"linear-gradient(135deg,#CCFF00,#88AB00)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Plus Jakarta Sans',sans-serif", fontSize:13, fontWeight:900, color:"#15171E", flexShrink:0, boxShadow:"0 2px 10px rgba(204,255,0,0.4), inset 0 1px 0 rgba(255,255,255,0.4)" }}>
+                      {profile?.name?.[0]?.toUpperCase() ?? "R"}
+                    </div>
+                    <span style={{ fontSize:12.5, fontWeight:600, color:"#D6DAE2", letterSpacing:0.2 }}>{profile?.name ?? "Rep"}</span>
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#5E6376" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft:2 }}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  </div>
+                  {showNameEdit && (
+                    <div className="glass" style={{ position:"absolute", top:"calc(100% + 10px)", right:0, borderRadius:14, padding:18, width:240, zIndex:200, boxShadow:"0 24px 60px rgba(0,0,0,0.7)", animation:"popIn 0.18s ease" }}>
+                      <div style={{ fontSize:10, fontWeight:800, color:"#666C7E", letterSpacing:2.5, textTransform:"uppercase", marginBottom:10 }}>Display Name</div>
+                      <input
+                        autoFocus
+                        value={nameEdit}
+                        onChange={e => setNameEdit(e.target.value)}
+                        onKeyDown={e => { if (e.key === "Enter") saveName(); if (e.key === "Escape") setShowNameEdit(false); }}
+                        placeholder="Your name…"
+                        style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:9, color:"#F2F4F8", fontSize:13, fontWeight:500, padding:"11px 13px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }}
+                      />
+                      <div style={{ display:"flex", gap:8, marginTop:10 }}>
+                        <button onClick={saveName} className="btn-primary" style={{ flex:1, fontSize:12, padding:"12px 0" }}>Save</button>
+                        <button onClick={() => setShowNameEdit(false)} className="btn-ghost" style={{ flex:1, fontSize:12, padding:"12px 0" }}>Cancel</button>
+                      </div>
+                    </div>
+                  )}
                 </div>
+
+                <button onClick={signOut} className="btn-ghost" style={{ fontSize:10, padding:"9px 14px" }}>Sign Out</button>
+              </div>
+            </div>
+
+            {/* Tab Nav */}
+            <div style={{ display:"flex", gap:4, overflowX:"auto", paddingBottom:10, marginBottom:-1, animation:"fadeUp 0.5s ease 0.1s both" }}>
+              {TABS.map(t => (
+                <button key={t.key} onClick={() => setTab(t.key)}
+                  className={"tab-pill" + (tab===t.key ? " active" : "")}
+                  style={{ fontSize:10.5, padding:dk?"10px 18px":"9px 14px", whiteSpace:"nowrap" }}>
+                  <span className="tab-bg" />
+                  <span>{t.label}</span>
+                </button>
               ))}
             </div>
-          </div>
 
+          </div>
         </div>
       </div>
 
-      {/* Tab Nav */}
-      <div style={{ position:"relative", zIndex:1, padding:wd?"0 56px 0":dk?"0 36px 0":"0 20px 0" }}>
-        <div style={{ maxWidth:1300, margin:"0 auto", borderBottom:"1px solid rgba(255,255,255,0.06)", display:"flex", gap:2, paddingBottom:0 }}>
-          {TABS.map(t => (
-            <button key={t.key} onClick={() => setTab(t.key)}
-              style={{ background: tab===t.key ? `${t.color}12` : "none", border:"none", borderBottom: tab===t.key ? `2px solid ${t.color}` : "2px solid transparent", color: tab===t.key ? t.color : "#444856", fontSize:10.5, fontWeight:700, letterSpacing:2, cursor:"pointer", padding:dk?"13px 20px":"11px 14px", fontFamily:"inherit", textTransform:"uppercase", transition:"all 0.18s", marginBottom:-1, borderRadius:"6px 6px 0 0" }}>
-              {t.label}
-            </button>
-          ))}
+      {/* Welcome + stats row */}
+      <div style={{ position:"relative", zIndex:1, padding:wd?"22px 56px 0":dk?"20px 36px 0":"16px 20px 0" }}>
+        <div style={{ maxWidth:1300, margin:"0 auto", display:"flex", alignItems:"center", justifyContent:"space-between", gap:16, flexWrap:"wrap", animation:"fadeUp 0.5s ease 0.16s both" }}>
+          <div>
+            <div style={{ fontSize:dk?22:18, fontWeight:800, color:"#F2F4F8", letterSpacing:"-0.02em", lineHeight:1.2 }}>
+              {profile?.name ? <>Welcome back, <span className="red-gradient-text">{profile.name}</span></> : "Welcome back"}
+            </div>
+            <p style={{ fontSize:dk?13:12, color:"#666C7E", margin:"6px 0 0", fontWeight:500 }}>Master every module. Close more deals.</p>
+          </div>
+          <div style={{ display:"flex", gap:8 }}>
+            {[
+              [completedModules.size, "Done", "#22C55E"],
+              ["13", "Modules", "#CCFF00"],
+              ["2", "Camps", "#F59E0B"],
+              ["6", "Quizzes", "#10B981"],
+            ].map(([n, l, col]) => (
+              <div key={l} className="stat-card" style={{ background:`linear-gradient(180deg,${col}14,${col}06)`, border:`1px solid ${col}26`, borderRadius:12, padding:"11px 16px", textAlign:"center", minWidth:62 }}>
+                <div style={{ fontSize:dk?22:18, fontWeight:900, color:col, lineHeight:1, letterSpacing:"-0.02em" }}>{n}</div>
+                <div style={{ fontSize:8.5, color:`${col}90`, textTransform:"uppercase", letterSpacing:1.5, fontWeight:800, marginTop:5 }}>{l}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
