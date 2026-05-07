@@ -1271,7 +1271,6 @@ export default function App() {
   const quizItems = CATS.filter(x=>x.t==="QUIZ");
   const TABS = [
     { key:"leaderboard", label:"Leaderboard", color:"#FFD700" },
-    { key:"crm", label:"CRM", color:"#8B5CF6" },
     { key:"scheduling", label:"Scheduling", color:"#F59E0B" },
     { key:"training", label:"Training", color:"#CCFF00" },
     { key:"reference", label:"Reference", color:"#6366F1" },
@@ -1430,20 +1429,6 @@ export default function App() {
         {/* LEADERBOARD TAB */}
         {tab === "leaderboard" && (
           <Leaderboard session={session} profile={profile} w={w} />
-        )}
-
-        {/* CRM TAB */}
-        {tab === "crm" && (
-          <div style={{ animation:"fadeUp 0.35s ease" }}>
-            <div style={{ display:"flex", justifyContent:"flex-end", marginBottom:12 }}>
-              <a href={CRM_URL + "/edit"} target="_blank" rel="noreferrer"
-                style={{ display:"inline-flex", alignItems:"center", gap:8, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", color:"#8B5CF6", fontSize:11, fontWeight:700, padding:"8px 16px", borderRadius:10, textDecoration:"none", letterSpacing:1 }}>
-                Open in Sheets ↗
-              </a>
-            </div>
-            <iframe src={CRM_URL + "/preview"} title="Redline CRM"
-              style={{ width:"100%", height:"calc(100dvh - 280px)", minHeight:500, border:"1px solid rgba(255,255,255,0.06)", borderRadius:16, background:"#181A21" }} />
-          </div>
         )}
 
         {/* SCHEDULING TAB */}
