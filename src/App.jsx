@@ -816,6 +816,8 @@ export default function App() {
   ];
   const referenceItems = CATS.filter(x=>x.t==="REFERENCE");
   const quizItems = CATS.filter(x=>x.t==="QUIZ");
+  const CRM_URL = "https://docs.google.com/spreadsheets/d/1CXPnhfQYXoQ9XKRuaA6dWjwpV8Ga2zPs";
+  const SCHED_URL = "https://docs.google.com/spreadsheets/d/1HtVfIS11tMoQr3TgM_bxKv62-8yaVnUI";
 
   const wrapStyle = { minHeight:"100dvh", background:"#101114", fontFamily:"'Outfit',system-ui,sans-serif", color:"#FFF" };
   const fonts = <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />;
@@ -915,7 +917,8 @@ export default function App() {
       <div style={{ position:"relative", zIndex:1, borderBottom:"1px solid #1E2128" }}>
         <div style={{ maxWidth:1280, margin:"0 auto", padding:wd?"0 56px":dk?"0 36px":"0 20px", display:"flex", gap:4 }}>
           {[
-            { key:"links", label:"Quick Links", color:"#8B5CF6" },
+            { key:"crm", label:"CRM", color:"#8B5CF6" },
+            { key:"scheduling", label:"Scheduling", color:"#F59E0B" },
             { key:"training", label:"Training", color:"#DC2626" },
             { key:"reference", label:"Reference", color:"#3B82F6" },
             { key:"quizzes", label:"Quizzes", color:"#10B981" },
@@ -931,20 +934,31 @@ export default function App() {
       {/* Tab Content */}
       <div style={{ position:"relative", zIndex:1, maxWidth:1280, margin:"0 auto", padding:wd?"28px 56px 80px":dk?"24px 36px 80px":"20px 20px 80px" }}>
 
-        {/* LINKS TAB */}
-        {tab === "links" && (
-          <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr 1fr":dk?"1fr 1fr":"1fr", gap:dk?10:8, animation:"fadeUp 0.4s ease" }}>
-            {LINKS.map((lk,i) => (
-              <a key={i} href={lk.url} target="_blank" rel="noreferrer" className="card-hover"
-                style={{ background:"#141519", border:"1px solid #252830", borderLeft:"3px solid #8B5CF6", borderRadius:16, padding:dk?"20px 20px":"16px 14px", textDecoration:"none", display:"flex", alignItems:"center", gap:14 }}>
-                <div style={{ fontSize:22, width:44, height:44, display:"flex", alignItems:"center", justifyContent:"center", background:"#1A1D24", borderRadius:12, flexShrink:0, border:"1px solid #282B33" }}>{lk.ic}</div>
-                <div style={{ flex:1, minWidth:0 }}>
-                  <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF0F4", margin:"0 0 2px" }}>{lk.label}</h3>
-                  <p style={{ fontSize:11, color:"#6A6E78", margin:0 }}>{lk.desc}</p>
-                </div>
-                <div style={{ width:32, height:32, borderRadius:10, background:"#1A1D24", border:"1px solid #282B33", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, color:"#3A3E48", fontSize:12 }}>↗</div>
+        {/* CRM TAB */}
+        {tab === "crm" && (
+          <div style={{ animation:"fadeUp 0.4s ease" }}>
+            <div style={{ display:"flex", justifyContent:"flex-end", marginBottom:12 }}>
+              <a href={CRM_URL + "/edit"} target="_blank" rel="noreferrer"
+                style={{ display:"inline-flex", alignItems:"center", gap:8, background:"#1C1F25", border:"1px solid #282B33", color:"#8B5CF6", fontSize:11, fontWeight:700, padding:"8px 16px", borderRadius:10, textDecoration:"none", letterSpacing:1 }}>
+                Open in Sheets ↗
               </a>
-            ))}
+            </div>
+            <iframe src={CRM_URL + "/preview"} title="Redline CRM"
+              style={{ width:"100%", height:"calc(100dvh - 300px)", minHeight:500, border:"1px solid #252830", borderRadius:16, background:"#141519" }} />
+          </div>
+        )}
+
+        {/* SCHEDULING TAB */}
+        {tab === "scheduling" && (
+          <div style={{ animation:"fadeUp 0.4s ease" }}>
+            <div style={{ display:"flex", justifyContent:"flex-end", marginBottom:12 }}>
+              <a href={SCHED_URL + "/edit"} target="_blank" rel="noreferrer"
+                style={{ display:"inline-flex", alignItems:"center", gap:8, background:"#1C1F25", border:"1px solid #282B33", color:"#F59E0B", fontSize:11, fontWeight:700, padding:"8px 16px", borderRadius:10, textDecoration:"none", letterSpacing:1 }}>
+                Open in Sheets ↗
+              </a>
+            </div>
+            <iframe src={SCHED_URL + "/preview"} title="Office Scheduling"
+              style={{ width:"100%", height:"calc(100dvh - 300px)", minHeight:500, border:"1px solid #252830", borderRadius:16, background:"#141519" }} />
           </div>
         )}
 
@@ -990,7 +1004,17 @@ export default function App() {
 
         {/* REFERENCE TAB */}
         {tab === "reference" && (
-          <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr 1fr":dk?"1fr 1fr":"1fr", gap:dk?10:8, animation:"fadeUp 0.4s ease" }}>
+          <div style={{ animation:"fadeUp 0.4s ease" }}>
+            <a href="https://www.redlinewebservices.net/" target="_blank" rel="noreferrer" className="card-hover"
+              style={{ display:"flex", alignItems:"center", gap:14, background:"#141519", border:"1px solid #252830", borderLeft:"3px solid #3B82F6", borderRadius:16, padding:dk?"20px 20px":"16px 14px", textDecoration:"none", marginBottom:10 }}>
+              <div style={{ fontSize:22, width:44, height:44, display:"flex", alignItems:"center", justifyContent:"center", background:"#1A1D24", borderRadius:12, flexShrink:0, border:"1px solid #282B33" }}>🌐</div>
+              <div style={{ flex:1, minWidth:0 }}>
+                <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF0F4", margin:"0 0 2px" }}>Redline Homepage</h3>
+                <p style={{ fontSize:11, color:"#6A6E78", margin:0 }}>redlinewebservices.net</p>
+              </div>
+              <div style={{ width:32, height:32, borderRadius:10, background:"#1A1D24", border:"1px solid #282B33", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, color:"#3A3E48", fontSize:12 }}>↗</div>
+            </a>
+          <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr 1fr":dk?"1fr 1fr":"1fr", gap:dk?10:8 }}>
             {referenceItems.map((x, i) => {
               const done = completedModules.has(x.k);
               return (
@@ -1012,6 +1036,7 @@ export default function App() {
                 </div>
               );
             })}
+          </div>
           </div>
         )}
 
