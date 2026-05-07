@@ -251,7 +251,7 @@ const LINKS = [
 const GLOBAL_CSS = `
 @keyframes fadeUp { from { opacity:0; transform:translateY(20px) } to { opacity:1; transform:translateY(0) } }
 @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
-@keyframes glow { 0%,100% { box-shadow:0 0 30px rgba(220,38,38,0.15),0 0 60px rgba(220,38,38,0.06) } 50% { box-shadow:0 0 50px rgba(220,38,38,0.28),0 0 90px rgba(220,38,38,0.12) } }
+@keyframes glow { 0%,100% { box-shadow:0 0 30px rgba(204,255,0,0.15),0 0 60px rgba(204,255,0,0.06) } 50% { box-shadow:0 0 50px rgba(204,255,0,0.28),0 0 90px rgba(204,255,0,0.12) } }
 @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.04)} }
 @keyframes gradShift { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
 @keyframes borderSpin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
@@ -260,7 +260,7 @@ const GLOBAL_CSS = `
 *{margin:0;padding:0;box-sizing:border-box}
 html,body,#root{min-height:100dvh;background:#15171E}
 body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
-::selection{background:rgba(220,38,38,0.28);color:#fff}
+::selection{background:rgba(204,255,0,0.28);color:#fff}
 ::-webkit-scrollbar{width:5px}
 ::-webkit-scrollbar-track{background:#15171E}
 ::-webkit-scrollbar-thumb{background:#33363F;border-radius:10px}
@@ -274,7 +274,7 @@ input::placeholder{color:#3A3D47}
 
 /* Cards */
 .card-hover { transition: transform 0.28s cubic-bezier(0.4,0,0.2,1), box-shadow 0.28s ease, border-color 0.28s ease }
-.card-hover:hover { transform:translateY(-3px); border-color:rgba(255,255,255,0.1) !important; box-shadow:0 16px 48px rgba(0,0,0,0.55), 0 0 0 1px rgba(220,38,38,0.1) !important }
+.card-hover:hover { transform:translateY(-3px); border-color:rgba(255,255,255,0.1) !important; box-shadow:0 16px 48px rgba(0,0,0,0.55), 0 0 0 1px rgba(204,255,0,0.1) !important }
 
 /* Accordion */
 .acc-btn { transition: background 0.22s ease }
@@ -286,7 +286,7 @@ input::placeholder{color:#3A3D47}
 
 /* Video card */
 .vid-card { transition: all 0.3s ease }
-.vid-card:hover { border-color:rgba(220,38,38,0.7) !important; box-shadow:0 0 36px rgba(220,38,38,0.18) !important }
+.vid-card:hover { border-color:rgba(204,255,0,0.7) !important; box-shadow:0 0 36px rgba(204,255,0,0.18) !important }
 .play-pulse { animation: pulse 2.5s ease-in-out infinite }
 
 /* Stat cards */
@@ -299,7 +299,7 @@ input::placeholder{color:#3A3D47}
 
 /* Gradient text utility */
 .red-gradient-text {
-  background: linear-gradient(135deg, #FF4545 0%, #DC2626 50%, #FF2020 100%);
+  background: linear-gradient(135deg, #DDFF40 0%, #CCFF00 50%, #E5FF1A 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -326,7 +326,7 @@ function RichText({ text }) {
 
         if (t.startsWith("→ ") || t.startsWith("• ")) return (
           <div key={i} style={{ display:"flex", gap:12, padding:"4px 0 4px 2px" }}>
-            <span style={{ color:"#DC2626", flexShrink:0, fontSize:8, marginTop:7, width:6, height:6, borderRadius:"50%", background:"#DC2626", display:"inline-block" }}></span>
+            <span style={{ color:"#CCFF00", flexShrink:0, fontSize:8, marginTop:7, width:6, height:6, borderRadius:"50%", background:"#CCFF00", display:"inline-block" }}></span>
             <span style={{ flex:1 }}>{t.slice(2)}</span>
           </div>
         );
@@ -335,7 +335,7 @@ function RichText({ text }) {
           const sp = t.indexOf(" ");
           return (
             <div key={i} style={{ display:"flex", gap:12, padding:"6px 0", alignItems:"flex-start" }}>
-              <span style={{ background:"#DC262615", color:"#DC2626", width:28, height:28, borderRadius:8, display:"flex", alignItems:"center", justifyContent:"center", fontSize:13, flexShrink:0, fontWeight:700 }}>{t.slice(0,sp)}</span>
+              <span style={{ background:"#CCFF0015", color:"#CCFF00", width:28, height:28, borderRadius:8, display:"flex", alignItems:"center", justifyContent:"center", fontSize:13, flexShrink:0, fontWeight:700 }}>{t.slice(0,sp)}</span>
               <span style={{ fontWeight:600, color:"#E8ECF0", paddingTop:3 }}>{t.slice(sp+1)}</span>
             </div>
           );
@@ -355,8 +355,8 @@ function RichText({ text }) {
 
         const isSub = /^[A-Z][A-Z\s&\/\-—:()]{6,}$/.test(t) || (/^[A-Z🔵🔴🔥✅📌]/.test(t) && t.endsWith(":") && t.length < 60);
         if (isSub) return (
-          <div key={i} style={{ fontSize:10.5, fontWeight:700, color:"#DC2626", letterSpacing:2, marginTop:20, marginBottom:6, textTransform:"uppercase", display:"flex", alignItems:"center", gap:8 }}>
-            <span style={{ width:12, height:1, background:"#DC262650" }}></span>
+          <div key={i} style={{ fontSize:10.5, fontWeight:700, color:"#CCFF00", letterSpacing:2, marginTop:20, marginBottom:6, textTransform:"uppercase", display:"flex", alignItems:"center", gap:8 }}>
+            <span style={{ width:12, height:1, background:"#CCFF0050" }}></span>
             {t.replace(/:$/, "")}
           </div>
         );
@@ -379,7 +379,7 @@ function RichText({ text }) {
             return (
               <div key={i} style={{ padding:"4px 0" }}>
                 {label && <span style={{ color:"#EEF0F4", fontWeight:500 }}>{label} </span>}
-                <a href={urlMatch[0]} target="_blank" rel="noreferrer" style={{ color:"#DC2626", wordBreak:"break-all", fontSize:12, textDecoration:"none", borderBottom:"1px solid #DC262640" }}>{urlMatch[0]}</a>
+                <a href={urlMatch[0]} target="_blank" rel="noreferrer" style={{ color:"#CCFF00", wordBreak:"break-all", fontSize:12, textDecoration:"none", borderBottom:"1px solid #CCFF0040" }}>{urlMatch[0]}</a>
               </div>
             );
           }
@@ -424,30 +424,30 @@ function Login() {
   const fieldStyle = (hasErr) => ({
     width:"100%", padding:"15px 20px",
     background:"rgba(7,8,12,0.9)",
-    border: `1.5px solid ${hasErr ? "#DC2626" : "rgba(255,255,255,0.07)"}`,
+    border: `1.5px solid ${hasErr ? "#FF3370" : "rgba(255,255,255,0.07)"}`,
     borderRadius:14, color:"#F2F4F8", fontSize:15, outline:"none",
     boxSizing:"border-box", fontFamily:"inherit", transition:"all 0.22s ease",
   });
 
-  const onFocus = e => { e.target.style.borderColor = "rgba(220,38,38,0.6)"; e.target.style.boxShadow = "0 0 0 4px rgba(220,38,38,0.08)"; };
-  const onBlur  = (e, hasErr) => { e.target.style.borderColor = hasErr ? "#DC2626" : "rgba(255,255,255,0.07)"; e.target.style.boxShadow = "none"; };
+  const onFocus = e => { e.target.style.borderColor = "rgba(204,255,0,0.6)"; e.target.style.boxShadow = "0 0 0 4px rgba(204,255,0,0.08)"; };
+  const onBlur  = (e, hasErr) => { e.target.style.borderColor = hasErr ? "#FF3370" : "rgba(255,255,255,0.07)"; e.target.style.boxShadow = "none"; };
 
   return (
     <div className="dotgrid" style={{ minHeight:"100dvh", background:"#15171E", display:"flex", alignItems:"center", justifyContent:"center", padding:24, position:"relative", overflow:"hidden" }}>
-      <div style={{ position:"absolute", top:"20%", left:"50%", transform:"translate(-50%,-50%)", width:700, height:700, background:"radial-gradient(circle, rgba(220,38,38,0.08) 0%, transparent 65%)", pointerEvents:"none" }} />
-      <div style={{ position:"absolute", bottom:0, left:"50%", transform:"translateX(-50%)", width:900, height:280, background:"radial-gradient(ellipse, rgba(220,38,38,0.04) 0%, transparent 70%)", pointerEvents:"none" }} />
+      <div style={{ position:"absolute", top:"20%", left:"50%", transform:"translate(-50%,-50%)", width:700, height:700, background:"radial-gradient(circle, rgba(204,255,0,0.08) 0%, transparent 65%)", pointerEvents:"none" }} />
+      <div style={{ position:"absolute", bottom:0, left:"50%", transform:"translateX(-50%)", width:900, height:280, background:"radial-gradient(ellipse, rgba(204,255,0,0.04) 0%, transparent 70%)", pointerEvents:"none" }} />
 
       <div style={{ width:"100%", maxWidth:420, animation:"fadeUp 0.7s cubic-bezier(0.4,0,0.2,1)", position:"relative", zIndex:1 }}>
         <div style={{ textAlign:"center", marginBottom:36 }}>
-          <div style={{ width:72, height:72, borderRadius:22, background:"linear-gradient(135deg,#DC2626,#7F1D1D)", display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 20px", boxShadow:"0 8px 36px rgba(220,38,38,0.4)", animation:"glow 3s ease-in-out infinite" }}>
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <div style={{ width:72, height:72, borderRadius:22, background:"linear-gradient(135deg,#CCFF00,#5C7A00)", display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 20px", boxShadow:"0 8px 36px rgba(204,255,0,0.4)", animation:"glow 3s ease-in-out infinite" }}>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#15171E" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
           </div>
           <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:40, letterSpacing:14, color:"#DC2626", lineHeight:1, textShadow:"0 0 50px rgba(220,38,38,0.3)" }}>REDLINE</div>
           <div style={{ fontSize:11, fontWeight:700, color:"#4D5260", letterSpacing:6, textTransform:"uppercase", marginTop:7 }}>Portal</div>
-          <div style={{ width:56, height:1.5, background:"linear-gradient(90deg,transparent,#DC2626,transparent)", margin:"14px auto 0" }} />
+          <div style={{ width:56, height:1.5, background:"linear-gradient(90deg,transparent,#CCFF00,transparent)", margin:"14px auto 0" }} />
         </div>
 
-        <div style={{ background:"linear-gradient(145deg,rgba(16,18,24,0.99),rgba(11,12,17,0.99))", border:"1px solid rgba(255,255,255,0.07)", borderRadius:24, padding:"36px 32px 32px", boxShadow:"0 24px 80px rgba(0,0,0,0.65), 0 0 0 1px rgba(220,38,38,0.06)" }}>
+        <div style={{ background:"linear-gradient(145deg,rgba(16,18,24,0.99),rgba(11,12,17,0.99))", border:"1px solid rgba(255,255,255,0.07)", borderRadius:24, padding:"36px 32px 32px", boxShadow:"0 24px 80px rgba(0,0,0,0.65), 0 0 0 1px rgba(204,255,0,0.06)" }}>
           <div style={{ marginBottom:16 }}>
             <label style={{ display:"block", fontSize:9.5, fontWeight:700, color:"#4D5260", letterSpacing:3, marginBottom:10, textTransform:"uppercase" }}>Email</label>
             <input type="email" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&go()} placeholder="you@redline.com" autoFocus style={fieldStyle(!!err)} onFocus={onFocus} onBlur={e=>onBlur(e,!!err)} />
@@ -458,11 +458,11 @@ function Login() {
           </div>
           {err && (
             <div style={{ display:"flex", alignItems:"center", gap:7, marginTop:12 }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              <p style={{ color:"#DC2626", fontSize:12, fontWeight:600 }}>{err}</p>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF3370" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <p style={{ color:"#FF3370", fontSize:12, fontWeight:600 }}>{err}</p>
             </div>
           )}
-          <button onClick={go} disabled={ld} style={{ width:"100%", padding:"16px", background: ld ? "#5A0A0A" : "linear-gradient(135deg,#E5222B,#991B1B)", color:"#FFF", border:"none", borderRadius:14, fontSize:11, fontWeight:800, letterSpacing:4, cursor: ld ? "wait" : "pointer", marginTop:20, textTransform:"uppercase", boxShadow: ld ? "none" : "0 6px 28px rgba(220,38,38,0.3)", transition:"all 0.25s ease", fontFamily:"inherit" }}>
+          <button onClick={go} disabled={ld} style={{ width:"100%", padding:"16px", background: ld ? "#3E5200" : "linear-gradient(135deg,#CCFF00,#6E9100)", color: ld ? "#FFF" : "#15171E", border:"none", borderRadius:14, fontSize:11, fontWeight:800, letterSpacing:4, cursor: ld ? "wait" : "pointer", marginTop:20, textTransform:"uppercase", boxShadow: ld ? "none" : "0 6px 28px rgba(204,255,0,0.3)", transition:"all 0.25s ease", fontFamily:"inherit" }}>
             {ld ? "Signing In…" : "Enter Portal"}
           </button>
         </div>
@@ -552,8 +552,8 @@ function Scheduler({ session, profile, w }) {
       {[0,1].map(week => (
         <div key={week} style={{ marginBottom:32, animation:"fadeUp 0.4s ease" }}>
           <div style={{ display:"flex", alignItems:"center", gap:12, paddingBottom:14 }}>
-            <div style={{ width:8, height:8, borderRadius:4, background: week===0?"#DC2626":"#F59E0B" }} />
-            <div style={{ fontSize:10, fontWeight:700, color: week===0?"#DC2626":"#F59E0B", letterSpacing:3, textTransform:"uppercase" }}>{week===0?"This Week":"Next Week"}</div>
+            <div style={{ width:8, height:8, borderRadius:4, background: week===0?"#CCFF00":"#F59E0B" }} />
+            <div style={{ fontSize:10, fontWeight:700, color: week===0?"#CCFF00":"#F59E0B", letterSpacing:3, textTransform:"uppercase" }}>{week===0?"This Week":"Next Week"}</div>
             <div style={{ flex:1, height:1, background:"#1F2229" }} />
           </div>
           <div style={{ display:"grid", gridTemplateColumns:dk?"repeat(5,1fr)":"repeat(2,1fr)", gap:10 }}>
@@ -567,10 +567,10 @@ function Scheduler({ session, profile, w }) {
               return (
                 <div key={dateStr} onClick={() => !isPast && !isFull && toggle(day)}
                   className={isPast || isFull ? "" : "card-hover"}
-                  style={{ background: isMine?"#DC262608":"#23262E", border:"1px solid "+(isMine?"#DC262630":isToday?"#404450":"#2D3038"), borderRadius:16, padding:"16px 14px", cursor:isPast||isFull?"default":"pointer", opacity:isPast?0.35:1, transition:"all 0.2s", minHeight:140, position:"relative" }}>
-                  {isToday && !isFull && <div style={{ position:"absolute", top:10, right:12, fontSize:8, fontWeight:700, color:"#DC2626", letterSpacing:2, textTransform:"uppercase" }}>Today</div>}
+                  style={{ background: isMine?"#CCFF0008":"#23262E", border:"1px solid "+(isMine?"#CCFF0030":isToday?"#404450":"#2D3038"), borderRadius:16, padding:"16px 14px", cursor:isPast||isFull?"default":"pointer", opacity:isPast?0.35:1, transition:"all 0.2s", minHeight:140, position:"relative" }}>
+                  {isToday && !isFull && <div style={{ position:"absolute", top:10, right:12, fontSize:8, fontWeight:700, color:"#CCFF00", letterSpacing:2, textTransform:"uppercase" }}>Today</div>}
                   {isFull && <div style={{ position:"absolute", top:10, right:12, fontSize:8, fontWeight:700, color:"#F59E0B", letterSpacing:2, textTransform:"uppercase" }}>Full</div>}
-                  <div style={{ fontSize:9, fontWeight:700, color:isToday?"#DC2626":"#7E8290", letterSpacing:2, marginBottom:4 }}>{DAY_NAMES[di]}</div>
+                  <div style={{ fontSize:9, fontWeight:700, color:isToday?"#CCFF00":"#7E8290", letterSpacing:2, marginBottom:4 }}>{DAY_NAMES[di]}</div>
                   <div style={{ fontSize:22, fontWeight:800, color:isToday?"#FFF":"#8A8E98", marginBottom:4, lineHeight:1 }}>
                     {day.getDate()} <span style={{ fontSize:12, fontWeight:500, color:"#7E8290" }}>{MONTHS[day.getMonth()]}</span>
                   </div>
@@ -580,7 +580,7 @@ function Scheduler({ session, profile, w }) {
                   </div>
                   <div style={{ display:"flex", flexDirection:"column", gap:5 }}>
                     {dayEntries.map(e => (
-                      <div key={e.id} style={{ fontSize:11, fontWeight:600, color:e.user_id===session.user.id?"#DC2626":"#D6DAE2", background:e.user_id===session.user.id?"#DC262612":"#2B2E37", border:"1px solid "+(e.user_id===session.user.id?"#DC262625":"#3D414B"), borderRadius:6, padding:"4px 8px" }}>
+                      <div key={e.id} style={{ fontSize:11, fontWeight:600, color:e.user_id===session.user.id?"#CCFF00":"#D6DAE2", background:e.user_id===session.user.id?"#CCFF0012":"#2B2E37", border:"1px solid "+(e.user_id===session.user.id?"#CCFF0025":"#3D414B"), borderRadius:6, padding:"4px 8px" }}>
                         {repProfiles[e.user_id] || "Rep"}
                       </div>
                     ))}
@@ -820,9 +820,13 @@ function Leaderboard({ session, profile, w }) {
   const [repProfiles, setRepProfiles] = useState({});
   const [period, setPeriod] = useState("all");
   const [showAdd, setShowAdd] = useState(false);
-  const [amount, setAmount] = useState("");
+  const [dealAmt, setDealAmt] = useState(null);
+  const [customAmt, setCustomAmt] = useState("");
+  const [retainer, setRetainer] = useState(null);
   const [note, setNote] = useState("");
   const [saving, setSaving] = useState(false);
+  const DEAL_OPTS = [1497, 2497, 4497];
+  const RETAINER_OPTS = [49, 197, 297];
   const dk = w >= 768;
 
   const load = async () => {
@@ -844,18 +848,22 @@ function Leaderboard({ session, profile, w }) {
     return () => supabase.removeChannel(ch);
   }, []);
 
+  const resetForm = () => { setDealAmt(null); setCustomAmt(""); setRetainer(null); setNote(""); setShowAdd(false); };
+
   const addSale = async () => {
-    const parsed = parseFloat(amount);
-    if (!amount || isNaN(parsed) || parsed <= 0) return;
+    const finalAmt = dealAmt === "custom" ? parseFloat(customAmt) : dealAmt;
+    if (!finalAmt || isNaN(finalAmt) || finalAmt <= 0) return;
+    if (retainer === null) return;
     setSaving(true);
     const { data } = await supabase.from("sales").insert({
       user_id: session.user.id,
-      amount: parsed,
+      amount: finalAmt,
+      retainer: retainer || null,
       note: note.trim() || null,
       sale_date: new Date().toISOString().split("T")[0],
     }).select().single();
     if (data) setSales(prev => [data, ...prev]);
-    setAmount(""); setNote(""); setShowAdd(false); setSaving(false);
+    resetForm(); setSaving(false);
   };
 
   const now = new Date();
@@ -874,9 +882,10 @@ function Leaderboard({ session, profile, w }) {
 
   const byRep = {};
   for (const s of filtered) {
-    if (!byRep[s.user_id]) byRep[s.user_id] = { count: 0, total: 0 };
+    if (!byRep[s.user_id]) byRep[s.user_id] = { count: 0, total: 0, retainerTotal: 0 };
     byRep[s.user_id].count++;
     byRep[s.user_id].total += s.amount ?? 0;
+    byRep[s.user_id].retainerTotal += s.retainer ?? 0;
   }
   const ranked = Object.entries(byRep)
     .map(([uid, stats]) => ({ uid, name: repProfiles[uid] || "Rep", ...stats }))
@@ -906,60 +915,88 @@ function Leaderboard({ session, profile, w }) {
           ))}
         </div>
         <button onClick={() => setShowAdd(v => !v)}
-          style={{ background:"#DC2626", border:"none", borderRadius:9, color:"#FFF", fontSize:11, fontWeight:800, letterSpacing:1.5, padding:"10px 20px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", boxShadow:"0 4px 16px rgba(220,38,38,0.35)", transition:"all 0.18s" }}>
+          style={{ background:"#CCFF00", border:"none", borderRadius:9, color:"#15171E", fontSize:11, fontWeight:800, letterSpacing:1.5, padding:"10px 20px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", boxShadow:"0 4px 16px rgba(204,255,0,0.35)", transition:"all 0.18s" }}>
           + Log Sale
         </button>
       </div>
 
       {/* Add sale form */}
       {showAdd && (
-        <div style={{ background:"#1A1C24", border:"1px solid rgba(255,255,255,0.08)", borderRadius:14, padding:20, marginBottom:20, animation:"fadeUp 0.2s ease" }}>
-          <div style={{ fontSize:10, fontWeight:700, color:"#666C7E", letterSpacing:2.5, textTransform:"uppercase", marginBottom:14 }}>Log a Sale</div>
-          <div style={{ display:"flex", gap:10, flexWrap:"wrap" }}>
-            <div style={{ flex:"1 1 140px" }}>
-              <div style={{ fontSize:9.5, fontWeight:700, color:"#444856", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Deal Value ($)</div>
-              <input
-                autoFocus
-                type="number"
-                min="0"
-                value={amount}
-                onChange={e => setAmount(e.target.value)}
-                onKeyDown={e => e.key === "Enter" && addSale()}
-                placeholder="e.g. 4500"
-                style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:14, fontWeight:600, padding:"10px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }}
-              />
-            </div>
-            <div style={{ flex:"2 1 200px" }}>
-              <div style={{ fontSize:9.5, fontWeight:700, color:"#444856", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Note (optional)</div>
-              <input
-                type="text"
-                value={note}
-                onChange={e => setNote(e.target.value)}
-                onKeyDown={e => e.key === "Enter" && addSale()}
-                placeholder="Client, product, etc."
-                style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:500, padding:"10px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }}
-              />
-            </div>
-            <div style={{ display:"flex", gap:8, alignItems:"flex-end", flex:"0 0 auto" }}>
-              <button onClick={addSale} disabled={saving}
-                style={{ background:"#DC2626", border:"none", borderRadius:8, color:"#FFF", fontSize:12, fontWeight:800, letterSpacing:1, padding:"10px 22px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", opacity:saving?0.6:1 }}>
-                {saving ? "Saving…" : "Save"}
-              </button>
-              <button onClick={() => { setShowAdd(false); setAmount(""); setNote(""); }}
-                style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:8, color:"#666C7E", fontSize:12, fontWeight:700, padding:"10px 16px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>
-                Cancel
-              </button>
-            </div>
+        <div style={{ background:"#1A1C24", border:"1px solid rgba(255,255,255,0.08)", borderRadius:16, padding:22, marginBottom:20, animation:"fadeUp 0.2s ease" }}>
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:20 }}>
+            <div style={{ fontSize:10, fontWeight:800, color:"#666C7E", letterSpacing:2.5, textTransform:"uppercase" }}>Log a Sale</div>
+            <button onClick={resetForm} style={{ background:"none", border:"none", color:"#444856", fontSize:18, cursor:"pointer", lineHeight:1, padding:0 }}>×</button>
           </div>
+
+          {/* Step 1: Deal Value */}
+          <div style={{ marginBottom:20 }}>
+            <div style={{ fontSize:9.5, fontWeight:700, color: dealAmt ? "#22C55E" : "#F59E0B", letterSpacing:2, textTransform:"uppercase", marginBottom:10, display:"flex", alignItems:"center", gap:8 }}>
+              {dealAmt ? "✓ " : "1 · "}Deal Value
+            </div>
+            <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+              {DEAL_OPTS.map(v => (
+                <button key={v} onClick={() => setDealAmt(v)}
+                  style={{ background: dealAmt===v ? "rgba(204,255,0,0.15)" : "rgba(255,255,255,0.04)", border:`1px solid ${dealAmt===v ? "rgba(204,255,0,0.4)" : "rgba(255,255,255,0.08)"}`, borderRadius:10, color: dealAmt===v ? "#DDFF40" : "#9CA3AF", fontSize:14, fontWeight:700, padding:"12px 20px", cursor:"pointer", fontFamily:"inherit", transition:"all 0.15s" }}>
+                  ${v.toLocaleString()}
+                </button>
+              ))}
+              <button onClick={() => setDealAmt("custom")}
+                style={{ background: dealAmt==="custom" ? "rgba(204,255,0,0.15)" : "rgba(255,255,255,0.04)", border:`1px solid ${dealAmt==="custom" ? "rgba(204,255,0,0.4)" : "rgba(255,255,255,0.08)"}`, borderRadius:10, color: dealAmt==="custom" ? "#DDFF40" : "#9CA3AF", fontSize:13, fontWeight:700, padding:"12px 16px", cursor:"pointer", fontFamily:"inherit", transition:"all 0.15s" }}>
+                Custom
+              </button>
+            </div>
+            {dealAmt === "custom" && (
+              <input autoFocus type="number" min="0" value={customAmt} onChange={e => setCustomAmt(e.target.value)}
+                placeholder="Enter amount…"
+                style={{ marginTop:10, width:"100%", maxWidth:200, background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:8, color:"#F2F4F8", fontSize:14, fontWeight:600, padding:"10px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }} />
+            )}
+          </div>
+
+          {/* Step 2: Retainer (only shown after deal value picked) */}
+          {dealAmt && (
+            <div style={{ marginBottom:20, animation:"fadeUp 0.2s ease" }}>
+              <div style={{ fontSize:9.5, fontWeight:700, color: retainer !== null ? "#22C55E" : "#F59E0B", letterSpacing:2, textTransform:"uppercase", marginBottom:10 }}>
+                {retainer !== null ? "✓ " : "2 · "}Maintenance Retainer
+              </div>
+              <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+                {RETAINER_OPTS.map(v => (
+                  <button key={v} onClick={() => setRetainer(v)}
+                    style={{ background: retainer===v ? "rgba(6,214,240,0.15)" : "rgba(255,255,255,0.04)", border:`1px solid ${retainer===v ? "rgba(6,214,240,0.4)" : "rgba(255,255,255,0.08)"}`, borderRadius:10, color: retainer===v ? "#5DE9F8" : "#9CA3AF", fontSize:14, fontWeight:700, padding:"12px 20px", cursor:"pointer", fontFamily:"inherit", transition:"all 0.15s" }}>
+                    ${v}/mo
+                  </button>
+                ))}
+                <button onClick={() => setRetainer(0)}
+                  style={{ background: retainer===0 ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.04)", border:`1px solid ${retainer===0 ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.08)"}`, borderRadius:10, color: retainer===0 ? "#C4C8D4" : "#9CA3AF", fontSize:13, fontWeight:700, padding:"12px 16px", cursor:"pointer", fontFamily:"inherit", transition:"all 0.15s" }}>
+                  No Retainer
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Note + Save (only shown after both steps done) */}
+          {dealAmt && retainer !== null && (
+            <div style={{ animation:"fadeUp 0.2s ease" }}>
+              <div style={{ fontSize:9.5, fontWeight:700, color:"#444856", letterSpacing:2, textTransform:"uppercase", marginBottom:8 }}>Note (optional)</div>
+              <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+                <input type="text" value={note} onChange={e => setNote(e.target.value)} onKeyDown={e => e.key === "Enter" && addSale()}
+                  placeholder="Client name, product, etc."
+                  style={{ flex:"1 1 200px", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:500, padding:"10px 12px", fontFamily:"inherit", outline:"none" }} />
+                <button onClick={addSale} disabled={saving}
+                  style={{ background:"#CCFF00", border:"none", borderRadius:8, color:"#15171E", fontSize:12, fontWeight:800, letterSpacing:1, padding:"10px 24px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", opacity:saving?0.6:1, flexShrink:0 }}>
+                  {saving ? "Saving…" : "Save"}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
       {/* My rank badge */}
       {myRank && (
-        <div style={{ display:"flex", alignItems:"center", gap:12, background:"rgba(220,38,38,0.06)", border:"1px solid rgba(220,38,38,0.15)", borderRadius:12, padding:"12px 18px", marginBottom:16 }}>
+        <div style={{ display:"flex", alignItems:"center", gap:12, background:"rgba(204,255,0,0.06)", border:"1px solid rgba(204,255,0,0.15)", borderRadius:12, padding:"12px 18px", marginBottom:16 }}>
           <div style={{ fontSize:20 }}>{MEDALS[myRank-1] ?? `#${myRank}`}</div>
           <div>
-            <div style={{ fontSize:11, fontWeight:700, color:"#DC2626", letterSpacing:1.5, textTransform:"uppercase" }}>Your Rank</div>
+            <div style={{ fontSize:11, fontWeight:700, color:"#CCFF00", letterSpacing:1.5, textTransform:"uppercase" }}>Your Rank</div>
             <div style={{ fontSize:13, fontWeight:600, color:"#C4C8D4" }}>{myEntry.count} {myEntry.count === 1 ? "sale" : "sales"}{myEntry.total > 0 ? ` · $${myEntry.total.toLocaleString()}` : ""}</div>
           </div>
         </div>
@@ -977,19 +1014,22 @@ function Leaderboard({ session, profile, w }) {
             const isTop = i < 3;
             const medal = MEDALS[i];
             return (
-              <div key={rep.uid} style={{ display:"flex", alignItems:"center", gap:dk?16:12, background: isMe ? "rgba(220,38,38,0.06)" : i===0 ? "rgba(255,215,0,0.04)" : "rgba(255,255,255,0.025)", border:`1px solid ${isMe ? "rgba(220,38,38,0.18)" : i===0 ? "rgba(255,215,0,0.12)" : "rgba(255,255,255,0.06)"}`, borderRadius:13, padding:dk?"16px 20px":"13px 16px", transition:"all 0.15s" }}>
+              <div key={rep.uid} style={{ display:"flex", alignItems:"center", gap:dk?16:12, background: isMe ? "rgba(204,255,0,0.06)" : i===0 ? "rgba(255,215,0,0.04)" : "rgba(255,255,255,0.025)", border:`1px solid ${isMe ? "rgba(204,255,0,0.18)" : i===0 ? "rgba(255,215,0,0.12)" : "rgba(255,255,255,0.06)"}`, borderRadius:13, padding:dk?"16px 20px":"13px 16px", transition:"all 0.15s" }}>
                 <div style={{ fontSize: isTop ? 22 : 14, fontWeight:800, color:"#444856", minWidth:32, textAlign:"center", lineHeight:1 }}>
                   {medal ?? `#${i+1}`}
                 </div>
-                <div style={{ width:36, height:36, borderRadius:9, background: isMe ? "linear-gradient(135deg,#DC2626,#991B1B)" : "linear-gradient(135deg,#2A2D38,#1E2028)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Plus Jakarta Sans',sans-serif", fontSize:14, fontWeight:800, color: isMe ? "#FFF" : "#888D9C", flexShrink:0, boxShadow: isMe ? "0 2px 10px rgba(220,38,38,0.3)" : "none" }}>
+                <div style={{ width:36, height:36, borderRadius:9, background: isMe ? "linear-gradient(135deg,#CCFF00,#6E9100)" : "linear-gradient(135deg,#2A2D38,#1E2028)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Plus Jakarta Sans',sans-serif", fontSize:14, fontWeight:800, color: isMe ? "#15171E" : "#888D9C", flexShrink:0, boxShadow: isMe ? "0 2px 10px rgba(204,255,0,0.3)" : "none" }}>
                   {rep.name[0]?.toUpperCase()}
                 </div>
                 <div style={{ flex:1, minWidth:0 }}>
-                  <div style={{ fontSize:14, fontWeight:700, color: isMe ? "#F2F4F8" : "#C4C8D4", lineHeight:1 }}>{rep.name}{isMe ? <span style={{ fontSize:9, fontWeight:700, color:"#DC2626", letterSpacing:1.5, marginLeft:8, textTransform:"uppercase" }}>you</span> : ""}</div>
-                  {rep.total > 0 && <div style={{ fontSize:11, color:"#444856", marginTop:3 }}>${rep.total.toLocaleString()} total</div>}
+                  <div style={{ fontSize:14, fontWeight:700, color: isMe ? "#F2F4F8" : "#C4C8D4", lineHeight:1 }}>{rep.name}{isMe ? <span style={{ fontSize:9, fontWeight:700, color:"#CCFF00", letterSpacing:1.5, marginLeft:8, textTransform:"uppercase" }}>you</span> : ""}</div>
+                  <div style={{ fontSize:11, color:"#444856", marginTop:3, display:"flex", gap:8 }}>
+                    {rep.total > 0 && <span style={{ color:"#22C55E66" }}>${rep.total.toLocaleString()}</span>}
+                    {rep.retainerTotal > 0 && <span style={{ color:"#06D6F066" }}>+${rep.retainerTotal.toLocaleString()}/mo retainer</span>}
+                  </div>
                 </div>
                 <div style={{ textAlign:"right", flexShrink:0 }}>
-                  <div style={{ fontSize:dk?26:22, fontWeight:900, color: i===0 ? "#FFD700" : isMe ? "#DC2626" : "#666C7E", lineHeight:1, letterSpacing:"-0.02em" }}>{rep.count}</div>
+                  <div style={{ fontSize:dk?26:22, fontWeight:900, color: i===0 ? "#FFD700" : isMe ? "#CCFF00" : "#666C7E", lineHeight:1, letterSpacing:"-0.02em" }}>{rep.count}</div>
                   <div style={{ fontSize:9, color:"#3A3E4A", textTransform:"uppercase", letterSpacing:1.5, fontWeight:700, marginTop:3 }}>{rep.count === 1 ? "sale" : "sales"}</div>
                 </div>
               </div>
@@ -1003,19 +1043,35 @@ function Leaderboard({ session, profile, w }) {
         <div style={{ marginTop:32 }}>
           <div style={{ fontSize:9.5, fontWeight:800, color:"#444856", letterSpacing:3, textTransform:"uppercase", marginBottom:14 }}>Recent Activity</div>
           <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
-            {filtered.slice(0, 10).map(s => (
-              <div key={s.id} style={{ display:"flex", alignItems:"center", gap:12, padding:"10px 16px", background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.05)", borderRadius:10 }}>
-                <div style={{ width:28, height:28, borderRadius:7, background: s.user_id===session.user.id ? "linear-gradient(135deg,#DC2626,#991B1B)" : "rgba(255,255,255,0.05)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, fontWeight:800, color: s.user_id===session.user.id ? "#FFF" : "#666C7E", flexShrink:0 }}>
-                  {(repProfiles[s.user_id] || "R")[0]?.toUpperCase()}
+            {filtered.slice(0, 10).map(s => {
+              const isOwn = s.user_id === session.user.id;
+              return (
+                <div key={s.id} style={{ display:"flex", alignItems:"center", gap:12, padding:"10px 16px", background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.05)", borderRadius:10 }}>
+                  <div style={{ width:28, height:28, borderRadius:7, background: isOwn ? "linear-gradient(135deg,#CCFF00,#6E9100)" : "rgba(255,255,255,0.05)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, fontWeight:800, color: isOwn ? "#15171E" : "#666C7E", flexShrink:0 }}>
+                    {(repProfiles[s.user_id] || "R")[0]?.toUpperCase()}
+                  </div>
+                  <div style={{ flex:1, minWidth:0 }}>
+                    <span style={{ fontSize:12, fontWeight:600, color:"#C4C8D4" }}>{repProfiles[s.user_id] || "Rep"}</span>
+                    {s.note && <span style={{ fontSize:11, color:"#444856" }}> — {s.note}</span>}
+                  </div>
+                  <div style={{ display:"flex", flexDirection:"column", alignItems:"flex-end", gap:2, flexShrink:0 }}>
+                    {s.amount > 0 && <div style={{ fontSize:13, fontWeight:700, color:"#22C55E" }}>${Number(s.amount).toLocaleString()}</div>}
+                    {s.retainer > 0 && <div style={{ fontSize:10, fontWeight:600, color:"#06D6F0" }}>+${Number(s.retainer).toLocaleString()}/mo</div>}
+                  </div>
+                  <div style={{ fontSize:10, color:"#3A3E4A", flexShrink:0 }}>{new Date(s.sale_date).toLocaleDateString("en-US",{month:"short",day:"numeric"})}</div>
+                  {isOwn && (
+                    <button onClick={async () => {
+                      await supabase.from("sales").delete().eq("id", s.id);
+                      setSales(prev => prev.filter(x => x.id !== s.id));
+                    }} style={{ background:"none", border:"none", color:"#3A3E4A", fontSize:16, cursor:"pointer", padding:"0 2px", lineHeight:1, flexShrink:0, transition:"color 0.15s" }}
+                      onMouseEnter={e => e.target.style.color="#FF3370"}
+                      onMouseLeave={e => e.target.style.color="#3A3E4A"}>
+                      ×
+                    </button>
+                  )}
                 </div>
-                <div style={{ flex:1, minWidth:0 }}>
-                  <span style={{ fontSize:12, fontWeight:600, color:"#C4C8D4" }}>{repProfiles[s.user_id] || "Rep"}</span>
-                  {s.note && <span style={{ fontSize:11, color:"#444856" }}> — {s.note}</span>}
-                </div>
-                {s.amount > 0 && <div style={{ fontSize:13, fontWeight:700, color:"#22C55E", flexShrink:0 }}>${Number(s.amount).toLocaleString()}</div>}
-                <div style={{ fontSize:10, color:"#3A3E4A", flexShrink:0 }}>{new Date(s.sale_date).toLocaleDateString("en-US",{month:"short",day:"numeric"})}</div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
@@ -1065,7 +1121,7 @@ function AdminPanel({ profile, onBack, w, onSignOut }) {
     <div>
       <div style={{ position:"sticky", top:0, zIndex:20, background:"rgba(7,8,12,0.92)", backdropFilter:"blur(24px)", WebkitBackdropFilter:"blur(24px)", borderBottom:"1px solid rgba(255,255,255,0.05)" }}>
         <div style={{ maxWidth:1000, margin:"0 auto", padding:dk?"0 44px":"0 20px", height:52, display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-          <button className="back-btn" onClick={onBack} style={{ background:"none", border:"none", color:"#DC2626", fontSize:13, fontWeight:700, cursor:"pointer", padding:"6px 0", display:"flex", alignItems:"center", gap:8, fontFamily:"inherit" }}>
+          <button className="back-btn" onClick={onBack} style={{ background:"none", border:"none", color:"#CCFF00", fontSize:13, fontWeight:700, cursor:"pointer", padding:"6px 0", display:"flex", alignItems:"center", gap:8, fontFamily:"inherit" }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
             Back to Portal
           </button>
@@ -1100,18 +1156,18 @@ function AdminPanel({ profile, onBack, w, onSignOut }) {
           <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
             {users.map((u, i) => (
               <div key={u.id} style={{ background:"linear-gradient(135deg,rgba(16,18,24,0.98),rgba(11,12,16,0.98))", border:"1px solid rgba(255,255,255,0.055)", borderRadius:16, padding:dk?"20px 24px":"16px 18px", display:"flex", alignItems:"center", gap:16, flexWrap:"wrap", animation:`fadeUp 0.4s ease ${0.05*i}s both`, boxShadow:"0 4px 20px rgba(0,0,0,0.3)" }}>
-                <div style={{ width:46, height:46, borderRadius:14, background:"linear-gradient(135deg,#DC2626,#7F1D1D)", display:"flex", alignItems:"center", justifyContent:"center", fontWeight:800, color:"#fff", fontSize:18, flexShrink:0, boxShadow:"0 4px 14px rgba(220,38,38,0.35)" }}>
+                <div style={{ width:46, height:46, borderRadius:14, background:"linear-gradient(135deg,#CCFF00,#5C7A00)", display:"flex", alignItems:"center", justifyContent:"center", fontWeight:800, color:"#15171E", fontSize:18, flexShrink:0, boxShadow:"0 4px 14px rgba(204,255,0,0.35)" }}>
                   {u.name?.[0]?.toUpperCase() ?? "?"}
                 </div>
                 <div style={{ flex:1, minWidth:140 }}>
                   <div style={{ fontSize:15, fontWeight:700, color:"#EEF2F8" }}>{u.name || "—"}</div>
-                  <span style={{ display:"inline-block", marginTop:4, fontSize:9, fontWeight:800, color: u.role === "admin" ? "#F59E0B" : "#6366F1", letterSpacing:2, textTransform:"uppercase", background: u.role === "admin" ? "rgba(245,158,11,0.1)" : "rgba(99,102,241,0.1)", padding:"3px 9px", borderRadius:5, border:`1px solid ${u.role === "admin" ? "rgba(245,158,11,0.2)" : "rgba(99,102,241,0.2)"}` }}>{u.role}</span>
+                  <span style={{ display:"inline-block", marginTop:4, fontSize:9, fontWeight:800, color: u.role === "admin" ? "#F59E0B" : "#06D6F0", letterSpacing:2, textTransform:"uppercase", background: u.role === "admin" ? "rgba(245,158,11,0.1)" : "rgba(6,214,240,0.1)", padding:"3px 9px", borderRadius:5, border:`1px solid ${u.role === "admin" ? "rgba(245,158,11,0.2)" : "rgba(6,214,240,0.2)"}` }}>{u.role}</span>
                 </div>
                 <div style={{ display:"flex", gap:dk?24:16, flexWrap:"wrap" }}>
                   {[
                     [u.modulesCompleted, "Completed", "#22C55E"],
                     [u.quizzesAttempted, "Quizzes", "#10B981"],
-                    ...(u.quizzesAttempted > 0 ? [[Math.round(u.avgScore)+"%", "Avg Score", u.avgScore>=90?"#22C55E":u.avgScore>=70?"#F59E0B":"#DC2626"]] : []),
+                    ...(u.quizzesAttempted > 0 ? [[Math.round(u.avgScore)+"%", "Avg Score", u.avgScore>=90?"#22C55E":u.avgScore>=70?"#F59E0B":"#FF3370"]] : []),
                   ].map(([val, lab, col]) => (
                     <div key={lab} style={{ textAlign:"center" }}>
                       <div style={{ fontSize:20, fontWeight:900, color:col, lineHeight:1, letterSpacing:"-0.02em" }}>{val}</div>
@@ -1141,8 +1197,8 @@ function Viewer({ ck, onBack, w, onComplete }) {
   const ref = useRef(null);
   const c = C[ck];
   const dk = w >= 768;
-  const accent = ck.includes("bc") ? "#F59E0B" : ck.includes("call") || ck.includes("comp") || ck.includes("onboard") ? "#6366F1" : "#DC2626";
-  const accentBg = ck.includes("bc") ? "rgba(245,158,11,0.08)" : ck.includes("call") || ck.includes("comp") || ck.includes("onboard") ? "rgba(99,102,241,0.08)" : "rgba(220,38,38,0.08)";
+  const accent = ck.includes("bc") ? "#F59E0B" : ck.includes("call") || ck.includes("comp") || ck.includes("onboard") ? "#06D6F0" : "#CCFF00";
+  const accentBg = ck.includes("bc") ? "rgba(245,158,11,0.08)" : ck.includes("call") || ck.includes("comp") || ck.includes("onboard") ? "rgba(6,214,240,0.08)" : "rgba(204,255,0,0.08)";
 
   useEffect(() => {
     ref.current?.scrollIntoView({ behavior:"smooth" });
@@ -1178,15 +1234,15 @@ function Viewer({ ck, onBack, w, onComplete }) {
         {/* Video */}
         {c.vid && (
           <a href={c.vid} target="_blank" rel="noreferrer" className="vid-card"
-            style={{ display:"flex", alignItems:"center", gap:18, background:"linear-gradient(135deg,rgba(20,14,16,0.9),rgba(16,12,20,0.9))", border:"1px solid rgba(220,38,38,0.18)", borderRadius:18, padding:"20px 24px", textDecoration:"none", marginBottom:28, animation:"fadeUp 0.55s ease 0.1s both", boxShadow:"0 4px 24px rgba(0,0,0,0.3)" }}>
-            <div className="play-pulse" style={{ width:54, height:54, borderRadius:16, background:"linear-gradient(135deg,#E5222B,#991B1B)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, boxShadow:"0 6px 24px rgba(220,38,38,0.4)" }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            style={{ display:"flex", alignItems:"center", gap:18, background:"linear-gradient(135deg,rgba(20,14,16,0.9),rgba(16,12,20,0.9))", border:"1px solid rgba(204,255,0,0.18)", borderRadius:18, padding:"20px 24px", textDecoration:"none", marginBottom:28, animation:"fadeUp 0.55s ease 0.1s both", boxShadow:"0 4px 24px rgba(0,0,0,0.3)" }}>
+            <div className="play-pulse" style={{ width:54, height:54, borderRadius:16, background:"linear-gradient(135deg,#CCFF00,#6E9100)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, boxShadow:"0 6px 24px rgba(204,255,0,0.4)" }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="#15171E"><polygon points="5 3 19 12 5 21 5 3"/></svg>
             </div>
             <div style={{ flex:1 }}>
               <div style={{ fontSize:14, fontWeight:700, color:"#F2F4F8", marginBottom:3 }}>Watch Training Video</div>
               <div style={{ fontSize:12, color:"#7E8595" }}>Complete before continuing with this module</div>
             </div>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#CCFF00" strokeWidth="2" strokeLinecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           </a>
         )}
 
@@ -1250,7 +1306,7 @@ function Quiz({ quizKey, onBack, w, onComplete }) {
   const nxt = () => { if (ci + 1 >= tot) { setDone(true); if (onComplete) onComplete(score, tot); return; } setCi(ci + 1); setSel(null); setLocked(false); };
   const retry = () => { setCi(0); setSel(null); setLocked(false); setScore(0); setDone(false); };
   const grade = score / tot;
-  const gc = grade >= 0.9 ? "#22C55E" : grade >= 0.7 ? "#F59E0B" : "#DC2626";
+  const gc = grade >= 0.9 ? "#22C55E" : grade >= 0.7 ? "#F59E0B" : "#FF3370";
   const gl = grade >= 0.9 ? "Excellent — you're ready to close" : grade >= 0.7 ? "Good — review weaker areas" : "Needs work — re-study the modules";
   return (
     <div ref={ref}>
@@ -1280,7 +1336,7 @@ function Quiz({ quizKey, onBack, w, onComplete }) {
             <span style={{ fontSize:11, fontWeight:800, color: done ? gc : "#666C7E" }}>{pct}%</span>
           </div>
           <div style={{ height:5, background:"rgba(255,255,255,0.05)", borderRadius:6, overflow:"hidden" }}>
-            <div style={{ height:"100%", width:`${pct}%`, background: done ? `linear-gradient(90deg,${gc},${gc}90)` : "linear-gradient(90deg,#DC2626,#F59E0B,#10B981)", borderRadius:6, transition:"width 0.55s cubic-bezier(0.4,0,0.2,1)" }} />
+            <div style={{ height:"100%", width:`${pct}%`, background: done ? `linear-gradient(90deg,${gc},${gc}90)` : "linear-gradient(90deg,#CCFF00,#F59E0B,#10B981)", borderRadius:6, transition:"width 0.55s cubic-bezier(0.4,0,0.2,1)" }} />
           </div>
         </div>
 
@@ -1294,7 +1350,7 @@ function Quiz({ quizKey, onBack, w, onComplete }) {
             <p style={{ fontSize:14, color:gc, fontWeight:700, margin:"0 0 36px", letterSpacing:0.3 }}>{gl}</p>
             <div style={{ display:"flex", gap:12, justifyContent:"center", flexWrap:"wrap" }}>
               <button onClick={retry} style={{ padding:"14px 28px", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:14, color:"#C0C8D8", fontSize:13, fontWeight:700, cursor:"pointer", fontFamily:"inherit", transition:"all 0.2s" }}>Retake Quiz</button>
-              <button onClick={onBack} style={{ padding:"14px 32px", background:"linear-gradient(135deg,#E5222B,#991B1B)", border:"none", borderRadius:14, color:"#FFF", fontSize:13, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:"0 6px 24px rgba(220,38,38,0.28)", letterSpacing:0.5 }}>Back to Portal</button>
+              <button onClick={onBack} style={{ padding:"14px 32px", background:"linear-gradient(135deg,#CCFF00,#6E9100)", border:"none", borderRadius:14, color:"#15171E", fontSize:13, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:"0 6px 24px rgba(204,255,0,0.28)", letterSpacing:0.5 }}>Back to Portal</button>
             </div>
           </div>
         ) : (
@@ -1307,14 +1363,14 @@ function Quiz({ quizKey, onBack, w, onComplete }) {
                 const isSel = sel === idx, isCor = idx === cur.a, showG = locked && isCor, showR = locked && isSel && !isCor;
                 let bg = "rgba(12,14,18,0.9)", bd = "rgba(255,255,255,0.05)", tc = "#8892A0";
                 if (showG) { bg = "rgba(34,197,94,0.08)"; bd = "rgba(34,197,94,0.35)"; tc = "#22C55E"; }
-                if (showR) { bg = "rgba(220,38,38,0.08)"; bd = "rgba(220,38,38,0.35)"; tc = "#DC2626"; }
-                if (!locked && isSel) { bg = "rgba(255,255,255,0.04)"; bd = "rgba(220,38,38,0.5)"; tc = "#F2F4F8"; }
+                if (showR) { bg = "rgba(255,51,112,0.08)"; bd = "rgba(255,51,112,0.35)"; tc = "#FF3370"; }
+                if (!locked && isSel) { bg = "rgba(255,255,255,0.04)"; bd = "rgba(204,255,0,0.5)"; tc = "#F2F4F8"; }
                 if (!locked && !isSel) { tc = "#8892A0"; }
                 return (
                   <button key={idx} className="quiz-opt" onClick={() => pick(idx)} disabled={locked}
-                    style={{ width:"100%", textAlign:"left", padding:"15px 18px", background:bg, border:`1.5px solid ${bd}`, borderRadius:14, cursor: locked ? "default" : "pointer", display:"flex", alignItems:"center", gap:14, fontFamily:"inherit", fontSize:14, color:tc, fontWeight: isSel || showG ? 600 : 400, boxShadow: showG ? "0 0 20px rgba(34,197,94,0.1)" : showR ? "0 0 20px rgba(220,38,38,0.08)" : "none" }}>
-                    <div style={{ width:34, height:34, borderRadius:10, display:"flex", alignItems:"center", justifyContent:"center", fontSize:12, fontWeight:800, flexShrink:0, background: showG ? "rgba(34,197,94,0.15)" : showR ? "rgba(220,38,38,0.15)" : "rgba(255,255,255,0.04)", color: showG ? "#22C55E" : showR ? "#DC2626" : "#666C7E", border:`1px solid ${showG ? "rgba(34,197,94,0.25)" : showR ? "rgba(220,38,38,0.25)" : "rgba(255,255,255,0.06)"}` }}>
-                      {showG ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> : showR ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> : String.fromCharCode(65 + idx)}
+                    style={{ width:"100%", textAlign:"left", padding:"15px 18px", background:bg, border:`1.5px solid ${bd}`, borderRadius:14, cursor: locked ? "default" : "pointer", display:"flex", alignItems:"center", gap:14, fontFamily:"inherit", fontSize:14, color:tc, fontWeight: isSel || showG ? 600 : 400, boxShadow: showG ? "0 0 20px rgba(34,197,94,0.1)" : showR ? "0 0 20px rgba(255,51,112,0.08)" : "none" }}>
+                    <div style={{ width:34, height:34, borderRadius:10, display:"flex", alignItems:"center", justifyContent:"center", fontSize:12, fontWeight:800, flexShrink:0, background: showG ? "rgba(34,197,94,0.15)" : showR ? "rgba(255,51,112,0.15)" : "rgba(255,255,255,0.04)", color: showG ? "#22C55E" : showR ? "#FF3370" : "#666C7E", border:`1px solid ${showG ? "rgba(34,197,94,0.25)" : showR ? "rgba(255,51,112,0.25)" : "rgba(255,255,255,0.06)"}` }}>
+                      {showG ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> : showR ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF3370" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> : String.fromCharCode(65 + idx)}
                     </div>
                     <span style={{ flex:1 }}>{opt}</span>
                   </button>
@@ -1322,7 +1378,7 @@ function Quiz({ quizKey, onBack, w, onComplete }) {
               })}
             </div>
             {locked && (
-              <button onClick={nxt} style={{ width:"100%", padding:"16px", background:"linear-gradient(135deg,#E5222B,#991B1B)", color:"#FFF", border:"none", borderRadius:14, fontSize:12, fontWeight:800, letterSpacing:2.5, cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", marginTop:18, boxShadow:"0 6px 24px rgba(220,38,38,0.28)", animation:"fadeUp 0.3s ease" }}>
+              <button onClick={nxt} style={{ width:"100%", padding:"16px", background:"linear-gradient(135deg,#CCFF00,#6E9100)", color:"#15171E", border:"none", borderRadius:14, fontSize:12, fontWeight:800, letterSpacing:2.5, cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", marginTop:18, boxShadow:"0 6px 24px rgba(204,255,0,0.28)", animation:"fadeUp 0.3s ease" }}>
                 {ci + 1 >= tot ? "See Results" : "Next Question →"}
               </button>
             )}
@@ -1339,15 +1395,15 @@ function Quiz({ quizKey, onBack, w, onComplete }) {
 
 /* Icon gradient per category */
 const IC_GRAD = {
-  MODULE:    "linear-gradient(135deg,#DC2626,#7F1D1D)",
+  MODULE:    "linear-gradient(135deg,#CCFF00,#5C7A00)",
   BOOTCAMP:  "linear-gradient(135deg,#F59E0B,#92400E)",
-  REFERENCE: "linear-gradient(135deg,#6366F1,#3730A3)",
+  REFERENCE: "linear-gradient(135deg,#06D6F0,#0588A0)",
   QUIZ:      "linear-gradient(135deg,#10B981,#065F46)",
 };
 const IC_SHADOW = {
-  MODULE:    "0 4px 16px rgba(220,38,38,0.35)",
+  MODULE:    "0 4px 16px rgba(204,255,0,0.35)",
   BOOTCAMP:  "0 4px 16px rgba(245,158,11,0.35)",
-  REFERENCE: "0 4px 16px rgba(99,102,241,0.35)",
+  REFERENCE: "0 4px 16px rgba(6,214,240,0.35)",
   QUIZ:      "0 4px 16px rgba(16,185,129,0.35)",
 };
 const LINK_ICONS = [
@@ -1433,9 +1489,9 @@ export default function App() {
   const FONT_LINK = "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap";
   const baseStyle = { minHeight:"100dvh", background:"#15171E", color:"#FFF" };
 
-  const bc = { MODULE:"#DC2626", BOOTCAMP:"#F59E0B", REFERENCE:"#6366F1", QUIZ:"#10B981" };
+  const bc = { MODULE:"#CCFF00", BOOTCAMP:"#F59E0B", REFERENCE:"#06D6F0", QUIZ:"#10B981" };
   const trainingGroups = [
-    { label:null, color:"#DC2626", items:CATS.filter(x=>x.t==="MODULE") },
+    { label:null, color:"#CCFF00", items:CATS.filter(x=>x.t==="MODULE") },
     { label:"BOOTCAMPS", color:"#F59E0B", items:CATS.filter(x=>x.t==="BOOTCAMP") },
   ];
   const referenceItems = CATS.filter(x=>x.t==="REFERENCE");
@@ -1444,8 +1500,8 @@ export default function App() {
     { key:"dashboard", label:"Dashboard", color:"#22C55E" },
     { key:"leaderboard", label:"Leaderboard", color:"#FFD700" },
     { key:"scheduling", label:"Scheduling", color:"#F59E0B" },
-    { key:"training", label:"Training", color:"#DC2626" },
-    { key:"reference", label:"Reference", color:"#6366F1" },
+    { key:"training", label:"Training", color:"#CCFF00" },
+    { key:"reference", label:"Reference", color:"#06D6F0" },
     { key:"quizzes", label:"Quizzes", color:"#10B981" },
   ];
 
@@ -1454,8 +1510,8 @@ export default function App() {
       <style>{GLOBAL_CSS}</style>
       <link href={FONT_LINK} rel="stylesheet" />
       <div style={{ textAlign:"center", animation:"fadeUp 0.6s ease" }}>
-        <div style={{ width:60, height:60, borderRadius:18, background:"linear-gradient(135deg,#DC2626,#7F1D1D)", display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 20px", boxShadow:"0 6px 28px rgba(220,38,38,0.35)", animation:"glow 3s ease-in-out infinite" }}>
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        <div style={{ width:60, height:60, borderRadius:18, background:"linear-gradient(135deg,#CCFF00,#5C7A00)", display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 20px", boxShadow:"0 6px 28px rgba(204,255,0,0.35)", animation:"glow 3s ease-in-out infinite" }}>
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#15171E" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
         </div>
         <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:28, letterSpacing:12, color:"#DC2626" }}>REDLINE</div>
         <div style={{ fontSize:10, color:"#444856", letterSpacing:3, textTransform:"uppercase", marginTop:8, fontWeight:700 }}>Loading…</div>
@@ -1500,7 +1556,7 @@ export default function App() {
       <style>{GLOBAL_CSS}</style>
       <link href={FONT_LINK} rel="stylesheet" />
 
-      <div style={{ position:"fixed", top:0, left:"50%", transform:"translateX(-50%)", width:1000, height:600, background:"radial-gradient(ellipse 60% 50% at 50% 0%, rgba(220,38,38,0.07) 0%, transparent 70%)", pointerEvents:"none", zIndex:0 }} />
+      <div style={{ position:"fixed", top:0, left:"50%", transform:"translateX(-50%)", width:1000, height:600, background:"radial-gradient(ellipse 60% 50% at 50% 0%, rgba(204,255,0,0.07) 0%, transparent 70%)", pointerEvents:"none", zIndex:0 }} />
 
       {/* Header */}
       <div style={{ position:"relative", zIndex:1, padding:wd?"36px 56px 32px":dk?"28px 36px 26px":"20px 20px 20px" }}>
@@ -1511,12 +1567,12 @@ export default function App() {
 
             {/* Logo */}
             <div style={{ display:"flex", alignItems:"center", gap:14 }}>
-              <div style={{ width:38, height:38, borderRadius:10, background:"linear-gradient(135deg,#DC2626,#7F1D1D)", display:"flex", alignItems:"center", justifyContent:"center", boxShadow:"0 4px 16px rgba(220,38,38,0.35)", animation:"glow 3.5s ease-in-out infinite", flexShrink:0 }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              <div style={{ width:38, height:38, borderRadius:10, background:"linear-gradient(135deg,#CCFF00,#5C7A00)", display:"flex", alignItems:"center", justifyContent:"center", boxShadow:"0 4px 16px rgba(204,255,0,0.35)", animation:"glow 3.5s ease-in-out infinite", flexShrink:0 }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15171E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
               </div>
               <div>
-                <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?22:18, letterSpacing:8, color:"#F2F4F8", lineHeight:1 }}>REDLINE</div>
-                <div style={{ fontSize:9, fontWeight:700, color:"#3A3E4A", letterSpacing:3, textTransform:"uppercase", marginTop:3 }}>Rep Portal</div>
+                <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?22:18, letterSpacing:8, color:"#DC2626", lineHeight:1 }}>REDLINE</div>
+                <div style={{ fontSize:9, fontWeight:700, color:"#5E6376", letterSpacing:3, textTransform:"uppercase", marginTop:3 }}>Portal</div>
               </div>
             </div>
 
@@ -1530,11 +1586,11 @@ export default function App() {
               <div style={{ position:"relative", display:"flex", alignItems:"center", gap:0 }}>
                 <div style={{ display:"flex", alignItems:"center", gap:10, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.07)", borderRadius:10, padding:"6px 12px 6px 6px", cursor:"pointer" }}
                   onClick={() => { setShowNameEdit(v => !v); setNameEdit(profile?.name ?? ""); }}>
-                  <div style={{ width:30, height:30, borderRadius:8, background:"linear-gradient(135deg,#DC2626,#991B1B)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Plus Jakarta Sans',sans-serif", fontSize:13, fontWeight:800, color:"#FFF", flexShrink:0, boxShadow:"0 2px 10px rgba(220,38,38,0.4)" }}>
+                  <div style={{ width:30, height:30, borderRadius:8, background:"linear-gradient(135deg,#CCFF00,#6E9100)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Plus Jakarta Sans',sans-serif", fontSize:13, fontWeight:800, color:"#15171E", flexShrink:0, boxShadow:"0 2px 10px rgba(204,255,0,0.4)" }}>
                     {profile?.name?.[0]?.toUpperCase() ?? "R"}
                   </div>
-                  <span style={{ fontSize:12, fontWeight:600, color:"#C4C8D4", letterSpacing:0.2 }}>{profile?.name ?? "Rep"}</span>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3A3E4A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft:2 }}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  <span style={{ fontSize:12, fontWeight:600, color:"#D6DAE2", letterSpacing:0.2 }}>{profile?.name ?? "Rep"}</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#5E6376" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft:2 }}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                 </div>
                 {showNameEdit && (
                   <div style={{ position:"absolute", top:"calc(100% + 10px)", right:0, background:"#16181F", border:"1px solid rgba(255,255,255,0.09)", borderRadius:14, padding:18, width:230, zIndex:200, boxShadow:"0 16px 48px rgba(0,0,0,0.7)" }}>
@@ -1548,7 +1604,7 @@ export default function App() {
                       style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:500, padding:"10px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }}
                     />
                     <div style={{ display:"flex", gap:8, marginTop:10 }}>
-                      <button onClick={saveName} style={{ flex:1, background:"#DC2626", border:"none", borderRadius:8, color:"#FFF", fontSize:12, fontWeight:800, letterSpacing:1, padding:"12px 0", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Save</button>
+                      <button onClick={saveName} style={{ flex:1, background:"#CCFF00", border:"none", borderRadius:8, color:"#15171E", fontSize:12, fontWeight:800, letterSpacing:1, padding:"12px 0", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Save</button>
                       <button onClick={() => setShowNameEdit(false)} style={{ flex:1, background:"rgba(255,255,255,0.06)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:8, color:"#666C7E", fontSize:12, fontWeight:700, letterSpacing:1, padding:"12px 0", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Cancel</button>
                     </div>
                   </div>
@@ -1562,12 +1618,12 @@ export default function App() {
           {/* Welcome + stats row */}
           <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:16, flexWrap:"wrap", animation:"fadeUp 0.5s ease 0.1s both" }}>
             <p style={{ fontSize:dk?14:13, color:"#444856", margin:0, lineHeight:1.5, fontWeight:500 }}>
-              {profile?.name ? <><span style={{ color:"#C4C8D4", fontWeight:600 }}>{profile.name}</span> — </> : ""}Master every module. Close more deals.
+              {profile?.name ? <><span style={{ color:"#D6DAE2", fontWeight:600 }}>{profile.name}</span> — </> : ""}Master every module. Close more deals.
             </p>
             <div style={{ display:"flex", gap:8 }}>
               {[
                 [completedModules.size, "Done", "#22C55E"],
-                ["13", "Modules", "#DC2626"],
+                ["13", "Modules", "#CCFF00"],
                 ["2", "Camps", "#F59E0B"],
                 ["6", "Quizzes", "#10B981"],
               ].map(([n, l, col]) => (
@@ -1664,7 +1720,7 @@ export default function App() {
           <div style={{ animation:"fadeUp 0.35s ease" }}>
             <a href="https://www.redlinewebservices.net/" target="_blank" rel="noreferrer" className="card-hover"
               style={{ display:"flex", alignItems:"center", gap:14, background:"linear-gradient(135deg,rgba(16,18,24,0.98),rgba(11,12,17,0.98))", border:"1px solid rgba(255,255,255,0.055)", borderRadius:16, padding:dk?"18px":"15px 14px", textDecoration:"none", marginBottom:10, boxShadow:"0 4px 20px rgba(0,0,0,0.3)" }}>
-              <div style={{ width:46, height:46, borderRadius:13, background:"linear-gradient(135deg,#6366F1,#3730A3)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, fontSize:22, boxShadow:"0 4px 16px rgba(99,102,241,0.35)" }}>🌐</div>
+              <div style={{ width:46, height:46, borderRadius:13, background:"linear-gradient(135deg,#06D6F0,#0588A0)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, fontSize:22, boxShadow:"0 4px 16px rgba(6,214,240,0.35)" }}>🌐</div>
               <div style={{ flex:1, minWidth:0 }}>
                 <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF2F8", margin:"0 0 2px" }}>Redline Homepage</h3>
                 <p style={{ fontSize:11.5, color:"#4A5060", margin:0, fontWeight:500 }}>redlinewebservices.net</p>
@@ -1678,7 +1734,7 @@ export default function App() {
                   <div style={{ display:"flex", alignItems:"center", gap:14 }}>
                     <div style={{ width:50, height:50, borderRadius:14, background:IC_GRAD.REFERENCE, display:"flex", alignItems:"center", justifyContent:"center", fontSize:22, flexShrink:0, boxShadow:IC_SHADOW.REFERENCE }}>{x.ic}</div>
                     <div style={{ flex:1, minWidth:0 }}>
-                      <div style={{ fontSize:9, fontWeight:800, color:"#6366F1", letterSpacing:2.5, marginBottom:4, textTransform:"uppercase" }}>REFERENCE</div>
+                      <div style={{ fontSize:9, fontWeight:800, color:"#06D6F0", letterSpacing:2.5, marginBottom:4, textTransform:"uppercase" }}>REFERENCE</div>
                       <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF2F8", margin:"0 0 3px", lineHeight:1.3 }}>{x.sub}</h3>
                       <p style={{ fontSize:11.5, color:"#666C7E", margin:0, lineHeight:1.4, fontWeight:500 }}>{x.d}</p>
                     </div>

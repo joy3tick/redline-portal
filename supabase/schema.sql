@@ -127,6 +127,7 @@ create table if not exists public.sales (
   id         uuid default gen_random_uuid() primary key,
   user_id    uuid references auth.users(id) on delete cascade not null,
   amount     numeric,
+  retainer   numeric,
   note       text,
   sale_date  date not null default current_date,
   created_at timestamptz default now()
