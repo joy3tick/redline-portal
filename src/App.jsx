@@ -1098,8 +1098,8 @@ export default function App() {
                       style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:500, padding:"9px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }}
                     />
                     <div style={{ display:"flex", gap:8, marginTop:10 }}>
-                      <button onClick={saveName} style={{ flex:1, background:"#DC2626", border:"none", borderRadius:8, color:"#FFF", fontSize:11, fontWeight:800, letterSpacing:1.5, padding:"9px 0", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Save</button>
-                      <button onClick={() => setShowNameEdit(false)} style={{ flex:1, background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.07)", borderRadius:8, color:"#3A4050", fontSize:11, fontWeight:700, letterSpacing:1.5, padding:"9px 0", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Cancel</button>
+                      <button onClick={saveName} style={{ flex:1, background:"#DC2626", border:"none", borderRadius:10, color:"#FFF", fontSize:13, fontWeight:800, letterSpacing:1, padding:"13px 0", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Save</button>
+                      <button onClick={() => setShowNameEdit(false)} style={{ flex:1, background:"rgba(255,255,255,0.07)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:10, color:"#9CA3AF", fontSize:13, fontWeight:700, letterSpacing:1, padding:"13px 0", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Cancel</button>
                     </div>
                   </div>
                 )}
