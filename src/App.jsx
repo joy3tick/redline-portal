@@ -443,7 +443,7 @@ function Login() {
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
           </div>
           <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:40, letterSpacing:14, color:"#DC2626", lineHeight:1, textShadow:"0 0 50px rgba(220,38,38,0.3)" }}>REDLINE</div>
-          <div style={{ fontSize:11, fontWeight:700, color:"#4D5260", letterSpacing:6, textTransform:"uppercase", marginTop:7 }}>Rep Portal</div>
+          <div style={{ fontSize:11, fontWeight:700, color:"#4D5260", letterSpacing:6, textTransform:"uppercase", marginTop:7 }}>Portal</div>
           <div style={{ width:56, height:1.5, background:"linear-gradient(90deg,transparent,#DC2626,transparent)", margin:"14px auto 0" }} />
         </div>
 
@@ -463,7 +463,7 @@ function Login() {
             </div>
           )}
           <button onClick={go} disabled={ld} style={{ width:"100%", padding:"16px", background: ld ? "#5A0A0A" : "linear-gradient(135deg,#E5222B,#991B1B)", color:"#FFF", border:"none", borderRadius:14, fontSize:11, fontWeight:800, letterSpacing:4, cursor: ld ? "wait" : "pointer", marginTop:20, textTransform:"uppercase", boxShadow: ld ? "none" : "0 6px 28px rgba(220,38,38,0.3)", transition:"all 0.25s ease", fontFamily:"inherit" }}>
-            {ld ? "Signing In…" : "Enter Academy"}
+            {ld ? "Signing In…" : "Enter Portal"}
           </button>
         </div>
         <p style={{ color:"#292C35", fontSize:9, marginTop:32, letterSpacing:2, textTransform:"uppercase", textAlign:"center" }}>© 2026 Redline Web Services LLC</p>
@@ -645,7 +645,7 @@ function AdminPanel({ profile, onBack, w, onSignOut }) {
         <div style={{ maxWidth:1000, margin:"0 auto", padding:dk?"0 44px":"0 20px", height:52, display:"flex", alignItems:"center", justifyContent:"space-between" }}>
           <button className="back-btn" onClick={onBack} style={{ background:"none", border:"none", color:"#DC2626", fontSize:13, fontWeight:700, cursor:"pointer", padding:"6px 0", display:"flex", alignItems:"center", gap:8, fontFamily:"inherit" }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-            Back to Academy
+            Back to Portal
           </button>
           <button onClick={onSignOut} style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", color:"#7E8595", fontSize:10, fontWeight:700, cursor:"pointer", padding:"8px 16px", borderRadius:9, fontFamily:"inherit", letterSpacing:1.5, textTransform:"uppercase" }}>Sign Out</button>
         </div>
@@ -735,7 +735,7 @@ function Viewer({ ck, onBack, w, onComplete }) {
         <div style={{ maxWidth:820, margin:"0 auto", padding:dk?"0 44px":"0 20px", height:52, display:"flex", alignItems:"center" }}>
           <button className="back-btn" onClick={onBack} style={{ background:"none", border:"none", color:accent, fontSize:13, fontWeight:700, cursor:"pointer", padding:"6px 0", display:"flex", alignItems:"center", gap:8, fontFamily:"inherit", letterSpacing:0.3 }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-            Back to Academy
+            Back to Portal
           </button>
         </div>
       </div>
@@ -836,7 +836,7 @@ function Quiz({ quizKey, onBack, w, onComplete }) {
         <div style={{ maxWidth:700, margin:"0 auto", padding:dk?"0 44px":"0 20px", height:52, display:"flex", alignItems:"center" }}>
           <button className="back-btn" onClick={onBack} style={{ background:"none", border:"none", color:"#10B981", fontSize:13, fontWeight:700, cursor:"pointer", padding:"6px 0", display:"flex", alignItems:"center", gap:8, fontFamily:"inherit" }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-            Back to Academy
+            Back to Portal
           </button>
         </div>
       </div>
@@ -872,7 +872,7 @@ function Quiz({ quizKey, onBack, w, onComplete }) {
             <p style={{ fontSize:14, color:gc, fontWeight:700, margin:"0 0 36px", letterSpacing:0.3 }}>{gl}</p>
             <div style={{ display:"flex", gap:12, justifyContent:"center", flexWrap:"wrap" }}>
               <button onClick={retry} style={{ padding:"14px 28px", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:14, color:"#C0C8D8", fontSize:13, fontWeight:700, cursor:"pointer", fontFamily:"inherit", transition:"all 0.2s" }}>Retake Quiz</button>
-              <button onClick={onBack} style={{ padding:"14px 32px", background:"linear-gradient(135deg,#E5222B,#991B1B)", border:"none", borderRadius:14, color:"#FFF", fontSize:13, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:"0 6px 24px rgba(220,38,38,0.28)", letterSpacing:0.5 }}>Back to Academy</button>
+              <button onClick={onBack} style={{ padding:"14px 32px", background:"linear-gradient(135deg,#E5222B,#991B1B)", border:"none", borderRadius:14, color:"#FFF", fontSize:13, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:"0 6px 24px rgba(220,38,38,0.28)", letterSpacing:0.5 }}>Back to Portal</button>
             </div>
           </div>
         ) : (

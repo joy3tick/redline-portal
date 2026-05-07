@@ -1,6 +1,6 @@
-# REDLINE Sales Academy
+# Redline Portal
 
-Internal training portal for REDLINE Web Services sales representatives.
+Internal hub for REDLINE Web Services sales representatives.
 
 ## Setup
 
