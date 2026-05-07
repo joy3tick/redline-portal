@@ -1616,12 +1616,12 @@ export default function App() {
   const referenceItems = CATS.filter(x=>x.t==="REFERENCE");
   const quizItems = CATS.filter(x=>x.t==="QUIZ");
   const TABS = [
-    { key:"dashboard", label:"Dashboard", color:"#22C55E" },
-    { key:"leaderboard", label:"Leaderboard", color:"#FFD700" },
-    { key:"scheduling", label:"Scheduling", color:"#F59E0B" },
-    { key:"training", label:"Training", color:"#CCFF00" },
-    { key:"reference", label:"Reference", color:"#06D6F0" },
-    { key:"quizzes", label:"Quizzes", color:"#10B981" },
+    { key:"dashboard",    label:"Dashboard",    short:"Home",     color:"#22C55E" },
+    { key:"leaderboard",  label:"Leaderboard",  short:"Board",    color:"#FFD700" },
+    { key:"scheduling",   label:"Scheduling",   short:"Schedule", color:"#F59E0B" },
+    { key:"training",     label:"Training",     short:"Train",    color:"#CCFF00" },
+    { key:"reference",    label:"Reference",    short:"Ref",      color:"#06D6F0" },
+    { key:"quizzes",      label:"Quizzes",      short:"Quizzes",  color:"#10B981" },
   ];
 
   if (loading) return (
@@ -1678,100 +1678,97 @@ export default function App() {
       <div style={{ position:"fixed", top:0, left:"50%", transform:"translateX(-50%)", width:1000, height:600, background:"radial-gradient(ellipse 60% 50% at 50% 0%, rgba(204,255,0,0.07) 0%, transparent 70%)", pointerEvents:"none", zIndex:0 }} />
 
       {/* Header */}
-      <div style={{ position:"relative", zIndex:1, padding:wd?"36px 56px 32px":dk?"28px 36px 26px":"20px 20px 20px" }}>
+      <div style={{ position:"relative", zIndex:1, padding:wd?"32px 56px 24px":dk?"24px 36px 20px":"14px 16px 14px" }}>
         <div style={{ maxWidth:1300, margin:"0 auto" }}>
 
           {/* Top row: logo + actions */}
-          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:dk?24:20, animation:"fadeUp 0.5s ease" }}>
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:dk?18:12, animation:"fadeUp 0.5s ease" }}>
 
             {/* Logo */}
-            <div style={{ display:"flex", alignItems:"center", gap:14 }}>
-              <div style={{ width:38, height:38, borderRadius:10, background:"linear-gradient(135deg,#CCFF00,#5C7A00)", display:"flex", alignItems:"center", justifyContent:"center", boxShadow:"0 4px 16px rgba(204,255,0,0.35)", animation:"glow 3.5s ease-in-out infinite", flexShrink:0 }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15171E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+              <div style={{ width:dk?36:32, height:dk?36:32, borderRadius:9, background:"linear-gradient(135deg,#CCFF00,#5C7A00)", display:"flex", alignItems:"center", justifyContent:"center", boxShadow:"0 4px 14px rgba(204,255,0,0.3)", animation:"glow 3.5s ease-in-out infinite", flexShrink:0 }}>
+                <svg width={dk?15:13} height={dk?15:13} viewBox="0 0 24 24" fill="none" stroke="#15171E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
               </div>
               <div>
-                <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?22:18, letterSpacing:8, color:"#DC2626", lineHeight:1 }}>REDLINE</div>
-                <div style={{ fontSize:9, fontWeight:700, color:"#5E6376", letterSpacing:3, textTransform:"uppercase", marginTop:3 }}>Portal</div>
+                <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?20:17, letterSpacing:dk?7:6, color:"#DC2626", lineHeight:1 }}>REDLINE</div>
+                {dk && <div style={{ fontSize:8.5, fontWeight:700, color:"#5E6376", letterSpacing:3, textTransform:"uppercase", marginTop:2 }}>Rep Portal</div>}
               </div>
             </div>
 
             {/* Right actions */}
-            <div style={{ display:"flex", alignItems:"center", gap:8, animation:"fadeUp 0.5s ease 0.06s both" }}>
+            <div style={{ display:"flex", alignItems:"center", gap:6 }}>
               {profile?.role === "admin" && (
-                <button onClick={() => setView("__admin")} style={{ background:"rgba(245,158,11,0.08)", border:"1px solid rgba(245,158,11,0.18)", color:"#F59E0B", fontSize:10, fontWeight:700, cursor:"pointer", padding:"8px 14px", borderRadius:8, fontFamily:"inherit", letterSpacing:1.5, textTransform:"uppercase", transition:"all 0.18s" }}>Admin</button>
+                <button onClick={() => setView("__admin")} style={{ background:"rgba(245,158,11,0.08)", border:"1px solid rgba(245,158,11,0.18)", color:"#F59E0B", fontSize:9.5, fontWeight:700, cursor:"pointer", padding:dk?"8px 14px":"6px 10px", borderRadius:8, fontFamily:"inherit", letterSpacing:1.5, textTransform:"uppercase", transition:"all 0.18s" }}>Admin</button>
               )}
 
-              {/* Avatar + name edit grouped */}
-              <div style={{ position:"relative", display:"flex", alignItems:"center", gap:0 }}>
-                <div style={{ display:"flex", alignItems:"center", gap:10, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.07)", borderRadius:10, padding:"6px 12px 6px 6px", cursor:"pointer" }}
+              {/* Avatar pill */}
+              <div style={{ position:"relative" }}>
+                <div style={{ display:"flex", alignItems:"center", gap:dk?8:0, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.07)", borderRadius:9, padding:dk?"5px 11px 5px 5px":"5px", cursor:"pointer" }}
                   onClick={() => { setShowNameEdit(v => !v); setNameEdit(profile?.name ?? ""); }}>
-                  <div style={{ width:30, height:30, borderRadius:8, background:"linear-gradient(135deg,#CCFF00,#6E9100)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Plus Jakarta Sans',sans-serif", fontSize:13, fontWeight:800, color:"#15171E", flexShrink:0, boxShadow:"0 2px 10px rgba(204,255,0,0.4)" }}>
+                  <div style={{ width:dk?28:30, height:dk?28:30, borderRadius:7, background:"linear-gradient(135deg,#CCFF00,#6E9100)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:dk?12:13, fontWeight:800, color:"#15171E", flexShrink:0, boxShadow:"0 2px 8px rgba(204,255,0,0.35)" }}>
                     {profile?.name?.[0]?.toUpperCase() ?? "R"}
                   </div>
-                  <span style={{ fontSize:12, fontWeight:600, color:"#D6DAE2", letterSpacing:0.2 }}>{profile?.name ?? "Rep"}</span>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#5E6376" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft:2 }}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  {dk && <span style={{ fontSize:12, fontWeight:600, color:"#D6DAE2" }}>{profile?.name ?? "Rep"}</span>}
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#5E6376" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft:dk?2:0 }}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                 </div>
                 {showNameEdit && (
-                  <div style={{ position:"absolute", top:"calc(100% + 10px)", right:0, background:"#16181F", border:"1px solid rgba(255,255,255,0.09)", borderRadius:14, padding:18, width:230, zIndex:200, boxShadow:"0 16px 48px rgba(0,0,0,0.7)" }}>
-                    <div style={{ fontSize:10, fontWeight:700, color:"#444856", letterSpacing:2.5, textTransform:"uppercase", marginBottom:10 }}>Display Name</div>
-                    <input
-                      autoFocus
-                      value={nameEdit}
-                      onChange={e => setNameEdit(e.target.value)}
+                  <div style={{ position:"absolute", top:"calc(100% + 8px)", right:0, background:"#16181F", border:"1px solid rgba(255,255,255,0.09)", borderRadius:14, padding:16, width:220, zIndex:200, boxShadow:"0 16px 48px rgba(0,0,0,0.8)" }}>
+                    <div style={{ fontSize:9.5, fontWeight:700, color:"#444856", letterSpacing:2, textTransform:"uppercase", marginBottom:10 }}>Display Name</div>
+                    <input autoFocus value={nameEdit} onChange={e => setNameEdit(e.target.value)}
                       onKeyDown={e => { if (e.key === "Enter") saveName(); if (e.key === "Escape") setShowNameEdit(false); }}
                       placeholder="Your name…"
-                      style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:500, padding:"10px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }}
-                    />
+                      style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:500, padding:"10px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }} />
                     <div style={{ display:"flex", gap:8, marginTop:10 }}>
-                      <button onClick={saveName} style={{ flex:1, background:"#CCFF00", border:"none", borderRadius:8, color:"#15171E", fontSize:12, fontWeight:800, letterSpacing:1, padding:"12px 0", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Save</button>
-                      <button onClick={() => setShowNameEdit(false)} style={{ flex:1, background:"rgba(255,255,255,0.06)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:8, color:"#666C7E", fontSize:12, fontWeight:700, letterSpacing:1, padding:"12px 0", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Cancel</button>
+                      <button onClick={saveName} style={{ flex:1, background:"#CCFF00", border:"none", borderRadius:8, color:"#15171E", fontSize:12, fontWeight:800, padding:"12px 0", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Save</button>
+                      <button onClick={() => setShowNameEdit(false)} style={{ flex:1, background:"rgba(255,255,255,0.06)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:8, color:"#666C7E", fontSize:12, fontWeight:700, padding:"12px 0", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Cancel</button>
                     </div>
                   </div>
                 )}
               </div>
 
-              <button onClick={signOut} style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.07)", color:"#444856", fontSize:10, fontWeight:700, cursor:"pointer", padding:"8px 14px", borderRadius:8, fontFamily:"inherit", letterSpacing:1.5, textTransform:"uppercase", transition:"all 0.18s" }}>Sign Out</button>
+              <button onClick={signOut} style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.07)", color:"#444856", fontSize:9.5, fontWeight:700, cursor:"pointer", padding:dk?"8px 14px":"6px 10px", borderRadius:8, fontFamily:"inherit", letterSpacing:1, textTransform:"uppercase", transition:"all 0.18s", whiteSpace:"nowrap" }}>
+                {dk ? "Sign Out" : "Out"}
+              </button>
             </div>
           </div>
 
-          {/* Welcome + stats row */}
-          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:16, flexWrap:"wrap", animation:"fadeUp 0.5s ease 0.1s both" }}>
-            <p style={{ fontSize:dk?14:13, color:"#444856", margin:0, lineHeight:1.5, fontWeight:500 }}>
-              {profile?.name ? <><span style={{ color:"#D6DAE2", fontWeight:600 }}>{profile.name}</span> — </> : ""}Master every module. Close more deals.
-            </p>
-            <div style={{ display:"flex", gap:8 }}>
-              {[
-                [completedModules.size, "Done", "#22C55E"],
-                ["13", "Modules", "#CCFF00"],
-                ["2", "Camps", "#F59E0B"],
-                ["6", "Quizzes", "#10B981"],
-              ].map(([n, l, col]) => (
-                <div key={l} style={{ background:`${col}10`, border:`1px solid ${col}20`, borderRadius:10, padding:"10px 16px", textAlign:"center", minWidth:60 }}>
-                  <div style={{ fontSize:dk?22:18, fontWeight:900, color:col, lineHeight:1, letterSpacing:"-0.02em" }}>{n}</div>
-                  <div style={{ fontSize:8.5, color:`${col}70`, textTransform:"uppercase", letterSpacing:1.5, fontWeight:700, marginTop:4 }}>{l}</div>
-                </div>
-              ))}
-            </div>
+          {/* Welcome line */}
+          <p style={{ fontSize:dk?14:12.5, color:"#444856", margin:"0 0 12px", lineHeight:1.5, fontWeight:500, animation:"fadeUp 0.5s ease 0.08s both" }}>
+            {profile?.name ? <><span style={{ color:"#D6DAE2", fontWeight:600 }}>{profile.name}</span>{" — "}</> : ""}Master every module. Close more deals.
+          </p>
+
+          {/* Stats row — equal width tiles, always one row */}
+          <div style={{ display:"flex", gap:dk?8:5, animation:"fadeUp 0.5s ease 0.12s both" }}>
+            {[
+              [completedModules.size, "Done", "#22C55E"],
+              ["13", "Modules", "#CCFF00"],
+              ["2", "Camps", "#F59E0B"],
+              ["6", "Quizzes", "#10B981"],
+            ].map(([n, l, col]) => (
+              <div key={l} style={{ background:`${col}10`, border:`1px solid ${col}18`, borderRadius:9, padding:dk?"10px 16px":"8px 0", textAlign:"center", flex:1 }}>
+                <div style={{ fontSize:dk?20:16, fontWeight:900, color:col, lineHeight:1, letterSpacing:"-0.02em" }}>{n}</div>
+                <div style={{ fontSize:dk?8:7.5, color:`${col}70`, textTransform:"uppercase", letterSpacing:1.5, fontWeight:700, marginTop:3 }}>{l}</div>
+              </div>
+            ))}
           </div>
 
         </div>
       </div>
 
-      {/* Tab Nav */}
-      <div style={{ position:"relative", zIndex:1, padding:wd?"0 56px 0":dk?"0 36px 0":"0 20px 0" }}>
-        <div style={{ maxWidth:1300, margin:"0 auto", borderBottom:"1px solid rgba(255,255,255,0.06)", display:"flex", gap:2, paddingBottom:0 }}>
+      {/* Tab Nav — scrollable on mobile, no scrollbar shown */}
+      <div style={{ position:"relative", zIndex:1, borderBottom:"1px solid rgba(255,255,255,0.06)" }}>
+        <div style={{ maxWidth:1300, margin:"0 auto", paddingLeft:wd?56:dk?36:0, paddingRight:wd?56:dk?36:0, display:"flex", overflowX:"auto", scrollbarWidth:"none", msOverflowStyle:"none" }}>
           {TABS.map(t => (
             <button key={t.key} onClick={() => setTab(t.key)}
-              style={{ background: tab===t.key ? `${t.color}12` : "none", border:"none", borderBottom: tab===t.key ? `2px solid ${t.color}` : "2px solid transparent", color: tab===t.key ? t.color : "#444856", fontSize:10.5, fontWeight:700, letterSpacing:2, cursor:"pointer", padding:dk?"13px 20px":"11px 14px", fontFamily:"inherit", textTransform:"uppercase", transition:"all 0.18s", marginBottom:-1, borderRadius:"6px 6px 0 0" }}>
-              {t.label}
+              style={{ background: tab===t.key ? `${t.color}12` : "none", border:"none", borderBottom: tab===t.key ? `2px solid ${t.color}` : "2px solid transparent", color: tab===t.key ? t.color : "#4A4E5C", fontSize:dk?10.5:10, fontWeight:700, letterSpacing:dk?2:1.5, cursor:"pointer", padding:dk?"13px 18px":"12px 16px", fontFamily:"inherit", textTransform:"uppercase", transition:"color 0.15s, border-color 0.15s", marginBottom:-1, flexShrink:0, whiteSpace:"nowrap" }}>
+              {dk ? t.label : t.short}
             </button>
           ))}
         </div>
       </div>
 
       {/* Tab Content */}
-      {/* LEADERBOARD TAB is rendered below */}
-      <div style={{ position:"relative", zIndex:1, maxWidth:1300, margin:"0 auto", padding:wd?"28px 56px 90px":dk?"24px 36px 90px":"18px 20px 90px" }}>
+      <div style={{ position:"relative", zIndex:1, maxWidth:1300, margin:"0 auto", padding:wd?"28px 56px 90px":dk?"24px 36px 90px":"16px 16px 90px" }}>
 
         {/* DASHBOARD TAB */}
         {tab === "dashboard" && (
