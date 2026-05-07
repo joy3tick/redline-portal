@@ -711,6 +711,8 @@ function Scheduler({ session, profile, w }) {
   );
 }
 
+const TIER_GLOW = { trial:"rgba(6,214,240,0.3)", bronze:"rgba(184,115,42,0.35)", silver:"rgba(192,200,216,0.3)", gold:"rgba(255,215,0,0.4)", platinum:"rgba(167,139,250,0.35)", diamond:"rgba(204,255,0,0.4)" };
+
 function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab, onOpenModule }) {
   const [sales, setSales] = useState([]);
   const [schedule, setSchedule] = useState([]);
@@ -768,10 +770,12 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
   const doneQuizzes = CATS.filter(x => x.t === "QUIZ" && quizScores[x.k]).length;
 
   const nextModule = CATS.find(x => (x.t === "MODULE" || x.t === "BOOTCAMP") && !completedModules.has(x.k));
-
   const todaysReps = schedule.map(e => repProfiles[e.user_id] || "Rep");
   const recentSales = sales.slice(0, 5);
   const MEDALS = ["🥇","🥈","🥉"];
+
+  const tierObj = TIERS.find(t => t.v === profile?.tier) ?? null;
+  const tierIdx = tierObj ? TIERS.indexOf(tierObj) : -1;
 
   const onCardMove = (e) => {
     const r = e.currentTarget.getBoundingClientRect();
@@ -779,8 +783,9 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
     e.currentTarget.style.setProperty("--my", `${e.clientY - r.top}px`);
   };
 
-  const Card = ({ title, accent, action, actionOnClick, children }) => (
-    <div className="dash-card" onMouseMove={onCardMove} style={{ padding:dk?"22px 24px":"18px 20px" }}>
+  const Card = ({ title, accent, action, actionOnClick, children, fullWidth }) => (
+    <div className="dash-card" onMouseMove={onCardMove}
+      style={{ padding:dk?"22px 24px":"18px 20px", gridColumn: fullWidth && wd ? "1 / -1" : undefined }}>
       <div style={{ position:"absolute", top:0, left:0, right:0, height:2, background:`linear-gradient(90deg,transparent,${accent}80,transparent)`, opacity:0.4 }} />
       <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:16, position:"relative" }}>
         <div style={{ fontSize:10, fontWeight:800, color:accent, letterSpacing:2.5, textTransform:"uppercase" }}>{title}</div>
@@ -797,48 +802,89 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
     </div>
   );
 
-  if (loading) return <div style={{ textAlign:"center", padding:60, color:"#7E8290", fontSize:13 }}>Loading dashboard…</div>;
+  if (loading) return <div style={{ textAlign:"center", padding:60, color:"#7E8290", fontSize:13 }}>Loading…</div>;
 
   return (
     <div style={{ animation:"fadeUp 0.35s ease", display:"grid", gridTemplateColumns: wd ? "1fr 1fr" : "1fr", gap:dk?18:14 }}>
+
+      {/* Tier Card — full width */}
+      <div className="dash-card" onMouseMove={onCardMove}
+        style={{ padding:dk?"26px 28px":"20px 20px", gridColumn: wd ? "1 / -1" : undefined,
+          background: tierObj ? `linear-gradient(135deg, rgba(14,15,20,0.97) 0%, ${tierObj.color}10 100%)` : undefined,
+          borderColor: tierObj ? `${tierObj.color}22` : undefined }}>
+        {tierObj && <div style={{ position:"absolute", top:0, left:0, right:0, height:2, background:`linear-gradient(90deg,transparent,${tierObj.color}90,transparent)` }} />}
+        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:16 }}>
+          {/* Left: tier name */}
+          <div style={{ display:"flex", alignItems:"center", gap:dk?18:14 }}>
+            <div style={{ width:dk?62:52, height:dk?62:52, borderRadius:16, background: tierObj ? `radial-gradient(circle at 35% 35%, ${tierObj.color}30, ${tierObj.color}08)` : "rgba(255,255,255,0.04)", border:`2px solid ${tierObj ? tierObj.color+"55" : "rgba(255,255,255,0.08)"}`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, boxShadow: tierObj ? `0 0 28px ${TIER_GLOW[tierObj.v]}` : undefined, fontSize:dk?26:22, lineHeight:1 }}>
+              {tierObj ? tierObj.emoji : "?"}
+            </div>
+            <div>
+              <div style={{ fontSize:9, fontWeight:800, color:"#5E6376", letterSpacing:2.5, textTransform:"uppercase", marginBottom:4 }}>Current Tier</div>
+              <div style={{ fontSize:dk?30:24, fontWeight:900, color: tierObj ? tierObj.color : "#3A3E4A", letterSpacing:"-0.03em", lineHeight:1, textShadow: tierObj ? `0 0 24px ${TIER_GLOW[tierObj.v]}` : undefined }}>
+                {tierObj ? tierObj.label.toUpperCase() : "—"}
+              </div>
+              {!tierObj && <div style={{ fontSize:11, color:"#444856", marginTop:4 }}>No tier assigned yet</div>}
+            </div>
+          </div>
+          {/* Right: tier progression */}
+          <div style={{ display:"flex", gap:dk?6:4, alignItems:"center" }}>
+            {TIERS.map((t, i) => {
+              const active = t.v === profile?.tier;
+              const passed = tierIdx >= 0 && i < tierIdx;
+              return (
+                <div key={t.v} style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:4 }}>
+                  <div style={{ width:dk?34:26, height:dk?34:26, borderRadius:9, background: active ? `radial-gradient(circle, ${t.color}30, ${t.color}10)` : passed ? `${t.color}15` : "rgba(255,255,255,0.03)", border:`1.5px solid ${active ? t.color : passed ? t.color+"50" : "rgba(255,255,255,0.07)"}`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:dk?13:11, transition:"all 0.2s", boxShadow: active ? `0 0 14px ${TIER_GLOW[t.v]}` : undefined }}>
+                    {active ? <span style={{ fontSize:dk?15:13 }}>{t.emoji}</span> : passed ? <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={t.color} strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> : <div style={{ width:5, height:5, borderRadius:"50%", background:"rgba(255,255,255,0.12)" }} />}
+                  </div>
+                  {dk && <div style={{ fontSize:7.5, fontWeight:800, color: active ? t.color : passed ? t.color+"80" : "#3A3E4A", letterSpacing:1, textTransform:"uppercase" }}>{t.label}</div>}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
 
       {/* Your Week */}
       <Card title="Your Week" accent="#CCFF00">
         <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:8 }}>
           {[
             { v: myRankWeek >= 0 ? `#${myRankWeek + 1}` : "—", l: "Rank", c: "#FFD700" },
-            { v: myWeek.count, l: myWeek.count === 1 ? "Sale" : "Sales", c: "#CCFF00" },
+            { v: myWeek.count, l: "Sales", c: "#CCFF00" },
             { v: `${trainingPct}%`, l: "Training", c: "#22C55E" },
             { v: `${doneQuizzes}/${totalQuizzes}`, l: "Quizzes", c: "#10B981" },
           ].map(s => (
             <div key={s.l} style={{ background:`${s.c}10`, border:`1px solid ${s.c}20`, borderRadius:10, padding:"12px 8px", textAlign:"center" }}>
-              <div style={{ fontSize:dk?22:18, fontWeight:900, color:s.c, lineHeight:1, letterSpacing:"-0.02em" }}>{s.v}</div>
+              <div style={{ fontSize:dk?24:19, fontWeight:900, color:s.c, lineHeight:1, letterSpacing:"-0.02em" }}>{s.v}</div>
               <div style={{ fontSize:8.5, color:`${s.c}70`, textTransform:"uppercase", letterSpacing:1.5, fontWeight:700, marginTop:5 }}>{s.l}</div>
             </div>
           ))}
         </div>
         {myWeek.total > 0 && (
-          <div style={{ marginTop:12, fontSize:11, color:"#666C7E", textAlign:"center" }}>
-            <span style={{ color:"#22C55E", fontWeight:700 }}>${myWeek.total.toLocaleString()}</span> closed this week
+          <div style={{ marginTop:10, fontSize:11.5, color:"#22C55E", fontWeight:700, textAlign:"center", letterSpacing:0.3 }}>
+            ${myWeek.total.toLocaleString()} closed
           </div>
         )}
       </Card>
 
       {/* Top Performers */}
-      <Card title="Top Performers · This Week" accent="#FFD700" action="Leaderboard" actionOnClick={() => onGoTab("leaderboard")}>
+      <Card title="This Week" accent="#FFD700" action="Leaderboard" actionOnClick={() => onGoTab("leaderboard")}>
         {rankedWeek.length === 0 ? (
-          <div style={{ fontSize:12, color:"#444856", padding:"12px 0" }}>No sales logged yet this week. Be the first.</div>
+          <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:8, padding:"16px 0", color:"#2E3140" }}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+            <span style={{ fontSize:11, color:"#3A3E4A" }}>No sales yet this week</span>
+          </div>
         ) : (
           <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
             {rankedWeek.slice(0, 3).map((rep, i) => {
               const isMe = rep.uid === session.user.id;
               return (
-                <div key={rep.uid} style={{ display:"flex", alignItems:"center", gap:12, background: isMe ? "rgba(204,255,0,0.06)" : i===0 ? "rgba(255,215,0,0.04)" : "rgba(255,255,255,0.025)", border:`1px solid ${isMe ? "rgba(204,255,0,0.18)" : i===0 ? "rgba(255,215,0,0.12)" : "rgba(255,255,255,0.06)"}`, borderRadius:10, padding:"10px 12px" }}>
-                  <div style={{ fontSize:18, minWidth:26, textAlign:"center" }}>{MEDALS[i]}</div>
-                  <div style={{ flex:1, minWidth:0, fontSize:13, fontWeight:700, color: isMe ? "#F2F4F8" : "#D6DAE2" }}>
-                    {rep.name}{isMe ? <span style={{ fontSize:9, fontWeight:700, color:"#CCFF00", letterSpacing:1.5, marginLeft:8, textTransform:"uppercase" }}>you</span> : ""}
+                <div key={rep.uid} style={{ display:"flex", alignItems:"center", gap:10, background: isMe ? "rgba(204,255,0,0.06)" : i===0 ? "rgba(255,215,0,0.04)" : "rgba(255,255,255,0.025)", border:`1px solid ${isMe ? "rgba(204,255,0,0.18)" : i===0 ? "rgba(255,215,0,0.12)" : "rgba(255,255,255,0.06)"}`, borderRadius:10, padding:"10px 12px" }}>
+                  <div style={{ fontSize:16, minWidth:22, textAlign:"center" }}>{MEDALS[i]}</div>
+                  <div style={{ flex:1, minWidth:0, fontSize:12.5, fontWeight:700, color: isMe ? "#F2F4F8" : "#D6DAE2", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                    {rep.name}{isMe ? <span style={{ fontSize:9, fontWeight:700, color:"#CCFF00", letterSpacing:1.5, marginLeft:7, textTransform:"uppercase" }}>you</span> : ""}
                   </div>
-                  <div style={{ fontSize:18, fontWeight:900, color: i===0 ? "#FFD700" : "#888D9C", lineHeight:1 }}>{rep.count}</div>
+                  <div style={{ fontSize:17, fontWeight:900, color: i===0 ? "#FFD700" : "#555A6A", lineHeight:1 }}>{rep.count}</div>
                 </div>
               );
             })}
@@ -847,41 +893,53 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
       </Card>
 
       {/* Continue Training */}
-      <Card title="Continue Training" accent="#CCFF00" action="All Modules" actionOnClick={() => onGoTab("training")}>
+      <Card title="Training" accent="#CCFF00" action="All Modules" actionOnClick={() => onGoTab("training")}>
         {nextModule ? (
-          <div className="card-hover" onClick={() => onOpenModule(nextModule.k)}
-            style={{ display:"flex", alignItems:"center", gap:14, cursor:"pointer", background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:12, padding:"12px 14px" }}>
-            <div style={{ width:46, height:46, borderRadius:12, background:IC_GRAD[nextModule.t], display:"flex", alignItems:"center", justifyContent:"center", fontSize:20, flexShrink:0, boxShadow:IC_SHADOW[nextModule.t] }}>{nextModule.ic}</div>
+          <div onClick={() => onOpenModule(nextModule.k)}
+            style={{ display:"flex", alignItems:"center", gap:12, cursor:"pointer", background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:12, padding:"12px 14px", transition:"border-color 0.2s" }}
+            onMouseEnter={e => e.currentTarget.style.borderColor="rgba(204,255,0,0.2)"}
+            onMouseLeave={e => e.currentTarget.style.borderColor="rgba(255,255,255,0.06)"}>
+            <div style={{ width:42, height:42, borderRadius:11, background:IC_GRAD[nextModule.t], display:"flex", alignItems:"center", justifyContent:"center", fontSize:18, flexShrink:0, boxShadow:IC_SHADOW[nextModule.t] }}>{nextModule.ic}</div>
             <div style={{ flex:1, minWidth:0 }}>
-              <div style={{ fontSize:9, fontWeight:800, color: nextModule.t === "MODULE" ? "#CCFF00" : "#F59E0B", letterSpacing:2.5, marginBottom:3, textTransform:"uppercase" }}>{nextModule.n || nextModule.t} · Up Next</div>
-              <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF2F8", margin:"0 0 3px", lineHeight:1.3 }}>{nextModule.sub}</h3>
-              <p style={{ fontSize:11, color:"#666C7E", margin:0, lineHeight:1.4, fontWeight:500 }}>{nextModule.d}</p>
+              <div style={{ fontSize:9, fontWeight:800, color: nextModule.t === "MODULE" ? "#CCFF00" : "#F59E0B", letterSpacing:2, marginBottom:3, textTransform:"uppercase" }}>Up Next</div>
+              <div style={{ fontSize:13, fontWeight:700, color:"#EEF2F8", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{nextModule.sub}</div>
             </div>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#666C7E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0 }}><polyline points="9 18 15 12 9 6"/></svg>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#555A6A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0 }}><polyline points="9 18 15 12 9 6"/></svg>
           </div>
         ) : (
-          <div style={{ fontSize:12, color:"#22C55E", padding:"12px 0", fontWeight:600 }}>🎉 All modules complete. You're a closer.</div>
+          <div style={{ display:"flex", alignItems:"center", gap:10, padding:"10px 0" }}>
+            <div style={{ width:36, height:36, borderRadius:10, background:"rgba(34,197,94,0.12)", display:"flex", alignItems:"center", justifyContent:"center" }}>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div style={{ fontSize:13, fontWeight:700, color:"#22C55E" }}>All modules complete</div>
+          </div>
         )}
-        <div style={{ marginTop:12, height:6, borderRadius:3, background:"rgba(255,255,255,0.04)", overflow:"hidden" }}>
-          <div style={{ width:`${trainingPct}%`, height:"100%", background:"linear-gradient(90deg,#CCFF00,#F59E0B)", transition:"width 0.4s" }} />
+        <div style={{ marginTop:14, height:5, borderRadius:3, background:"rgba(255,255,255,0.05)", overflow:"hidden" }}>
+          <div style={{ width:`${trainingPct}%`, height:"100%", background:"linear-gradient(90deg,#CCFF00,#F59E0B)", transition:"width 0.5s" }} />
         </div>
-        <div style={{ fontSize:10, color:"#666C7E", marginTop:6, letterSpacing:1, textTransform:"uppercase", fontWeight:700 }}>{doneModules} of {totalModules} done</div>
+        <div style={{ display:"flex", justifyContent:"space-between", marginTop:6 }}>
+          <div style={{ fontSize:9.5, color:"#444856", letterSpacing:1, textTransform:"uppercase", fontWeight:700 }}>{doneModules}/{totalModules} modules</div>
+          <div style={{ fontSize:9.5, color:"#CCFF00", fontWeight:800 }}>{trainingPct}%</div>
+        </div>
       </Card>
 
       {/* Today on the Floor */}
-      <Card title="Today on the Floor" accent="#F59E0B" action="Schedule" actionOnClick={() => onGoTab("scheduling")}>
+      <Card title="On the Floor Today" accent="#F59E0B" action="Schedule" actionOnClick={() => onGoTab("scheduling")}>
         {todaysReps.length === 0 ? (
-          <div style={{ fontSize:12, color:"#444856", padding:"12px 0" }}>Nobody scheduled today. Tap Schedule to add yourself.</div>
+          <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:8, padding:"16px 0", color:"#2E3140" }}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <span style={{ fontSize:11, color:"#3A3E4A" }}>Nobody in today</span>
+          </div>
         ) : (
           <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
             {todaysReps.map((name, i) => {
               const isMe = schedule[i]?.user_id === session.user.id;
               return (
-                <div key={i} style={{ display:"flex", alignItems:"center", gap:8, background:isMe?"rgba(204,255,0,0.08)":"rgba(255,255,255,0.04)", border:`1px solid ${isMe?"rgba(204,255,0,0.2)":"rgba(255,255,255,0.07)"}`, borderRadius:8, padding:"6px 10px" }}>
-                  <div style={{ width:22, height:22, borderRadius:6, background: isMe ? "linear-gradient(135deg,#CCFF00,#6E9100)" : "linear-gradient(135deg,#2A2D38,#1E2028)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, fontWeight:800, color: isMe?"#15171E":"#888D9C" }}>
+                <div key={i} style={{ display:"flex", alignItems:"center", gap:7, background:isMe?"rgba(204,255,0,0.08)":"rgba(255,255,255,0.04)", border:`1px solid ${isMe?"rgba(204,255,0,0.2)":"rgba(255,255,255,0.07)"}`, borderRadius:8, padding:"6px 10px" }}>
+                  <div style={{ width:22, height:22, borderRadius:6, background: isMe ? "linear-gradient(135deg,#CCFF00,#6E9100)" : "rgba(255,255,255,0.06)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, fontWeight:800, color: isMe?"#15171E":"#666C7E" }}>
                     {name[0]?.toUpperCase()}
                   </div>
-                  <div style={{ fontSize:12, fontWeight:600, color: isMe?"#F2F4F8":"#D6DAE2" }}>{name}</div>
+                  <div style={{ fontSize:12, fontWeight:600, color: isMe?"#F2F4F8":"#B0B5C4" }}>{name}</div>
                 </div>
               );
             })}
@@ -890,20 +948,23 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
       </Card>
 
       {/* Recent Sales */}
-      <Card title="Recent Sales" accent="#22C55E" action="Leaderboard" actionOnClick={() => onGoTab("leaderboard")}>
+      <Card title="Recent Sales" accent="#22C55E" action="All Sales" actionOnClick={() => onGoTab("leaderboard")}>
         {recentSales.length === 0 ? (
-          <div style={{ fontSize:12, color:"#444856", padding:"12px 0" }}>No sales logged yet.</div>
+          <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:8, padding:"16px 0", color:"#2E3140" }}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            <span style={{ fontSize:11, color:"#3A3E4A" }}>No sales logged yet</span>
+          </div>
         ) : (
           <div style={{ display:"flex", flexDirection:"column", gap:5 }}>
             {recentSales.map(s => (
               <div key={s.id} style={{ display:"flex", alignItems:"center", gap:10, padding:"8px 12px", background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.05)", borderRadius:9 }}>
-                <div style={{ width:24, height:24, borderRadius:6, background: s.user_id===session.user.id ? "linear-gradient(135deg,#CCFF00,#6E9100)" : "rgba(255,255,255,0.05)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, fontWeight:800, color: s.user_id===session.user.id ? "#15171E" : "#666C7E", flexShrink:0 }}>
+                <div style={{ width:28, height:28, borderRadius:8, background: s.user_id===session.user.id ? "linear-gradient(135deg,#CCFF00,#6E9100)" : "rgba(255,255,255,0.05)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, fontWeight:800, color: s.user_id===session.user.id ? "#15171E" : "#555A6A", flexShrink:0 }}>
                   {(repProfiles[s.user_id] || "R")[0]?.toUpperCase()}
                 </div>
-                <div style={{ flex:1, minWidth:0, fontSize:11.5, color:"#D6DAE2", fontWeight:600, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
-                  {repProfiles[s.user_id] || "Rep"}{s.note ? <span style={{ color:"#444856", fontWeight:500 }}> — {s.note}</span> : ""}
+                <div style={{ flex:1, minWidth:0, fontSize:12, color:"#C4C9D4", fontWeight:600, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                  {repProfiles[s.user_id] || "Rep"}
                 </div>
-                {s.amount > 0 && <div style={{ fontSize:12, fontWeight:700, color:"#22C55E", flexShrink:0 }}>${Number(s.amount).toLocaleString()}</div>}
+                {s.amount > 0 && <div style={{ fontSize:13, fontWeight:800, color:"#22C55E", flexShrink:0 }}>${Number(s.amount).toLocaleString()}</div>}
               </div>
             ))}
           </div>
