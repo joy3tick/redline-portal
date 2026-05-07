@@ -246,37 +246,62 @@ const LINKS = [
    GLOBAL STYLES — injected once
    ═══════════════════════════════════════════ */
 const GLOBAL_CSS = `
-@keyframes fadeUp { from { opacity:0; transform:translateY(16px) } to { opacity:1; transform:translateY(0) } }
+@keyframes fadeUp { from { opacity:0; transform:translateY(20px) } to { opacity:1; transform:translateY(0) } }
 @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
-@keyframes slideDown { from { opacity:0; max-height:0; padding-top:0; padding-bottom:0 } to { opacity:1; max-height:2000px } }
-@keyframes glow { 0%,100% { box-shadow:0 0 20px rgba(220,38,38,0.08) } 50% { box-shadow:0 0 30px rgba(220,38,38,0.15) } }
-@keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
-@keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
-@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
+@keyframes glow { 0%,100% { box-shadow:0 0 30px rgba(220,38,38,0.15),0 0 60px rgba(220,38,38,0.06) } 50% { box-shadow:0 0 50px rgba(220,38,38,0.28),0 0 90px rgba(220,38,38,0.12) } }
+@keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.04)} }
+@keyframes gradShift { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
+@keyframes borderSpin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+@keyframes loginGlow { 0%,100%{opacity:.5} 50%{opacity:1} }
 
 *{margin:0;padding:0;box-sizing:border-box}
-html,body,#root{min-height:100dvh;background:#101114}
-body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden}
-::selection{background:rgba(220,38,38,0.2);color:#fff}
+html,body,#root{min-height:100dvh;background:#07080C}
+body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
+::selection{background:rgba(220,38,38,0.28);color:#fff}
 ::-webkit-scrollbar{width:5px}
-::-webkit-scrollbar-track{background:#101114}
-::-webkit-scrollbar-thumb{background:#2A2D35;border-radius:10px}
-::-webkit-scrollbar-thumb:hover{background:#3A3D45}
-input::placeholder{color:#2a2a2e}
+::-webkit-scrollbar-track{background:#07080C}
+::-webkit-scrollbar-thumb{background:#22252E;border-radius:10px}
+::-webkit-scrollbar-thumb:hover{background:#32353E}
+input::placeholder{color:#252830}
 
 .dotgrid {
-  background-image: radial-gradient(circle, #ffffff08 1px, transparent 1px);
-  background-size: 24px 24px;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.035) 1px, transparent 1px);
+  background-size: 28px 28px;
 }
-.card-hover { transition: all 0.3s cubic-bezier(0.4,0,0.2,1) }
-.card-hover:hover { transform:translateY(-3px); border-color:#222 !important; box-shadow:0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(220,38,38,0.08) }
-.acc-btn { transition: all 0.25s ease }
-.acc-btn:hover { background:#101014 !important }
+
+/* Cards */
+.card-hover { transition: transform 0.28s cubic-bezier(0.4,0,0.2,1), box-shadow 0.28s ease, border-color 0.28s ease }
+.card-hover:hover { transform:translateY(-3px); border-color:rgba(255,255,255,0.1) !important; box-shadow:0 16px 48px rgba(0,0,0,0.55), 0 0 0 1px rgba(220,38,38,0.1) !important }
+
+/* Accordion */
+.acc-btn { transition: background 0.22s ease }
+.acc-btn:hover { background:#0C0E12 !important }
+
+/* Nav back */
 .back-btn { transition: all 0.2s }
-.back-btn:hover { opacity:0.7; transform:translateX(-2px) }
+.back-btn:hover { opacity:0.75; transform:translateX(-3px) }
+
+/* Video card */
 .vid-card { transition: all 0.3s ease }
-.vid-card:hover { border-color:#DC2626 !important; box-shadow:0 0 24px rgba(220,38,38,0.15) }
-.play-pulse { animation: pulse 2s ease-in-out infinite }
+.vid-card:hover { border-color:rgba(220,38,38,0.7) !important; box-shadow:0 0 36px rgba(220,38,38,0.18) !important }
+.play-pulse { animation: pulse 2.5s ease-in-out infinite }
+
+/* Stat cards */
+.stat-card { transition: transform 0.22s ease, box-shadow 0.22s ease }
+.stat-card:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,0.35) !important }
+
+/* Quiz options */
+.quiz-opt { transition: all 0.18s ease }
+.quiz-opt:hover:not(:disabled) { transform:translateX(3px) }
+
+/* Gradient text utility */
+.red-gradient-text {
+  background: linear-gradient(135deg, #FF4545 0%, #DC2626 50%, #FF2020 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
 `;
 
 /* ═══════════════════════════════════════════
@@ -387,56 +412,58 @@ function Login() {
 
   const go = async () => {
     if (!email || !password) return;
-    setLd(true);
-    setErr(null);
+    setLd(true); setErr(null);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) setErr("Invalid email or password.");
     setLd(false);
   };
 
-  const inputStyle = (hasErr) => ({
-    width:"100%", padding:"16px 20px", background:"#101114",
-    border: hasErr ? "1.5px solid #DC2626" : "1.5px solid #1a1a1e",
-    borderRadius:14, color:"#FFF", fontSize:15, outline:"none",
-    boxSizing:"border-box", transition:"all 0.3s", fontFamily:"inherit",
+  const fieldStyle = (hasErr) => ({
+    width:"100%", padding:"15px 20px",
+    background:"rgba(7,8,12,0.9)",
+    border: `1.5px solid ${hasErr ? "#DC2626" : "rgba(255,255,255,0.07)"}`,
+    borderRadius:14, color:"#F2F4F8", fontSize:15, outline:"none",
+    boxSizing:"border-box", fontFamily:"inherit", transition:"all 0.22s ease",
   });
 
-  return (
-    <div className="dotgrid" style={{ minHeight:"100dvh", background:"#101114", display:"flex", alignItems:"center", justifyContent:"center", padding:20, position:"relative" }}>
-      <div style={{ position:"absolute", top:"30%", left:"50%", transform:"translate(-50%,-50%)", width:400, height:400, background:"radial-gradient(circle, rgba(220,38,38,0.07) 0%, transparent 70%)", pointerEvents:"none" }} />
+  const onFocus = e => { e.target.style.borderColor = "rgba(220,38,38,0.6)"; e.target.style.boxShadow = "0 0 0 4px rgba(220,38,38,0.08)"; };
+  const onBlur  = (e, hasErr) => { e.target.style.borderColor = hasErr ? "#DC2626" : "rgba(255,255,255,0.07)"; e.target.style.boxShadow = "none"; };
 
-      <div style={{ width:"100%", maxWidth:400, textAlign:"center", animation:"fadeUp 0.8s cubic-bezier(0.4,0,0.2,1)", position:"relative", zIndex:1 }}>
-        <div style={{ marginBottom:40 }}>
-          <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:36, letterSpacing:14, color:"#DC2626", marginBottom:4 }}>REDLINE</div>
-          <div style={{ fontSize:13, fontWeight:500, color:"#5A5E68", letterSpacing:6, textTransform:"uppercase" }}>Rep Portal</div>
-          <div style={{ width:48, height:2, background:"linear-gradient(90deg,transparent,#DC2626,transparent)", margin:"16px auto 0" }} />
+  return (
+    <div className="dotgrid" style={{ minHeight:"100dvh", background:"#07080C", display:"flex", alignItems:"center", justifyContent:"center", padding:24, position:"relative", overflow:"hidden" }}>
+      <div style={{ position:"absolute", top:"20%", left:"50%", transform:"translate(-50%,-50%)", width:700, height:700, background:"radial-gradient(circle, rgba(220,38,38,0.08) 0%, transparent 65%)", pointerEvents:"none" }} />
+      <div style={{ position:"absolute", bottom:0, left:"50%", transform:"translateX(-50%)", width:900, height:280, background:"radial-gradient(ellipse, rgba(220,38,38,0.04) 0%, transparent 70%)", pointerEvents:"none" }} />
+
+      <div style={{ width:"100%", maxWidth:420, animation:"fadeUp 0.7s cubic-bezier(0.4,0,0.2,1)", position:"relative", zIndex:1 }}>
+        <div style={{ textAlign:"center", marginBottom:36 }}>
+          <div style={{ width:72, height:72, borderRadius:22, background:"linear-gradient(135deg,#DC2626,#7F1D1D)", display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 20px", boxShadow:"0 8px 36px rgba(220,38,38,0.4)", animation:"glow 3s ease-in-out infinite" }}>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:40, letterSpacing:14, color:"#DC2626", lineHeight:1, textShadow:"0 0 50px rgba(220,38,38,0.3)" }}>REDLINE</div>
+          <div style={{ fontSize:11, fontWeight:700, color:"#2E3240", letterSpacing:6, textTransform:"uppercase", marginTop:7 }}>Rep Portal</div>
+          <div style={{ width:56, height:1.5, background:"linear-gradient(90deg,transparent,#DC2626,transparent)", margin:"14px auto 0" }} />
         </div>
 
-        <div style={{ background:"#181B20", border:"1px solid #2A2D35", borderRadius:20, padding:"40px 32px", boxShadow:"0 16px 64px rgba(0,0,0,0.5)" }}>
+        <div style={{ background:"linear-gradient(145deg,rgba(16,18,24,0.99),rgba(11,12,17,0.99))", border:"1px solid rgba(255,255,255,0.07)", borderRadius:24, padding:"36px 32px 32px", boxShadow:"0 24px 80px rgba(0,0,0,0.65), 0 0 0 1px rgba(220,38,38,0.06)" }}>
           <div style={{ marginBottom:16 }}>
-            <label style={{ display:"block", textAlign:"left", fontSize:10, fontWeight:600, color:"#5A5E68", letterSpacing:2.5, marginBottom:10, textTransform:"uppercase" }}>Email</label>
-            <input type="email" value={email} onChange={e=>setEmail(e.target.value)}
-              onKeyDown={e=>e.key==="Enter"&&go()} placeholder="you@redline.com" autoFocus
-              style={inputStyle(!!err)}
-              onFocus={e=>{e.target.style.borderColor="#DC2626";e.target.style.boxShadow="0 0 0 4px rgba(220,38,38,0.08)"}}
-              onBlur={e=>{e.target.style.borderColor=err?"#DC2626":"#1a1a1e";e.target.style.boxShadow="none"}} />
+            <label style={{ display:"block", fontSize:9.5, fontWeight:700, color:"#2E3240", letterSpacing:3, marginBottom:10, textTransform:"uppercase" }}>Email</label>
+            <input type="email" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&go()} placeholder="you@redline.com" autoFocus style={fieldStyle(!!err)} onFocus={onFocus} onBlur={e=>onBlur(e,!!err)} />
           </div>
           <div>
-            <label style={{ display:"block", textAlign:"left", fontSize:10, fontWeight:600, color:"#5A5E68", letterSpacing:2.5, marginBottom:10, textTransform:"uppercase" }}>Password</label>
-            <input type="password" value={password} onChange={e=>setPassword(e.target.value)}
-              onKeyDown={e=>e.key==="Enter"&&go()} placeholder="••••••••"
-              style={inputStyle(!!err)}
-              onFocus={e=>{e.target.style.borderColor="#DC2626";e.target.style.boxShadow="0 0 0 4px rgba(220,38,38,0.08)"}}
-              onBlur={e=>{e.target.style.borderColor=err?"#DC2626":"#1a1a1e";e.target.style.boxShadow="none"}} />
+            <label style={{ display:"block", fontSize:9.5, fontWeight:700, color:"#2E3240", letterSpacing:3, marginBottom:10, textTransform:"uppercase" }}>Password</label>
+            <input type="password" value={password} onChange={e=>setPassword(e.target.value)} onKeyDown={e=>e.key==="Enter"&&go()} placeholder="••••••••" style={fieldStyle(!!err)} onFocus={onFocus} onBlur={e=>onBlur(e,!!err)} />
           </div>
-          {err && <p style={{ color:"#DC2626", fontSize:12, margin:"12px 0 0", fontWeight:500, textAlign:"left" }}>{err}</p>}
-          <button onClick={go} disabled={ld}
-            style={{ width:"100%", padding:"16px", background:ld?"#7f1d1d":"linear-gradient(135deg,#DC2626,#991B1B)", color:"#FFF", border:"none", borderRadius:14, fontSize:12, fontWeight:700, letterSpacing:4, cursor:ld?"wait":"pointer", marginTop:18, textTransform:"uppercase", transition:"all 0.3s", boxShadow:"0 4px 24px rgba(220,38,38,0.2)" }}>
-            {ld ? "Signing In..." : "Enter Academy"}
+          {err && (
+            <div style={{ display:"flex", alignItems:"center", gap:7, marginTop:12 }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <p style={{ color:"#DC2626", fontSize:12, fontWeight:600 }}>{err}</p>
+            </div>
+          )}
+          <button onClick={go} disabled={ld} style={{ width:"100%", padding:"16px", background: ld ? "#5A0A0A" : "linear-gradient(135deg,#E5222B,#991B1B)", color:"#FFF", border:"none", borderRadius:14, fontSize:11, fontWeight:800, letterSpacing:4, cursor: ld ? "wait" : "pointer", marginTop:20, textTransform:"uppercase", boxShadow: ld ? "none" : "0 6px 28px rgba(220,38,38,0.3)", transition:"all 0.25s ease", fontFamily:"inherit" }}>
+            {ld ? "Signing In…" : "Enter Academy"}
           </button>
         </div>
-
-        <p style={{ color:"#252830", fontSize:9, marginTop:36, letterSpacing:2, textTransform:"uppercase" }}>© 2026 Redline Web Services LLC</p>
+        <p style={{ color:"#1A1D25", fontSize:9, marginTop:32, letterSpacing:2, textTransform:"uppercase", textAlign:"center" }}>© 2026 Redline Web Services LLC</p>
       </div>
     </div>
   );
@@ -601,71 +628,64 @@ function AdminPanel({ profile, onBack, w, onSignOut }) {
 
   return (
     <div>
-      <div style={{ position:"sticky", top:0, zIndex:20, background:"rgba(5,5,7,0.88)", backdropFilter:"blur(20px)", WebkitBackdropFilter:"blur(20px)", borderBottom:"1px solid #252830", padding:"12px 0" }}>
-        <div style={{ maxWidth:1000, margin:"0 auto", padding:dk?"0 40px":"0 20px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-          <button className="back-btn" onClick={onBack} style={{ background:"none", border:"none", color:"#DC2626", fontSize:13, fontWeight:600, cursor:"pointer", padding:"6px 0", display:"flex", alignItems:"center", gap:8, fontFamily:"inherit" }}>
-            <span style={{ fontSize:18, lineHeight:1 }}>‹</span> Back to Academy
+      <div style={{ position:"sticky", top:0, zIndex:20, background:"rgba(7,8,12,0.92)", backdropFilter:"blur(24px)", WebkitBackdropFilter:"blur(24px)", borderBottom:"1px solid rgba(255,255,255,0.05)" }}>
+        <div style={{ maxWidth:1000, margin:"0 auto", padding:dk?"0 44px":"0 20px", height:52, display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+          <button className="back-btn" onClick={onBack} style={{ background:"none", border:"none", color:"#DC2626", fontSize:13, fontWeight:700, cursor:"pointer", padding:"6px 0", display:"flex", alignItems:"center", gap:8, fontFamily:"inherit" }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            Back to Academy
           </button>
-          <button onClick={onSignOut} style={{ background:"none", border:"1px solid #252830", color:"#6A6E78", fontSize:10, fontWeight:600, cursor:"pointer", padding:"8px 16px", borderRadius:8, fontFamily:"inherit", letterSpacing:1, textTransform:"uppercase" }}>
-            Sign Out
-          </button>
+          <button onClick={onSignOut} style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", color:"#5A6070", fontSize:10, fontWeight:700, cursor:"pointer", padding:"8px 16px", borderRadius:9, fontFamily:"inherit", letterSpacing:1.5, textTransform:"uppercase" }}>Sign Out</button>
         </div>
       </div>
 
-      <div style={{ maxWidth:1000, margin:"0 auto", padding:dk?"0 40px 80px":"0 20px 80px" }}>
-        <div style={{ padding:"36px 0 28px", animation:"fadeUp 0.5s ease" }}>
-          <div style={{ width:40, height:3, background:"#DC2626", borderRadius:2, marginBottom:20 }} />
-          <h2 style={{ fontSize:dk?28:22, fontWeight:800, color:"#FFF", margin:"0 0 8px", letterSpacing:"-0.04em" }}>Admin Panel</h2>
-          <p style={{ fontSize:13, color:"#6A6E78" }}>Rep accounts, progress, and access management.</p>
+      <div style={{ maxWidth:1000, margin:"0 auto", padding:dk?"0 44px 90px":"0 20px 90px" }}>
+        <div style={{ padding:"40px 0 28px", animation:"fadeUp 0.5s ease" }}>
+          <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:18 }}>
+            <div style={{ width:32, height:4, background:"linear-gradient(90deg,#F59E0B,transparent)", borderRadius:4 }} />
+            <div style={{ fontSize:9.5, fontWeight:800, color:"#F59E0B", letterSpacing:3.5, textTransform:"uppercase" }}>Admin</div>
+          </div>
+          <h2 style={{ fontSize:dk?30:24, fontWeight:800, color:"#F2F4F8", margin:"0 0 8px", letterSpacing:"-0.03em" }}>Admin Panel</h2>
+          <p style={{ fontSize:14, color:"#5A6070", margin:0, fontWeight:500 }}>Rep accounts, progress, and access management.</p>
         </div>
 
-        <a href={SUPABASE_USERS_URL} target="_blank" rel="noreferrer" className="card-hover"
-          style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:16, background:"#181B20", border:"1px solid #252830", borderLeft:"3px solid #F59E0B", borderRadius:16, padding:"20px 24px", marginBottom:24, textDecoration:"none", animation:"fadeUp 0.5s ease 0.1s both" }}>
+        <a href={SUPABASE_USERS_URL} target="_blank" rel="noreferrer" className="card-hover vid-card"
+          style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:16, background:"linear-gradient(135deg,rgba(20,16,8,0.95),rgba(14,12,6,0.95))", border:"1px solid rgba(245,158,11,0.2)", borderRadius:18, padding:"20px 24px", marginBottom:28, textDecoration:"none", animation:"fadeUp 0.5s ease 0.1s both", boxShadow:"0 4px 24px rgba(0,0,0,0.35)" }}>
           <div>
-            <div style={{ fontSize:10, fontWeight:700, color:"#F59E0B", letterSpacing:3, marginBottom:6, textTransform:"uppercase" }}>Add New Rep</div>
-            <div style={{ fontSize:13, color:"#8A8E98", lineHeight:1.5 }}>
-              Open Supabase → Authentication → Users → Add User. New accounts appear here automatically.
-            </div>
+            <div style={{ fontSize:9.5, fontWeight:800, color:"#F59E0B", letterSpacing:3, marginBottom:6, textTransform:"uppercase" }}>Add New Rep</div>
+            <div style={{ fontSize:13, color:"#5A6070", lineHeight:1.6, fontWeight:500 }}>Open Supabase → Authentication → Users → Add User. New accounts appear here automatically.</div>
           </div>
-          <div style={{ width:36, height:36, borderRadius:10, background:"#1A1D24", border:"1px solid #282B33", display:"flex", alignItems:"center", justifyContent:"center", color:"#F59E0B", fontSize:14, flexShrink:0 }}>↗</div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
         </a>
 
         {loading ? (
-          <div style={{ textAlign:"center", padding:60, color:"#5A5E68", fontSize:13 }}>Loading reps...</div>
+          <div style={{ textAlign:"center", padding:60, color:"#3A4050", fontSize:13 }}>Loading reps…</div>
         ) : users.length === 0 ? (
-          <div style={{ textAlign:"center", padding:60, color:"#5A5E68", fontSize:13 }}>No users yet.</div>
+          <div style={{ textAlign:"center", padding:60, color:"#3A4050", fontSize:13 }}>No users yet.</div>
         ) : (
           <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
             {users.map((u, i) => (
-              <div key={u.id} style={{ background:"#141519", border:"1px solid #252830", borderRadius:16, padding:dk?"20px 24px":"16px 18px", display:"flex", alignItems:"center", gap:16, flexWrap:"wrap", animation:`fadeUp 0.4s ease ${0.05*i}s both` }}>
-                <div style={{ width:44, height:44, borderRadius:12, background:"linear-gradient(135deg,#DC2626,#7f1d1d)", display:"flex", alignItems:"center", justifyContent:"center", fontWeight:800, color:"#fff", fontSize:18, flexShrink:0 }}>
+              <div key={u.id} style={{ background:"linear-gradient(135deg,rgba(16,18,24,0.98),rgba(11,12,16,0.98))", border:"1px solid rgba(255,255,255,0.055)", borderRadius:16, padding:dk?"20px 24px":"16px 18px", display:"flex", alignItems:"center", gap:16, flexWrap:"wrap", animation:`fadeUp 0.4s ease ${0.05*i}s both`, boxShadow:"0 4px 20px rgba(0,0,0,0.3)" }}>
+                <div style={{ width:46, height:46, borderRadius:14, background:"linear-gradient(135deg,#DC2626,#7F1D1D)", display:"flex", alignItems:"center", justifyContent:"center", fontWeight:800, color:"#fff", fontSize:18, flexShrink:0, boxShadow:"0 4px 14px rgba(220,38,38,0.35)" }}>
                   {u.name?.[0]?.toUpperCase() ?? "?"}
                 </div>
                 <div style={{ flex:1, minWidth:140 }}>
-                  <div style={{ fontSize:15, fontWeight:700, color:"#EEF0F4" }}>{u.name || "—"}</div>
-                  <div style={{ display:"flex", alignItems:"center", gap:8, marginTop:3 }}>
-                    <span style={{ fontSize:9, fontWeight:700, color: u.role === "admin" ? "#F59E0B" : "#3B82F6", letterSpacing:2, textTransform:"uppercase", background: u.role === "admin" ? "#F59E0B12" : "#3B82F612", padding:"2px 8px", borderRadius:4 }}>{u.role}</span>
-                  </div>
+                  <div style={{ fontSize:15, fontWeight:700, color:"#EEF2F8" }}>{u.name || "—"}</div>
+                  <span style={{ display:"inline-block", marginTop:4, fontSize:9, fontWeight:800, color: u.role === "admin" ? "#F59E0B" : "#6366F1", letterSpacing:2, textTransform:"uppercase", background: u.role === "admin" ? "rgba(245,158,11,0.1)" : "rgba(99,102,241,0.1)", padding:"3px 9px", borderRadius:5, border:`1px solid ${u.role === "admin" ? "rgba(245,158,11,0.2)" : "rgba(99,102,241,0.2)"}` }}>{u.role}</span>
                 </div>
-                <div style={{ display:"flex", gap:dk?24:14, flexWrap:"wrap" }}>
-                  <div style={{ textAlign:"center" }}>
-                    <div style={{ fontSize:20, fontWeight:800, color:"#22C55E" }}>{u.modulesCompleted}</div>
-                    <div style={{ fontSize:9, color:"#5A5E68", textTransform:"uppercase", letterSpacing:1.5, marginTop:2 }}>Completed</div>
-                  </div>
-                  <div style={{ textAlign:"center" }}>
-                    <div style={{ fontSize:20, fontWeight:800, color:"#10B981" }}>{u.quizzesAttempted}</div>
-                    <div style={{ fontSize:9, color:"#5A5E68", textTransform:"uppercase", letterSpacing:1.5, marginTop:2 }}>Quizzes</div>
-                  </div>
-                  {u.quizzesAttempted > 0 && (
-                    <div style={{ textAlign:"center" }}>
-                      <div style={{ fontSize:20, fontWeight:800, color: u.avgScore >= 90 ? "#22C55E" : u.avgScore >= 70 ? "#F59E0B" : "#DC2626" }}>{Math.round(u.avgScore)}%</div>
-                      <div style={{ fontSize:9, color:"#5A5E68", textTransform:"uppercase", letterSpacing:1.5, marginTop:2 }}>Avg Score</div>
+                <div style={{ display:"flex", gap:dk?24:16, flexWrap:"wrap" }}>
+                  {[
+                    [u.modulesCompleted, "Completed", "#22C55E"],
+                    [u.quizzesAttempted, "Quizzes", "#10B981"],
+                    ...(u.quizzesAttempted > 0 ? [[Math.round(u.avgScore)+"%", "Avg Score", u.avgScore>=90?"#22C55E":u.avgScore>=70?"#F59E0B":"#DC2626"]] : []),
+                  ].map(([val, lab, col]) => (
+                    <div key={lab} style={{ textAlign:"center" }}>
+                      <div style={{ fontSize:20, fontWeight:900, color:col, lineHeight:1, letterSpacing:"-0.02em" }}>{val}</div>
+                      <div style={{ fontSize:9, color:"#3A4050", textTransform:"uppercase", letterSpacing:1.5, marginTop:3, fontWeight:700 }}>{lab}</div>
                     </div>
-                  )}
+                  ))}
                 </div>
                 {u.id !== profile.id && (
-                  <button onClick={() => toggleRole(u.id, u.role)}
-                    style={{ background:"#1C1F25", border:"1px solid #282B33", color:"#8A8E98", fontSize:10, fontWeight:600, cursor:"pointer", padding:"8px 16px", borderRadius:8, fontFamily:"inherit", letterSpacing:1, flexShrink:0, textTransform:"uppercase" }}>
+                  <button onClick={() => toggleRole(u.id, u.role)} style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", color:"#5A6070", fontSize:10, fontWeight:700, cursor:"pointer", padding:"9px 16px", borderRadius:10, fontFamily:"inherit", letterSpacing:1.5, flexShrink:0, textTransform:"uppercase", transition:"all 0.2s" }}>
                     {u.role === "admin" ? "Make Rep" : "Make Admin"}
                   </button>
                 )}
@@ -686,10 +706,11 @@ function Viewer({ ck, onBack, w, onComplete }) {
   const ref = useRef(null);
   const c = C[ck];
   const dk = w >= 768;
-  const accent = ck.includes("bc")?"#F59E0B":ck.includes("call")||ck.includes("comp")||ck.includes("onboard")?"#3B82F6":"#DC2626";
+  const accent = ck.includes("bc") ? "#F59E0B" : ck.includes("call") || ck.includes("comp") || ck.includes("onboard") ? "#6366F1" : "#DC2626";
+  const accentBg = ck.includes("bc") ? "rgba(245,158,11,0.08)" : ck.includes("call") || ck.includes("comp") || ck.includes("onboard") ? "rgba(99,102,241,0.08)" : "rgba(220,38,38,0.08)";
 
   useEffect(() => {
-    ref.current?.scrollIntoView({behavior:"smooth"});
+    ref.current?.scrollIntoView({ behavior:"smooth" });
     setOi(0);
     if (onComplete) onComplete(ck);
   }, [ck]);
@@ -697,60 +718,71 @@ function Viewer({ ck, onBack, w, onComplete }) {
   return (
     <div ref={ref}>
       {/* Sticky nav */}
-      <div style={{ position:"sticky", top:0, zIndex:20, background:"rgba(5,5,7,0.88)", backdropFilter:"blur(20px)", WebkitBackdropFilter:"blur(20px)", borderBottom:"1px solid #252830", padding:dk?"12px 0":"12px 0" }}>
-        <div style={{ maxWidth:800, margin:"0 auto", padding:dk?"0 40px":"0 20px" }}>
-          <button className="back-btn" onClick={onBack} style={{ background:"none", border:"none", color:"#DC2626", fontSize:13, fontWeight:600, cursor:"pointer", padding:"6px 0", display:"flex", alignItems:"center", gap:8, fontFamily:"inherit" }}>
-            <span style={{ fontSize:18, lineHeight:1 }}>‹</span> Back to Academy
+      <div style={{ position:"sticky", top:0, zIndex:20, background:"rgba(7,8,12,0.9)", backdropFilter:"blur(24px)", WebkitBackdropFilter:"blur(24px)", borderBottom:"1px solid rgba(255,255,255,0.05)" }}>
+        <div style={{ maxWidth:820, margin:"0 auto", padding:dk?"0 44px":"0 20px", height:52, display:"flex", alignItems:"center" }}>
+          <button className="back-btn" onClick={onBack} style={{ background:"none", border:"none", color:accent, fontSize:13, fontWeight:700, cursor:"pointer", padding:"6px 0", display:"flex", alignItems:"center", gap:8, fontFamily:"inherit", letterSpacing:0.3 }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            Back to Academy
           </button>
         </div>
       </div>
 
-      <div style={{ maxWidth:800, margin:"0 auto", padding:dk?"0 40px":"0 20px" }}>
+      <div style={{ maxWidth:820, margin:"0 auto", padding:dk?"0 44px":"0 20px" }}>
         {/* Hero */}
-        <div style={{ padding:"36px 0 28px", animation:"fadeUp 0.5s ease", position:"relative" }}>
-          <div style={{ width:40, height:3, background:accent, borderRadius:2, marginBottom:20 }} />
-          <h2 style={{ fontSize:dk?30:24, fontWeight:800, color:"#FFF", margin:"0 0 8px", letterSpacing:"-0.04em", lineHeight:1.15 }}>{c.t}</h2>
-          <p style={{ fontSize:14, color:"#6A6E78", margin:0, lineHeight:1.5 }}>{c.st}</p>
+        <div style={{ padding:"40px 0 28px", animation:"fadeUp 0.5s ease" }}>
+          <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:18 }}>
+            <div style={{ width:32, height:4, background:`linear-gradient(90deg,${accent},transparent)`, borderRadius:4 }} />
+            <div style={{ fontSize:9.5, fontWeight:800, color:accent, letterSpacing:3.5, textTransform:"uppercase" }}>
+              {ck.includes("m") && !ck.includes("bc") ? "Training Module" : ck.includes("bc") ? "Bootcamp" : ck.includes("q-") ? "Quiz" : "Reference"}
+            </div>
+          </div>
+          <h2 style={{ fontSize:dk?32:24, fontWeight:800, color:"#F2F4F8", margin:"0 0 10px", letterSpacing:"-0.03em", lineHeight:1.15 }}>{c.t}</h2>
+          <p style={{ fontSize:14, color:"#5A6070", margin:0, lineHeight:1.6, fontWeight:500 }}>{c.st}</p>
         </div>
 
         {/* Video */}
         {c.vid && (
           <a href={c.vid} target="_blank" rel="noreferrer" className="vid-card"
-            style={{ display:"flex", alignItems:"center", gap:16, background:"linear-gradient(135deg,#1A1518,#181B20)", border:"1px solid #2E2530", borderRadius:16, padding:"20px 22px", textDecoration:"none", marginBottom:24, animation:"fadeUp 0.6s ease" }}>
-            <div className="play-pulse" style={{ width:52, height:52, borderRadius:14, background:"linear-gradient(135deg,#DC2626,#991B1B)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:18, flexShrink:0, boxShadow:"0 4px 20px rgba(220,38,38,0.3)", color:"#fff" }}>▶</div>
-            <div>
-              <div style={{ fontSize:13, fontWeight:700, color:"#FFF", marginBottom:3 }}>Watch Training Video</div>
-              <div style={{ fontSize:11, color:"#6A6E78" }}>Complete before continuing with this module</div>
+            style={{ display:"flex", alignItems:"center", gap:18, background:"linear-gradient(135deg,rgba(20,14,16,0.9),rgba(16,12,20,0.9))", border:"1px solid rgba(220,38,38,0.18)", borderRadius:18, padding:"20px 24px", textDecoration:"none", marginBottom:28, animation:"fadeUp 0.55s ease 0.1s both", boxShadow:"0 4px 24px rgba(0,0,0,0.3)" }}>
+            <div className="play-pulse" style={{ width:54, height:54, borderRadius:16, background:"linear-gradient(135deg,#E5222B,#991B1B)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, boxShadow:"0 6px 24px rgba(220,38,38,0.4)" }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><polygon points="5 3 19 12 5 21 5 3"/></svg>
             </div>
+            <div style={{ flex:1 }}>
+              <div style={{ fontSize:14, fontWeight:700, color:"#F2F4F8", marginBottom:3 }}>Watch Training Video</div>
+              <div style={{ fontSize:12, color:"#5A6070" }}>Complete before continuing with this module</div>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           </a>
         )}
 
         {/* Sections */}
-        <div style={{ paddingBottom:80 }}>
+        <div style={{ paddingBottom:90 }}>
           {c.s.map((s, i) => {
             const open = oi === i;
             return (
-              <div key={i} style={{ marginBottom:6, animation:`fadeUp 0.4s ease ${0.05*i}s both` }}>
+              <div key={i} style={{ marginBottom:5, animation:`fadeUp 0.4s ease ${0.04*i}s both` }}>
                 <button className="acc-btn" onClick={() => setOi(open ? null : i)}
                   style={{
                     width:"100%", textAlign:"left",
-                    background: open ? "#1A1D24" : "#08080a",
-                    border: "1px solid " + (open ? "#1e1e22" : "#111114"),
+                    background: open ? "linear-gradient(135deg,rgba(18,20,26,0.99),rgba(14,16,22,0.99))" : "rgba(10,11,15,0.8)",
+                    border: `1px solid ${open ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.04)"}`,
                     borderRadius: open ? "16px 16px 0 0" : 16,
-                    padding: dk ? "20px 24px" : "18px 20px",
+                    padding: dk ? "20px 24px" : "17px 20px",
                     cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"space-between",
-                    fontFamily:"inherit", minHeight:56
+                    fontFamily:"inherit", minHeight:58
                   }}>
-                  <span style={{ fontSize:dk?15:14, fontWeight:700, color:open?"#FFF":"#c0c0c4", lineHeight:1.35, paddingRight:16 }}>{s.h}</span>
-                  <div style={{ width:28, height:28, borderRadius:8, background:open?accent+"18":"#ffffff08", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, transition:"all 0.3s" }}>
-                    <span style={{ color:open?accent:"#333", fontSize:11, transform:open?"rotate(180deg)":"none", transition:"transform 0.3s ease", display:"block" }}>▾</span>
+                  <span style={{ fontSize:dk?14.5:13.5, fontWeight:700, color: open ? "#F2F4F8" : "#8892A0", lineHeight:1.35, paddingRight:16 }}>{s.h}</span>
+                  <div style={{ width:30, height:30, borderRadius:9, background: open ? accentBg : "rgba(255,255,255,0.04)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, transition:"all 0.25s", border:`1px solid ${open ? accent+"25" : "transparent"}` }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={open ? accent : "#3A3E4A"} strokeWidth="2.5" strokeLinecap="round" style={{ transition:"transform 0.25s ease", transform: open ? "rotate(180deg)" : "none" }}><polyline points="6 9 12 15 18 9"/></svg>
                   </div>
                 </button>
                 {open && (
                   <div style={{
-                    background:"#131317", border:"1px solid #32353D", borderTop:"none",
-                    borderRadius:"0 0 16px 16px", padding:dk?"28px 24px":"22px 20px",
-                    animation:"fadeIn 0.3s ease"
+                    background:"linear-gradient(180deg,rgba(12,13,18,0.98) 0%,rgba(9,10,14,0.98) 100%)",
+                    border:"1px solid rgba(255,255,255,0.06)", borderTop:"none",
+                    borderRadius:"0 0 16px 16px", padding:dk?"28px 26px 30px":"22px 20px 26px",
+                    animation:"fadeIn 0.25s ease",
+                    boxShadow:"inset 0 4px 24px rgba(0,0,0,0.3)"
                   }}>
                     <RichText text={s.b} />
                   </div>
@@ -777,79 +809,86 @@ function Quiz({ quizKey, onBack, w, onComplete }) {
   const ref = useRef(null);
   const q = QUIZZES[quizKey];
   const dk = w >= 768;
-  useEffect(() => { ref.current?.scrollIntoView({behavior:"smooth"}); setCi(0); setSel(null); setLocked(false); setScore(0); setDone(false); }, [quizKey]);
-  const cur = q.qs[ci], tot = q.qs.length, pct = done ? 100 : Math.round((ci/tot)*100);
-  const pick = (idx) => { if(locked) return; setSel(idx); setLocked(true); if(idx===cur.a) setScore(s=>s+1); };
-  const nxt = () => {
-    if (ci+1>=tot) {
-      setDone(true);
-      if (onComplete) onComplete(score, tot);
-      return;
-    }
-    setCi(ci+1); setSel(null); setLocked(false);
-  };
+  useEffect(() => { ref.current?.scrollIntoView({ behavior:"smooth" }); setCi(0); setSel(null); setLocked(false); setScore(0); setDone(false); }, [quizKey]);
+  const cur = q.qs[ci], tot = q.qs.length, pct = done ? 100 : Math.round((ci / tot) * 100);
+  const pick = (idx) => { if (locked) return; setSel(idx); setLocked(true); if (idx === cur.a) setScore(s => s + 1); };
+  const nxt = () => { if (ci + 1 >= tot) { setDone(true); if (onComplete) onComplete(score, tot); return; } setCi(ci + 1); setSel(null); setLocked(false); };
   const retry = () => { setCi(0); setSel(null); setLocked(false); setScore(0); setDone(false); };
-  const grade = score/tot;
-  const gc = grade>=0.9?"#22C55E":grade>=0.7?"#F59E0B":"#DC2626";
-  const gl = grade>=0.9?"Excellent — you're ready":grade>=0.7?"Good — review weak areas":"Needs work — re-study the modules";
+  const grade = score / tot;
+  const gc = grade >= 0.9 ? "#22C55E" : grade >= 0.7 ? "#F59E0B" : "#DC2626";
+  const gl = grade >= 0.9 ? "Excellent — you're ready to close" : grade >= 0.7 ? "Good — review weaker areas" : "Needs work — re-study the modules";
   return (
     <div ref={ref}>
-      <div style={{ position:"sticky",top:0,zIndex:20,background:"rgba(16,17,20,0.92)",backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",borderBottom:"1px solid #252830",padding:"12px 0" }}>
-        <div style={{ maxWidth:800,margin:"0 auto",padding:dk?"0 40px":"0 20px" }}>
-          <button className="back-btn" onClick={onBack} style={{ background:"none",border:"none",color:"#DC2626",fontSize:13,fontWeight:600,cursor:"pointer",padding:"6px 0",display:"flex",alignItems:"center",gap:8,fontFamily:"inherit" }}>
-            <span style={{ fontSize:18,lineHeight:1 }}>‹</span> Back to Academy
+      <div style={{ position:"sticky", top:0, zIndex:20, background:"rgba(7,8,12,0.92)", backdropFilter:"blur(24px)", WebkitBackdropFilter:"blur(24px)", borderBottom:"1px solid rgba(255,255,255,0.05)" }}>
+        <div style={{ maxWidth:700, margin:"0 auto", padding:dk?"0 44px":"0 20px", height:52, display:"flex", alignItems:"center" }}>
+          <button className="back-btn" onClick={onBack} style={{ background:"none", border:"none", color:"#10B981", fontSize:13, fontWeight:700, cursor:"pointer", padding:"6px 0", display:"flex", alignItems:"center", gap:8, fontFamily:"inherit" }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            Back to Academy
           </button>
         </div>
       </div>
-      <div style={{ maxWidth:640,margin:"0 auto",padding:dk?"0 40px":"0 20px" }}>
-        <div style={{ padding:"32px 0 24px",animation:"fadeUp 0.5s ease" }}>
-          <div style={{ width:40,height:3,background:"#10B981",borderRadius:2,marginBottom:16 }} />
-          <h2 style={{ fontSize:dk?26:22,fontWeight:800,color:"#FFF",margin:"0 0 6px",letterSpacing:"-0.03em" }}>{q.title}</h2>
-          <p style={{ fontSize:13,color:"#6A6E78",margin:0 }}>{q.subtitle}</p>
-        </div>
-        <div style={{ marginBottom:32,animation:"fadeUp 0.5s ease 0.1s both" }}>
-          <div style={{ display:"flex",justifyContent:"space-between",marginBottom:8 }}>
-            <span style={{ fontSize:11,fontWeight:600,color:"#6A6E78" }}>{done?"Complete":`Question ${ci+1} of ${tot}`}</span>
-            <span style={{ fontSize:11,fontWeight:700,color:done?gc:"#6A6E78" }}>{pct}%</span>
+      <div style={{ maxWidth:660, margin:"0 auto", padding:dk?"0 44px":"0 20px" }}>
+        {/* Header */}
+        <div style={{ padding:"36px 0 22px", animation:"fadeUp 0.5s ease" }}>
+          <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:14 }}>
+            <div style={{ width:28, height:3.5, background:"linear-gradient(90deg,#10B981,transparent)", borderRadius:4 }} />
+            <span style={{ fontSize:9.5, fontWeight:800, color:"#10B981", letterSpacing:3.5, textTransform:"uppercase" }}>Practice Quiz</span>
           </div>
-          <div style={{ height:4,background:"#1C1F25",borderRadius:4,overflow:"hidden" }}>
-            <div style={{ height:"100%",width:`${pct}%`,background:done?gc:"linear-gradient(90deg,#DC2626,#F59E0B)",borderRadius:4,transition:"width 0.5s cubic-bezier(0.4,0,0.2,1)" }} />
+          <h2 style={{ fontSize:dk?27:22, fontWeight:800, color:"#F2F4F8", margin:"0 0 6px", letterSpacing:"-0.03em" }}>{q.title}</h2>
+          <p style={{ fontSize:13, color:"#5A6070", margin:0, fontWeight:500 }}>{q.subtitle}</p>
+        </div>
+
+        {/* Progress */}
+        <div style={{ marginBottom:28, animation:"fadeUp 0.5s ease 0.1s both" }}>
+          <div style={{ display:"flex", justifyContent:"space-between", marginBottom:8, alignItems:"center" }}>
+            <span style={{ fontSize:11, fontWeight:600, color:"#3A4050", letterSpacing:0.5 }}>{done ? "Complete" : `Question ${ci + 1} of ${tot}`}</span>
+            <span style={{ fontSize:11, fontWeight:800, color: done ? gc : "#3A4050" }}>{pct}%</span>
+          </div>
+          <div style={{ height:5, background:"rgba(255,255,255,0.05)", borderRadius:6, overflow:"hidden" }}>
+            <div style={{ height:"100%", width:`${pct}%`, background: done ? `linear-gradient(90deg,${gc},${gc}90)` : "linear-gradient(90deg,#DC2626,#F59E0B,#10B981)", borderRadius:6, transition:"width 0.55s cubic-bezier(0.4,0,0.2,1)" }} />
           </div>
         </div>
+
         {done ? (
-          <div style={{ textAlign:"center",padding:"40px 0 80px",animation:"fadeUp 0.5s ease" }}>
-            <div style={{ width:100,height:100,borderRadius:28,background:`${gc}15`,border:`2px solid ${gc}30`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 24px",fontSize:36,fontWeight:800,color:gc }}>{score}/{tot}</div>
-            <h3 style={{ fontSize:22,fontWeight:800,color:"#FFF",margin:"0 0 8px" }}>{Math.round(grade*100)}%</h3>
-            <p style={{ fontSize:14,color:gc,fontWeight:600,margin:"0 0 32px" }}>{gl}</p>
-            <div style={{ display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap" }}>
-              <button onClick={retry} style={{ padding:"14px 28px",background:"#1C1F25",border:"1px solid #282B33",borderRadius:12,color:"#FFF",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"inherit" }}>Retake Quiz</button>
-              <button onClick={onBack} style={{ padding:"14px 28px",background:"linear-gradient(135deg,#DC2626,#991B1B)",border:"none",borderRadius:12,color:"#FFF",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"inherit",boxShadow:"0 4px 16px rgba(220,38,38,0.2)" }}>Back to Academy</button>
+          <div style={{ textAlign:"center", padding:"36px 0 90px", animation:"fadeUp 0.5s ease" }}>
+            <div style={{ width:110, height:110, borderRadius:32, background:`linear-gradient(135deg,${gc}18,${gc}08)`, border:`1.5px solid ${gc}35`, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", margin:"0 auto 24px", boxShadow:`0 8px 40px ${gc}20` }}>
+              <span style={{ fontSize:32, fontWeight:900, color:gc, lineHeight:1 }}>{score}</span>
+              <span style={{ fontSize:12, color:gc+"90", fontWeight:600 }}>/ {tot}</span>
+            </div>
+            <h3 style={{ fontSize:28, fontWeight:900, color:"#F2F4F8", margin:"0 0 8px", letterSpacing:"-0.03em" }}>{Math.round(grade * 100)}%</h3>
+            <p style={{ fontSize:14, color:gc, fontWeight:700, margin:"0 0 36px", letterSpacing:0.3 }}>{gl}</p>
+            <div style={{ display:"flex", gap:12, justifyContent:"center", flexWrap:"wrap" }}>
+              <button onClick={retry} style={{ padding:"14px 28px", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:14, color:"#C0C8D8", fontSize:13, fontWeight:700, cursor:"pointer", fontFamily:"inherit", transition:"all 0.2s" }}>Retake Quiz</button>
+              <button onClick={onBack} style={{ padding:"14px 32px", background:"linear-gradient(135deg,#E5222B,#991B1B)", border:"none", borderRadius:14, color:"#FFF", fontSize:13, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:"0 6px 24px rgba(220,38,38,0.28)", letterSpacing:0.5 }}>Back to Academy</button>
             </div>
           </div>
         ) : (
-          <div style={{ paddingBottom:80,animation:"fadeUp 0.35s ease" }}>
-            <h3 style={{ fontSize:dk?18:16,fontWeight:700,color:"#FFF",margin:"0 0 24px",lineHeight:1.4 }}>{cur.q}</h3>
-            <div style={{ display:"flex",flexDirection:"column",gap:10 }}>
-              {cur.o.map((opt,idx) => {
-                const isSel=sel===idx, isCor=idx===cur.a, showG=locked&&isCor, showR=locked&&isSel&&!isCor;
-                let bg="#141519",bd="#252830",tc="#D0D4DC";
-                if(showG){bg="#22C55E12";bd="#22C55E40";tc="#22C55E"}
-                if(showR){bg="#DC262612";bd="#DC262640";tc="#DC2626"}
-                if(!locked&&isSel){bg="#1C1F25";bd="#DC2626"}
+          <div style={{ paddingBottom:90, animation:"fadeUp 0.3s ease" }}>
+            <div style={{ background:"linear-gradient(135deg,rgba(18,20,26,0.98),rgba(12,14,18,0.98))", border:"1px solid rgba(255,255,255,0.07)", borderRadius:18, padding:dk?"28px":"22px 18px", marginBottom:20, boxShadow:"0 8px 32px rgba(0,0,0,0.4)" }}>
+              <h3 style={{ fontSize:dk?18:16, fontWeight:700, color:"#F2F4F8", margin:0, lineHeight:1.5 }}>{cur.q}</h3>
+            </div>
+            <div style={{ display:"flex", flexDirection:"column", gap:9 }}>
+              {cur.o.map((opt, idx) => {
+                const isSel = sel === idx, isCor = idx === cur.a, showG = locked && isCor, showR = locked && isSel && !isCor;
+                let bg = "rgba(12,14,18,0.9)", bd = "rgba(255,255,255,0.05)", tc = "#8892A0";
+                if (showG) { bg = "rgba(34,197,94,0.08)"; bd = "rgba(34,197,94,0.35)"; tc = "#22C55E"; }
+                if (showR) { bg = "rgba(220,38,38,0.08)"; bd = "rgba(220,38,38,0.35)"; tc = "#DC2626"; }
+                if (!locked && isSel) { bg = "rgba(255,255,255,0.04)"; bd = "rgba(220,38,38,0.5)"; tc = "#F2F4F8"; }
+                if (!locked && !isSel) { tc = "#8892A0"; }
                 return (
-                  <button key={idx} onClick={()=>pick(idx)}
-                    style={{ width:"100%",textAlign:"left",padding:"16px 18px",background:bg,border:`1.5px solid ${bd}`,borderRadius:14,cursor:locked?"default":"pointer",display:"flex",alignItems:"center",gap:14,transition:"all 0.2s",fontFamily:"inherit",fontSize:14,color:tc,fontWeight:isSel?600:400 }}>
-                    <div style={{ width:32,height:32,borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:700,flexShrink:0,background:showG?"#22C55E20":showR?"#DC262620":"#1C1F25",color:showG?"#22C55E":showR?"#DC2626":"#6A6E78",border:`1px solid ${showG?"#22C55E30":showR?"#DC262630":"#282B33"}` }}>
-                      {showG?"✓":showR?"✗":String.fromCharCode(65+idx)}
+                  <button key={idx} className="quiz-opt" onClick={() => pick(idx)} disabled={locked}
+                    style={{ width:"100%", textAlign:"left", padding:"15px 18px", background:bg, border:`1.5px solid ${bd}`, borderRadius:14, cursor: locked ? "default" : "pointer", display:"flex", alignItems:"center", gap:14, fontFamily:"inherit", fontSize:14, color:tc, fontWeight: isSel || showG ? 600 : 400, boxShadow: showG ? "0 0 20px rgba(34,197,94,0.1)" : showR ? "0 0 20px rgba(220,38,38,0.08)" : "none" }}>
+                    <div style={{ width:34, height:34, borderRadius:10, display:"flex", alignItems:"center", justifyContent:"center", fontSize:12, fontWeight:800, flexShrink:0, background: showG ? "rgba(34,197,94,0.15)" : showR ? "rgba(220,38,38,0.15)" : "rgba(255,255,255,0.04)", color: showG ? "#22C55E" : showR ? "#DC2626" : "#3A4050", border:`1px solid ${showG ? "rgba(34,197,94,0.25)" : showR ? "rgba(220,38,38,0.25)" : "rgba(255,255,255,0.06)"}` }}>
+                      {showG ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> : showR ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> : String.fromCharCode(65 + idx)}
                     </div>
-                    <span>{opt}</span>
+                    <span style={{ flex:1 }}>{opt}</span>
                   </button>
                 );
               })}
             </div>
             {locked && (
-              <button onClick={nxt} style={{ width:"100%",padding:"16px",background:"linear-gradient(135deg,#DC2626,#991B1B)",color:"#FFF",border:"none",borderRadius:14,fontSize:13,fontWeight:700,letterSpacing:2,cursor:"pointer",fontFamily:"inherit",textTransform:"uppercase",marginTop:20,boxShadow:"0 4px 16px rgba(220,38,38,0.2)",animation:"fadeUp 0.3s ease" }}>
-                {ci+1>=tot?"See Results":"Next Question →"}
+              <button onClick={nxt} style={{ width:"100%", padding:"16px", background:"linear-gradient(135deg,#E5222B,#991B1B)", color:"#FFF", border:"none", borderRadius:14, fontSize:12, fontWeight:800, letterSpacing:2.5, cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", marginTop:18, boxShadow:"0 6px 24px rgba(220,38,38,0.28)", animation:"fadeUp 0.3s ease" }}>
+                {ci + 1 >= tot ? "See Results" : "Next Question →"}
               </button>
             )}
           </div>
@@ -858,6 +897,29 @@ function Quiz({ quizKey, onBack, w, onComplete }) {
     </div>
   );
 }
+
+/* ═══════════════════════════════════════════
+   MAIN APP
+   ═══════════════════════════════════════════ */
+
+/* Icon gradient per category */
+const IC_GRAD = {
+  MODULE:    "linear-gradient(135deg,#DC2626,#7F1D1D)",
+  BOOTCAMP:  "linear-gradient(135deg,#F59E0B,#92400E)",
+  REFERENCE: "linear-gradient(135deg,#6366F1,#3730A3)",
+  QUIZ:      "linear-gradient(135deg,#10B981,#065F46)",
+};
+const IC_SHADOW = {
+  MODULE:    "0 4px 16px rgba(220,38,38,0.35)",
+  BOOTCAMP:  "0 4px 16px rgba(245,158,11,0.35)",
+  REFERENCE: "0 4px 16px rgba(99,102,241,0.35)",
+  QUIZ:      "0 4px 16px rgba(16,185,129,0.35)",
+};
+const LINK_ICONS = [
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>,
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>,
+];
 
 export default function App() {
   const [session, setSession] = useState(null);
@@ -871,7 +933,7 @@ export default function App() {
   const dk = w >= 768;
   const wd = w >= 1100;
 
-  const top = useCallback(() => { ref.current?.scrollIntoView({behavior:"smooth"}); }, []);
+  const top = useCallback(() => { ref.current?.scrollIntoView({ behavior:"smooth" }); }, []);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -923,104 +985,111 @@ export default function App() {
 
   const signOut = async () => { await supabase.auth.signOut(); setView(null); };
 
-  const bc = { MODULE:"#DC2626", BOOTCAMP:"#F59E0B", REFERENCE:"#3B82F6", QUIZ:"#10B981" };
+  const FONT_LINK = "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap";
+  const baseStyle = { minHeight:"100dvh", background:"#07080C", color:"#FFF" };
+
+  const bc = { MODULE:"#DC2626", BOOTCAMP:"#F59E0B", REFERENCE:"#6366F1", QUIZ:"#10B981" };
   const trainingGroups = [
     { label:null, color:"#DC2626", items:CATS.filter(x=>x.t==="MODULE") },
     { label:"BOOTCAMPS", color:"#F59E0B", items:CATS.filter(x=>x.t==="BOOTCAMP") },
   ];
   const referenceItems = CATS.filter(x=>x.t==="REFERENCE");
   const quizItems = CATS.filter(x=>x.t==="QUIZ");
-  const CRM_URL = "https://docs.google.com/spreadsheets/d/1CXPnhfQYXoQ9XKRuaA6dWjwpV8Ga2zPs";
-  const SCHED_URL = "https://docs.google.com/spreadsheets/d/1HtVfIS11tMoQr3TgM_bxKv62-8yaVnUI";
-
-  const wrapStyle = { minHeight:"100dvh", background:"#101114", fontFamily:"'Outfit',system-ui,sans-serif", color:"#FFF" };
-  const fonts = <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />;
+  const TABS = [
+    { key:"crm", label:"CRM", color:"#8B5CF6" },
+    { key:"scheduling", label:"Scheduling", color:"#F59E0B" },
+    { key:"training", label:"Training", color:"#DC2626" },
+    { key:"reference", label:"Reference", color:"#6366F1" },
+    { key:"quizzes", label:"Quizzes", color:"#10B981" },
+  ];
 
   if (loading) return (
-    <div style={{ ...wrapStyle, display:"flex", alignItems:"center", justifyContent:"center" }}>
-      <style>{GLOBAL_CSS}</style>{fonts}
+    <div style={{ ...baseStyle, display:"flex", alignItems:"center", justifyContent:"center" }}>
+      <style>{GLOBAL_CSS}</style>
+      <link href={FONT_LINK} rel="stylesheet" />
       <div style={{ textAlign:"center", animation:"fadeUp 0.6s ease" }}>
-        <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:28, letterSpacing:12, color:"#DC2626", marginBottom:8 }}>REDLINE</div>
-        <div style={{ fontSize:11, color:"#5A5E68", letterSpacing:3, textTransform:"uppercase" }}>Loading...</div>
+        <div style={{ width:60, height:60, borderRadius:18, background:"linear-gradient(135deg,#DC2626,#7F1D1D)", display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 20px", boxShadow:"0 6px 28px rgba(220,38,38,0.35)", animation:"glow 3s ease-in-out infinite" }}>
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+        <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:28, letterSpacing:12, color:"#DC2626" }}>REDLINE</div>
+        <div style={{ fontSize:10, color:"#2A2E38", letterSpacing:3, textTransform:"uppercase", marginTop:8, fontWeight:700 }}>Loading…</div>
       </div>
     </div>
   );
 
   if (!session) return (
-    <div style={{ fontFamily:"'Outfit',system-ui,sans-serif" }}>
-      <style>{GLOBAL_CSS}</style>{fonts}
+    <div style={baseStyle}>
+      <style>{GLOBAL_CSS}</style>
+      <link href={FONT_LINK} rel="stylesheet" />
       <Login />
     </div>
   );
 
   if (view === "__admin" && profile?.role === "admin") return (
-    <div ref={ref} style={wrapStyle}>
-      <style>{GLOBAL_CSS}</style>{fonts}
+    <div ref={ref} style={baseStyle}>
+      <style>{GLOBAL_CSS}</style>
+      <link href={FONT_LINK} rel="stylesheet" />
       <AdminPanel profile={profile} onBack={() => setView(null)} w={w} onSignOut={signOut} />
     </div>
   );
 
   if (view && QUIZZES[view]) return (
-    <div ref={ref} style={wrapStyle}>
-      <style>{GLOBAL_CSS}</style>{fonts}
-      <Quiz quizKey={view} onBack={()=>{setView(null);setTimeout(top,50)}} w={w}
-        onComplete={(sc, tot) => saveScore(view, sc, tot)} />
+    <div ref={ref} style={baseStyle}>
+      <style>{GLOBAL_CSS}</style>
+      <link href={FONT_LINK} rel="stylesheet" />
+      <Quiz quizKey={view} onBack={() => { setView(null); setTimeout(top, 50); }} w={w} onComplete={(sc, tot) => saveScore(view, sc, tot)} />
     </div>
   );
 
   if (view) return (
-    <div ref={ref} style={wrapStyle}>
-      <style>{GLOBAL_CSS}</style>{fonts}
-      <Viewer ck={view} onBack={()=>{setView(null);setTimeout(top,50)}} w={w} onComplete={markComplete} />
+    <div ref={ref} style={baseStyle}>
+      <style>{GLOBAL_CSS}</style>
+      <link href={FONT_LINK} rel="stylesheet" />
+      <Viewer ck={view} onBack={() => { setView(null); setTimeout(top, 50); }} w={w} onComplete={markComplete} />
     </div>
   );
 
   return (
-    <div ref={ref} className="dotgrid" style={{ ...wrapStyle, position:"relative" }}>
-      <style>{GLOBAL_CSS}</style>{fonts}
+    <div ref={ref} className="dotgrid" style={{ ...baseStyle, position:"relative" }}>
+      <style>{GLOBAL_CSS}</style>
+      <link href={FONT_LINK} rel="stylesheet" />
 
-      <div style={{ position:"fixed", top:0, left:"50%", transform:"translateX(-50%)", width:800, height:500, background:"radial-gradient(ellipse, rgba(220,38,38,0.05) 0%, transparent 70%)", pointerEvents:"none", zIndex:0 }} />
+      <div style={{ position:"fixed", top:0, left:"50%", transform:"translateX(-50%)", width:1000, height:600, background:"radial-gradient(ellipse 60% 50% at 50% 0%, rgba(220,38,38,0.07) 0%, transparent 70%)", pointerEvents:"none", zIndex:0 }} />
 
       {/* Header */}
-      <div style={{ position:"relative", zIndex:1, borderBottom:"1px solid #1E2128", padding:wd?"52px 56px 36px":dk?"44px 36px 32px":"36px 20px 28px" }}>
-        <div style={{ maxWidth:1280, margin:"0 auto" }}>
-          <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:dk?24:20 }}>
-            <div style={{ animation:"fadeUp 0.6s ease" }}>
-              <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?30:24, letterSpacing:12, color:"#DC2626", lineHeight:1 }}>REDLINE</div>
-              <h1 style={{ fontSize:dk?14:12, fontWeight:600, color:"#5A5E68", margin:"6px 0 0", letterSpacing:dk?6:4, textTransform:"uppercase" }}>Rep Portal</h1>
+      <div style={{ position:"relative", zIndex:1, borderBottom:"1px solid rgba(255,255,255,0.05)", padding:wd?"52px 56px 40px":dk?"44px 36px 34px":"32px 20px 26px" }}>
+        <div style={{ maxWidth:1300, margin:"0 auto" }}>
+          <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:dk?20:18 }}>
+            <div style={{ animation:"fadeUp 0.55s ease" }}>
+              <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?32:26, letterSpacing:12, color:"#DC2626", lineHeight:1, textShadow:"0 0 50px rgba(220,38,38,0.25)" }}>REDLINE</div>
+              <div style={{ fontSize:dk?11:10, fontWeight:700, color:"#2A2E38", margin:"7px 0 0", letterSpacing:dk?5:4, textTransform:"uppercase" }}>Rep Portal</div>
             </div>
-            <div style={{ display:"flex", alignItems:"center", gap:10, animation:"fadeUp 0.6s ease 0.1s both" }}>
+            <div style={{ display:"flex", alignItems:"center", gap:10, animation:"fadeUp 0.55s ease 0.08s both" }}>
               {profile?.role === "admin" && (
-                <button onClick={() => setView("__admin")}
-                  style={{ background:"#1C1F25", border:"1px solid #282B33", color:"#F59E0B", fontSize:10, fontWeight:700, cursor:"pointer", padding:"8px 14px", borderRadius:10, fontFamily:"inherit", letterSpacing:2, textTransform:"uppercase" }}>
-                  Admin
-                </button>
+                <button onClick={() => setView("__admin")} style={{ background:"rgba(245,158,11,0.1)", border:"1px solid rgba(245,158,11,0.2)", color:"#F59E0B", fontSize:9.5, fontWeight:800, cursor:"pointer", padding:"9px 14px", borderRadius:10, fontFamily:"inherit", letterSpacing:2, textTransform:"uppercase", transition:"all 0.2s" }}>Admin</button>
               )}
-              <div style={{ width:dk?44:38, height:dk?44:38, borderRadius:12, background:"linear-gradient(135deg,#DC2626,#7f1d1d)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?18:15, color:"#FFF", letterSpacing:2, boxShadow:"0 4px 24px rgba(220,38,38,0.2)", animation:"glow 3s ease-in-out infinite" }}>
+              <div style={{ width:dk?50:44, height:dk?50:44, borderRadius:14, background:"linear-gradient(135deg,#DC2626,#7F1D1D)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?20:16, color:"#FFF", letterSpacing:2, boxShadow:"0 6px 28px rgba(220,38,38,0.3)", animation:"glow 3.5s ease-in-out infinite" }}>
                 {profile?.name?.[0]?.toUpperCase() ?? "R"}
               </div>
-              <button onClick={signOut}
-                style={{ background:"none", border:"1px solid #252830", color:"#5A5E68", fontSize:10, fontWeight:600, cursor:"pointer", padding:"8px 14px", borderRadius:10, fontFamily:"inherit", letterSpacing:1 }}>
-                Sign Out
-              </button>
+              <button onClick={signOut} style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.07)", color:"#3A4050", fontSize:10, fontWeight:700, cursor:"pointer", padding:"9px 14px", borderRadius:10, fontFamily:"inherit", letterSpacing:1.5, textTransform:"uppercase", transition:"all 0.2s" }}>Sign Out</button>
             </div>
           </div>
 
-          <p style={{ fontSize:dk?14:13, color:"#5A5E68", margin:"0 0 24px", maxWidth:500, lineHeight:1.5, animation:"fadeUp 0.6s ease 0.15s both" }}>
+          <p style={{ fontSize:dk?14:13, color:"#3A4050", margin:"0 0 28px", maxWidth:500, lineHeight:1.6, fontWeight:500, animation:"fadeUp 0.55s ease 0.12s both" }}>
             {profile?.name ? `Welcome back, ${profile.name}. ` : ""}Your complete training system. Master every module, close more deals.
           </p>
 
           {/* Stats */}
-          <div style={{ display:"flex", gap:dk?12:8, animation:"fadeUp 0.6s ease 0.2s both" }}>
+          <div style={{ display:"flex", gap:dk?10:7, animation:"fadeUp 0.55s ease 0.18s both" }}>
             {[
-              [completedModules.size, "Completed", "#22C55E"],
-              ["13", "Modules", "#DC2626"],
-              ["2", "Bootcamps", "#F59E0B"],
-              ["6", "Quizzes", "#10B981"],
-            ].map(([n,l,col]) => (
-              <div key={l} style={{ background:"#181B20", border:"1px solid #252830", borderRadius:14, padding:dk?"16px 24px":"14px 16px", textAlign:"center", minWidth:dk?120:0, flex:dk?"none":1 }}>
-                <div style={{ fontSize:dk?28:22, fontWeight:800, color:col, lineHeight:1 }}>{n}</div>
-                <div style={{ fontSize:9, color:"#5A5E68", textTransform:"uppercase", letterSpacing:2, fontWeight:600, marginTop:6 }}>{l}</div>
+              [completedModules.size, "Completed", "#22C55E", "linear-gradient(135deg,rgba(34,197,94,0.12),rgba(34,197,94,0.04))"],
+              ["13", "Modules", "#DC2626", "linear-gradient(135deg,rgba(220,38,38,0.12),rgba(220,38,38,0.04))"],
+              ["2", "Bootcamps", "#F59E0B", "linear-gradient(135deg,rgba(245,158,11,0.12),rgba(245,158,11,0.04))"],
+              ["6", "Quizzes", "#10B981", "linear-gradient(135deg,rgba(16,185,129,0.12),rgba(16,185,129,0.04))"],
+            ].map(([n, l, col, grad]) => (
+              <div key={l} className="stat-card" style={{ background:grad, border:`1px solid ${col}22`, borderRadius:14, padding:dk?"16px 22px":"12px 14px", textAlign:"center", minWidth:dk?110:0, flex:dk?"none":1, boxShadow:`0 4px 20px ${col}10` }}>
+                <div style={{ fontSize:dk?30:22, fontWeight:900, color:col, lineHeight:1, letterSpacing:"-0.02em" }}>{n}</div>
+                <div style={{ fontSize:9, color:col+"80", textTransform:"uppercase", letterSpacing:2, fontWeight:700, marginTop:6 }}>{l}</div>
               </div>
             ))}
           </div>
@@ -1028,17 +1097,11 @@ export default function App() {
       </div>
 
       {/* Tab Nav */}
-      <div style={{ position:"relative", zIndex:1, borderBottom:"1px solid #1E2128" }}>
-        <div style={{ maxWidth:1280, margin:"0 auto", padding:wd?"0 56px":dk?"0 36px":"0 20px", display:"flex", gap:4 }}>
-          {[
-            { key:"crm", label:"CRM", color:"#8B5CF6" },
-            { key:"scheduling", label:"Scheduling", color:"#F59E0B" },
-            { key:"training", label:"Training", color:"#DC2626" },
-            { key:"reference", label:"Reference", color:"#3B82F6" },
-            { key:"quizzes", label:"Quizzes", color:"#10B981" },
-          ].map(t => (
+      <div style={{ position:"relative", zIndex:1, borderBottom:"1px solid rgba(255,255,255,0.06)" }}>
+        <div style={{ maxWidth:1300, margin:"0 auto", padding:wd?"0 56px":dk?"0 36px":"0 20px", display:"flex", gap:0 }}>
+          {TABS.map(t => (
             <button key={t.key} onClick={() => setTab(t.key)}
-              style={{ background:"none", border:"none", borderBottom: tab===t.key ? `2px solid ${t.color}` : "2px solid transparent", color: tab===t.key ? "#FFF" : "#5A5E68", fontSize:12, fontWeight:700, letterSpacing:2, cursor:"pointer", padding:"16px 20px", fontFamily:"inherit", textTransform:"uppercase", transition:"all 0.2s", marginBottom:-1 }}>
+              style={{ background:"none", border:"none", borderBottom: tab===t.key ? `2px solid ${t.color}` : "2px solid transparent", color: tab===t.key ? "#F2F4F8" : "#3A4050", fontSize:11, fontWeight:800, letterSpacing:2.5, cursor:"pointer", padding:"15px 22px", fontFamily:"inherit", textTransform:"uppercase", transition:"all 0.2s", marginBottom:-1, boxShadow: tab===t.key ? `0 1px 0 ${t.color}` : "none" }}>
               {t.label}
             </button>
           ))}
@@ -1046,19 +1109,19 @@ export default function App() {
       </div>
 
       {/* Tab Content */}
-      <div style={{ position:"relative", zIndex:1, maxWidth:1280, margin:"0 auto", padding:wd?"28px 56px 80px":dk?"24px 36px 80px":"20px 20px 80px" }}>
+      <div style={{ position:"relative", zIndex:1, maxWidth:1300, margin:"0 auto", padding:wd?"28px 56px 90px":dk?"24px 36px 90px":"18px 20px 90px" }}>
 
         {/* CRM TAB */}
         {tab === "crm" && (
-          <div style={{ animation:"fadeUp 0.4s ease" }}>
+          <div style={{ animation:"fadeUp 0.35s ease" }}>
             <div style={{ display:"flex", justifyContent:"flex-end", marginBottom:12 }}>
               <a href={CRM_URL + "/edit"} target="_blank" rel="noreferrer"
-                style={{ display:"inline-flex", alignItems:"center", gap:8, background:"#1C1F25", border:"1px solid #282B33", color:"#8B5CF6", fontSize:11, fontWeight:700, padding:"8px 16px", borderRadius:10, textDecoration:"none", letterSpacing:1 }}>
+                style={{ display:"inline-flex", alignItems:"center", gap:8, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", color:"#8B5CF6", fontSize:11, fontWeight:700, padding:"8px 16px", borderRadius:10, textDecoration:"none", letterSpacing:1 }}>
                 Open in Sheets ↗
               </a>
             </div>
             <iframe src={CRM_URL + "/preview"} title="Redline CRM"
-              style={{ width:"100%", height:"calc(100dvh - 300px)", minHeight:500, border:"1px solid #252830", borderRadius:16, background:"#141519" }} />
+              style={{ width:"100%", height:"calc(100dvh - 280px)", minHeight:500, border:"1px solid rgba(255,255,255,0.06)", borderRadius:16, background:"#0a0b0f" }} />
           </div>
         )}
 
@@ -1069,33 +1132,31 @@ export default function App() {
 
         {/* TRAINING TAB */}
         {tab === "training" && (
-          <div style={{ animation:"fadeUp 0.4s ease" }}>
+          <div style={{ animation:"fadeUp 0.35s ease" }}>
             {trainingGroups.map((g, gi) => (
               <div key={gi}>
-                {g.label && (
-                  <div style={{ display:"flex", alignItems:"center", gap:12, padding: gi===0 ? "0 0 14px" : "28px 0 14px" }}>
-                    <div style={{ width:8, height:8, borderRadius:4, background:g.color }} />
-                    <div style={{ fontSize:10, fontWeight:700, color:g.color, letterSpacing:3, textTransform:"uppercase" }}>{g.label}</div>
-                    <div style={{ flex:1, height:1, background:"#111114" }} />
-                  </div>
-                )}
+                {g.label
+                  ? <SectionLabel color={g.color} label={g.label} delay={0.04 * gi} />
+                  : <div style={{ height:4 }} />
+                }
                 <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr 1fr":dk?"1fr 1fr":"1fr", gap:dk?10:8 }}>
                   {g.items.map((x, i) => {
                     const done = completedModules.has(x.k);
                     return (
-                      <div key={x.id} className="card-hover" onClick={()=>{setView(x.k);setTimeout(top,50)}}
-                        style={{ background:"#141519", border:"1px solid " + (done ? "#22C55E18" : "#252830"), borderRadius:16, padding:dk?"22px 20px":"18px 16px", cursor:"pointer", animation:`fadeUp 0.4s ease ${0.04*i}s both`, position:"relative", overflow:"hidden" }}>
-                        <div style={{ position:"absolute", top:0, left:0, width:3, height:"100%", background: done ? "#22C55E" : bc[x.t], borderRadius:"3px 0 0 3px" }} />
-                        <div style={{ display:"flex", alignItems:"center", gap:14, paddingLeft:8 }}>
-                          <div style={{ fontSize:24, width:48, height:48, display:"flex", alignItems:"center", justifyContent:"center", background:"#1C1F25", borderRadius:14, flexShrink:0, border:"1px solid #282B33" }}>{x.ic}</div>
+                      <div key={x.id} className="card-hover" onClick={() => { setView(x.k); setTimeout(top, 50); }}
+                        style={{ background:"linear-gradient(135deg,rgba(16,18,24,0.98),rgba(11,12,16,0.98))", border:`1px solid ${done ? "rgba(34,197,94,0.15)" : "rgba(255,255,255,0.055)"}`, borderRadius:16, padding:dk?"20px 18px":"17px 15px", cursor:"pointer", animation:`fadeUp 0.38s ease ${0.04*(gi*4+i)}s both`, boxShadow:"0 4px 20px rgba(0,0,0,0.3)" }}>
+                        <div style={{ display:"flex", alignItems:"center", gap:14 }}>
+                          <div style={{ width:50, height:50, borderRadius:14, background:IC_GRAD[x.t], display:"flex", alignItems:"center", justifyContent:"center", fontSize:22, flexShrink:0, boxShadow:IC_SHADOW[x.t] }}>{x.ic}</div>
                           <div style={{ flex:1, minWidth:0 }}>
-                            <div style={{ fontSize:9, fontWeight:700, color:bc[x.t], letterSpacing:2, marginBottom:4, textTransform:"uppercase" }}>{x.n||x.t}</div>
-                            <h3 style={{ fontSize:14.5, fontWeight:700, color:"#EEF0F4", margin:"0 0 3px", lineHeight:1.3 }}>{x.sub}</h3>
-                            <p style={{ fontSize:11.5, color:"#5A5E68", margin:0, lineHeight:1.35 }}>{x.d}</p>
+                            <div style={{ fontSize:9, fontWeight:800, color:bc[x.t], letterSpacing:2.5, marginBottom:4, textTransform:"uppercase" }}>{x.n || x.t}</div>
+                            <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF2F8", margin:"0 0 3px", lineHeight:1.3 }}>{x.sub}</h3>
+                            <p style={{ fontSize:11.5, color:"#3A4050", margin:0, lineHeight:1.4, fontWeight:500 }}>{x.d}</p>
                           </div>
                           <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6 }}>
-                            {done && <div style={{ width:20, height:20, borderRadius:6, background:"#22C55E18", border:"1px solid #22C55E40", display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, color:"#22C55E" }}>✓</div>}
-                            <div style={{ width:32, height:32, borderRadius:10, background:"#1C1F25", border:"1px solid #282B33", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, color:"#3A3E48", fontSize:14 }}>›</div>
+                            {done && <div style={{ width:20, height:20, borderRadius:6, background:"rgba(34,197,94,0.12)", border:"1px solid rgba(34,197,94,0.3)", display:"flex", alignItems:"center", justifyContent:"center" }}><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>}
+                            <div style={{ width:32, height:32, borderRadius:10, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.06)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3A4050" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -1109,63 +1170,59 @@ export default function App() {
 
         {/* REFERENCE TAB */}
         {tab === "reference" && (
-          <div style={{ animation:"fadeUp 0.4s ease" }}>
+          <div style={{ animation:"fadeUp 0.35s ease" }}>
             <a href="https://www.redlinewebservices.net/" target="_blank" rel="noreferrer" className="card-hover"
-              style={{ display:"flex", alignItems:"center", gap:14, background:"#141519", border:"1px solid #252830", borderLeft:"3px solid #3B82F6", borderRadius:16, padding:dk?"20px 20px":"16px 14px", textDecoration:"none", marginBottom:10 }}>
-              <div style={{ fontSize:22, width:44, height:44, display:"flex", alignItems:"center", justifyContent:"center", background:"#1A1D24", borderRadius:12, flexShrink:0, border:"1px solid #282B33" }}>🌐</div>
+              style={{ display:"flex", alignItems:"center", gap:14, background:"linear-gradient(135deg,rgba(16,18,24,0.98),rgba(11,12,17,0.98))", border:"1px solid rgba(255,255,255,0.055)", borderRadius:16, padding:dk?"18px":"15px 14px", textDecoration:"none", marginBottom:10, boxShadow:"0 4px 20px rgba(0,0,0,0.3)" }}>
+              <div style={{ width:46, height:46, borderRadius:13, background:"linear-gradient(135deg,#6366F1,#3730A3)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, fontSize:22, boxShadow:"0 4px 16px rgba(99,102,241,0.35)" }}>🌐</div>
               <div style={{ flex:1, minWidth:0 }}>
-                <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF0F4", margin:"0 0 2px" }}>Redline Homepage</h3>
-                <p style={{ fontSize:11, color:"#6A6E78", margin:0 }}>redlinewebservices.net</p>
+                <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF2F8", margin:"0 0 2px" }}>Redline Homepage</h3>
+                <p style={{ fontSize:11.5, color:"#4A5060", margin:0, fontWeight:500 }}>redlinewebservices.net</p>
               </div>
-              <div style={{ width:32, height:32, borderRadius:10, background:"#1A1D24", border:"1px solid #282B33", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, color:"#3A3E48", fontSize:12 }}>↗</div>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3A3E4A" strokeWidth="2" strokeLinecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
             </a>
-          <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr 1fr":dk?"1fr 1fr":"1fr", gap:dk?10:8 }}>
-            {referenceItems.map((x, i) => {
-              const done = completedModules.has(x.k);
-              return (
-                <div key={x.id} className="card-hover" onClick={()=>{setView(x.k);setTimeout(top,50)}}
-                  style={{ background:"#141519", border:"1px solid " + (done ? "#3B82F618" : "#252830"), borderRadius:16, padding:dk?"22px 20px":"18px 16px", cursor:"pointer", animation:`fadeUp 0.4s ease ${0.04*i}s both`, position:"relative", overflow:"hidden" }}>
-                  <div style={{ position:"absolute", top:0, left:0, width:3, height:"100%", background: done ? "#3B82F6" : "#3B82F6", borderRadius:"3px 0 0 3px" }} />
-                  <div style={{ display:"flex", alignItems:"center", gap:14, paddingLeft:8 }}>
-                    <div style={{ fontSize:24, width:48, height:48, display:"flex", alignItems:"center", justifyContent:"center", background:"#1C1F25", borderRadius:14, flexShrink:0, border:"1px solid #282B33" }}>{x.ic}</div>
+            <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr 1fr":dk?"1fr 1fr":"1fr", gap:dk?10:8 }}>
+              {referenceItems.map((x, i) => (
+                <div key={x.id} className="card-hover" onClick={() => { setView(x.k); setTimeout(top, 50); }}
+                  style={{ background:"linear-gradient(135deg,rgba(16,18,24,0.98),rgba(11,12,16,0.98))", border:"1px solid rgba(255,255,255,0.055)", borderRadius:16, padding:dk?"20px 18px":"17px 15px", cursor:"pointer", animation:`fadeUp 0.38s ease ${0.05*i}s both`, boxShadow:"0 4px 20px rgba(0,0,0,0.3)" }}>
+                  <div style={{ display:"flex", alignItems:"center", gap:14 }}>
+                    <div style={{ width:50, height:50, borderRadius:14, background:IC_GRAD.REFERENCE, display:"flex", alignItems:"center", justifyContent:"center", fontSize:22, flexShrink:0, boxShadow:IC_SHADOW.REFERENCE }}>{x.ic}</div>
                     <div style={{ flex:1, minWidth:0 }}>
-                      <div style={{ fontSize:9, fontWeight:700, color:"#3B82F6", letterSpacing:2, marginBottom:4, textTransform:"uppercase" }}>REFERENCE</div>
-                      <h3 style={{ fontSize:14.5, fontWeight:700, color:"#EEF0F4", margin:"0 0 3px", lineHeight:1.3 }}>{x.sub}</h3>
-                      <p style={{ fontSize:11.5, color:"#5A5E68", margin:0, lineHeight:1.35 }}>{x.d}</p>
+                      <div style={{ fontSize:9, fontWeight:800, color:"#6366F1", letterSpacing:2.5, marginBottom:4, textTransform:"uppercase" }}>REFERENCE</div>
+                      <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF2F8", margin:"0 0 3px", lineHeight:1.3 }}>{x.sub}</h3>
+                      <p style={{ fontSize:11.5, color:"#3A4050", margin:0, lineHeight:1.4, fontWeight:500 }}>{x.d}</p>
                     </div>
-                    <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6 }}>
-                      {done && <div style={{ width:20, height:20, borderRadius:6, background:"#3B82F618", border:"1px solid #3B82F640", display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, color:"#3B82F6" }}>✓</div>}
-                      <div style={{ width:32, height:32, borderRadius:10, background:"#1C1F25", border:"1px solid #282B33", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, color:"#3A3E48", fontSize:14 }}>›</div>
+                    <div style={{ width:32, height:32, borderRadius:10, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.06)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3A4050" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
                     </div>
                   </div>
                 </div>
-              );
-            })}
-          </div>
+              ))}
+            </div>
           </div>
         )}
 
         {/* QUIZZES TAB */}
         {tab === "quizzes" && (
-          <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr 1fr":dk?"1fr 1fr":"1fr", gap:dk?10:8, animation:"fadeUp 0.4s ease" }}>
+          <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr 1fr":dk?"1fr 1fr":"1fr", gap:dk?10:8, animation:"fadeUp 0.35s ease" }}>
             {quizItems.map((x, i) => {
               const qs = quizScores[x.k];
               return (
-                <div key={x.id} className="card-hover" onClick={()=>{setView(x.k);setTimeout(top,50)}}
-                  style={{ background:"#141519", border:"1px solid " + (qs ? "#10B98118" : "#252830"), borderRadius:16, padding:dk?"22px 20px":"18px 16px", cursor:"pointer", animation:`fadeUp 0.4s ease ${0.04*i}s both`, position:"relative", overflow:"hidden" }}>
-                  <div style={{ position:"absolute", top:0, left:0, width:3, height:"100%", background: qs ? "#10B981" : "#10B981", borderRadius:"3px 0 0 3px" }} />
-                  <div style={{ display:"flex", alignItems:"center", gap:14, paddingLeft:8 }}>
-                    <div style={{ fontSize:24, width:48, height:48, display:"flex", alignItems:"center", justifyContent:"center", background:"#1C1F25", borderRadius:14, flexShrink:0, border:"1px solid #282B33" }}>{x.ic}</div>
+                <div key={x.id} className="card-hover" onClick={() => { setView(x.k); setTimeout(top, 50); }}
+                  style={{ background:"linear-gradient(135deg,rgba(16,18,24,0.98),rgba(11,12,16,0.98))", border:`1px solid ${qs ? "rgba(16,185,129,0.15)" : "rgba(255,255,255,0.055)"}`, borderRadius:16, padding:dk?"20px 18px":"17px 15px", cursor:"pointer", animation:`fadeUp 0.38s ease ${0.05*i}s both`, boxShadow:"0 4px 20px rgba(0,0,0,0.3)" }}>
+                  <div style={{ display:"flex", alignItems:"center", gap:14 }}>
+                    <div style={{ width:50, height:50, borderRadius:14, background:IC_GRAD.QUIZ, display:"flex", alignItems:"center", justifyContent:"center", fontSize:22, flexShrink:0, boxShadow:IC_SHADOW.QUIZ }}>{x.ic}</div>
                     <div style={{ flex:1, minWidth:0 }}>
-                      <div style={{ fontSize:9, fontWeight:700, color:"#10B981", letterSpacing:2, marginBottom:4, textTransform:"uppercase" }}>QUIZ</div>
-                      <h3 style={{ fontSize:14.5, fontWeight:700, color:"#EEF0F4", margin:"0 0 3px", lineHeight:1.3 }}>{x.sub}</h3>
-                      <p style={{ fontSize:11.5, color: qs ? "#10B981" : "#5A5E68", margin:0, lineHeight:1.35, fontWeight: qs ? 600 : 400 }}>
-                        {qs ? `Best score: ${Math.round(qs.score/qs.total*100)}%` : x.d}
+                      <div style={{ fontSize:9, fontWeight:800, color:"#10B981", letterSpacing:2.5, marginBottom:4, textTransform:"uppercase" }}>QUIZ</div>
+                      <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF2F8", margin:"0 0 3px", lineHeight:1.3 }}>{x.sub}</h3>
+                      <p style={{ fontSize:11.5, color: qs ? "#10B981" : "#3A4050", margin:0, lineHeight:1.4, fontWeight: qs ? 600 : 500 }}>
+                        {qs ? `Best: ${Math.round(qs.score/qs.total*100)}%` : x.d}
                       </p>
                     </div>
                     <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6 }}>
-                      {qs && <div style={{ width:20, height:20, borderRadius:6, background:"#10B98118", border:"1px solid #10B98140", display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, color:"#10B981" }}>✓</div>}
-                      <div style={{ width:32, height:32, borderRadius:10, background:"#1C1F25", border:"1px solid #282B33", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, color:"#3A3E48", fontSize:14 }}>›</div>
+                      {qs && <div style={{ width:20, height:20, borderRadius:6, background:"rgba(16,185,129,0.12)", border:"1px solid rgba(16,185,129,0.3)", display:"flex", alignItems:"center", justifyContent:"center" }}><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>}
+                      <div style={{ width:32, height:32, borderRadius:10, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.06)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3A4050" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1175,6 +1232,16 @@ export default function App() {
         )}
 
       </div>
+    </div>
+  );
+}
+
+function SectionLabel({ color, label, delay = 0 }) {
+  return (
+    <div style={{ display:"flex", alignItems:"center", gap:12, padding:"28px 0 13px", animation:`fadeUp 0.5s ease ${delay}s both` }}>
+      <div style={{ width:6, height:6, borderRadius:3, background:color, boxShadow:`0 0 8px ${color}60` }} />
+      <div style={{ fontSize:9.5, fontWeight:800, color:color, letterSpacing:3.5, textTransform:"uppercase" }}>{label}</div>
+      <div style={{ flex:1, height:1, background:"linear-gradient(90deg,rgba(255,255,255,0.05),transparent)" }} />
     </div>
   );
 }
