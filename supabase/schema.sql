@@ -32,6 +32,10 @@ create policy "Own profile read"
   on public.profiles for select
   using (auth.uid() = id);
 
+create policy "Authenticated users read all profiles"
+  on public.profiles for select
+  using (auth.role() = 'authenticated');
+
 create policy "Admins read all profiles"
   on public.profiles for select
   using (public.is_admin());
