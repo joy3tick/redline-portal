@@ -1081,10 +1081,11 @@ export default function App() {
               {profile?.role === "admin" && (
                 <button onClick={() => setView("__admin")} style={{ background:"rgba(245,158,11,0.1)", border:"1px solid rgba(245,158,11,0.2)", color:"#F59E0B", fontSize:9.5, fontWeight:800, cursor:"pointer", padding:"9px 14px", borderRadius:10, fontFamily:"inherit", letterSpacing:2, textTransform:"uppercase", transition:"all 0.2s" }}>Admin</button>
               )}
+              <div style={{ width:dk?50:44, height:dk?50:44, borderRadius:14, background:"linear-gradient(135deg,#DC2626,#7F1D1D)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?20:16, color:"#FFF", letterSpacing:2, boxShadow:"0 6px 28px rgba(220,38,38,0.3)", animation:"glow 3.5s ease-in-out infinite" }}>
+                {profile?.name?.[0]?.toUpperCase() ?? "R"}
+              </div>
               <div style={{ position:"relative" }}>
-                <div onClick={() => { setShowNameEdit(v => !v); setNameEdit(profile?.name ?? ""); }} style={{ width:dk?50:44, height:dk?50:44, borderRadius:14, background:"linear-gradient(135deg,#DC2626,#7F1D1D)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?20:16, color:"#FFF", letterSpacing:2, boxShadow:"0 6px 28px rgba(220,38,38,0.3)", animation:"glow 3.5s ease-in-out infinite", cursor:"pointer" }}>
-                  {profile?.name?.[0]?.toUpperCase() ?? "R"}
-                </div>
+                <button onClick={() => { setShowNameEdit(v => !v); setNameEdit(profile?.name ?? ""); }} style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.07)", color:"#9CA3AF", fontSize:10, fontWeight:700, cursor:"pointer", padding:"9px 14px", borderRadius:10, fontFamily:"inherit", letterSpacing:1.5, textTransform:"uppercase", transition:"all 0.2s" }}>Edit Name</button>
                 {showNameEdit && (
                   <div style={{ position:"absolute", top:"calc(100% + 10px)", right:0, background:"#111318", border:"1px solid rgba(255,255,255,0.1)", borderRadius:14, padding:16, width:220, zIndex:100, boxShadow:"0 12px 40px rgba(0,0,0,0.6)" }}>
                     <div style={{ fontSize:10, fontWeight:700, color:"#3A4050", letterSpacing:2, textTransform:"uppercase", marginBottom:10 }}>Display Name</div>

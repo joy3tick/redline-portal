@@ -36,6 +36,10 @@ create policy "Admins read all profiles"
   on public.profiles for select
   using (public.is_admin());
 
+create policy "Own profile update"
+  on public.profiles for update
+  using (auth.uid() = id);
+
 create policy "Admins update any profile"
   on public.profiles for update
   using (public.is_admin());
