@@ -533,6 +533,8 @@ function Scheduler({ session, profile, w }) {
       await supabase.from("schedule").delete().eq("id", mine.id);
       setEntries(prev => prev.filter(e => e.id !== mine.id));
     } else {
+      const dayCount = entries.filter(e => e.date === dateStr).length;
+      if (dayCount >= 6) return;
       const { data } = await supabase.from("schedule").insert({ user_id: session.user.id, date: dateStr }).select().single();
       if (data) setEntries(prev => [...prev, data]);
     }
@@ -561,16 +563,21 @@ function Scheduler({ session, profile, w }) {
               const isPast = day < today;
               const isToday = dateStr === ds(today);
               const isMine = dayEntries.some(e => e.user_id === session.user.id);
+              const isFull = dayEntries.length >= 6 && !isMine;
               return (
-                <div key={dateStr} onClick={() => !isPast && toggle(day)}
-                  className={isPast ? "" : "card-hover"}
-                  style={{ background: isMine?"#DC262608":"#141519", border:"1px solid "+(isMine?"#DC262630":isToday?"#2A2D35":"#1E2128"), borderRadius:16, padding:"16px 14px", cursor:isPast?"default":"pointer", opacity:isPast?0.35:1, transition:"all 0.2s", minHeight:140, position:"relative" }}>
-                  {isToday && <div style={{ position:"absolute", top:10, right:12, fontSize:8, fontWeight:700, color:"#DC2626", letterSpacing:2, textTransform:"uppercase" }}>Today</div>}
+                <div key={dateStr} onClick={() => !isPast && !isFull && toggle(day)}
+                  className={isPast || isFull ? "" : "card-hover"}
+                  style={{ background: isMine?"#DC262608":"#141519", border:"1px solid "+(isMine?"#DC262630":isToday?"#2A2D35":"#1E2128"), borderRadius:16, padding:"16px 14px", cursor:isPast||isFull?"default":"pointer", opacity:isPast?0.35:1, transition:"all 0.2s", minHeight:140, position:"relative" }}>
+                  {isToday && !isFull && <div style={{ position:"absolute", top:10, right:12, fontSize:8, fontWeight:700, color:"#DC2626", letterSpacing:2, textTransform:"uppercase" }}>Today</div>}
+                  {isFull && <div style={{ position:"absolute", top:10, right:12, fontSize:8, fontWeight:700, color:"#F59E0B", letterSpacing:2, textTransform:"uppercase" }}>Full</div>}
                   <div style={{ fontSize:9, fontWeight:700, color:isToday?"#DC2626":"#5A5E68", letterSpacing:2, marginBottom:4 }}>{DAY_NAMES[di]}</div>
                   <div style={{ fontSize:22, fontWeight:800, color:isToday?"#FFF":"#8A8E98", marginBottom:4, lineHeight:1 }}>
                     {day.getDate()} <span style={{ fontSize:12, fontWeight:500, color:"#5A5E68" }}>{MONTHS[day.getMonth()]}</span>
                   </div>
-                  <div style={{ fontSize:9, color:"#3A3E48", marginBottom:12, letterSpacing:1 }}>9:00 AM – 5:00 PM</div>
+                  <div style={{ fontSize:9, color:"#3A3E48", marginBottom:12, letterSpacing:1, display:"flex", justifyContent:"space-between" }}>
+                    <span>9:00 AM – 5:00 PM</span>
+                    <span style={{ color: dayEntries.length >= 6 ? "#F59E0B" : "#3A3E48" }}>{dayEntries.length}/6</span>
+                  </div>
                   <div style={{ display:"flex", flexDirection:"column", gap:5 }}>
                     {dayEntries.map(e => (
                       <div key={e.id} style={{ fontSize:11, fontWeight:600, color:e.user_id===session.user.id?"#DC2626":"#C4C8D0", background:e.user_id===session.user.id?"#DC262612":"#1C1F25", border:"1px solid "+(e.user_id===session.user.id?"#DC262625":"#282B33"), borderRadius:6, padding:"4px 8px" }}>
@@ -579,6 +586,9 @@ function Scheduler({ session, profile, w }) {
                     ))}
                     {dayEntries.length === 0 && !isPast && (
                       <div style={{ fontSize:10, color:"#3A3E48" }}>+ Add yourself</div>
+                    )}
+                    {isFull && !isMine && (
+                      <div style={{ fontSize:10, color:"#F59E0B88" }}>Day is full</div>
                     )}
                   </div>
                 </div>
