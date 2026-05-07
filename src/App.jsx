@@ -1963,30 +1963,7 @@ export default function App() {
         </div>
       </div>
 
-      {/* Welcome + stats row */}
-      <div style={{ position:"relative", zIndex:1, padding:wd?"22px 56px 0":dk?"20px 36px 0":"14px 16px 0" }}>
-        <div style={{ maxWidth:1300, margin:"0 auto", display:"flex", alignItems:"center", justifyContent:"space-between", gap:12, flexWrap:"wrap", animation:"fadeUp 0.5s ease 0.16s both" }}>
-          <div>
-            <div style={{ fontSize:dk?22:17, fontWeight:800, color:"#F2F4F8", letterSpacing:"-0.02em", lineHeight:1.2 }}>
-              {profile?.name ? <>Welcome back, <span className="red-gradient-text">{profile.name}</span></> : "Welcome back"}
-            </div>
-            {dk && <p style={{ fontSize:13, color:"#666C7E", margin:"6px 0 0", fontWeight:500 }}>Master every module. Close more deals.</p>}
-          </div>
-          <div style={{ display:"flex", gap:dk?8:5 }}>
-            {[
-              [completedModules.size, "Done", "#22C55E"],
-              ["13", "Modules", "#CCFF00"],
-              ["2", "Camps", "#F59E0B"],
-              ["6", "Quizzes", "#10B981"],
-            ].map(([n, l, col]) => (
-              <div key={l} className="stat-card" style={{ background:`linear-gradient(180deg,${col}14,${col}06)`, border:`1px solid ${col}26`, borderRadius:12, padding:dk?"11px 16px":"8px 10px", textAlign:"center", flex:1, minWidth:dk?62:48 }}>
-                <div style={{ fontSize:dk?22:15, fontWeight:900, color:col, lineHeight:1, letterSpacing:"-0.02em" }}>{n}</div>
-                <div style={{ fontSize:8.5, color:`${col}90`, textTransform:"uppercase", letterSpacing:1.5, fontWeight:800, marginTop:5 }}>{l}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+
 
       {/* Tab Content */}
       <div style={{ position:"relative", zIndex:1, maxWidth:1300, margin:"0 auto", padding:wd?"28px 56px 90px":dk?"24px 36px 90px":"16px 16px 90px" }}>
