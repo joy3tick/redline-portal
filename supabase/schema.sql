@@ -122,6 +122,27 @@ create policy "Admins read all scores"
 -- Find your UUID in Supabase Dashboard → Authentication → Users.
 
 
+-- ─── MONTHLY BONUSES ────────────────────────────────────────
+create table if not exists public.monthly_bonuses (
+  id          uuid default gen_random_uuid() primary key,
+  label       text not null,
+  threshold   integer,
+  amount      numeric not null,
+  description text,
+  created_at  timestamptz default now()
+);
+
+alter table public.monthly_bonuses enable row level security;
+
+create policy "Authenticated users read bonuses"
+  on public.monthly_bonuses for select
+  using (auth.role() = 'authenticated');
+
+create policy "Admins manage bonuses"
+  on public.monthly_bonuses for all
+  using (public.is_admin());
+
+
 -- ─── SALES ──────────────────────────────────────────────────
 create table if not exists public.sales (
   id         uuid default gen_random_uuid() primary key,

@@ -801,6 +801,7 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
 function Leaderboard({ session, profile, w }) {
   const [sales, setSales] = useState([]);
   const [repProfiles, setRepProfiles] = useState({});
+  const [bonuses, setBonuses] = useState([]);
   const [period, setPeriod] = useState("all");
   const [showAdd, setShowAdd] = useState(false);
   const [dealAmt, setDealAmt] = useState(null);
@@ -808,13 +809,22 @@ function Leaderboard({ session, profile, w }) {
   const [retainer, setRetainer] = useState(null);
   const [note, setNote] = useState("");
   const [saving, setSaving] = useState(false);
+  const [editingBonus, setEditingBonus] = useState(null);
+  const [showAddBonus, setShowAddBonus] = useState(false);
+  const [bonusForm, setBonusForm] = useState({ label:"", threshold:"", amount:"", description:"" });
   const DEAL_OPTS = [1497, 2497, 4497];
   const RETAINER_OPTS = [49, 197, 297];
   const dk = w >= 768;
+  const isAdmin = profile?.role === "admin";
+
+  const loadBonuses = async () => {
+    const { data } = await supabase.from("monthly_bonuses").select("*").order("threshold", { ascending: true, nullsFirst: false }).order("amount");
+    setBonuses(data ?? []);
+  };
 
   const load = async () => {
     const [salesRes, profRes] = await Promise.all([
-      supabase.from("sales").select("id, user_id, amount, note, sale_date, created_at").order("created_at", { ascending: false }),
+      supabase.from("sales").select("id, user_id, amount, retainer, note, sale_date, created_at").order("created_at", { ascending: false }),
       supabase.from("profiles").select("id, name"),
     ]);
     setSales(salesRes.data ?? []);
@@ -825,13 +835,36 @@ function Leaderboard({ session, profile, w }) {
 
   useEffect(() => {
     load();
+    loadBonuses();
     const ch = supabase.channel("sales-rt")
       .on("postgres_changes", { event: "*", schema: "public", table: "sales" }, load)
+      .on("postgres_changes", { event: "*", schema: "public", table: "monthly_bonuses" }, loadBonuses)
       .subscribe();
     return () => supabase.removeChannel(ch);
   }, []);
 
   const resetForm = () => { setDealAmt(null); setCustomAmt(""); setRetainer(null); setNote(""); setShowAdd(false); };
+  const resetBonusForm = () => { setBonusForm({ label:"", threshold:"", amount:"", description:"" }); setShowAddBonus(false); setEditingBonus(null); };
+
+  const saveBonus = async () => {
+    const payload = {
+      label: bonusForm.label.trim(),
+      threshold: bonusForm.threshold !== "" ? parseInt(bonusForm.threshold) : null,
+      amount: parseFloat(bonusForm.amount),
+      description: bonusForm.description.trim() || null,
+    };
+    if (!payload.label || isNaN(payload.amount)) return;
+    if (editingBonus) {
+      await supabase.from("monthly_bonuses").update(payload).eq("id", editingBonus.id);
+    } else {
+      await supabase.from("monthly_bonuses").insert(payload);
+    }
+    resetBonusForm();
+  };
+
+  const deleteBonus = async (id) => {
+    await supabase.from("monthly_bonuses").delete().eq("id", id);
+  };
 
   const addSale = async () => {
     const finalAmt = dealAmt === "custom" ? parseFloat(customAmt) : dealAmt;
@@ -1058,6 +1091,92 @@ function Leaderboard({ session, profile, w }) {
           </div>
         </div>
       )}
+
+      {/* Monthly Bonuses */}
+      <div style={{ marginTop:40 }}>
+        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:16 }}>
+          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+            <div style={{ fontSize:16 }}>🏆</div>
+            <div style={{ fontSize:10, fontWeight:800, color:"#FFD700", letterSpacing:3, textTransform:"uppercase" }}>Monthly Bonuses</div>
+          </div>
+          {isAdmin && (
+            <button onClick={() => { resetBonusForm(); setShowAddBonus(true); }}
+              style={{ background:"rgba(255,215,0,0.08)", border:"1px solid rgba(255,215,0,0.2)", borderRadius:8, color:"#FFD700", fontSize:10, fontWeight:700, letterSpacing:1.5, padding:"7px 14px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>
+              + Add Tier
+            </button>
+          )}
+        </div>
+
+        {/* Add / Edit bonus form (admin only) */}
+        {isAdmin && (showAddBonus || editingBonus) && (
+          <div style={{ background:"#1A1C24", border:"1px solid rgba(255,215,0,0.12)", borderRadius:14, padding:18, marginBottom:16, animation:"fadeUp 0.2s ease" }}>
+            <div style={{ fontSize:10, fontWeight:700, color:"#666C7E", letterSpacing:2, textTransform:"uppercase", marginBottom:14 }}>{editingBonus ? "Edit Bonus Tier" : "New Bonus Tier"}</div>
+            <div style={{ display:"flex", gap:10, flexWrap:"wrap", marginBottom:10 }}>
+              <div style={{ flex:"2 1 160px" }}>
+                <div style={{ fontSize:9, fontWeight:700, color:"#444856", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Label</div>
+                <input value={bonusForm.label} onChange={e => setBonusForm(p=>({...p, label:e.target.value}))} placeholder="e.g. Bronze, 5-Sale Bonus…"
+                  style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:500, padding:"9px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }} />
+              </div>
+              <div style={{ flex:"1 1 100px" }}>
+                <div style={{ fontSize:9, fontWeight:700, color:"#444856", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Sales Needed</div>
+                <input type="number" min="0" value={bonusForm.threshold} onChange={e => setBonusForm(p=>({...p, threshold:e.target.value}))} placeholder="e.g. 5"
+                  style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:600, padding:"9px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }} />
+              </div>
+              <div style={{ flex:"1 1 100px" }}>
+                <div style={{ fontSize:9, fontWeight:700, color:"#444856", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Bonus ($)</div>
+                <input type="number" min="0" value={bonusForm.amount} onChange={e => setBonusForm(p=>({...p, amount:e.target.value}))} placeholder="e.g. 500"
+                  style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:600, padding:"9px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }} />
+              </div>
+            </div>
+            <div style={{ marginBottom:12 }}>
+              <div style={{ fontSize:9, fontWeight:700, color:"#444856", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Description (optional)</div>
+              <input value={bonusForm.description} onChange={e => setBonusForm(p=>({...p, description:e.target.value}))} placeholder="Any extra details…"
+                style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:500, padding:"9px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }} />
+            </div>
+            <div style={{ display:"flex", gap:8 }}>
+              <button onClick={saveBonus} style={{ background:"#FFD700", border:"none", borderRadius:8, color:"#111", fontSize:12, fontWeight:800, letterSpacing:1, padding:"10px 22px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Save</button>
+              <button onClick={resetBonusForm} style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:8, color:"#666C7E", fontSize:12, fontWeight:700, padding:"10px 16px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Cancel</button>
+            </div>
+          </div>
+        )}
+
+        {/* Bonus tier cards */}
+        {bonuses.length === 0 && !showAddBonus ? (
+          <div style={{ fontSize:12, color:"#3A3E4A", padding:"20px 0" }}>{isAdmin ? "No bonus tiers set yet. Add one above." : "No bonuses set this month yet."}</div>
+        ) : (
+          <div style={{ display:"grid", gridTemplateColumns:dk?"repeat(auto-fill, minmax(220px, 1fr))":"1fr", gap:10 }}>
+            {bonuses.map(b => {
+              const myCount = sales.filter(s => {
+                if (s.user_id !== session.user.id) return false;
+                const d = new Date(s.sale_date);
+                return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+              }).length;
+              const reached = b.threshold != null ? myCount >= b.threshold : false;
+              return (
+                <div key={b.id} style={{ background: reached ? "rgba(255,215,0,0.06)" : "rgba(255,255,255,0.025)", border:`1px solid ${reached ? "rgba(255,215,0,0.2)" : "rgba(255,255,255,0.07)"}`, borderRadius:14, padding:"16px 18px", position:"relative" }}>
+                  {reached && <div style={{ position:"absolute", top:12, right:12, fontSize:9, fontWeight:800, color:"#FFD700", letterSpacing:1.5, textTransform:"uppercase" }}>✓ Reached</div>}
+                  <div style={{ fontSize:22, fontWeight:900, color: reached ? "#FFD700" : "#C4C8D4", lineHeight:1, marginBottom:4 }}>${Number(b.amount).toLocaleString()}</div>
+                  <div style={{ fontSize:12, fontWeight:700, color: reached ? "#FFD700" : "#9CA3AF", marginBottom:b.description?4:0 }}>{b.label}</div>
+                  {b.threshold != null && (
+                    <div style={{ fontSize:10, color:"#444856", marginBottom:b.description?4:0 }}>{b.threshold} {b.threshold===1?"sale":"sales"} needed{b.threshold != null && ` · ${myCount}/${b.threshold} this month`}</div>
+                  )}
+                  {b.description && <div style={{ fontSize:11, color:"#3A3E4A" }}>{b.description}</div>}
+                  {isAdmin && (
+                    <div style={{ display:"flex", gap:8, marginTop:12 }}>
+                      <button onClick={() => { setEditingBonus(b); setBonusForm({ label:b.label, threshold:b.threshold??'', amount:b.amount, description:b.description??'' }); setShowAddBonus(false); }}
+                        style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:6, color:"#666C7E", fontSize:10, fontWeight:700, padding:"5px 12px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", letterSpacing:1 }}>Edit</button>
+                      <button onClick={() => deleteBonus(b.id)}
+                        style={{ background:"none", border:"none", color:"#3A3E4A", fontSize:10, fontWeight:700, padding:"5px 8px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", letterSpacing:1, transition:"color 0.15s" }}
+                        onMouseEnter={e=>e.target.style.color="#DC2626"} onMouseLeave={e=>e.target.style.color="#3A3E4A"}>Delete</button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
     </div>
   );
 }
