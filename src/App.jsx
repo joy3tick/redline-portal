@@ -424,13 +424,13 @@ function Login() {
   const fieldStyle = (hasErr) => ({
     width:"100%", padding:"15px 20px",
     background:"rgba(7,8,12,0.9)",
-    border: `1.5px solid ${hasErr ? "#CCFF00" : "rgba(255,255,255,0.07)"}`,
+    border: `1.5px solid ${hasErr ? "#FF3370" : "rgba(255,255,255,0.07)"}`,
     borderRadius:14, color:"#F2F4F8", fontSize:15, outline:"none",
     boxSizing:"border-box", fontFamily:"inherit", transition:"all 0.22s ease",
   });
 
   const onFocus = e => { e.target.style.borderColor = "rgba(204,255,0,0.6)"; e.target.style.boxShadow = "0 0 0 4px rgba(204,255,0,0.08)"; };
-  const onBlur  = (e, hasErr) => { e.target.style.borderColor = hasErr ? "#CCFF00" : "rgba(255,255,255,0.07)"; e.target.style.boxShadow = "none"; };
+  const onBlur  = (e, hasErr) => { e.target.style.borderColor = hasErr ? "#FF3370" : "rgba(255,255,255,0.07)"; e.target.style.boxShadow = "none"; };
 
   return (
     <div className="dotgrid" style={{ minHeight:"100dvh", background:"#15171E", display:"flex", alignItems:"center", justifyContent:"center", padding:24, position:"relative", overflow:"hidden" }}>
@@ -458,8 +458,8 @@ function Login() {
           </div>
           {err && (
             <div style={{ display:"flex", alignItems:"center", gap:7, marginTop:12 }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#CCFF00" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              <p style={{ color:"#CCFF00", fontSize:12, fontWeight:600 }}>{err}</p>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF3370" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <p style={{ color:"#FF3370", fontSize:12, fontWeight:600 }}>{err}</p>
             </div>
           )}
           <button onClick={go} disabled={ld} style={{ width:"100%", padding:"16px", background: ld ? "#3E5200" : "linear-gradient(135deg,#CCFF00,#6E9100)", color: ld ? "#FFF" : "#15171E", border:"none", borderRadius:14, fontSize:11, fontWeight:800, letterSpacing:4, cursor: ld ? "wait" : "pointer", marginTop:20, textTransform:"uppercase", boxShadow: ld ? "none" : "0 6px 28px rgba(204,255,0,0.3)", transition:"all 0.25s ease", fontFamily:"inherit" }}>
@@ -597,6 +597,220 @@ function Scheduler({ session, profile, w }) {
           </div>
         </div>
       ))}
+    </div>
+  );
+}
+
+function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab, onOpenModule }) {
+  const [sales, setSales] = useState([]);
+  const [schedule, setSchedule] = useState([]);
+  const [repProfiles, setRepProfiles] = useState({});
+  const [loading, setLoading] = useState(true);
+  const dk = w >= 768;
+  const wd = w >= 1100;
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  const todayStr = today.toISOString().split("T")[0];
+  const mon = new Date(today); mon.setDate(today.getDate() - (today.getDay() === 0 ? 6 : today.getDay() - 1));
+  const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+
+  const load = async () => {
+    const [salesRes, schedRes, profRes] = await Promise.all([
+      supabase.from("sales").select("id, user_id, amount, note, sale_date, created_at").order("created_at", { ascending: false }),
+      supabase.from("schedule").select("id, user_id, date").eq("date", todayStr),
+      supabase.from("profiles").select("id, name"),
+    ]);
+    setSales(salesRes.data ?? []);
+    setSchedule(schedRes.data ?? []);
+    const pm = {};
+    for (const p of profRes.data ?? []) pm[p.id] = p.name || "Rep";
+    setRepProfiles(pm);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    load();
+    const ch = supabase.channel("dashboard-rt")
+      .on("postgres_changes", { event: "*", schema: "public", table: "sales" }, load)
+      .on("postgres_changes", { event: "*", schema: "public", table: "schedule" }, load)
+      .subscribe();
+    return () => supabase.removeChannel(ch);
+  }, []);
+
+  const weekSales = sales.filter(s => { const d = new Date(s.sale_date); return d >= mon && d <= sun; });
+  const byRepWeek = {};
+  for (const s of weekSales) {
+    if (!byRepWeek[s.user_id]) byRepWeek[s.user_id] = { count: 0, total: 0 };
+    byRepWeek[s.user_id].count++;
+    byRepWeek[s.user_id].total += s.amount ?? 0;
+  }
+  const rankedWeek = Object.entries(byRepWeek)
+    .map(([uid, stats]) => ({ uid, name: repProfiles[uid] || "Rep", ...stats }))
+    .sort((a, b) => b.count - a.count || b.total - a.total);
+
+  const myWeek = byRepWeek[session.user.id] ?? { count: 0, total: 0 };
+  const myRankWeek = rankedWeek.findIndex(r => r.uid === session.user.id);
+
+  const totalModules = CATS.filter(x => x.t === "MODULE" || x.t === "BOOTCAMP").length;
+  const doneModules = CATS.filter(x => (x.t === "MODULE" || x.t === "BOOTCAMP") && completedModules.has(x.k)).length;
+  const trainingPct = totalModules > 0 ? Math.round((doneModules / totalModules) * 100) : 0;
+  const totalQuizzes = CATS.filter(x => x.t === "QUIZ").length;
+  const doneQuizzes = CATS.filter(x => x.t === "QUIZ" && quizScores[x.k]).length;
+
+  const nextModule = CATS.find(x => (x.t === "MODULE" || x.t === "BOOTCAMP") && !completedModules.has(x.k));
+
+  const todaysReps = schedule.map(e => repProfiles[e.user_id] || "Rep");
+  const recentSales = sales.slice(0, 5);
+  const MEDALS = ["🥇","🥈","🥉"];
+
+  const Card = ({ title, accent, action, actionOnClick, children }) => (
+    <div style={{ background:"linear-gradient(135deg,rgba(16,18,24,0.98),rgba(11,12,16,0.98))", border:"1px solid rgba(255,255,255,0.055)", borderRadius:16, padding:dk?"20px 22px":"16px 18px", boxShadow:"0 4px 20px rgba(0,0,0,0.3)" }}>
+      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:14 }}>
+        <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+          <div style={{ width:6, height:6, borderRadius:3, background:accent }} />
+          <div style={{ fontSize:10, fontWeight:800, color:accent, letterSpacing:2.5, textTransform:"uppercase" }}>{title}</div>
+        </div>
+        {action && (
+          <button onClick={actionOnClick}
+            style={{ background:"none", border:"none", color:"#666C7E", fontSize:10, fontWeight:700, letterSpacing:1.5, cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", padding:0 }}>
+            {action} →
+          </button>
+        )}
+      </div>
+      {children}
+    </div>
+  );
+
+  if (loading) return <div style={{ textAlign:"center", padding:60, color:"#7E8290", fontSize:13 }}>Loading dashboard…</div>;
+
+  return (
+    <div style={{ animation:"fadeUp 0.35s ease", display:"grid", gridTemplateColumns: wd ? "1fr 1fr" : "1fr", gap:dk?14:12 }}>
+
+      {/* Your Week */}
+      <Card title="Your Week" accent="#DC2626">
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:8 }}>
+          {[
+            { v: myRankWeek >= 0 ? `#${myRankWeek + 1}` : "—", l: "Rank", c: "#FFD700" },
+            { v: myWeek.count, l: myWeek.count === 1 ? "Sale" : "Sales", c: "#DC2626" },
+            { v: `${trainingPct}%`, l: "Training", c: "#22C55E" },
+            { v: `${doneQuizzes}/${totalQuizzes}`, l: "Quizzes", c: "#10B981" },
+          ].map(s => (
+            <div key={s.l} style={{ background:`${s.c}10`, border:`1px solid ${s.c}20`, borderRadius:10, padding:"12px 8px", textAlign:"center" }}>
+              <div style={{ fontSize:dk?22:18, fontWeight:900, color:s.c, lineHeight:1, letterSpacing:"-0.02em" }}>{s.v}</div>
+              <div style={{ fontSize:8.5, color:`${s.c}70`, textTransform:"uppercase", letterSpacing:1.5, fontWeight:700, marginTop:5 }}>{s.l}</div>
+            </div>
+          ))}
+        </div>
+        {myWeek.total > 0 && (
+          <div style={{ marginTop:12, fontSize:11, color:"#666C7E", textAlign:"center" }}>
+            <span style={{ color:"#22C55E", fontWeight:700 }}>${myWeek.total.toLocaleString()}</span> closed this week
+          </div>
+        )}
+      </Card>
+
+      {/* Top Performers */}
+      <Card title="Top Performers · This Week" accent="#FFD700" action="Leaderboard" actionOnClick={() => onGoTab("leaderboard")}>
+        {rankedWeek.length === 0 ? (
+          <div style={{ fontSize:12, color:"#444856", padding:"12px 0" }}>No sales logged yet this week. Be the first.</div>
+        ) : (
+          <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
+            {rankedWeek.slice(0, 3).map((rep, i) => {
+              const isMe = rep.uid === session.user.id;
+              return (
+                <div key={rep.uid} style={{ display:"flex", alignItems:"center", gap:12, background: isMe ? "rgba(220,38,38,0.06)" : i===0 ? "rgba(255,215,0,0.04)" : "rgba(255,255,255,0.025)", border:`1px solid ${isMe ? "rgba(220,38,38,0.18)" : i===0 ? "rgba(255,215,0,0.12)" : "rgba(255,255,255,0.06)"}`, borderRadius:10, padding:"10px 12px" }}>
+                  <div style={{ fontSize:18, minWidth:26, textAlign:"center" }}>{MEDALS[i]}</div>
+                  <div style={{ flex:1, minWidth:0, fontSize:13, fontWeight:700, color: isMe ? "#F2F4F8" : "#C4C8D4" }}>
+                    {rep.name}{isMe ? <span style={{ fontSize:9, fontWeight:700, color:"#DC2626", letterSpacing:1.5, marginLeft:8, textTransform:"uppercase" }}>you</span> : ""}
+                  </div>
+                  <div style={{ fontSize:18, fontWeight:900, color: i===0 ? "#FFD700" : "#888D9C", lineHeight:1 }}>{rep.count}</div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </Card>
+
+      {/* Continue Training */}
+      <Card title="Continue Training" accent="#DC2626" action="All Modules" actionOnClick={() => onGoTab("training")}>
+        {nextModule ? (
+          <div className="card-hover" onClick={() => onOpenModule(nextModule.k)}
+            style={{ display:"flex", alignItems:"center", gap:14, cursor:"pointer", background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:12, padding:"12px 14px" }}>
+            <div style={{ width:46, height:46, borderRadius:12, background:IC_GRAD[nextModule.t], display:"flex", alignItems:"center", justifyContent:"center", fontSize:20, flexShrink:0, boxShadow:IC_SHADOW[nextModule.t] }}>{nextModule.ic}</div>
+            <div style={{ flex:1, minWidth:0 }}>
+              <div style={{ fontSize:9, fontWeight:800, color: nextModule.t === "MODULE" ? "#DC2626" : "#F59E0B", letterSpacing:2.5, marginBottom:3, textTransform:"uppercase" }}>{nextModule.n || nextModule.t} · Up Next</div>
+              <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF2F8", margin:"0 0 3px", lineHeight:1.3 }}>{nextModule.sub}</h3>
+              <p style={{ fontSize:11, color:"#666C7E", margin:0, lineHeight:1.4, fontWeight:500 }}>{nextModule.d}</p>
+            </div>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#666C7E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0 }}><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+        ) : (
+          <div style={{ fontSize:12, color:"#22C55E", padding:"12px 0", fontWeight:600 }}>🎉 All modules complete. You're a closer.</div>
+        )}
+        <div style={{ marginTop:12, height:6, borderRadius:3, background:"rgba(255,255,255,0.04)", overflow:"hidden" }}>
+          <div style={{ width:`${trainingPct}%`, height:"100%", background:"linear-gradient(90deg,#DC2626,#F59E0B)", transition:"width 0.4s" }} />
+        </div>
+        <div style={{ fontSize:10, color:"#666C7E", marginTop:6, letterSpacing:1, textTransform:"uppercase", fontWeight:700 }}>{doneModules} of {totalModules} done</div>
+      </Card>
+
+      {/* Today on the Floor */}
+      <Card title="Today on the Floor" accent="#F59E0B" action="Schedule" actionOnClick={() => onGoTab("scheduling")}>
+        {todaysReps.length === 0 ? (
+          <div style={{ fontSize:12, color:"#444856", padding:"12px 0" }}>Nobody scheduled today. Tap Schedule to add yourself.</div>
+        ) : (
+          <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
+            {todaysReps.map((name, i) => {
+              const isMe = schedule[i]?.user_id === session.user.id;
+              return (
+                <div key={i} style={{ display:"flex", alignItems:"center", gap:8, background:isMe?"rgba(220,38,38,0.08)":"rgba(255,255,255,0.04)", border:`1px solid ${isMe?"rgba(220,38,38,0.2)":"rgba(255,255,255,0.07)"}`, borderRadius:8, padding:"6px 10px" }}>
+                  <div style={{ width:22, height:22, borderRadius:6, background: isMe ? "linear-gradient(135deg,#DC2626,#991B1B)" : "linear-gradient(135deg,#2A2D38,#1E2028)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, fontWeight:800, color: isMe?"#FFF":"#888D9C" }}>
+                    {name[0]?.toUpperCase()}
+                  </div>
+                  <div style={{ fontSize:12, fontWeight:600, color: isMe?"#F2F4F8":"#C4C8D4" }}>{name}</div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </Card>
+
+      {/* Recent Sales */}
+      <Card title="Recent Sales" accent="#22C55E" action="Leaderboard" actionOnClick={() => onGoTab("leaderboard")}>
+        {recentSales.length === 0 ? (
+          <div style={{ fontSize:12, color:"#444856", padding:"12px 0" }}>No sales logged yet.</div>
+        ) : (
+          <div style={{ display:"flex", flexDirection:"column", gap:5 }}>
+            {recentSales.map(s => (
+              <div key={s.id} style={{ display:"flex", alignItems:"center", gap:10, padding:"8px 12px", background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.05)", borderRadius:9 }}>
+                <div style={{ width:24, height:24, borderRadius:6, background: s.user_id===session.user.id ? "linear-gradient(135deg,#DC2626,#991B1B)" : "rgba(255,255,255,0.05)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, fontWeight:800, color: s.user_id===session.user.id ? "#FFF" : "#666C7E", flexShrink:0 }}>
+                  {(repProfiles[s.user_id] || "R")[0]?.toUpperCase()}
+                </div>
+                <div style={{ flex:1, minWidth:0, fontSize:11.5, color:"#C4C8D4", fontWeight:600, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                  {repProfiles[s.user_id] || "Rep"}{s.note ? <span style={{ color:"#444856", fontWeight:500 }}> — {s.note}</span> : ""}
+                </div>
+                {s.amount > 0 && <div style={{ fontSize:12, fontWeight:700, color:"#22C55E", flexShrink:0 }}>${Number(s.amount).toLocaleString()}</div>}
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
+
+      {/* Quick Links */}
+      <Card title="Quick Links" accent="#6366F1">
+        <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
+          {LINKS.map(l => (
+            <a key={l.url} href={l.url} target="_blank" rel="noreferrer"
+              style={{ display:"flex", alignItems:"center", gap:12, padding:"10px 12px", background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:10, textDecoration:"none", transition:"all 0.15s" }}>
+              <div style={{ width:32, height:32, borderRadius:8, background:"rgba(99,102,241,0.1)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:16, flexShrink:0 }}>{l.ic}</div>
+              <div style={{ flex:1, minWidth:0 }}>
+                <div style={{ fontSize:12.5, fontWeight:700, color:"#EEF2F8" }}>{l.label}</div>
+                <div style={{ fontSize:10.5, color:"#666C7E", marginTop:2 }}>{l.desc}</div>
+              </div>
+              <div style={{ fontSize:11, color:"#444856" }}>↗</div>
+            </a>
+          ))}
+        </div>
+      </Card>
+
     </div>
   );
 }
@@ -755,12 +969,12 @@ function Leaderboard({ session, profile, w }) {
             <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
               {DEAL_OPTS.map(v => (
                 <button key={v} onClick={() => setDealAmt(v)}
-                  style={{ background: dealAmt===v ? "rgba(220,38,38,0.15)" : "rgba(255,255,255,0.04)", border:`1px solid ${dealAmt===v ? "rgba(220,38,38,0.4)" : "rgba(255,255,255,0.08)"}`, borderRadius:10, color: dealAmt===v ? "#F87171" : "#9CA3AF", fontSize:14, fontWeight:700, padding:"12px 20px", cursor:"pointer", fontFamily:"inherit", transition:"all 0.15s" }}>
+                  style={{ background: dealAmt===v ? "rgba(204,255,0,0.15)" : "rgba(255,255,255,0.04)", border:`1px solid ${dealAmt===v ? "rgba(204,255,0,0.4)" : "rgba(255,255,255,0.08)"}`, borderRadius:10, color: dealAmt===v ? "#DDFF40" : "#9CA3AF", fontSize:14, fontWeight:700, padding:"12px 20px", cursor:"pointer", fontFamily:"inherit", transition:"all 0.15s" }}>
                   ${v.toLocaleString()}
                 </button>
               ))}
               <button onClick={() => setDealAmt("custom")}
-                style={{ background: dealAmt==="custom" ? "rgba(220,38,38,0.15)" : "rgba(255,255,255,0.04)", border:`1px solid ${dealAmt==="custom" ? "rgba(220,38,38,0.4)" : "rgba(255,255,255,0.08)"}`, borderRadius:10, color: dealAmt==="custom" ? "#F87171" : "#9CA3AF", fontSize:13, fontWeight:700, padding:"12px 16px", cursor:"pointer", fontFamily:"inherit", transition:"all 0.15s" }}>
+                style={{ background: dealAmt==="custom" ? "rgba(204,255,0,0.15)" : "rgba(255,255,255,0.04)", border:`1px solid ${dealAmt==="custom" ? "rgba(204,255,0,0.4)" : "rgba(255,255,255,0.08)"}`, borderRadius:10, color: dealAmt==="custom" ? "#DDFF40" : "#9CA3AF", fontSize:13, fontWeight:700, padding:"12px 16px", cursor:"pointer", fontFamily:"inherit", transition:"all 0.15s" }}>
                 Custom
               </button>
             </div>
@@ -780,7 +994,7 @@ function Leaderboard({ session, profile, w }) {
               <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
                 {RETAINER_OPTS.map(v => (
                   <button key={v} onClick={() => setRetainer(v)}
-                    style={{ background: retainer===v ? "rgba(99,102,241,0.15)" : "rgba(255,255,255,0.04)", border:`1px solid ${retainer===v ? "rgba(99,102,241,0.4)" : "rgba(255,255,255,0.08)"}`, borderRadius:10, color: retainer===v ? "#A5B4FC" : "#9CA3AF", fontSize:14, fontWeight:700, padding:"12px 20px", cursor:"pointer", fontFamily:"inherit", transition:"all 0.15s" }}>
+                    style={{ background: retainer===v ? "rgba(6,214,240,0.15)" : "rgba(255,255,255,0.04)", border:`1px solid ${retainer===v ? "rgba(6,214,240,0.4)" : "rgba(255,255,255,0.08)"}`, borderRadius:10, color: retainer===v ? "#5DE9F8" : "#9CA3AF", fontSize:14, fontWeight:700, padding:"12px 20px", cursor:"pointer", fontFamily:"inherit", transition:"all 0.15s" }}>
                     ${v}/mo
                   </button>
                 ))}
@@ -801,7 +1015,7 @@ function Leaderboard({ session, profile, w }) {
                   placeholder="Client name, product, etc."
                   style={{ flex:"1 1 200px", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:500, padding:"10px 12px", fontFamily:"inherit", outline:"none" }} />
                 <button onClick={addSale} disabled={saving}
-                  style={{ background:"#DC2626", border:"none", borderRadius:8, color:"#FFF", fontSize:12, fontWeight:800, letterSpacing:1, padding:"10px 24px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", opacity:saving?0.6:1, flexShrink:0 }}>
+                  style={{ background:"#CCFF00", border:"none", borderRadius:8, color:"#15171E", fontSize:12, fontWeight:800, letterSpacing:1, padding:"10px 24px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", opacity:saving?0.6:1, flexShrink:0 }}>
                   {saving ? "Saving…" : "Save"}
                 </button>
               </div>
@@ -844,7 +1058,7 @@ function Leaderboard({ session, profile, w }) {
                   <div style={{ fontSize:14, fontWeight:700, color: isMe ? "#F2F4F8" : "#C4C8D4", lineHeight:1 }}>{rep.name}{isMe ? <span style={{ fontSize:9, fontWeight:700, color:"#CCFF00", letterSpacing:1.5, marginLeft:8, textTransform:"uppercase" }}>you</span> : ""}</div>
                   <div style={{ fontSize:11, color:"#444856", marginTop:3, display:"flex", gap:8 }}>
                     {rep.total > 0 && <span style={{ color:"#22C55E66" }}>${rep.total.toLocaleString()}</span>}
-                    {rep.retainerTotal > 0 && <span style={{ color:"#6366F166" }}>+${rep.retainerTotal.toLocaleString()}/mo retainer</span>}
+                    {rep.retainerTotal > 0 && <span style={{ color:"#06D6F066" }}>+${rep.retainerTotal.toLocaleString()}/mo retainer</span>}
                   </div>
                 </div>
                 <div style={{ textAlign:"right", flexShrink:0 }}>
@@ -875,7 +1089,7 @@ function Leaderboard({ session, profile, w }) {
                   </div>
                   <div style={{ display:"flex", flexDirection:"column", alignItems:"flex-end", gap:2, flexShrink:0 }}>
                     {s.amount > 0 && <div style={{ fontSize:13, fontWeight:700, color:"#22C55E" }}>${Number(s.amount).toLocaleString()}</div>}
-                    {s.retainer > 0 && <div style={{ fontSize:10, fontWeight:600, color:"#6366F1" }}>+${Number(s.retainer).toLocaleString()}/mo</div>}
+                    {s.retainer > 0 && <div style={{ fontSize:10, fontWeight:600, color:"#06D6F0" }}>+${Number(s.retainer).toLocaleString()}/mo</div>}
                   </div>
                   <div style={{ fontSize:10, color:"#3A3E4A", flexShrink:0 }}>{new Date(s.sale_date).toLocaleDateString("en-US",{month:"short",day:"numeric"})}</div>
                   {isOwn && (
@@ -883,7 +1097,7 @@ function Leaderboard({ session, profile, w }) {
                       await supabase.from("sales").delete().eq("id", s.id);
                       setSales(prev => prev.filter(x => x.id !== s.id));
                     }} style={{ background:"none", border:"none", color:"#3A3E4A", fontSize:16, cursor:"pointer", padding:"0 2px", lineHeight:1, flexShrink:0, transition:"color 0.15s" }}
-                      onMouseEnter={e => e.target.style.color="#DC2626"}
+                      onMouseEnter={e => e.target.style.color="#FF3370"}
                       onMouseLeave={e => e.target.style.color="#3A3E4A"}>
                       ×
                     </button>
@@ -1066,13 +1280,13 @@ function AdminPanel({ profile, onBack, w, onSignOut }) {
                 </div>
                 <div style={{ flex:1, minWidth:140 }}>
                   <div style={{ fontSize:15, fontWeight:700, color:"#EEF2F8" }}>{u.name || "—"}</div>
-                  <span style={{ display:"inline-block", marginTop:4, fontSize:9, fontWeight:800, color: u.role === "admin" ? "#F59E0B" : "#6366F1", letterSpacing:2, textTransform:"uppercase", background: u.role === "admin" ? "rgba(245,158,11,0.1)" : "rgba(99,102,241,0.1)", padding:"3px 9px", borderRadius:5, border:`1px solid ${u.role === "admin" ? "rgba(245,158,11,0.2)" : "rgba(99,102,241,0.2)"}` }}>{u.role}</span>
+                  <span style={{ display:"inline-block", marginTop:4, fontSize:9, fontWeight:800, color: u.role === "admin" ? "#F59E0B" : "#06D6F0", letterSpacing:2, textTransform:"uppercase", background: u.role === "admin" ? "rgba(245,158,11,0.1)" : "rgba(6,214,240,0.1)", padding:"3px 9px", borderRadius:5, border:`1px solid ${u.role === "admin" ? "rgba(245,158,11,0.2)" : "rgba(6,214,240,0.2)"}` }}>{u.role}</span>
                 </div>
                 <div style={{ display:"flex", gap:dk?24:16, flexWrap:"wrap" }}>
                   {[
                     [u.modulesCompleted, "Completed", "#22C55E"],
                     [u.quizzesAttempted, "Quizzes", "#10B981"],
-                    ...(u.quizzesAttempted > 0 ? [[Math.round(u.avgScore)+"%", "Avg Score", u.avgScore>=90?"#22C55E":u.avgScore>=70?"#F59E0B":"#CCFF00"]] : []),
+                    ...(u.quizzesAttempted > 0 ? [[Math.round(u.avgScore)+"%", "Avg Score", u.avgScore>=90?"#22C55E":u.avgScore>=70?"#F59E0B":"#FF3370"]] : []),
                   ].map(([val, lab, col]) => (
                     <div key={lab} style={{ textAlign:"center" }}>
                       <div style={{ fontSize:20, fontWeight:900, color:col, lineHeight:1, letterSpacing:"-0.02em" }}>{val}</div>
@@ -1102,8 +1316,8 @@ function Viewer({ ck, onBack, w, onComplete }) {
   const ref = useRef(null);
   const c = C[ck];
   const dk = w >= 768;
-  const accent = ck.includes("bc") ? "#F59E0B" : ck.includes("call") || ck.includes("comp") || ck.includes("onboard") ? "#6366F1" : "#CCFF00";
-  const accentBg = ck.includes("bc") ? "rgba(245,158,11,0.08)" : ck.includes("call") || ck.includes("comp") || ck.includes("onboard") ? "rgba(99,102,241,0.08)" : "rgba(204,255,0,0.08)";
+  const accent = ck.includes("bc") ? "#F59E0B" : ck.includes("call") || ck.includes("comp") || ck.includes("onboard") ? "#06D6F0" : "#CCFF00";
+  const accentBg = ck.includes("bc") ? "rgba(245,158,11,0.08)" : ck.includes("call") || ck.includes("comp") || ck.includes("onboard") ? "rgba(6,214,240,0.08)" : "rgba(204,255,0,0.08)";
 
   useEffect(() => {
     ref.current?.scrollIntoView({ behavior:"smooth" });
@@ -1211,7 +1425,7 @@ function Quiz({ quizKey, onBack, w, onComplete }) {
   const nxt = () => { if (ci + 1 >= tot) { setDone(true); if (onComplete) onComplete(score, tot); return; } setCi(ci + 1); setSel(null); setLocked(false); };
   const retry = () => { setCi(0); setSel(null); setLocked(false); setScore(0); setDone(false); };
   const grade = score / tot;
-  const gc = grade >= 0.9 ? "#22C55E" : grade >= 0.7 ? "#F59E0B" : "#CCFF00";
+  const gc = grade >= 0.9 ? "#22C55E" : grade >= 0.7 ? "#F59E0B" : "#FF3370";
   const gl = grade >= 0.9 ? "Excellent — you're ready to close" : grade >= 0.7 ? "Good — review weaker areas" : "Needs work — re-study the modules";
   return (
     <div ref={ref}>
@@ -1268,14 +1482,14 @@ function Quiz({ quizKey, onBack, w, onComplete }) {
                 const isSel = sel === idx, isCor = idx === cur.a, showG = locked && isCor, showR = locked && isSel && !isCor;
                 let bg = "rgba(12,14,18,0.9)", bd = "rgba(255,255,255,0.05)", tc = "#8892A0";
                 if (showG) { bg = "rgba(34,197,94,0.08)"; bd = "rgba(34,197,94,0.35)"; tc = "#22C55E"; }
-                if (showR) { bg = "rgba(204,255,0,0.08)"; bd = "rgba(204,255,0,0.35)"; tc = "#CCFF00"; }
+                if (showR) { bg = "rgba(255,51,112,0.08)"; bd = "rgba(255,51,112,0.35)"; tc = "#FF3370"; }
                 if (!locked && isSel) { bg = "rgba(255,255,255,0.04)"; bd = "rgba(204,255,0,0.5)"; tc = "#F2F4F8"; }
                 if (!locked && !isSel) { tc = "#8892A0"; }
                 return (
                   <button key={idx} className="quiz-opt" onClick={() => pick(idx)} disabled={locked}
-                    style={{ width:"100%", textAlign:"left", padding:"15px 18px", background:bg, border:`1.5px solid ${bd}`, borderRadius:14, cursor: locked ? "default" : "pointer", display:"flex", alignItems:"center", gap:14, fontFamily:"inherit", fontSize:14, color:tc, fontWeight: isSel || showG ? 600 : 400, boxShadow: showG ? "0 0 20px rgba(34,197,94,0.1)" : showR ? "0 0 20px rgba(204,255,0,0.08)" : "none" }}>
-                    <div style={{ width:34, height:34, borderRadius:10, display:"flex", alignItems:"center", justifyContent:"center", fontSize:12, fontWeight:800, flexShrink:0, background: showG ? "rgba(34,197,94,0.15)" : showR ? "rgba(204,255,0,0.15)" : "rgba(255,255,255,0.04)", color: showG ? "#22C55E" : showR ? "#CCFF00" : "#666C7E", border:`1px solid ${showG ? "rgba(34,197,94,0.25)" : showR ? "rgba(204,255,0,0.25)" : "rgba(255,255,255,0.06)"}` }}>
-                      {showG ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> : showR ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#CCFF00" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> : String.fromCharCode(65 + idx)}
+                    style={{ width:"100%", textAlign:"left", padding:"15px 18px", background:bg, border:`1.5px solid ${bd}`, borderRadius:14, cursor: locked ? "default" : "pointer", display:"flex", alignItems:"center", gap:14, fontFamily:"inherit", fontSize:14, color:tc, fontWeight: isSel || showG ? 600 : 400, boxShadow: showG ? "0 0 20px rgba(34,197,94,0.1)" : showR ? "0 0 20px rgba(255,51,112,0.08)" : "none" }}>
+                    <div style={{ width:34, height:34, borderRadius:10, display:"flex", alignItems:"center", justifyContent:"center", fontSize:12, fontWeight:800, flexShrink:0, background: showG ? "rgba(34,197,94,0.15)" : showR ? "rgba(255,51,112,0.15)" : "rgba(255,255,255,0.04)", color: showG ? "#22C55E" : showR ? "#FF3370" : "#666C7E", border:`1px solid ${showG ? "rgba(34,197,94,0.25)" : showR ? "rgba(255,51,112,0.25)" : "rgba(255,255,255,0.06)"}` }}>
+                      {showG ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> : showR ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF3370" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> : String.fromCharCode(65 + idx)}
                     </div>
                     <span style={{ flex:1 }}>{opt}</span>
                   </button>
@@ -1302,13 +1516,13 @@ function Quiz({ quizKey, onBack, w, onComplete }) {
 const IC_GRAD = {
   MODULE:    "linear-gradient(135deg,#CCFF00,#5C7A00)",
   BOOTCAMP:  "linear-gradient(135deg,#F59E0B,#92400E)",
-  REFERENCE: "linear-gradient(135deg,#6366F1,#3730A3)",
+  REFERENCE: "linear-gradient(135deg,#06D6F0,#0588A0)",
   QUIZ:      "linear-gradient(135deg,#10B981,#065F46)",
 };
 const IC_SHADOW = {
   MODULE:    "0 4px 16px rgba(204,255,0,0.35)",
   BOOTCAMP:  "0 4px 16px rgba(245,158,11,0.35)",
-  REFERENCE: "0 4px 16px rgba(99,102,241,0.35)",
+  REFERENCE: "0 4px 16px rgba(6,214,240,0.35)",
   QUIZ:      "0 4px 16px rgba(16,185,129,0.35)",
 };
 const LINK_ICONS = [
@@ -1377,7 +1591,7 @@ export default function App() {
     });
   };
 
-  const [tab, setTab] = useState("leaderboard");
+  const [tab, setTab] = useState("dashboard");
   const [showNameEdit, setShowNameEdit] = useState(false);
   const [nameEdit, setNameEdit] = useState("");
 
@@ -1394,7 +1608,7 @@ export default function App() {
   const FONT_LINK = "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap";
   const baseStyle = { minHeight:"100dvh", background:"#15171E", color:"#FFF" };
 
-  const bc = { MODULE:"#CCFF00", BOOTCAMP:"#F59E0B", REFERENCE:"#6366F1", QUIZ:"#10B981" };
+  const bc = { MODULE:"#CCFF00", BOOTCAMP:"#F59E0B", REFERENCE:"#06D6F0", QUIZ:"#10B981" };
   const trainingGroups = [
     { label:null, color:"#CCFF00", items:CATS.filter(x=>x.t==="MODULE") },
     { label:"BOOTCAMPS", color:"#F59E0B", items:CATS.filter(x=>x.t==="BOOTCAMP") },
@@ -1402,10 +1616,11 @@ export default function App() {
   const referenceItems = CATS.filter(x=>x.t==="REFERENCE");
   const quizItems = CATS.filter(x=>x.t==="QUIZ");
   const TABS = [
+    { key:"dashboard", label:"Dashboard", color:"#22C55E" },
     { key:"leaderboard", label:"Leaderboard", color:"#FFD700" },
     { key:"scheduling", label:"Scheduling", color:"#F59E0B" },
     { key:"training", label:"Training", color:"#CCFF00" },
-    { key:"reference", label:"Reference", color:"#6366F1" },
+    { key:"reference", label:"Reference", color:"#06D6F0" },
     { key:"quizzes", label:"Quizzes", color:"#10B981" },
   ];
 
@@ -1558,6 +1773,19 @@ export default function App() {
       {/* LEADERBOARD TAB is rendered below */}
       <div style={{ position:"relative", zIndex:1, maxWidth:1300, margin:"0 auto", padding:wd?"28px 56px 90px":dk?"24px 36px 90px":"18px 20px 90px" }}>
 
+        {/* DASHBOARD TAB */}
+        {tab === "dashboard" && (
+          <Dashboard
+            session={session}
+            profile={profile}
+            w={w}
+            completedModules={completedModules}
+            quizScores={quizScores}
+            onGoTab={setTab}
+            onOpenModule={(k) => { setView(k); setTimeout(top, 50); }}
+          />
+        )}
+
         {/* LEADERBOARD TAB */}
         {tab === "leaderboard" && (
           <Leaderboard session={session} profile={profile} w={w} />
@@ -1611,7 +1839,7 @@ export default function App() {
           <div style={{ animation:"fadeUp 0.35s ease" }}>
             <a href="https://www.redlinewebservices.net/" target="_blank" rel="noreferrer" className="card-hover"
               style={{ display:"flex", alignItems:"center", gap:14, background:"linear-gradient(135deg,rgba(16,18,24,0.98),rgba(11,12,17,0.98))", border:"1px solid rgba(255,255,255,0.055)", borderRadius:16, padding:dk?"18px":"15px 14px", textDecoration:"none", marginBottom:10, boxShadow:"0 4px 20px rgba(0,0,0,0.3)" }}>
-              <div style={{ width:46, height:46, borderRadius:13, background:"linear-gradient(135deg,#6366F1,#3730A3)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, fontSize:22, boxShadow:"0 4px 16px rgba(99,102,241,0.35)" }}>🌐</div>
+              <div style={{ width:46, height:46, borderRadius:13, background:"linear-gradient(135deg,#06D6F0,#0588A0)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, fontSize:22, boxShadow:"0 4px 16px rgba(6,214,240,0.35)" }}>🌐</div>
               <div style={{ flex:1, minWidth:0 }}>
                 <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF2F8", margin:"0 0 2px" }}>Redline Homepage</h3>
                 <p style={{ fontSize:11.5, color:"#4A5060", margin:0, fontWeight:500 }}>redlinewebservices.net</p>
@@ -1625,7 +1853,7 @@ export default function App() {
                   <div style={{ display:"flex", alignItems:"center", gap:14 }}>
                     <div style={{ width:50, height:50, borderRadius:14, background:IC_GRAD.REFERENCE, display:"flex", alignItems:"center", justifyContent:"center", fontSize:22, flexShrink:0, boxShadow:IC_SHADOW.REFERENCE }}>{x.ic}</div>
                     <div style={{ flex:1, minWidth:0 }}>
-                      <div style={{ fontSize:9, fontWeight:800, color:"#6366F1", letterSpacing:2.5, marginBottom:4, textTransform:"uppercase" }}>REFERENCE</div>
+                      <div style={{ fontSize:9, fontWeight:800, color:"#06D6F0", letterSpacing:2.5, marginBottom:4, textTransform:"uppercase" }}>REFERENCE</div>
                       <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF2F8", margin:"0 0 3px", lineHeight:1.3 }}>{x.sub}</h3>
                       <p style={{ fontSize:11.5, color:"#666C7E", margin:0, lineHeight:1.4, fontWeight:500 }}>{x.d}</p>
                     </div>
