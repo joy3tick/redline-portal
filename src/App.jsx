@@ -601,6 +601,214 @@ function Scheduler({ session, profile, w }) {
   );
 }
 
+function Leaderboard({ session, profile, w }) {
+  const [sales, setSales] = useState([]);
+  const [repProfiles, setRepProfiles] = useState({});
+  const [period, setPeriod] = useState("all");
+  const [showAdd, setShowAdd] = useState(false);
+  const [amount, setAmount] = useState("");
+  const [note, setNote] = useState("");
+  const [saving, setSaving] = useState(false);
+  const dk = w >= 768;
+
+  const load = async () => {
+    const [salesRes, profRes] = await Promise.all([
+      supabase.from("sales").select("id, user_id, amount, note, sale_date, created_at").order("created_at", { ascending: false }),
+      supabase.from("profiles").select("id, name"),
+    ]);
+    setSales(salesRes.data ?? []);
+    const pm = {};
+    for (const p of profRes.data ?? []) pm[p.id] = p.name || "Rep";
+    setRepProfiles(pm);
+  };
+
+  useEffect(() => {
+    load();
+    const ch = supabase.channel("sales-rt")
+      .on("postgres_changes", { event: "*", schema: "public", table: "sales" }, load)
+      .subscribe();
+    return () => supabase.removeChannel(ch);
+  }, []);
+
+  const addSale = async () => {
+    const parsed = parseFloat(amount);
+    if (!amount || isNaN(parsed) || parsed <= 0) return;
+    setSaving(true);
+    const { data } = await supabase.from("sales").insert({
+      user_id: session.user.id,
+      amount: parsed,
+      note: note.trim() || null,
+      sale_date: new Date().toISOString().split("T")[0],
+    }).select().single();
+    if (data) setSales(prev => [data, ...prev]);
+    setAmount(""); setNote(""); setShowAdd(false); setSaving(false);
+  };
+
+  const now = new Date();
+  const filtered = sales.filter(s => {
+    if (period === "all") return true;
+    const d = new Date(s.sale_date);
+    if (period === "month") return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+    if (period === "week") {
+      const mon = new Date(now); mon.setHours(0,0,0,0);
+      mon.setDate(now.getDate() - (now.getDay() === 0 ? 6 : now.getDay() - 1));
+      const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+      return d >= mon && d <= sun;
+    }
+    return true;
+  });
+
+  const byRep = {};
+  for (const s of filtered) {
+    if (!byRep[s.user_id]) byRep[s.user_id] = { count: 0, total: 0 };
+    byRep[s.user_id].count++;
+    byRep[s.user_id].total += s.amount ?? 0;
+  }
+  const ranked = Object.entries(byRep)
+    .map(([uid, stats]) => ({ uid, name: repProfiles[uid] || "Rep", ...stats }))
+    .sort((a, b) => b.count - a.count || b.total - a.total);
+
+  const MEDALS = ["🥇","🥈","🥉"];
+  const PERIODS = [
+    { key:"all", label:"All Time" },
+    { key:"month", label:"This Month" },
+    { key:"week", label:"This Week" },
+  ];
+
+  const myEntry = ranked.find(r => r.uid === session.user.id);
+  const myRank = myEntry ? ranked.indexOf(myEntry) + 1 : null;
+
+  return (
+    <div style={{ animation:"fadeUp 0.35s ease" }}>
+
+      {/* Header row */}
+      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:20, flexWrap:"wrap", gap:12 }}>
+        <div style={{ display:"flex", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.07)", borderRadius:10, padding:3, gap:2 }}>
+          {PERIODS.map(p => (
+            <button key={p.key} onClick={() => setPeriod(p.key)}
+              style={{ background: period===p.key ? "rgba(255,215,0,0.12)" : "none", border: period===p.key ? "1px solid rgba(255,215,0,0.2)" : "1px solid transparent", borderRadius:7, color: period===p.key ? "#FFD700" : "#666C7E", fontSize:10.5, fontWeight:700, letterSpacing:1.5, padding:"8px 16px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", transition:"all 0.15s" }}>
+              {p.label}
+            </button>
+          ))}
+        </div>
+        <button onClick={() => setShowAdd(v => !v)}
+          style={{ background:"#DC2626", border:"none", borderRadius:9, color:"#FFF", fontSize:11, fontWeight:800, letterSpacing:1.5, padding:"10px 20px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", boxShadow:"0 4px 16px rgba(220,38,38,0.35)", transition:"all 0.18s" }}>
+          + Log Sale
+        </button>
+      </div>
+
+      {/* Add sale form */}
+      {showAdd && (
+        <div style={{ background:"#1A1C24", border:"1px solid rgba(255,255,255,0.08)", borderRadius:14, padding:20, marginBottom:20, animation:"fadeUp 0.2s ease" }}>
+          <div style={{ fontSize:10, fontWeight:700, color:"#666C7E", letterSpacing:2.5, textTransform:"uppercase", marginBottom:14 }}>Log a Sale</div>
+          <div style={{ display:"flex", gap:10, flexWrap:"wrap" }}>
+            <div style={{ flex:"1 1 140px" }}>
+              <div style={{ fontSize:9.5, fontWeight:700, color:"#444856", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Deal Value ($)</div>
+              <input
+                autoFocus
+                type="number"
+                min="0"
+                value={amount}
+                onChange={e => setAmount(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && addSale()}
+                placeholder="e.g. 4500"
+                style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:14, fontWeight:600, padding:"10px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }}
+              />
+            </div>
+            <div style={{ flex:"2 1 200px" }}>
+              <div style={{ fontSize:9.5, fontWeight:700, color:"#444856", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Note (optional)</div>
+              <input
+                type="text"
+                value={note}
+                onChange={e => setNote(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && addSale()}
+                placeholder="Client, product, etc."
+                style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:500, padding:"10px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }}
+              />
+            </div>
+            <div style={{ display:"flex", gap:8, alignItems:"flex-end", flex:"0 0 auto" }}>
+              <button onClick={addSale} disabled={saving}
+                style={{ background:"#DC2626", border:"none", borderRadius:8, color:"#FFF", fontSize:12, fontWeight:800, letterSpacing:1, padding:"10px 22px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", opacity:saving?0.6:1 }}>
+                {saving ? "Saving…" : "Save"}
+              </button>
+              <button onClick={() => { setShowAdd(false); setAmount(""); setNote(""); }}
+                style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:8, color:"#666C7E", fontSize:12, fontWeight:700, padding:"10px 16px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* My rank badge */}
+      {myRank && (
+        <div style={{ display:"flex", alignItems:"center", gap:12, background:"rgba(220,38,38,0.06)", border:"1px solid rgba(220,38,38,0.15)", borderRadius:12, padding:"12px 18px", marginBottom:16 }}>
+          <div style={{ fontSize:20 }}>{MEDALS[myRank-1] ?? `#${myRank}`}</div>
+          <div>
+            <div style={{ fontSize:11, fontWeight:700, color:"#DC2626", letterSpacing:1.5, textTransform:"uppercase" }}>Your Rank</div>
+            <div style={{ fontSize:13, fontWeight:600, color:"#C4C8D4" }}>{myEntry.count} {myEntry.count === 1 ? "sale" : "sales"}{myEntry.total > 0 ? ` · $${myEntry.total.toLocaleString()}` : ""}</div>
+          </div>
+        </div>
+      )}
+
+      {/* Leaderboard list */}
+      {ranked.length === 0 ? (
+        <div style={{ textAlign:"center", padding:"60px 0", color:"#444856", fontSize:13 }}>
+          No sales logged {period === "week" ? "this week" : period === "month" ? "this month" : "yet"}. Be the first to log one!
+        </div>
+      ) : (
+        <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+          {ranked.map((rep, i) => {
+            const isMe = rep.uid === session.user.id;
+            const isTop = i < 3;
+            const medal = MEDALS[i];
+            return (
+              <div key={rep.uid} style={{ display:"flex", alignItems:"center", gap:dk?16:12, background: isMe ? "rgba(220,38,38,0.06)" : i===0 ? "rgba(255,215,0,0.04)" : "rgba(255,255,255,0.025)", border:`1px solid ${isMe ? "rgba(220,38,38,0.18)" : i===0 ? "rgba(255,215,0,0.12)" : "rgba(255,255,255,0.06)"}`, borderRadius:13, padding:dk?"16px 20px":"13px 16px", transition:"all 0.15s" }}>
+                <div style={{ fontSize: isTop ? 22 : 14, fontWeight:800, color:"#444856", minWidth:32, textAlign:"center", lineHeight:1 }}>
+                  {medal ?? `#${i+1}`}
+                </div>
+                <div style={{ width:36, height:36, borderRadius:9, background: isMe ? "linear-gradient(135deg,#DC2626,#991B1B)" : "linear-gradient(135deg,#2A2D38,#1E2028)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Plus Jakarta Sans',sans-serif", fontSize:14, fontWeight:800, color: isMe ? "#FFF" : "#888D9C", flexShrink:0, boxShadow: isMe ? "0 2px 10px rgba(220,38,38,0.3)" : "none" }}>
+                  {rep.name[0]?.toUpperCase()}
+                </div>
+                <div style={{ flex:1, minWidth:0 }}>
+                  <div style={{ fontSize:14, fontWeight:700, color: isMe ? "#F2F4F8" : "#C4C8D4", lineHeight:1 }}>{rep.name}{isMe ? <span style={{ fontSize:9, fontWeight:700, color:"#DC2626", letterSpacing:1.5, marginLeft:8, textTransform:"uppercase" }}>you</span> : ""}</div>
+                  {rep.total > 0 && <div style={{ fontSize:11, color:"#444856", marginTop:3 }}>${rep.total.toLocaleString()} total</div>}
+                </div>
+                <div style={{ textAlign:"right", flexShrink:0 }}>
+                  <div style={{ fontSize:dk?26:22, fontWeight:900, color: i===0 ? "#FFD700" : isMe ? "#DC2626" : "#666C7E", lineHeight:1, letterSpacing:"-0.02em" }}>{rep.count}</div>
+                  <div style={{ fontSize:9, color:"#3A3E4A", textTransform:"uppercase", letterSpacing:1.5, fontWeight:700, marginTop:3 }}>{rep.count === 1 ? "sale" : "sales"}</div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Recent activity feed */}
+      {filtered.length > 0 && (
+        <div style={{ marginTop:32 }}>
+          <div style={{ fontSize:9.5, fontWeight:800, color:"#444856", letterSpacing:3, textTransform:"uppercase", marginBottom:14 }}>Recent Activity</div>
+          <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
+            {filtered.slice(0, 10).map(s => (
+              <div key={s.id} style={{ display:"flex", alignItems:"center", gap:12, padding:"10px 16px", background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.05)", borderRadius:10 }}>
+                <div style={{ width:28, height:28, borderRadius:7, background: s.user_id===session.user.id ? "linear-gradient(135deg,#DC2626,#991B1B)" : "rgba(255,255,255,0.05)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, fontWeight:800, color: s.user_id===session.user.id ? "#FFF" : "#666C7E", flexShrink:0 }}>
+                  {(repProfiles[s.user_id] || "R")[0]?.toUpperCase()}
+                </div>
+                <div style={{ flex:1, minWidth:0 }}>
+                  <span style={{ fontSize:12, fontWeight:600, color:"#C4C8D4" }}>{repProfiles[s.user_id] || "Rep"}</span>
+                  {s.note && <span style={{ fontSize:11, color:"#444856" }}> — {s.note}</span>}
+                </div>
+                {s.amount > 0 && <div style={{ fontSize:13, fontWeight:700, color:"#22C55E", flexShrink:0 }}>${Number(s.amount).toLocaleString()}</div>}
+                <div style={{ fontSize:10, color:"#3A3E4A", flexShrink:0 }}>{new Date(s.sale_date).toLocaleDateString("en-US",{month:"short",day:"numeric"})}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function AdminPanel({ profile, onBack, w, onSignOut }) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -994,7 +1202,7 @@ export default function App() {
     });
   };
 
-  const [tab, setTab] = useState("training");
+  const [tab, setTab] = useState("leaderboard");
   const [showNameEdit, setShowNameEdit] = useState(false);
   const [nameEdit, setNameEdit] = useState("");
 
@@ -1019,6 +1227,7 @@ export default function App() {
   const referenceItems = CATS.filter(x=>x.t==="REFERENCE");
   const quizItems = CATS.filter(x=>x.t==="QUIZ");
   const TABS = [
+    { key:"leaderboard", label:"Leaderboard", color:"#FFD700" },
     { key:"crm", label:"CRM", color:"#8B5CF6" },
     { key:"scheduling", label:"Scheduling", color:"#F59E0B" },
     { key:"training", label:"Training", color:"#DC2626" },
@@ -1172,7 +1381,13 @@ export default function App() {
       </div>
 
       {/* Tab Content */}
+      {/* LEADERBOARD TAB is rendered below */}
       <div style={{ position:"relative", zIndex:1, maxWidth:1300, margin:"0 auto", padding:wd?"28px 56px 90px":dk?"24px 36px 90px":"18px 20px 90px" }}>
+
+        {/* LEADERBOARD TAB */}
+        {tab === "leaderboard" && (
+          <Leaderboard session={session} profile={profile} w={w} />
+        )}
 
         {/* CRM TAB */}
         {tab === "crm" && (

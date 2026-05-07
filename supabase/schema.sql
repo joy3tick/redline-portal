@@ -122,6 +122,27 @@ create policy "Admins read all scores"
 -- Find your UUID in Supabase Dashboard → Authentication → Users.
 
 
+-- ─── SALES ──────────────────────────────────────────────────
+create table if not exists public.sales (
+  id         uuid default gen_random_uuid() primary key,
+  user_id    uuid references auth.users(id) on delete cascade not null,
+  amount     numeric,
+  note       text,
+  sale_date  date not null default current_date,
+  created_at timestamptz default now()
+);
+
+alter table public.sales enable row level security;
+
+create policy "Authenticated users read all sales"
+  on public.sales for select
+  using (auth.role() = 'authenticated');
+
+create policy "Users manage own sales"
+  on public.sales for all
+  using (auth.uid() = user_id);
+
+
 -- ─── OFFICE SCHEDULE ────────────────────────────────────────
 create table if not exists public.schedule (
   id         uuid default gen_random_uuid() primary key,
