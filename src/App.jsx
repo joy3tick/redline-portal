@@ -1080,71 +1080,91 @@ export default function App() {
       <div style={{ position:"fixed", top:0, left:"50%", transform:"translateX(-50%)", width:1000, height:600, background:"radial-gradient(ellipse 60% 50% at 50% 0%, rgba(220,38,38,0.07) 0%, transparent 70%)", pointerEvents:"none", zIndex:0 }} />
 
       {/* Header */}
-      <div style={{ position:"relative", zIndex:1, borderBottom:"1px solid rgba(255,255,255,0.05)", padding:wd?"52px 56px 40px":dk?"44px 36px 34px":"32px 20px 26px" }}>
+      <div style={{ position:"relative", zIndex:1, padding:wd?"36px 56px 32px":dk?"28px 36px 26px":"20px 20px 20px" }}>
         <div style={{ maxWidth:1300, margin:"0 auto" }}>
-          <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:dk?20:18 }}>
-            <div style={{ animation:"fadeUp 0.55s ease" }}>
-              <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?32:26, letterSpacing:12, color:"#DC2626", lineHeight:1, textShadow:"0 0 50px rgba(220,38,38,0.25)" }}>REDLINE</div>
-              <div style={{ fontSize:dk?11:10, fontWeight:700, color:"#444856", margin:"7px 0 0", letterSpacing:dk?5:4, textTransform:"uppercase" }}>Rep Portal</div>
-            </div>
-            <div style={{ display:"flex", alignItems:"center", gap:10, animation:"fadeUp 0.55s ease 0.08s both" }}>
-              {profile?.role === "admin" && (
-                <button onClick={() => setView("__admin")} style={{ background:"rgba(245,158,11,0.1)", border:"1px solid rgba(245,158,11,0.2)", color:"#F59E0B", fontSize:9.5, fontWeight:800, cursor:"pointer", padding:"9px 14px", borderRadius:10, fontFamily:"inherit", letterSpacing:2, textTransform:"uppercase", transition:"all 0.2s" }}>Admin</button>
-              )}
-              <div style={{ width:dk?50:44, height:dk?50:44, borderRadius:14, background:"linear-gradient(135deg,#DC2626,#7F1D1D)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?20:16, color:"#FFF", letterSpacing:2, boxShadow:"0 6px 28px rgba(220,38,38,0.3)", animation:"glow 3.5s ease-in-out infinite" }}>
-                {profile?.name?.[0]?.toUpperCase() ?? "R"}
+
+          {/* Top row: logo + actions */}
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:dk?24:20, animation:"fadeUp 0.5s ease" }}>
+
+            {/* Logo */}
+            <div style={{ display:"flex", alignItems:"center", gap:14 }}>
+              <div style={{ width:38, height:38, borderRadius:10, background:"linear-gradient(135deg,#DC2626,#7F1D1D)", display:"flex", alignItems:"center", justifyContent:"center", boxShadow:"0 4px 16px rgba(220,38,38,0.35)", animation:"glow 3.5s ease-in-out infinite", flexShrink:0 }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
               </div>
-              <div style={{ position:"relative" }}>
-                <button onClick={() => { setShowNameEdit(v => !v); setNameEdit(profile?.name ?? ""); }} style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.07)", color:"#9CA3AF", fontSize:10, fontWeight:700, cursor:"pointer", padding:"9px 14px", borderRadius:10, fontFamily:"inherit", letterSpacing:1.5, textTransform:"uppercase", transition:"all 0.2s" }}>Edit Name</button>
+              <div>
+                <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?22:18, letterSpacing:8, color:"#F2F4F8", lineHeight:1 }}>REDLINE</div>
+                <div style={{ fontSize:9, fontWeight:700, color:"#3A3E4A", letterSpacing:3, textTransform:"uppercase", marginTop:3 }}>Rep Portal</div>
+              </div>
+            </div>
+
+            {/* Right actions */}
+            <div style={{ display:"flex", alignItems:"center", gap:8, animation:"fadeUp 0.5s ease 0.06s both" }}>
+              {profile?.role === "admin" && (
+                <button onClick={() => setView("__admin")} style={{ background:"rgba(245,158,11,0.08)", border:"1px solid rgba(245,158,11,0.18)", color:"#F59E0B", fontSize:10, fontWeight:700, cursor:"pointer", padding:"8px 14px", borderRadius:8, fontFamily:"inherit", letterSpacing:1.5, textTransform:"uppercase", transition:"all 0.18s" }}>Admin</button>
+              )}
+
+              {/* Avatar + name edit grouped */}
+              <div style={{ position:"relative", display:"flex", alignItems:"center", gap:0 }}>
+                <div style={{ display:"flex", alignItems:"center", gap:10, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.07)", borderRadius:10, padding:"6px 12px 6px 6px", cursor:"pointer" }}
+                  onClick={() => { setShowNameEdit(v => !v); setNameEdit(profile?.name ?? ""); }}>
+                  <div style={{ width:30, height:30, borderRadius:8, background:"linear-gradient(135deg,#DC2626,#991B1B)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Plus Jakarta Sans',sans-serif", fontSize:13, fontWeight:800, color:"#FFF", flexShrink:0, boxShadow:"0 2px 10px rgba(220,38,38,0.4)" }}>
+                    {profile?.name?.[0]?.toUpperCase() ?? "R"}
+                  </div>
+                  <span style={{ fontSize:12, fontWeight:600, color:"#C4C8D4", letterSpacing:0.2 }}>{profile?.name ?? "Rep"}</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3A3E4A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft:2 }}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </div>
                 {showNameEdit && (
-                  <div style={{ position:"absolute", top:"calc(100% + 10px)", right:0, background:"#1F2229", border:"1px solid rgba(255,255,255,0.1)", borderRadius:14, padding:16, width:220, zIndex:100, boxShadow:"0 12px 40px rgba(0,0,0,0.6)" }}>
-                    <div style={{ fontSize:10, fontWeight:700, color:"#666C7E", letterSpacing:2, textTransform:"uppercase", marginBottom:10 }}>Display Name</div>
+                  <div style={{ position:"absolute", top:"calc(100% + 10px)", right:0, background:"#16181F", border:"1px solid rgba(255,255,255,0.09)", borderRadius:14, padding:18, width:230, zIndex:200, boxShadow:"0 16px 48px rgba(0,0,0,0.7)" }}>
+                    <div style={{ fontSize:10, fontWeight:700, color:"#444856", letterSpacing:2.5, textTransform:"uppercase", marginBottom:10 }}>Display Name</div>
                     <input
                       autoFocus
                       value={nameEdit}
                       onChange={e => setNameEdit(e.target.value)}
                       onKeyDown={e => { if (e.key === "Enter") saveName(); if (e.key === "Escape") setShowNameEdit(false); }}
                       placeholder="Your name…"
-                      style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:500, padding:"9px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }}
+                      style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:500, padding:"10px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }}
                     />
                     <div style={{ display:"flex", gap:8, marginTop:10 }}>
-                      <button onClick={saveName} style={{ flex:1, background:"#DC2626", border:"none", borderRadius:10, color:"#FFF", fontSize:13, fontWeight:800, letterSpacing:1, padding:"13px 0", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Save</button>
-                      <button onClick={() => setShowNameEdit(false)} style={{ flex:1, background:"rgba(255,255,255,0.07)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:10, color:"#9CA3AF", fontSize:13, fontWeight:700, letterSpacing:1, padding:"13px 0", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Cancel</button>
+                      <button onClick={saveName} style={{ flex:1, background:"#DC2626", border:"none", borderRadius:8, color:"#FFF", fontSize:12, fontWeight:800, letterSpacing:1, padding:"12px 0", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Save</button>
+                      <button onClick={() => setShowNameEdit(false)} style={{ flex:1, background:"rgba(255,255,255,0.06)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:8, color:"#666C7E", fontSize:12, fontWeight:700, letterSpacing:1, padding:"12px 0", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Cancel</button>
                     </div>
                   </div>
                 )}
               </div>
-              <button onClick={signOut} style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.07)", color:"#666C7E", fontSize:10, fontWeight:700, cursor:"pointer", padding:"9px 14px", borderRadius:10, fontFamily:"inherit", letterSpacing:1.5, textTransform:"uppercase", transition:"all 0.2s" }}>Sign Out</button>
+
+              <button onClick={signOut} style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.07)", color:"#444856", fontSize:10, fontWeight:700, cursor:"pointer", padding:"8px 14px", borderRadius:8, fontFamily:"inherit", letterSpacing:1.5, textTransform:"uppercase", transition:"all 0.18s" }}>Sign Out</button>
             </div>
           </div>
 
-          <p style={{ fontSize:dk?14:13, color:"#666C7E", margin:"0 0 28px", maxWidth:500, lineHeight:1.6, fontWeight:500, animation:"fadeUp 0.55s ease 0.12s both" }}>
-            {profile?.name ? `Welcome back, ${profile.name}. ` : ""}Your complete training system. Master every module, close more deals.
-          </p>
-
-          {/* Stats */}
-          <div style={{ display:"flex", gap:dk?10:7, animation:"fadeUp 0.55s ease 0.18s both" }}>
-            {[
-              [completedModules.size, "Completed", "#22C55E", "linear-gradient(135deg,rgba(34,197,94,0.12),rgba(34,197,94,0.04))"],
-              ["13", "Modules", "#DC2626", "linear-gradient(135deg,rgba(220,38,38,0.12),rgba(220,38,38,0.04))"],
-              ["2", "Bootcamps", "#F59E0B", "linear-gradient(135deg,rgba(245,158,11,0.12),rgba(245,158,11,0.04))"],
-              ["6", "Quizzes", "#10B981", "linear-gradient(135deg,rgba(16,185,129,0.12),rgba(16,185,129,0.04))"],
-            ].map(([n, l, col, grad]) => (
-              <div key={l} className="stat-card" style={{ background:grad, border:`1px solid ${col}22`, borderRadius:14, padding:dk?"16px 22px":"12px 14px", textAlign:"center", minWidth:dk?110:0, flex:dk?"none":1, boxShadow:`0 4px 20px ${col}10` }}>
-                <div style={{ fontSize:dk?30:22, fontWeight:900, color:col, lineHeight:1, letterSpacing:"-0.02em" }}>{n}</div>
-                <div style={{ fontSize:9, color:col+"80", textTransform:"uppercase", letterSpacing:2, fontWeight:700, marginTop:6 }}>{l}</div>
-              </div>
-            ))}
+          {/* Welcome + stats row */}
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:16, flexWrap:"wrap", animation:"fadeUp 0.5s ease 0.1s both" }}>
+            <p style={{ fontSize:dk?14:13, color:"#444856", margin:0, lineHeight:1.5, fontWeight:500 }}>
+              {profile?.name ? <><span style={{ color:"#C4C8D4", fontWeight:600 }}>{profile.name}</span> — </> : ""}Master every module. Close more deals.
+            </p>
+            <div style={{ display:"flex", gap:8 }}>
+              {[
+                [completedModules.size, "Done", "#22C55E"],
+                ["13", "Modules", "#DC2626"],
+                ["2", "Camps", "#F59E0B"],
+                ["6", "Quizzes", "#10B981"],
+              ].map(([n, l, col]) => (
+                <div key={l} style={{ background:`${col}10`, border:`1px solid ${col}20`, borderRadius:10, padding:"10px 16px", textAlign:"center", minWidth:60 }}>
+                  <div style={{ fontSize:dk?22:18, fontWeight:900, color:col, lineHeight:1, letterSpacing:"-0.02em" }}>{n}</div>
+                  <div style={{ fontSize:8.5, color:`${col}70`, textTransform:"uppercase", letterSpacing:1.5, fontWeight:700, marginTop:4 }}>{l}</div>
+                </div>
+              ))}
+            </div>
           </div>
+
         </div>
       </div>
 
       {/* Tab Nav */}
-      <div style={{ position:"relative", zIndex:1, borderBottom:"1px solid rgba(255,255,255,0.06)" }}>
-        <div style={{ maxWidth:1300, margin:"0 auto", padding:wd?"0 56px":dk?"0 36px":"0 20px", display:"flex", gap:0 }}>
+      <div style={{ position:"relative", zIndex:1, padding:wd?"0 56px 0":dk?"0 36px 0":"0 20px 0" }}>
+        <div style={{ maxWidth:1300, margin:"0 auto", borderBottom:"1px solid rgba(255,255,255,0.06)", display:"flex", gap:2, paddingBottom:0 }}>
           {TABS.map(t => (
             <button key={t.key} onClick={() => setTab(t.key)}
-              style={{ background:"none", border:"none", borderBottom: tab===t.key ? `2px solid ${t.color}` : "2px solid transparent", color: tab===t.key ? "#F2F4F8" : "#666C7E", fontSize:11, fontWeight:800, letterSpacing:2.5, cursor:"pointer", padding:"15px 22px", fontFamily:"inherit", textTransform:"uppercase", transition:"all 0.2s", marginBottom:-1, boxShadow: tab===t.key ? `0 1px 0 ${t.color}` : "none" }}>
+              style={{ background: tab===t.key ? `${t.color}12` : "none", border:"none", borderBottom: tab===t.key ? `2px solid ${t.color}` : "2px solid transparent", color: tab===t.key ? t.color : "#444856", fontSize:10.5, fontWeight:700, letterSpacing:2, cursor:"pointer", padding:dk?"13px 20px":"11px 14px", fontFamily:"inherit", textTransform:"uppercase", transition:"all 0.18s", marginBottom:-1, borderRadius:"6px 6px 0 0" }}>
               {t.label}
             </button>
           ))}
