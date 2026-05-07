@@ -587,13 +587,19 @@ function AdminPanel({ profile, onBack, w, onSignOut }) {
 /* ═══════════════════════════════════════════
    CONTENT VIEWER
    ═══════════════════════════════════════════ */
-function Viewer({ ck, onBack, w, onComplete }) {
+function Viewer({ ck, onBack, w, onComplete, onNav, done }) {
   const [oi, setOi] = useState(0);
   const ref = useRef(null);
   const c = C[ck];
   const dk = w >= 768;
   const accent = ck.includes("bc") ? "#F59E0B" : ck.includes("call") || ck.includes("comp") || ck.includes("onboard") ? "#6366F1" : "#DC2626";
   const accentBg = ck.includes("bc") ? "rgba(245,158,11,0.08)" : ck.includes("call") || ck.includes("comp") || ck.includes("onboard") ? "rgba(99,102,241,0.08)" : "rgba(220,38,38,0.08)";
+  const cur = CATS.find(x => x.k === ck);
+  const sib = cur ? CATS.filter(x => x.t === cur.t) : [];
+  const sIdx = sib.findIndex(x => x.k === ck);
+  const prev = sIdx > 0 ? sib[sIdx-1] : null;
+  const next = sIdx >= 0 && sIdx < sib.length-1 ? sib[sIdx+1] : null;
+  const isDone = done?.has(ck);
 
   useEffect(() => {
     ref.current?.scrollIntoView({ behavior:"smooth" });
@@ -616,14 +622,39 @@ function Viewer({ ck, onBack, w, onComplete }) {
       <div style={{ maxWidth:820, margin:"0 auto", padding:dk?"0 44px":"0 20px" }}>
         {/* Hero */}
         <div style={{ padding:"40px 0 28px", animation:"fadeUp 0.5s ease" }}>
-          <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:18 }}>
+          <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:18, flexWrap:"wrap" }}>
             <div style={{ width:32, height:4, background:`linear-gradient(90deg,${accent},transparent)`, borderRadius:4 }} />
             <div style={{ fontSize:9.5, fontWeight:800, color:accent, letterSpacing:3.5, textTransform:"uppercase" }}>
               {ck.includes("m") && !ck.includes("bc") ? "Training Module" : ck.includes("bc") ? "Bootcamp" : ck.includes("q-") ? "Quiz" : "Reference"}
             </div>
+            {sib.length > 1 && (
+              <span style={{ fontSize:9.5, fontWeight:700, color:"#5A6070", letterSpacing:1.5, fontVariantNumeric:"tabular-nums" }}>· {sIdx+1} of {sib.length}</span>
+            )}
+            {isDone && (
+              <span style={{ display:"inline-flex", alignItems:"center", gap:5, fontSize:9, fontWeight:800, color:"#22C55E", background:"rgba(34,197,94,0.1)", border:"1px solid rgba(34,197,94,0.25)", padding:"3px 8px", borderRadius:6, letterSpacing:1.5, textTransform:"uppercase" }}>
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Completed
+              </span>
+            )}
           </div>
           <h2 style={{ fontSize:dk?32:24, fontWeight:800, color:"#F2F4F8", margin:"0 0 10px", letterSpacing:"-0.03em", lineHeight:1.15 }}>{c.t}</h2>
           <p style={{ fontSize:14, color:"#5A6070", margin:0, lineHeight:1.6, fontWeight:500 }}>{c.st}</p>
+          {c.s && c.s.length > 1 && (
+            <div style={{ marginTop:22 }}>
+              <div style={{ display:"flex", justifyContent:"space-between", marginBottom:7, alignItems:"center" }}>
+                <span style={{ fontSize:9, fontWeight:800, color:"#3A4050", letterSpacing:2.5, textTransform:"uppercase" }}>Section {oi != null ? oi+1 : "—"} of {c.s.length}</span>
+                <span style={{ fontSize:9, fontWeight:700, color:"#3A4050", letterSpacing:1.5, textTransform:"uppercase" }}>Click to jump</span>
+              </div>
+              <div style={{ display:"flex", gap:5 }}>
+                {c.s.map((_, i) => (
+                  <button key={i} onClick={() => setOi(i)} aria-label={`Jump to section ${i+1}`}
+                    style={{ flex:1, height:4, borderRadius:4, background: oi === i ? accent : "rgba(255,255,255,0.06)", border:"none", padding:0, cursor:"pointer", transition:"background 0.25s ease, transform 0.2s ease" }}
+                    onMouseEnter={e => { if (oi !== i) e.currentTarget.style.background = "rgba(255,255,255,0.14)"; }}
+                    onMouseLeave={e => { if (oi !== i) e.currentTarget.style.background = "rgba(255,255,255,0.06)"; }} />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Video */}
@@ -642,7 +673,7 @@ function Viewer({ ck, onBack, w, onComplete }) {
         )}
 
         {/* Sections */}
-        <div style={{ paddingBottom:90 }}>
+        <div style={{ paddingBottom: (prev || next) ? 24 : 90 }}>
           {c.s.map((s, i) => {
             const open = oi === i;
             return (
@@ -677,6 +708,36 @@ function Viewer({ ck, onBack, w, onComplete }) {
             );
           })}
         </div>
+
+        {/* Prev / Next nav */}
+        {(prev || next) && (
+          <div style={{ display:"grid", gridTemplateColumns: prev && next ? "1fr 1fr" : "1fr", gap:dk?12:8, paddingBottom:90, animation:"fadeUp 0.4s ease" }}>
+            {prev && (
+              <button onClick={() => onNav(prev.k)} className="card-hover"
+                style={{ background:"linear-gradient(135deg,rgba(16,18,24,0.98),rgba(11,12,16,0.98))", border:"1px solid rgba(255,255,255,0.06)", borderRadius:14, padding:dk?"16px 20px":"14px 16px", cursor:"pointer", textAlign:"left", fontFamily:"inherit", display:"flex", alignItems:"center", gap:14, color:"inherit" }}>
+                <div style={{ width:34, height:34, borderRadius:10, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.06)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                </div>
+                <div style={{ flex:1, minWidth:0 }}>
+                  <div style={{ fontSize:9, fontWeight:800, color:"#3A4050", letterSpacing:2.5, textTransform:"uppercase", marginBottom:3 }}>Previous</div>
+                  <div style={{ fontSize:13, fontWeight:700, color:"#C0C8D8", lineHeight:1.3, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{prev.sub}</div>
+                </div>
+              </button>
+            )}
+            {next && (
+              <button onClick={() => onNav(next.k)} className="card-hover"
+                style={{ background:`linear-gradient(135deg,${accent}10,rgba(11,12,16,0.98) 60%)`, border:`1px solid ${accent}25`, borderRadius:14, padding:dk?"16px 20px":"14px 16px", cursor:"pointer", textAlign:"right", fontFamily:"inherit", display:"flex", alignItems:"center", gap:14, color:"inherit", boxShadow:`0 4px 20px ${accent}10` }}>
+                <div style={{ flex:1, minWidth:0 }}>
+                  <div style={{ fontSize:9, fontWeight:800, color:accent, letterSpacing:2.5, textTransform:"uppercase", marginBottom:3 }}>Next Up</div>
+                  <div style={{ fontSize:13, fontWeight:700, color:"#EEF2F8", lineHeight:1.3, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{next.sub}</div>
+                </div>
+                <div style={{ width:34, height:34, borderRadius:10, background:accent+"15", border:`1px solid ${accent}30`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -692,14 +753,15 @@ function Quiz({ quizKey, onBack, w, onComplete }) {
   const [locked, setLocked] = useState(false);
   const [score, setScore] = useState(0);
   const [done, setDone] = useState(false);
+  const [marks, setMarks] = useState([]);
   const ref = useRef(null);
   const q = QUIZZES[quizKey];
   const dk = w >= 768;
-  useEffect(() => { ref.current?.scrollIntoView({ behavior:"smooth" }); setCi(0); setSel(null); setLocked(false); setScore(0); setDone(false); }, [quizKey]);
+  useEffect(() => { ref.current?.scrollIntoView({ behavior:"smooth" }); setCi(0); setSel(null); setLocked(false); setScore(0); setDone(false); setMarks([]); }, [quizKey]);
   const cur = q.qs[ci], tot = q.qs.length, pct = done ? 100 : Math.round((ci / tot) * 100);
-  const pick = (idx) => { if (locked) return; setSel(idx); setLocked(true); if (idx === cur.a) setScore(s => s + 1); };
+  const pick = (idx) => { if (locked) return; setSel(idx); setLocked(true); const ok = idx === cur.a; if (ok) setScore(s => s + 1); setMarks(m => { const n = [...m]; n[ci] = ok ? "c" : "w"; return n; }); };
   const nxt = () => { if (ci + 1 >= tot) { setDone(true); if (onComplete) onComplete(score, tot); return; } setCi(ci + 1); setSel(null); setLocked(false); };
-  const retry = () => { setCi(0); setSel(null); setLocked(false); setScore(0); setDone(false); };
+  const retry = () => { setCi(0); setSel(null); setLocked(false); setScore(0); setDone(false); setMarks([]); };
   const grade = score / tot;
   const gc = grade >= 0.9 ? "#22C55E" : grade >= 0.7 ? "#F59E0B" : "#DC2626";
   const gl = grade >= 0.9 ? "Excellent — you're ready to close" : grade >= 0.7 ? "Good — review weaker areas" : "Needs work — re-study the modules";
@@ -726,12 +788,22 @@ function Quiz({ quizKey, onBack, w, onComplete }) {
 
         {/* Progress */}
         <div style={{ marginBottom:28, animation:"fadeUp 0.5s ease 0.1s both" }}>
-          <div style={{ display:"flex", justifyContent:"space-between", marginBottom:8, alignItems:"center" }}>
+          <div style={{ display:"flex", justifyContent:"space-between", marginBottom:9, alignItems:"center" }}>
             <span style={{ fontSize:11, fontWeight:600, color:"#3A4050", letterSpacing:0.5 }}>{done ? "Complete" : `Question ${ci + 1} of ${tot}`}</span>
-            <span style={{ fontSize:11, fontWeight:800, color: done ? gc : "#3A4050" }}>{pct}%</span>
+            <span style={{ fontSize:11, fontWeight:800, color: done ? gc : "#5A6070", fontVariantNumeric:"tabular-nums" }}>
+              <span style={{ color:"#22C55E" }}>{score}</span>
+              <span style={{ color:"#3A4050" }}> correct</span>
+              {!done && <span style={{ color:"#3A4050", marginLeft:10 }}>{pct}%</span>}
+            </span>
           </div>
-          <div style={{ height:5, background:"rgba(255,255,255,0.05)", borderRadius:6, overflow:"hidden" }}>
-            <div style={{ height:"100%", width:`${pct}%`, background: done ? `linear-gradient(90deg,${gc},${gc}90)` : "linear-gradient(90deg,#DC2626,#F59E0B,#10B981)", borderRadius:6, transition:"width 0.55s cubic-bezier(0.4,0,0.2,1)" }} />
+          <div style={{ display:"flex", gap:4 }}>
+            {q.qs.map((_, i) => {
+              const m = marks[i];
+              const isCur = i === ci && !done;
+              const bg = m === "c" ? "#22C55E" : m === "w" ? "#DC2626" : isCur ? "#F2F4F8" : "rgba(255,255,255,0.07)";
+              const sh = m === "c" ? "0 0 8px rgba(34,197,94,0.5)" : m === "w" ? "0 0 8px rgba(220,38,38,0.5)" : isCur ? "0 0 8px rgba(255,255,255,0.3)" : "none";
+              return <div key={i} style={{ flex:1, height:5, borderRadius:5, background:bg, boxShadow:sh, transition:"all 0.3s cubic-bezier(0.4,0,0.2,1)" }} />;
+            })}
           </div>
         </div>
 
@@ -881,10 +953,17 @@ export default function App() {
     { label:"QUICK REFERENCE", color:"#6366F1", items:CATS.filter(x=>x.t==="REFERENCE") },
   ];
   const quizItems = CATS.filter(x=>x.t==="QUIZ");
+  const trainingItems = CATS.filter(x=>x.t!=="QUIZ");
+  const trainingDone = trainingItems.filter(x=>completedModules.has(x.k)).length;
+  const quizzesDone = Object.keys(quizScores).length;
+  const totalAll = trainingItems.length + quizItems.length;
+  const doneAll = trainingDone + quizzesDone;
+  const pctAll = Math.round((doneAll / totalAll) * 100);
+  const nextUp = trainingItems.find(x => !completedModules.has(x.k));
   const TABS = [
-    { key:"links", label:"Quick Links", color:"#8B5CF6" },
-    { key:"training", label:"Training", color:"#DC2626" },
-    { key:"quizzes", label:"Quizzes", color:"#10B981" },
+    { key:"links", label:"Quick Links", color:"#8B5CF6", count:null, total:null },
+    { key:"training", label:"Training", color:"#DC2626", count:trainingDone, total:trainingItems.length },
+    { key:"quizzes", label:"Quizzes", color:"#10B981", count:quizzesDone, total:quizItems.length },
   ];
 
   if (loading) return (
@@ -929,7 +1008,7 @@ export default function App() {
     <div ref={ref} style={baseStyle}>
       <style>{GLOBAL_CSS}</style>
       <link href={FONT_LINK} rel="stylesheet" />
-      <Viewer ck={view} onBack={() => { setView(null); setTimeout(top, 50); }} w={w} onComplete={markComplete} />
+      <Viewer ck={view} onBack={() => { setView(null); setTimeout(top, 50); }} w={w} onComplete={markComplete} onNav={(k) => { setView(k); setTimeout(top, 50); }} done={completedModules} />
     </div>
   );
 
@@ -966,7 +1045,7 @@ export default function App() {
           {/* Stats */}
           <div style={{ display:"flex", gap:dk?10:7, animation:"fadeUp 0.55s ease 0.18s both" }}>
             {[
-              [completedModules.size, "Completed", "#22C55E", "linear-gradient(135deg,rgba(34,197,94,0.12),rgba(34,197,94,0.04))"],
+              [`${doneAll}`, "Completed", "#22C55E", "linear-gradient(135deg,rgba(34,197,94,0.12),rgba(34,197,94,0.04))"],
               ["13", "Modules", "#DC2626", "linear-gradient(135deg,rgba(220,38,38,0.12),rgba(220,38,38,0.04))"],
               ["2", "Bootcamps", "#F59E0B", "linear-gradient(135deg,rgba(245,158,11,0.12),rgba(245,158,11,0.04))"],
               ["6", "Quizzes", "#10B981", "linear-gradient(135deg,rgba(16,185,129,0.12),rgba(16,185,129,0.04))"],
@@ -977,18 +1056,37 @@ export default function App() {
               </div>
             ))}
           </div>
+
+          {/* Overall progress strip */}
+          <div style={{ marginTop:dk?16:12, animation:"fadeUp 0.55s ease 0.24s both" }}>
+            <div style={{ display:"flex", justifyContent:"space-between", marginBottom:7, alignItems:"center" }}>
+              <span style={{ fontSize:9.5, fontWeight:800, color:"#5A6070", letterSpacing:2.5, textTransform:"uppercase" }}>Overall Progress</span>
+              <span style={{ fontSize:11, fontWeight:800, color:"#EEF2F8", fontVariantNumeric:"tabular-nums" }}>{doneAll}<span style={{color:"#3A4050"}}>/{totalAll}</span> <span style={{color:"#5A6070", marginLeft:6}}>{pctAll}%</span></span>
+            </div>
+            <div style={{ height:4, background:"rgba(255,255,255,0.04)", borderRadius:4, overflow:"hidden" }}>
+              <div style={{ height:"100%", width:`${pctAll}%`, background:"linear-gradient(90deg,#DC2626,#F59E0B,#10B981)", borderRadius:4, transition:"width 0.6s cubic-bezier(0.4,0,0.2,1)" }} />
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Tab Nav */}
       <div style={{ position:"relative", zIndex:1, borderBottom:"1px solid rgba(255,255,255,0.06)" }}>
         <div style={{ maxWidth:1300, margin:"0 auto", padding:wd?"0 56px":dk?"0 36px":"0 20px", display:"flex", gap:0 }}>
-          {TABS.map(t => (
-            <button key={t.key} onClick={() => setTab(t.key)}
-              style={{ background:"none", border:"none", borderBottom: tab===t.key ? `2px solid ${t.color}` : "2px solid transparent", color: tab===t.key ? "#F2F4F8" : "#3A4050", fontSize:11, fontWeight:800, letterSpacing:2.5, cursor:"pointer", padding:"15px 22px", fontFamily:"inherit", textTransform:"uppercase", transition:"all 0.2s", marginBottom:-1, boxShadow: tab===t.key ? `0 1px 0 ${t.color}` : "none" }}>
-              {t.label}
-            </button>
-          ))}
+          {TABS.map(t => {
+            const on = tab===t.key;
+            return (
+              <button key={t.key} onClick={() => setTab(t.key)}
+                style={{ background:"none", border:"none", borderBottom: on ? `2px solid ${t.color}` : "2px solid transparent", color: on ? "#F2F4F8" : "#3A4050", fontSize:11, fontWeight:800, letterSpacing:2.5, cursor:"pointer", padding:"15px 22px", fontFamily:"inherit", textTransform:"uppercase", transition:"all 0.2s", marginBottom:-1, boxShadow: on ? `0 1px 0 ${t.color}` : "none", display:"flex", alignItems:"center", gap:8 }}>
+                <span>{t.label}</span>
+                {t.total !== null && (
+                  <span style={{ fontSize:9.5, fontWeight:800, color: on ? t.color : "#3A4050", background: on ? t.color+"15" : "rgba(255,255,255,0.04)", border:`1px solid ${on ? t.color+"30" : "rgba(255,255,255,0.05)"}`, padding:"2px 7px", borderRadius:6, letterSpacing:1, fontVariantNumeric:"tabular-nums" }}>
+                    {t.count}/{t.total}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -1015,6 +1113,26 @@ export default function App() {
         {/* TRAINING TAB */}
         {tab === "training" && (
           <div style={{ animation:"fadeUp 0.35s ease" }}>
+            {nextUp && (
+              <div onClick={() => { setView(nextUp.k); setTimeout(top, 50); }} className="card-hover"
+                style={{ background:`linear-gradient(135deg,${bc[nextUp.t]}10,rgba(11,12,16,0.98) 60%)`, border:`1px solid ${bc[nextUp.t]}30`, borderRadius:18, padding:dk?"22px 24px":"18px 16px", cursor:"pointer", marginBottom:dk?14:10, boxShadow:`0 8px 32px ${bc[nextUp.t]}15, 0 4px 20px rgba(0,0,0,0.35)`, position:"relative", overflow:"hidden" }}>
+                <div style={{ display:"flex", alignItems:"center", gap:dk?16:12 }}>
+                  <div style={{ width:dk?60:54, height:dk?60:54, borderRadius:16, background:IC_GRAD[nextUp.t], display:"flex", alignItems:"center", justifyContent:"center", fontSize:dk?26:22, flexShrink:0, boxShadow:IC_SHADOW[nextUp.t] }}>{nextUp.ic}</div>
+                  <div style={{ flex:1, minWidth:0 }}>
+                    <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:5 }}>
+                      <span style={{ width:6, height:6, borderRadius:3, background:bc[nextUp.t], boxShadow:`0 0 10px ${bc[nextUp.t]}80`, animation:"loginGlow 2s ease-in-out infinite" }} />
+                      <span style={{ fontSize:9, fontWeight:800, color:bc[nextUp.t], letterSpacing:2.5, textTransform:"uppercase" }}>Continue Where You Left Off</span>
+                    </div>
+                    <h3 style={{ fontSize:dk?17:15, fontWeight:800, color:"#F2F4F8", margin:"0 0 3px", lineHeight:1.25, letterSpacing:"-0.01em" }}>{nextUp.n} — {nextUp.sub}</h3>
+                    <p style={{ fontSize:12, color:"#5A6070", margin:0, lineHeight:1.4, fontWeight:500 }}>{nextUp.d}</p>
+                  </div>
+                  <div style={{ display:"flex", alignItems:"center", gap:8, padding:dk?"10px 16px":"8px 12px", background:bc[nextUp.t]+"15", border:`1px solid ${bc[nextUp.t]}30`, borderRadius:11, fontSize:10.5, fontWeight:800, color:bc[nextUp.t], letterSpacing:1.5, textTransform:"uppercase", flexShrink:0 }}>
+                    {dk && <span>Resume</span>}
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                  </div>
+                </div>
+              </div>
+            )}
             {trainingGroups.map((g, gi) => (
               <div key={gi}>
                 {g.label
