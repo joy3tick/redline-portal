@@ -813,8 +813,8 @@ export default function App() {
   const trainingGroups = [
     { label:null, color:"#DC2626", items:CATS.filter(x=>x.t==="MODULE") },
     { label:"BOOTCAMPS", color:"#F59E0B", items:CATS.filter(x=>x.t==="BOOTCAMP") },
-    { label:"QUICK REFERENCE", color:"#3B82F6", items:CATS.filter(x=>x.t==="REFERENCE") },
   ];
+  const referenceItems = CATS.filter(x=>x.t==="REFERENCE");
   const quizItems = CATS.filter(x=>x.t==="QUIZ");
 
   const wrapStyle = { minHeight:"100dvh", background:"#101114", fontFamily:"'Outfit',system-ui,sans-serif", color:"#FFF" };
@@ -917,6 +917,7 @@ export default function App() {
           {[
             { key:"links", label:"Quick Links", color:"#8B5CF6" },
             { key:"training", label:"Training", color:"#DC2626" },
+            { key:"reference", label:"Reference", color:"#3B82F6" },
             { key:"quizzes", label:"Quizzes", color:"#10B981" },
           ].map(t => (
             <button key={t.key} onClick={() => setTab(t.key)}
@@ -984,6 +985,33 @@ export default function App() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* REFERENCE TAB */}
+        {tab === "reference" && (
+          <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr 1fr":dk?"1fr 1fr":"1fr", gap:dk?10:8, animation:"fadeUp 0.4s ease" }}>
+            {referenceItems.map((x, i) => {
+              const done = completedModules.has(x.k);
+              return (
+                <div key={x.id} className="card-hover" onClick={()=>{setView(x.k);setTimeout(top,50)}}
+                  style={{ background:"#141519", border:"1px solid " + (done ? "#3B82F618" : "#252830"), borderRadius:16, padding:dk?"22px 20px":"18px 16px", cursor:"pointer", animation:`fadeUp 0.4s ease ${0.04*i}s both`, position:"relative", overflow:"hidden" }}>
+                  <div style={{ position:"absolute", top:0, left:0, width:3, height:"100%", background: done ? "#3B82F6" : "#3B82F6", borderRadius:"3px 0 0 3px" }} />
+                  <div style={{ display:"flex", alignItems:"center", gap:14, paddingLeft:8 }}>
+                    <div style={{ fontSize:24, width:48, height:48, display:"flex", alignItems:"center", justifyContent:"center", background:"#1C1F25", borderRadius:14, flexShrink:0, border:"1px solid #282B33" }}>{x.ic}</div>
+                    <div style={{ flex:1, minWidth:0 }}>
+                      <div style={{ fontSize:9, fontWeight:700, color:"#3B82F6", letterSpacing:2, marginBottom:4, textTransform:"uppercase" }}>REFERENCE</div>
+                      <h3 style={{ fontSize:14.5, fontWeight:700, color:"#EEF0F4", margin:"0 0 3px", lineHeight:1.3 }}>{x.sub}</h3>
+                      <p style={{ fontSize:11.5, color:"#5A5E68", margin:0, lineHeight:1.35 }}>{x.d}</p>
+                    </div>
+                    <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6 }}>
+                      {done && <div style={{ width:20, height:20, borderRadius:6, background:"#3B82F618", border:"1px solid #3B82F640", display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, color:"#3B82F6" }}>✓</div>}
+                      <div style={{ width:32, height:32, borderRadius:10, background:"#1C1F25", border:"1px solid #282B33", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, color:"#3A3E48", fontSize:14 }}>›</div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
 
