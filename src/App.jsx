@@ -867,17 +867,24 @@ export default function App() {
     });
   };
 
+  const [tab, setTab] = useState("training");
+
   const signOut = async () => { await supabase.auth.signOut(); setView(null); };
 
   const FONT_LINK = "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap";
   const baseStyle = { minHeight:"100dvh", background:"#07080C", color:"#FFF" };
 
   const bc = { MODULE:"#DC2626", BOOTCAMP:"#F59E0B", REFERENCE:"#6366F1", QUIZ:"#10B981" };
-  const groups = [
+  const trainingGroups = [
     { label:null, color:"#DC2626", items:CATS.filter(x=>x.t==="MODULE") },
     { label:"BOOTCAMPS", color:"#F59E0B", items:CATS.filter(x=>x.t==="BOOTCAMP") },
     { label:"QUICK REFERENCE", color:"#6366F1", items:CATS.filter(x=>x.t==="REFERENCE") },
-    { label:"PRACTICE QUIZZES", color:"#10B981", items:CATS.filter(x=>x.t==="QUIZ") },
+  ];
+  const quizItems = CATS.filter(x=>x.t==="QUIZ");
+  const TABS = [
+    { key:"links", label:"Quick Links", color:"#8B5CF6" },
+    { key:"training", label:"Training", color:"#DC2626" },
+    { key:"quizzes", label:"Quizzes", color:"#10B981" },
   ];
 
   if (loading) return (
@@ -973,16 +980,28 @@ export default function App() {
         </div>
       </div>
 
-      {/* Cards */}
+      {/* Tab Nav */}
+      <div style={{ position:"relative", zIndex:1, borderBottom:"1px solid rgba(255,255,255,0.06)" }}>
+        <div style={{ maxWidth:1300, margin:"0 auto", padding:wd?"0 56px":dk?"0 36px":"0 20px", display:"flex", gap:0 }}>
+          {TABS.map(t => (
+            <button key={t.key} onClick={() => setTab(t.key)}
+              style={{ background:"none", border:"none", borderBottom: tab===t.key ? `2px solid ${t.color}` : "2px solid transparent", color: tab===t.key ? "#F2F4F8" : "#3A4050", fontSize:11, fontWeight:800, letterSpacing:2.5, cursor:"pointer", padding:"15px 22px", fontFamily:"inherit", textTransform:"uppercase", transition:"all 0.2s", marginBottom:-1, boxShadow: tab===t.key ? `0 1px 0 ${t.color}` : "none" }}>
+              {t.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Tab Content */}
       <div style={{ position:"relative", zIndex:1, maxWidth:1300, margin:"0 auto", padding:wd?"28px 56px 90px":dk?"24px 36px 90px":"18px 20px 90px" }}>
 
-        <div style={{ marginBottom:10, animation:"fadeUp 0.5s ease 0.2s both" }}>
-          <SectionLabel color="#8B5CF6" label="Quick Links" />
-          <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr 1fr":dk?"1fr 1fr 1fr":"1fr", gap:dk?10:8 }}>
+        {/* LINKS TAB */}
+        {tab === "links" && (
+          <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr 1fr":dk?"1fr 1fr":"1fr", gap:dk?10:8, animation:"fadeUp 0.35s ease" }}>
             {LINKS.map((lk, i) => (
               <a key={i} href={lk.url} target="_blank" rel="noreferrer" className="card-hover"
-                style={{ background:"linear-gradient(135deg,rgba(16,18,24,0.98),rgba(11,12,17,0.98))", border:"1px solid rgba(255,255,255,0.055)", borderRadius:16, padding:dk?"18px":"15px 14px", textDecoration:"none", display:"flex", alignItems:"center", gap:14, animation:`fadeUp 0.4s ease ${0.06*i}s both`, boxShadow:"0 4px 20px rgba(0,0,0,0.3)" }}>
-                <div style={{ width:44, height:44, borderRadius:13, background:"linear-gradient(135deg,#8B5CF6,#5B21B6)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, boxShadow:"0 4px 14px rgba(139,92,246,0.35)" }}>{LINK_ICONS[i]}</div>
+                style={{ background:"linear-gradient(135deg,rgba(16,18,24,0.98),rgba(11,12,17,0.98))", border:"1px solid rgba(255,255,255,0.055)", borderRadius:16, padding:dk?"18px":"15px 14px", textDecoration:"none", display:"flex", alignItems:"center", gap:14, animation:`fadeUp 0.35s ease ${0.08*i}s both`, boxShadow:"0 4px 20px rgba(0,0,0,0.3)" }}>
+                <div style={{ width:46, height:46, borderRadius:13, background:"linear-gradient(135deg,#8B5CF6,#5B21B6)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, boxShadow:"0 4px 16px rgba(139,92,246,0.35)" }}>{LINK_ICONS[i]}</div>
                 <div style={{ flex:1, minWidth:0 }}>
                   <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF2F8", margin:"0 0 2px" }}>{lk.label}</h3>
                   <p style={{ fontSize:11.5, color:"#4A5060", margin:0, fontWeight:500 }}>{lk.desc}</p>
@@ -991,46 +1010,76 @@ export default function App() {
               </a>
             ))}
           </div>
-        </div>
+        )}
 
-        {groups.map((g, gi) => (
-          <div key={gi}>
-            {g.label
-              ? <SectionLabel color={g.color} label={g.label} delay={0.25 + gi * 0.08} />
-              : <div style={{ height:28 }} />
-            }
-            <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr 1fr":dk?"1fr 1fr":"1fr", gap:dk?10:8 }}>
-              {g.items.map((x, i) => {
-                const done = completedModules.has(x.k);
-                const qs = quizScores[x.k];
-                const isQuiz = x.t === "QUIZ";
-                const borderCol = done && !isQuiz ? "rgba(34,197,94,0.15)" : qs ? "rgba(16,185,129,0.15)" : "rgba(255,255,255,0.055)";
-                return (
-                  <div key={x.id} className="card-hover" onClick={() => { setView(x.k); setTimeout(top, 50); }}
-                    style={{ background:"linear-gradient(135deg,rgba(16,18,24,0.98),rgba(11,12,16,0.98))", border:`1px solid ${borderCol}`, borderRadius:16, padding:dk?"20px 18px":"17px 15px", cursor:"pointer", animation:`fadeUp 0.48s cubic-bezier(0.4,0,0.2,1) ${0.05*(gi*3+i)}s both`, boxShadow:"0 4px 20px rgba(0,0,0,0.3)" }}>
-                    <div style={{ display:"flex", alignItems:"center", gap:14 }}>
-                      <div style={{ width:50, height:50, borderRadius:14, background:IC_GRAD[x.t], display:"flex", alignItems:"center", justifyContent:"center", fontSize:22, flexShrink:0, boxShadow:IC_SHADOW[x.t] }}>{x.ic}</div>
-                      <div style={{ flex:1, minWidth:0 }}>
-                        <div style={{ fontSize:9, fontWeight:800, color:bc[x.t], letterSpacing:2.5, marginBottom:4, textTransform:"uppercase" }}>{x.n || x.t}</div>
-                        <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF2F8", margin:"0 0 3px", lineHeight:1.3 }}>{x.sub}</h3>
-                        <p style={{ fontSize:11.5, color: qs ? "#10B981" : "#3A4050", margin:0, lineHeight:1.4, fontWeight: qs ? 600 : 500 }}>
-                          {qs ? `Best: ${Math.round(qs.score/qs.total*100)}%` : x.d}
-                        </p>
-                      </div>
-                      <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6 }}>
-                        {(done && !isQuiz) && <div style={{ width:20, height:20, borderRadius:6, background:"rgba(34,197,94,0.12)", border:"1px solid rgba(34,197,94,0.3)", display:"flex", alignItems:"center", justifyContent:"center" }}><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>}
-                        {qs && <div style={{ width:20, height:20, borderRadius:6, background:"rgba(16,185,129,0.12)", border:"1px solid rgba(16,185,129,0.3)", display:"flex", alignItems:"center", justifyContent:"center" }}><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>}
-                        <div style={{ width:32, height:32, borderRadius:10, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.06)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3A4050" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        {/* TRAINING TAB */}
+        {tab === "training" && (
+          <div style={{ animation:"fadeUp 0.35s ease" }}>
+            {trainingGroups.map((g, gi) => (
+              <div key={gi}>
+                {g.label
+                  ? <SectionLabel color={g.color} label={g.label} delay={0.04 * gi} />
+                  : <div style={{ height:4 }} />
+                }
+                <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr 1fr":dk?"1fr 1fr":"1fr", gap:dk?10:8 }}>
+                  {g.items.map((x, i) => {
+                    const done = completedModules.has(x.k);
+                    return (
+                      <div key={x.id} className="card-hover" onClick={() => { setView(x.k); setTimeout(top, 50); }}
+                        style={{ background:"linear-gradient(135deg,rgba(16,18,24,0.98),rgba(11,12,16,0.98))", border:`1px solid ${done ? "rgba(34,197,94,0.15)" : "rgba(255,255,255,0.055)"}`, borderRadius:16, padding:dk?"20px 18px":"17px 15px", cursor:"pointer", animation:`fadeUp 0.38s ease ${0.04*(gi*4+i)}s both`, boxShadow:"0 4px 20px rgba(0,0,0,0.3)" }}>
+                        <div style={{ display:"flex", alignItems:"center", gap:14 }}>
+                          <div style={{ width:50, height:50, borderRadius:14, background:IC_GRAD[x.t], display:"flex", alignItems:"center", justifyContent:"center", fontSize:22, flexShrink:0, boxShadow:IC_SHADOW[x.t] }}>{x.ic}</div>
+                          <div style={{ flex:1, minWidth:0 }}>
+                            <div style={{ fontSize:9, fontWeight:800, color:bc[x.t], letterSpacing:2.5, marginBottom:4, textTransform:"uppercase" }}>{x.n || x.t}</div>
+                            <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF2F8", margin:"0 0 3px", lineHeight:1.3 }}>{x.sub}</h3>
+                            <p style={{ fontSize:11.5, color:"#3A4050", margin:0, lineHeight:1.4, fontWeight:500 }}>{x.d}</p>
+                          </div>
+                          <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6 }}>
+                            {done && <div style={{ width:20, height:20, borderRadius:6, background:"rgba(34,197,94,0.12)", border:"1px solid rgba(34,197,94,0.3)", display:"flex", alignItems:"center", justifyContent:"center" }}><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>}
+                            <div style={{ width:32, height:32, borderRadius:10, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.06)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3A4050" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                            </div>
+                          </div>
                         </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* QUIZZES TAB */}
+        {tab === "quizzes" && (
+          <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr 1fr":dk?"1fr 1fr":"1fr", gap:dk?10:8, animation:"fadeUp 0.35s ease" }}>
+            {quizItems.map((x, i) => {
+              const qs = quizScores[x.k];
+              return (
+                <div key={x.id} className="card-hover" onClick={() => { setView(x.k); setTimeout(top, 50); }}
+                  style={{ background:"linear-gradient(135deg,rgba(16,18,24,0.98),rgba(11,12,16,0.98))", border:`1px solid ${qs ? "rgba(16,185,129,0.15)" : "rgba(255,255,255,0.055)"}`, borderRadius:16, padding:dk?"20px 18px":"17px 15px", cursor:"pointer", animation:`fadeUp 0.38s ease ${0.05*i}s both`, boxShadow:"0 4px 20px rgba(0,0,0,0.3)" }}>
+                  <div style={{ display:"flex", alignItems:"center", gap:14 }}>
+                    <div style={{ width:50, height:50, borderRadius:14, background:IC_GRAD.QUIZ, display:"flex", alignItems:"center", justifyContent:"center", fontSize:22, flexShrink:0, boxShadow:IC_SHADOW.QUIZ }}>{x.ic}</div>
+                    <div style={{ flex:1, minWidth:0 }}>
+                      <div style={{ fontSize:9, fontWeight:800, color:"#10B981", letterSpacing:2.5, marginBottom:4, textTransform:"uppercase" }}>QUIZ</div>
+                      <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF2F8", margin:"0 0 3px", lineHeight:1.3 }}>{x.sub}</h3>
+                      <p style={{ fontSize:11.5, color: qs ? "#10B981" : "#3A4050", margin:0, lineHeight:1.4, fontWeight: qs ? 600 : 500 }}>
+                        {qs ? `Best: ${Math.round(qs.score/qs.total*100)}%` : x.d}
+                      </p>
+                    </div>
+                    <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6 }}>
+                      {qs && <div style={{ width:20, height:20, borderRadius:6, background:"rgba(16,185,129,0.12)", border:"1px solid rgba(16,185,129,0.3)", display:"flex", alignItems:"center", justifyContent:"center" }}><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>}
+                      <div style={{ width:32, height:32, borderRadius:10, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.06)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3A4050" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
                       </div>
                     </div>
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              );
+            })}
           </div>
-        ))}
+        )}
+
       </div>
     </div>
   );
