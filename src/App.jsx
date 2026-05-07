@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-
-const PW = "redline2026";
+import { supabase } from "./lib/supabase";
 const C = {
   "m1": { t: "Module 1 — Onboarding & Training", st: "Your foundation for closing deals and driving revenue.", vid: "https://youtu.be/Xfhpyj7Fhdw", s: [
     { h: "🏢  WHAT WE DO", b: "We deliver a premium experience for service-based small businesses — HVAC, plumbing, electrical, roofing, landscaping, and more.\n\n⚡ End-to-End Execution\nWe don't just \"help with a website.\" We handle strategy, design, development, optimization, and launch. The client's only job is to fill out a 5-minute form and keep answering their phone.\n\n⚡ Streamlined Process\nEvery project follows the same proven system: Onboarding Form → Discovery → Design → Build → Optimize → Launch. No scope creep. No surprises.\n\n⚡ Business Growth Focus\nWe don't sell pixels. We sell leads, calls, and revenue. If a site looks beautiful but doesn't convert, it's a liability. Every design choice we make is tied to a business outcome." },
@@ -380,14 +379,30 @@ function useW() {
 /* ═══════════════════════════════════════════
    LOGIN
    ═══════════════════════════════════════════ */
-function Login({ onLogin, err }) {
-  const [p, setP] = useState("");
+function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [err, setErr] = useState(null);
   const [ld, setLd] = useState(false);
-  const go = () => { setLd(true); setTimeout(() => { onLogin(p); setLd(false); }, 500); };
+
+  const go = async () => {
+    if (!email || !password) return;
+    setLd(true);
+    setErr(null);
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) setErr("Invalid email or password.");
+    setLd(false);
+  };
+
+  const inputStyle = (hasErr) => ({
+    width:"100%", padding:"16px 20px", background:"#101114",
+    border: hasErr ? "1.5px solid #DC2626" : "1.5px solid #1a1a1e",
+    borderRadius:14, color:"#FFF", fontSize:15, outline:"none",
+    boxSizing:"border-box", transition:"all 0.3s", fontFamily:"inherit",
+  });
 
   return (
     <div className="dotgrid" style={{ minHeight:"100dvh", background:"#101114", display:"flex", alignItems:"center", justifyContent:"center", padding:20, position:"relative" }}>
-      {/* Ambient glow */}
       <div style={{ position:"absolute", top:"30%", left:"50%", transform:"translate(-50%,-50%)", width:400, height:400, background:"radial-gradient(circle, rgba(220,38,38,0.07) 0%, transparent 70%)", pointerEvents:"none" }} />
 
       <div style={{ width:"100%", maxWidth:400, textAlign:"center", animation:"fadeUp 0.8s cubic-bezier(0.4,0,0.2,1)", position:"relative", zIndex:1 }}>
@@ -398,16 +413,26 @@ function Login({ onLogin, err }) {
         </div>
 
         <div style={{ background:"#181B20", border:"1px solid #2A2D35", borderRadius:20, padding:"40px 32px", boxShadow:"0 16px 64px rgba(0,0,0,0.5)" }}>
-          <label style={{ display:"block", textAlign:"left", fontSize:10, fontWeight:600, color:"#5A5E68", letterSpacing:2.5, marginBottom:10, textTransform:"uppercase" }}>Access Code</label>
-          <input type="password" value={p} onChange={e=>setP(e.target.value)} onKeyDown={e=>e.key==="Enter"&&go()}
-            placeholder="Enter code" autoFocus
-            style={{ width:"100%", padding:"16px 20px", background:"#101114", border:err?"1.5px solid #DC2626":"1.5px solid #1a1a1e", borderRadius:14, color:"#FFF", fontSize:15, outline:"none", boxSizing:"border-box", transition:"all 0.3s", fontFamily:"inherit", letterSpacing:2 }}
-            onFocus={e=>{if(!err){e.target.style.borderColor="#DC2626";e.target.style.boxShadow="0 0 0 4px rgba(220,38,38,0.08)"}}}
-            onBlur={e=>{e.target.style.borderColor=err?"#DC2626":"#1a1a1e";e.target.style.boxShadow="none"}} />
-          {err && <p style={{ color:"#DC2626", fontSize:12, margin:"12px 0 0", fontWeight:500, textAlign:"left" }}>Invalid code. Try again.</p>}
+          <div style={{ marginBottom:16 }}>
+            <label style={{ display:"block", textAlign:"left", fontSize:10, fontWeight:600, color:"#5A5E68", letterSpacing:2.5, marginBottom:10, textTransform:"uppercase" }}>Email</label>
+            <input type="email" value={email} onChange={e=>setEmail(e.target.value)}
+              onKeyDown={e=>e.key==="Enter"&&go()} placeholder="you@redline.com" autoFocus
+              style={inputStyle(!!err)}
+              onFocus={e=>{e.target.style.borderColor="#DC2626";e.target.style.boxShadow="0 0 0 4px rgba(220,38,38,0.08)"}}
+              onBlur={e=>{e.target.style.borderColor=err?"#DC2626":"#1a1a1e";e.target.style.boxShadow="none"}} />
+          </div>
+          <div>
+            <label style={{ display:"block", textAlign:"left", fontSize:10, fontWeight:600, color:"#5A5E68", letterSpacing:2.5, marginBottom:10, textTransform:"uppercase" }}>Password</label>
+            <input type="password" value={password} onChange={e=>setPassword(e.target.value)}
+              onKeyDown={e=>e.key==="Enter"&&go()} placeholder="••••••••"
+              style={inputStyle(!!err)}
+              onFocus={e=>{e.target.style.borderColor="#DC2626";e.target.style.boxShadow="0 0 0 4px rgba(220,38,38,0.08)"}}
+              onBlur={e=>{e.target.style.borderColor=err?"#DC2626":"#1a1a1e";e.target.style.boxShadow="none"}} />
+          </div>
+          {err && <p style={{ color:"#DC2626", fontSize:12, margin:"12px 0 0", fontWeight:500, textAlign:"left" }}>{err}</p>}
           <button onClick={go} disabled={ld}
             style={{ width:"100%", padding:"16px", background:ld?"#7f1d1d":"linear-gradient(135deg,#DC2626,#991B1B)", color:"#FFF", border:"none", borderRadius:14, fontSize:12, fontWeight:700, letterSpacing:4, cursor:ld?"wait":"pointer", marginTop:18, textTransform:"uppercase", transition:"all 0.3s", boxShadow:"0 4px 24px rgba(220,38,38,0.2)" }}>
-            {ld ? "Verifying..." : "Enter Academy"}
+            {ld ? "Signing In..." : "Enter Academy"}
           </button>
         </div>
 
@@ -418,16 +443,137 @@ function Login({ onLogin, err }) {
 }
 
 /* ═══════════════════════════════════════════
+   ADMIN PANEL
+   ═══════════════════════════════════════════ */
+function AdminPanel({ profile, onBack, w, onSignOut }) {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const dk = w >= 768;
+
+  useEffect(() => {
+    const load = async () => {
+      const [profilesRes, progressRes, scoresRes] = await Promise.all([
+        supabase.from("profiles").select("*").order("created_at"),
+        supabase.from("module_progress").select("user_id"),
+        supabase.from("quiz_scores").select("user_id, quiz_id, score, total"),
+      ]);
+      const byUser = {};
+      for (const p of progressRes.data ?? []) byUser[p.user_id] = (byUser[p.user_id] ?? 0) + 1;
+      const quizByUser = {};
+      for (const s of scoresRes.data ?? []) {
+        if (!quizByUser[s.user_id]) quizByUser[s.user_id] = {};
+        const ex = quizByUser[s.user_id][s.quiz_id];
+        if (!ex || s.score / s.total > ex.score / ex.total) quizByUser[s.user_id][s.quiz_id] = s;
+      }
+      setUsers((profilesRes.data ?? []).map(u => ({
+        ...u,
+        modulesCompleted: byUser[u.id] ?? 0,
+        quizzesAttempted: Object.keys(quizByUser[u.id] ?? {}).length,
+        avgScore: Object.values(quizByUser[u.id] ?? {}).reduce((a, s) => a + s.score / s.total, 0) /
+          Math.max(Object.keys(quizByUser[u.id] ?? {}).length, 1) * 100,
+      })));
+      setLoading(false);
+    };
+    load();
+  }, []);
+
+  const toggleRole = async (userId, currentRole) => {
+    const newRole = currentRole === "admin" ? "rep" : "admin";
+    await supabase.from("profiles").update({ role: newRole }).eq("id", userId);
+    setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
+  };
+
+  return (
+    <div>
+      <div style={{ position:"sticky", top:0, zIndex:20, background:"rgba(5,5,7,0.88)", backdropFilter:"blur(20px)", WebkitBackdropFilter:"blur(20px)", borderBottom:"1px solid #252830", padding:"12px 0" }}>
+        <div style={{ maxWidth:1000, margin:"0 auto", padding:dk?"0 40px":"0 20px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+          <button className="back-btn" onClick={onBack} style={{ background:"none", border:"none", color:"#DC2626", fontSize:13, fontWeight:600, cursor:"pointer", padding:"6px 0", display:"flex", alignItems:"center", gap:8, fontFamily:"inherit" }}>
+            <span style={{ fontSize:18, lineHeight:1 }}>‹</span> Back to Academy
+          </button>
+          <button onClick={onSignOut} style={{ background:"none", border:"1px solid #252830", color:"#6A6E78", fontSize:10, fontWeight:600, cursor:"pointer", padding:"8px 16px", borderRadius:8, fontFamily:"inherit", letterSpacing:1, textTransform:"uppercase" }}>
+            Sign Out
+          </button>
+        </div>
+      </div>
+
+      <div style={{ maxWidth:1000, margin:"0 auto", padding:dk?"0 40px 80px":"0 20px 80px" }}>
+        <div style={{ padding:"36px 0 28px", animation:"fadeUp 0.5s ease" }}>
+          <div style={{ width:40, height:3, background:"#DC2626", borderRadius:2, marginBottom:20 }} />
+          <h2 style={{ fontSize:dk?28:22, fontWeight:800, color:"#FFF", margin:"0 0 8px", letterSpacing:"-0.04em" }}>Admin Panel</h2>
+          <p style={{ fontSize:13, color:"#6A6E78" }}>Rep accounts, progress, and access management.</p>
+        </div>
+
+        <div style={{ background:"#181B20", border:"1px solid #252830", borderLeft:"3px solid #F59E0B", borderRadius:16, padding:"20px 24px", marginBottom:24, animation:"fadeUp 0.5s ease 0.1s both" }}>
+          <div style={{ fontSize:10, fontWeight:700, color:"#F59E0B", letterSpacing:3, marginBottom:10, textTransform:"uppercase" }}>Adding New Reps</div>
+          <p style={{ fontSize:13, color:"#8A8E98", lineHeight:1.6, margin:0 }}>
+            Go to your <strong style={{ color:"#EEF0F4" }}>Supabase Dashboard</strong> → Authentication → Users → Add User.
+            Enter the rep's email and a temporary password, then share it with them. Their account will appear here automatically.
+          </p>
+        </div>
+
+        {loading ? (
+          <div style={{ textAlign:"center", padding:60, color:"#5A5E68", fontSize:13 }}>Loading reps...</div>
+        ) : users.length === 0 ? (
+          <div style={{ textAlign:"center", padding:60, color:"#5A5E68", fontSize:13 }}>No users yet.</div>
+        ) : (
+          <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+            {users.map((u, i) => (
+              <div key={u.id} style={{ background:"#141519", border:"1px solid #252830", borderRadius:16, padding:dk?"20px 24px":"16px 18px", display:"flex", alignItems:"center", gap:16, flexWrap:"wrap", animation:`fadeUp 0.4s ease ${0.05*i}s both` }}>
+                <div style={{ width:44, height:44, borderRadius:12, background:"linear-gradient(135deg,#DC2626,#7f1d1d)", display:"flex", alignItems:"center", justifyContent:"center", fontWeight:800, color:"#fff", fontSize:18, flexShrink:0 }}>
+                  {u.name?.[0]?.toUpperCase() ?? "?"}
+                </div>
+                <div style={{ flex:1, minWidth:140 }}>
+                  <div style={{ fontSize:15, fontWeight:700, color:"#EEF0F4" }}>{u.name || "—"}</div>
+                  <div style={{ display:"flex", alignItems:"center", gap:8, marginTop:3 }}>
+                    <span style={{ fontSize:9, fontWeight:700, color: u.role === "admin" ? "#F59E0B" : "#3B82F6", letterSpacing:2, textTransform:"uppercase", background: u.role === "admin" ? "#F59E0B12" : "#3B82F612", padding:"2px 8px", borderRadius:4 }}>{u.role}</span>
+                  </div>
+                </div>
+                <div style={{ display:"flex", gap:dk?24:14, flexWrap:"wrap" }}>
+                  <div style={{ textAlign:"center" }}>
+                    <div style={{ fontSize:20, fontWeight:800, color:"#22C55E" }}>{u.modulesCompleted}</div>
+                    <div style={{ fontSize:9, color:"#5A5E68", textTransform:"uppercase", letterSpacing:1.5, marginTop:2 }}>Completed</div>
+                  </div>
+                  <div style={{ textAlign:"center" }}>
+                    <div style={{ fontSize:20, fontWeight:800, color:"#10B981" }}>{u.quizzesAttempted}</div>
+                    <div style={{ fontSize:9, color:"#5A5E68", textTransform:"uppercase", letterSpacing:1.5, marginTop:2 }}>Quizzes</div>
+                  </div>
+                  {u.quizzesAttempted > 0 && (
+                    <div style={{ textAlign:"center" }}>
+                      <div style={{ fontSize:20, fontWeight:800, color: u.avgScore >= 90 ? "#22C55E" : u.avgScore >= 70 ? "#F59E0B" : "#DC2626" }}>{Math.round(u.avgScore)}%</div>
+                      <div style={{ fontSize:9, color:"#5A5E68", textTransform:"uppercase", letterSpacing:1.5, marginTop:2 }}>Avg Score</div>
+                    </div>
+                  )}
+                </div>
+                {u.id !== profile.id && (
+                  <button onClick={() => toggleRole(u.id, u.role)}
+                    style={{ background:"#1C1F25", border:"1px solid #282B33", color:"#8A8E98", fontSize:10, fontWeight:600, cursor:"pointer", padding:"8px 16px", borderRadius:8, fontFamily:"inherit", letterSpacing:1, flexShrink:0, textTransform:"uppercase" }}>
+                    {u.role === "admin" ? "Make Rep" : "Make Admin"}
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════
    CONTENT VIEWER
    ═══════════════════════════════════════════ */
-function Viewer({ ck, onBack, w }) {
+function Viewer({ ck, onBack, w, onComplete }) {
   const [oi, setOi] = useState(0);
   const ref = useRef(null);
   const c = C[ck];
   const dk = w >= 768;
   const accent = ck.includes("bc")?"#F59E0B":ck.includes("call")||ck.includes("comp")||ck.includes("onboard")?"#3B82F6":"#DC2626";
 
-  useEffect(() => { ref.current?.scrollIntoView({behavior:"smooth"}); setOi(0); }, [ck]);
+  useEffect(() => {
+    ref.current?.scrollIntoView({behavior:"smooth"});
+    setOi(0);
+    if (onComplete) onComplete(ck);
+  }, [ck]);
 
   return (
     <div ref={ref}>
@@ -503,7 +649,7 @@ function Viewer({ ck, onBack, w }) {
    MAIN APP
    ═══════════════════════════════════════════ */
 
-function Quiz({ quizKey, onBack, w }) {
+function Quiz({ quizKey, onBack, w, onComplete }) {
   const [ci, setCi] = useState(0);
   const [sel, setSel] = useState(null);
   const [locked, setLocked] = useState(false);
@@ -515,7 +661,14 @@ function Quiz({ quizKey, onBack, w }) {
   useEffect(() => { ref.current?.scrollIntoView({behavior:"smooth"}); setCi(0); setSel(null); setLocked(false); setScore(0); setDone(false); }, [quizKey]);
   const cur = q.qs[ci], tot = q.qs.length, pct = done ? 100 : Math.round((ci/tot)*100);
   const pick = (idx) => { if(locked) return; setSel(idx); setLocked(true); if(idx===cur.a) setScore(s=>s+1); };
-  const nxt = () => { if(ci+1>=tot){setDone(true);return} setCi(ci+1); setSel(null); setLocked(false); };
+  const nxt = () => {
+    if (ci+1>=tot) {
+      setDone(true);
+      if (onComplete) onComplete(score, tot);
+      return;
+    }
+    setCi(ci+1); setSel(null); setLocked(false);
+  };
   const retry = () => { setCi(0); setSel(null); setLocked(false); setScore(0); setDone(false); };
   const grade = score/tot;
   const gc = grade>=0.9?"#22C55E":grade>=0.7?"#F59E0B":"#DC2626";
@@ -588,8 +741,11 @@ function Quiz({ quizKey, onBack, w }) {
 }
 
 export default function App() {
-  const [auth, setAuth] = useState(false);
-  const [err, setErr] = useState(false);
+  const [session, setSession] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [completedModules, setCompletedModules] = useState(new Set());
+  const [quizScores, setQuizScores] = useState({});
   const [view, setView] = useState(null);
   const ref = useRef(null);
   const w = useW();
@@ -597,6 +753,54 @@ export default function App() {
   const wd = w >= 1100;
 
   const top = useCallback(() => { ref.current?.scrollIntoView({behavior:"smooth"}); }, []);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session) loadUserData(session.user.id);
+      else setLoading(false);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      if (session) loadUserData(session.user.id);
+      else { setProfile(null); setCompletedModules(new Set()); setQuizScores({}); setLoading(false); }
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const loadUserData = async (userId) => {
+    const [profileRes, progressRes, scoresRes] = await Promise.all([
+      supabase.from("profiles").select("*").eq("id", userId).single(),
+      supabase.from("module_progress").select("module_id").eq("user_id", userId),
+      supabase.from("quiz_scores").select("quiz_id, score, total").eq("user_id", userId),
+    ]);
+    setProfile(profileRes.data);
+    setCompletedModules(new Set(progressRes.data?.map(r => r.module_id) ?? []));
+    const best = {};
+    for (const s of scoresRes.data ?? []) {
+      if (!best[s.quiz_id] || s.score / s.total > best[s.quiz_id].score / best[s.quiz_id].total) best[s.quiz_id] = s;
+    }
+    setQuizScores(best);
+    setLoading(false);
+  };
+
+  const markComplete = async (moduleId) => {
+    if (completedModules.has(moduleId) || !session) return;
+    setCompletedModules(prev => new Set([...prev, moduleId]));
+    await supabase.from("module_progress").upsert({ user_id: session.user.id, module_id: moduleId });
+  };
+
+  const saveScore = async (quizId, score, total) => {
+    if (!session) return;
+    await supabase.from("quiz_scores").insert({ user_id: session.user.id, quiz_id: quizId, score, total });
+    setQuizScores(prev => {
+      const ex = prev[quizId];
+      if (!ex || score / total > ex.score / ex.total) return { ...prev, [quizId]: { quiz_id: quizId, score, total } };
+      return prev;
+    });
+  };
+
+  const signOut = async () => { await supabase.auth.signOut(); setView(null); };
 
   const bc = { MODULE:"#DC2626", BOOTCAMP:"#F59E0B", REFERENCE:"#3B82F6", QUIZ:"#10B981" };
   const groups = [
@@ -606,36 +810,52 @@ export default function App() {
     { label:"PRACTICE QUIZZES", color:"#10B981", items:CATS.filter(x=>x.t==="QUIZ") },
   ];
 
-  if (!auth) return (
-    <>
-      <style>{GLOBAL_CSS}</style>
-      <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-      <div style={{fontFamily:"'Outfit',system-ui,sans-serif"}}><Login onLogin={p=>p===PW?(setAuth(true),setErr(false)):setErr(true)} err={err} /></div>
-    </>
+  const wrapStyle = { minHeight:"100dvh", background:"#101114", fontFamily:"'Outfit',system-ui,sans-serif", color:"#FFF" };
+  const fonts = <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />;
+
+  if (loading) return (
+    <div style={{ ...wrapStyle, display:"flex", alignItems:"center", justifyContent:"center" }}>
+      <style>{GLOBAL_CSS}</style>{fonts}
+      <div style={{ textAlign:"center", animation:"fadeUp 0.6s ease" }}>
+        <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:28, letterSpacing:12, color:"#DC2626", marginBottom:8 }}>REDLINE</div>
+        <div style={{ fontSize:11, color:"#5A5E68", letterSpacing:3, textTransform:"uppercase" }}>Loading...</div>
+      </div>
+    </div>
+  );
+
+  if (!session) return (
+    <div style={{ fontFamily:"'Outfit',system-ui,sans-serif" }}>
+      <style>{GLOBAL_CSS}</style>{fonts}
+      <Login />
+    </div>
+  );
+
+  if (view === "__admin" && profile?.role === "admin") return (
+    <div ref={ref} style={wrapStyle}>
+      <style>{GLOBAL_CSS}</style>{fonts}
+      <AdminPanel profile={profile} onBack={() => setView(null)} w={w} onSignOut={signOut} />
+    </div>
   );
 
   if (view && QUIZZES[view]) return (
-    <div ref={ref} style={{ minHeight:"100dvh", background:"#101114", fontFamily:"'Outfit',system-ui,sans-serif", color:"#FFF" }}>
-      <style>{GLOBAL_CSS}</style>
-      <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-      <Quiz quizKey={view} onBack={()=>{setView(null);setTimeout(top,50)}} w={w} />
+    <div ref={ref} style={wrapStyle}>
+      <style>{GLOBAL_CSS}</style>{fonts}
+      <Quiz quizKey={view} onBack={()=>{setView(null);setTimeout(top,50)}} w={w}
+        onComplete={(sc, tot) => saveScore(view, sc, tot)} />
     </div>
   );
 
   if (view) return (
-    <div ref={ref} style={{ minHeight:"100dvh", background:"#101114", fontFamily:"'Outfit',system-ui,sans-serif", color:"#FFF" }}>
-      <style>{GLOBAL_CSS}</style>
-      <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-      <Viewer ck={view} onBack={()=>{setView(null);setTimeout(top,50)}} w={w} />
+    <div ref={ref} style={wrapStyle}>
+      <style>{GLOBAL_CSS}</style>{fonts}
+      <Viewer ck={view} onBack={()=>{setView(null);setTimeout(top,50)}} w={w} onComplete={markComplete} />
     </div>
   );
 
   return (
-    <div ref={ref} className="dotgrid" style={{ minHeight:"100dvh", background:"#101114", fontFamily:"'Outfit',system-ui,sans-serif", color:"#FFF", position:"relative" }}>
-      <style>{GLOBAL_CSS}</style>
-      <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <div ref={ref} className="dotgrid" style={{ ...wrapStyle, position:"relative" }}>
+      <style>{GLOBAL_CSS}</style>{fonts}
 
-      {/* Ambient glow */}
       <div style={{ position:"fixed", top:0, left:"50%", transform:"translateX(-50%)", width:800, height:500, background:"radial-gradient(ellipse, rgba(220,38,38,0.05) 0%, transparent 70%)", pointerEvents:"none", zIndex:0 }} />
 
       {/* Header */}
@@ -646,18 +866,35 @@ export default function App() {
               <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?30:24, letterSpacing:12, color:"#DC2626", lineHeight:1 }}>REDLINE</div>
               <h1 style={{ fontSize:dk?14:12, fontWeight:600, color:"#5A5E68", margin:"6px 0 0", letterSpacing:dk?6:4, textTransform:"uppercase" }}>Rep Portal</h1>
             </div>
-            <div style={{ animation:"fadeUp 0.6s ease 0.1s both" }}>
-              <div style={{ width:dk?52:44, height:dk?52:44, borderRadius:14, background:"linear-gradient(135deg,#DC2626,#7f1d1d)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?20:16, color:"#FFF", letterSpacing:2, boxShadow:"0 4px 24px rgba(220,38,38,0.2)", animation:"glow 3s ease-in-out infinite" }}>R</div>
+            <div style={{ display:"flex", alignItems:"center", gap:10, animation:"fadeUp 0.6s ease 0.1s both" }}>
+              {profile?.role === "admin" && (
+                <button onClick={() => setView("__admin")}
+                  style={{ background:"#1C1F25", border:"1px solid #282B33", color:"#F59E0B", fontSize:10, fontWeight:700, cursor:"pointer", padding:"8px 14px", borderRadius:10, fontFamily:"inherit", letterSpacing:2, textTransform:"uppercase" }}>
+                  Admin
+                </button>
+              )}
+              <div style={{ width:dk?44:38, height:dk?44:38, borderRadius:12, background:"linear-gradient(135deg,#DC2626,#7f1d1d)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?18:15, color:"#FFF", letterSpacing:2, boxShadow:"0 4px 24px rgba(220,38,38,0.2)", animation:"glow 3s ease-in-out infinite" }}>
+                {profile?.name?.[0]?.toUpperCase() ?? "R"}
+              </div>
+              <button onClick={signOut}
+                style={{ background:"none", border:"1px solid #252830", color:"#5A5E68", fontSize:10, fontWeight:600, cursor:"pointer", padding:"8px 14px", borderRadius:10, fontFamily:"inherit", letterSpacing:1 }}>
+                Sign Out
+              </button>
             </div>
           </div>
 
           <p style={{ fontSize:dk?14:13, color:"#5A5E68", margin:"0 0 24px", maxWidth:500, lineHeight:1.5, animation:"fadeUp 0.6s ease 0.15s both" }}>
-            Your complete training system. Master every module, close more deals.
+            {profile?.name ? `Welcome back, ${profile.name}. ` : ""}Your complete training system. Master every module, close more deals.
           </p>
 
           {/* Stats */}
           <div style={{ display:"flex", gap:dk?12:8, animation:"fadeUp 0.6s ease 0.2s both" }}>
-            {[["13","Modules","#DC2626"],["2","Bootcamps","#F59E0B"],["3","Reference","#3B82F6"],["6","Quizzes","#10B981"]].map(([n,l,col]) => (
+            {[
+              [completedModules.size, "Completed", "#22C55E"],
+              ["13", "Modules", "#DC2626"],
+              ["2", "Bootcamps", "#F59E0B"],
+              ["6", "Quizzes", "#10B981"],
+            ].map(([n,l,col]) => (
               <div key={l} style={{ background:"#181B20", border:"1px solid #252830", borderRadius:14, padding:dk?"16px 24px":"14px 16px", textAlign:"center", minWidth:dk?120:0, flex:dk?"none":1 }}>
                 <div style={{ fontSize:dk?28:22, fontWeight:800, color:col, lineHeight:1 }}>{n}</div>
                 <div style={{ fontSize:9, color:"#5A5E68", textTransform:"uppercase", letterSpacing:2, fontWeight:600, marginTop:6 }}>{l}</div>
@@ -680,11 +917,7 @@ export default function App() {
           <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr 1fr":dk?"1fr 1fr 1fr":"1fr", gap:dk?10:8 }}>
             {LINKS.map((lk,i) => (
               <a key={i} href={lk.url} target="_blank" rel="noreferrer" className="card-hover"
-                style={{
-                  background:"#141519", border:"1px solid #252830", borderLeft:"3px solid #8B5CF6",
-                  borderRadius:16, padding:dk?"18px 18px":"16px 14px", textDecoration:"none",
-                  display:"flex", alignItems:"center", gap:14, animation:`fadeUp 0.4s ease ${0.05*i}s both`,
-                }}>
+                style={{ background:"#141519", border:"1px solid #252830", borderLeft:"3px solid #8B5CF6", borderRadius:16, padding:dk?"18px 18px":"16px 14px", textDecoration:"none", display:"flex", alignItems:"center", gap:14, animation:`fadeUp 0.4s ease ${0.05*i}s both` }}>
                 <div style={{ fontSize:22, width:44, height:44, display:"flex", alignItems:"center", justifyContent:"center", background:"#1A1D24", borderRadius:12, flexShrink:0, border:"1px solid #282B33" }}>{lk.ic}</div>
                 <div style={{ flex:1, minWidth:0 }}>
                   <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF0F4", margin:"0 0 2px" }}>{lk.label}</h3>
@@ -706,28 +939,32 @@ export default function App() {
               </div>
             )}
             <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr 1fr":dk?"1fr 1fr":"1fr", gap:dk?10:8 }}>
-              {g.items.map((x, i) => (
-                <div key={x.id} className="card-hover" onClick={()=>{setView(x.k);setTimeout(top,50)}}
-                  style={{
-                    background:"#141519", border:"1px solid #252830",
-                    borderRadius:16, padding:dk?"22px 20px":"18px 16px", cursor:"pointer",
-                    animation:`fadeUp 0.5s cubic-bezier(0.4,0,0.2,1) ${0.05*(gi*4+i)}s both`,
-                    position:"relative", overflow:"hidden"
-                  }}>
-                  {/* Accent strip */}
-                  <div style={{ position:"absolute", top:0, left:0, width:3, height:"100%", background:bc[x.t], borderRadius:"3px 0 0 3px" }} />
-
-                  <div style={{ display:"flex", alignItems:"center", gap:14, paddingLeft:8 }}>
-                    <div style={{ fontSize:24, width:48, height:48, display:"flex", alignItems:"center", justifyContent:"center", background:"#1C1F25", borderRadius:14, flexShrink:0, border:"1px solid #282B33" }}>{x.ic}</div>
-                    <div style={{ flex:1, minWidth:0 }}>
-                      <div style={{ fontSize:9, fontWeight:700, color:bc[x.t], letterSpacing:2, marginBottom:4, textTransform:"uppercase" }}>{x.n||x.t}</div>
-                      <h3 style={{ fontSize:14.5, fontWeight:700, color:"#EEF0F4", margin:"0 0 3px", lineHeight:1.3 }}>{x.sub}</h3>
-                      <p style={{ fontSize:11.5, color:"#5A5E68", margin:0, lineHeight:1.35 }}>{x.d}</p>
+              {g.items.map((x, i) => {
+                const done = completedModules.has(x.k);
+                const qs = quizScores[x.k];
+                const isQuiz = x.t === "QUIZ";
+                return (
+                  <div key={x.id} className="card-hover" onClick={()=>{setView(x.k);setTimeout(top,50)}}
+                    style={{ background:"#141519", border:"1px solid " + (done && !isQuiz ? "#22C55E18" : qs ? "#10B98118" : "#252830"), borderRadius:16, padding:dk?"22px 20px":"18px 16px", cursor:"pointer", animation:`fadeUp 0.5s cubic-bezier(0.4,0,0.2,1) ${0.05*(gi*4+i)}s both`, position:"relative", overflow:"hidden" }}>
+                    <div style={{ position:"absolute", top:0, left:0, width:3, height:"100%", background: done && !isQuiz ? "#22C55E" : qs ? "#10B981" : bc[x.t], borderRadius:"3px 0 0 3px" }} />
+                    <div style={{ display:"flex", alignItems:"center", gap:14, paddingLeft:8 }}>
+                      <div style={{ fontSize:24, width:48, height:48, display:"flex", alignItems:"center", justifyContent:"center", background:"#1C1F25", borderRadius:14, flexShrink:0, border:"1px solid #282B33" }}>{x.ic}</div>
+                      <div style={{ flex:1, minWidth:0 }}>
+                        <div style={{ fontSize:9, fontWeight:700, color:bc[x.t], letterSpacing:2, marginBottom:4, textTransform:"uppercase" }}>{x.n||x.t}</div>
+                        <h3 style={{ fontSize:14.5, fontWeight:700, color:"#EEF0F4", margin:"0 0 3px", lineHeight:1.3 }}>{x.sub}</h3>
+                        <p style={{ fontSize:11.5, color: qs ? "#10B981" : "#5A5E68", margin:0, lineHeight:1.35, fontWeight: qs ? 600 : 400 }}>
+                          {qs ? `Best score: ${Math.round(qs.score/qs.total*100)}%` : x.d}
+                        </p>
+                      </div>
+                      <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6 }}>
+                        {(done && !isQuiz) && <div style={{ width:20, height:20, borderRadius:6, background:"#22C55E18", border:"1px solid #22C55E40", display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, color:"#22C55E" }}>✓</div>}
+                        {qs && <div style={{ width:20, height:20, borderRadius:6, background:"#10B98118", border:"1px solid #10B98140", display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, color:"#10B981" }}>✓</div>}
+                        <div style={{ width:32, height:32, borderRadius:10, background:"#1C1F25", border:"1px solid #282B33", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, color:"#3A3E48", fontSize:14 }}>›</div>
+                      </div>
                     </div>
-                    <div style={{ width:32, height:32, borderRadius:10, background:"#1C1F25", border:"1px solid #282B33", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, color:"#3A3E48", fontSize:14 }}>›</div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         ))}
