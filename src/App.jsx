@@ -805,15 +805,17 @@ export default function App() {
     });
   };
 
+  const [tab, setTab] = useState("training");
+
   const signOut = async () => { await supabase.auth.signOut(); setView(null); };
 
   const bc = { MODULE:"#DC2626", BOOTCAMP:"#F59E0B", REFERENCE:"#3B82F6", QUIZ:"#10B981" };
-  const groups = [
+  const trainingGroups = [
     { label:null, color:"#DC2626", items:CATS.filter(x=>x.t==="MODULE") },
     { label:"BOOTCAMPS", color:"#F59E0B", items:CATS.filter(x=>x.t==="BOOTCAMP") },
     { label:"QUICK REFERENCE", color:"#3B82F6", items:CATS.filter(x=>x.t==="REFERENCE") },
-    { label:"PRACTICE QUIZZES", color:"#10B981", items:CATS.filter(x=>x.t==="QUIZ") },
   ];
+  const quizItems = CATS.filter(x=>x.t==="QUIZ");
 
   const wrapStyle = { minHeight:"100dvh", background:"#101114", fontFamily:"'Outfit',system-ui,sans-serif", color:"#FFF" };
   const fonts = <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />;
@@ -909,20 +911,31 @@ export default function App() {
         </div>
       </div>
 
-      {/* Cards */}
-      <div style={{ position:"relative", zIndex:1, maxWidth:1280, margin:"0 auto", padding:wd?"24px 56px 80px":dk?"20px 36px 80px":"16px 20px 80px" }}>
+      {/* Tab Nav */}
+      <div style={{ position:"relative", zIndex:1, borderBottom:"1px solid #1E2128" }}>
+        <div style={{ maxWidth:1280, margin:"0 auto", padding:wd?"0 56px":dk?"0 36px":"0 20px", display:"flex", gap:4 }}>
+          {[
+            { key:"links", label:"Quick Links", color:"#8B5CF6" },
+            { key:"training", label:"Training", color:"#DC2626" },
+            { key:"quizzes", label:"Quizzes", color:"#10B981" },
+          ].map(t => (
+            <button key={t.key} onClick={() => setTab(t.key)}
+              style={{ background:"none", border:"none", borderBottom: tab===t.key ? `2px solid ${t.color}` : "2px solid transparent", color: tab===t.key ? "#FFF" : "#5A5E68", fontSize:12, fontWeight:700, letterSpacing:2, cursor:"pointer", padding:"16px 20px", fontFamily:"inherit", textTransform:"uppercase", transition:"all 0.2s", marginBottom:-1 }}>
+              {t.label}
+            </button>
+          ))}
+        </div>
+      </div>
 
-        {/* Quick Links */}
-        <div style={{ marginBottom:8, animation:"fadeUp 0.5s ease 0.15s both" }}>
-          <div style={{ display:"flex", alignItems:"center", gap:10, padding:"8px 0 12px" }}>
-            <div style={{ width:8, height:8, borderRadius:4, background:"#8B5CF6" }} />
-            <div style={{ fontSize:10, fontWeight:700, color:"#8B5CF6", letterSpacing:3, textTransform:"uppercase" }}>Quick Links</div>
-            <div style={{ flex:1, height:1, background:"#141416" }} />
-          </div>
-          <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr 1fr":dk?"1fr 1fr 1fr":"1fr", gap:dk?10:8 }}>
+      {/* Tab Content */}
+      <div style={{ position:"relative", zIndex:1, maxWidth:1280, margin:"0 auto", padding:wd?"28px 56px 80px":dk?"24px 36px 80px":"20px 20px 80px" }}>
+
+        {/* LINKS TAB */}
+        {tab === "links" && (
+          <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr 1fr":dk?"1fr 1fr":"1fr", gap:dk?10:8, animation:"fadeUp 0.4s ease" }}>
             {LINKS.map((lk,i) => (
               <a key={i} href={lk.url} target="_blank" rel="noreferrer" className="card-hover"
-                style={{ background:"#141519", border:"1px solid #252830", borderLeft:"3px solid #8B5CF6", borderRadius:16, padding:dk?"18px 18px":"16px 14px", textDecoration:"none", display:"flex", alignItems:"center", gap:14, animation:`fadeUp 0.4s ease ${0.05*i}s both` }}>
+                style={{ background:"#141519", border:"1px solid #252830", borderLeft:"3px solid #8B5CF6", borderRadius:16, padding:dk?"20px 20px":"16px 14px", textDecoration:"none", display:"flex", alignItems:"center", gap:14 }}>
                 <div style={{ fontSize:22, width:44, height:44, display:"flex", alignItems:"center", justifyContent:"center", background:"#1A1D24", borderRadius:12, flexShrink:0, border:"1px solid #282B33" }}>{lk.ic}</div>
                 <div style={{ flex:1, minWidth:0 }}>
                   <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF0F4", margin:"0 0 2px" }}>{lk.label}</h3>
@@ -932,47 +945,77 @@ export default function App() {
               </a>
             ))}
           </div>
-        </div>
+        )}
 
-        {groups.map((g, gi) => (
-          <div key={gi}>
-            {g.label && (
-              <div style={{ display:"flex", alignItems:"center", gap:12, padding:"32px 0 14px", animation:`fadeUp 0.5s ease ${0.3+gi*0.1}s both` }}>
-                <div style={{ width:8, height:8, borderRadius:4, background:g.color }} />
-                <div style={{ fontSize:10, fontWeight:700, color:g.color, letterSpacing:3, textTransform:"uppercase" }}>{g.label}</div>
-                <div style={{ flex:1, height:1, background:"#111114" }} />
+        {/* TRAINING TAB */}
+        {tab === "training" && (
+          <div style={{ animation:"fadeUp 0.4s ease" }}>
+            {trainingGroups.map((g, gi) => (
+              <div key={gi}>
+                {g.label && (
+                  <div style={{ display:"flex", alignItems:"center", gap:12, padding: gi===0 ? "0 0 14px" : "28px 0 14px" }}>
+                    <div style={{ width:8, height:8, borderRadius:4, background:g.color }} />
+                    <div style={{ fontSize:10, fontWeight:700, color:g.color, letterSpacing:3, textTransform:"uppercase" }}>{g.label}</div>
+                    <div style={{ flex:1, height:1, background:"#111114" }} />
+                  </div>
+                )}
+                <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr 1fr":dk?"1fr 1fr":"1fr", gap:dk?10:8 }}>
+                  {g.items.map((x, i) => {
+                    const done = completedModules.has(x.k);
+                    return (
+                      <div key={x.id} className="card-hover" onClick={()=>{setView(x.k);setTimeout(top,50)}}
+                        style={{ background:"#141519", border:"1px solid " + (done ? "#22C55E18" : "#252830"), borderRadius:16, padding:dk?"22px 20px":"18px 16px", cursor:"pointer", animation:`fadeUp 0.4s ease ${0.04*i}s both`, position:"relative", overflow:"hidden" }}>
+                        <div style={{ position:"absolute", top:0, left:0, width:3, height:"100%", background: done ? "#22C55E" : bc[x.t], borderRadius:"3px 0 0 3px" }} />
+                        <div style={{ display:"flex", alignItems:"center", gap:14, paddingLeft:8 }}>
+                          <div style={{ fontSize:24, width:48, height:48, display:"flex", alignItems:"center", justifyContent:"center", background:"#1C1F25", borderRadius:14, flexShrink:0, border:"1px solid #282B33" }}>{x.ic}</div>
+                          <div style={{ flex:1, minWidth:0 }}>
+                            <div style={{ fontSize:9, fontWeight:700, color:bc[x.t], letterSpacing:2, marginBottom:4, textTransform:"uppercase" }}>{x.n||x.t}</div>
+                            <h3 style={{ fontSize:14.5, fontWeight:700, color:"#EEF0F4", margin:"0 0 3px", lineHeight:1.3 }}>{x.sub}</h3>
+                            <p style={{ fontSize:11.5, color:"#5A5E68", margin:0, lineHeight:1.35 }}>{x.d}</p>
+                          </div>
+                          <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6 }}>
+                            {done && <div style={{ width:20, height:20, borderRadius:6, background:"#22C55E18", border:"1px solid #22C55E40", display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, color:"#22C55E" }}>✓</div>}
+                            <div style={{ width:32, height:32, borderRadius:10, background:"#1C1F25", border:"1px solid #282B33", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, color:"#3A3E48", fontSize:14 }}>›</div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            )}
-            <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr 1fr":dk?"1fr 1fr":"1fr", gap:dk?10:8 }}>
-              {g.items.map((x, i) => {
-                const done = completedModules.has(x.k);
-                const qs = quizScores[x.k];
-                const isQuiz = x.t === "QUIZ";
-                return (
-                  <div key={x.id} className="card-hover" onClick={()=>{setView(x.k);setTimeout(top,50)}}
-                    style={{ background:"#141519", border:"1px solid " + (done && !isQuiz ? "#22C55E18" : qs ? "#10B98118" : "#252830"), borderRadius:16, padding:dk?"22px 20px":"18px 16px", cursor:"pointer", animation:`fadeUp 0.5s cubic-bezier(0.4,0,0.2,1) ${0.05*(gi*4+i)}s both`, position:"relative", overflow:"hidden" }}>
-                    <div style={{ position:"absolute", top:0, left:0, width:3, height:"100%", background: done && !isQuiz ? "#22C55E" : qs ? "#10B981" : bc[x.t], borderRadius:"3px 0 0 3px" }} />
-                    <div style={{ display:"flex", alignItems:"center", gap:14, paddingLeft:8 }}>
-                      <div style={{ fontSize:24, width:48, height:48, display:"flex", alignItems:"center", justifyContent:"center", background:"#1C1F25", borderRadius:14, flexShrink:0, border:"1px solid #282B33" }}>{x.ic}</div>
-                      <div style={{ flex:1, minWidth:0 }}>
-                        <div style={{ fontSize:9, fontWeight:700, color:bc[x.t], letterSpacing:2, marginBottom:4, textTransform:"uppercase" }}>{x.n||x.t}</div>
-                        <h3 style={{ fontSize:14.5, fontWeight:700, color:"#EEF0F4", margin:"0 0 3px", lineHeight:1.3 }}>{x.sub}</h3>
-                        <p style={{ fontSize:11.5, color: qs ? "#10B981" : "#5A5E68", margin:0, lineHeight:1.35, fontWeight: qs ? 600 : 400 }}>
-                          {qs ? `Best score: ${Math.round(qs.score/qs.total*100)}%` : x.d}
-                        </p>
-                      </div>
-                      <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6 }}>
-                        {(done && !isQuiz) && <div style={{ width:20, height:20, borderRadius:6, background:"#22C55E18", border:"1px solid #22C55E40", display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, color:"#22C55E" }}>✓</div>}
-                        {qs && <div style={{ width:20, height:20, borderRadius:6, background:"#10B98118", border:"1px solid #10B98140", display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, color:"#10B981" }}>✓</div>}
-                        <div style={{ width:32, height:32, borderRadius:10, background:"#1C1F25", border:"1px solid #282B33", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, color:"#3A3E48", fontSize:14 }}>›</div>
-                      </div>
+            ))}
+          </div>
+        )}
+
+        {/* QUIZZES TAB */}
+        {tab === "quizzes" && (
+          <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr 1fr":dk?"1fr 1fr":"1fr", gap:dk?10:8, animation:"fadeUp 0.4s ease" }}>
+            {quizItems.map((x, i) => {
+              const qs = quizScores[x.k];
+              return (
+                <div key={x.id} className="card-hover" onClick={()=>{setView(x.k);setTimeout(top,50)}}
+                  style={{ background:"#141519", border:"1px solid " + (qs ? "#10B98118" : "#252830"), borderRadius:16, padding:dk?"22px 20px":"18px 16px", cursor:"pointer", animation:`fadeUp 0.4s ease ${0.04*i}s both`, position:"relative", overflow:"hidden" }}>
+                  <div style={{ position:"absolute", top:0, left:0, width:3, height:"100%", background: qs ? "#10B981" : "#10B981", borderRadius:"3px 0 0 3px" }} />
+                  <div style={{ display:"flex", alignItems:"center", gap:14, paddingLeft:8 }}>
+                    <div style={{ fontSize:24, width:48, height:48, display:"flex", alignItems:"center", justifyContent:"center", background:"#1C1F25", borderRadius:14, flexShrink:0, border:"1px solid #282B33" }}>{x.ic}</div>
+                    <div style={{ flex:1, minWidth:0 }}>
+                      <div style={{ fontSize:9, fontWeight:700, color:"#10B981", letterSpacing:2, marginBottom:4, textTransform:"uppercase" }}>QUIZ</div>
+                      <h3 style={{ fontSize:14.5, fontWeight:700, color:"#EEF0F4", margin:"0 0 3px", lineHeight:1.3 }}>{x.sub}</h3>
+                      <p style={{ fontSize:11.5, color: qs ? "#10B981" : "#5A5E68", margin:0, lineHeight:1.35, fontWeight: qs ? 600 : 400 }}>
+                        {qs ? `Best score: ${Math.round(qs.score/qs.total*100)}%` : x.d}
+                      </p>
+                    </div>
+                    <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6 }}>
+                      {qs && <div style={{ width:20, height:20, borderRadius:6, background:"#10B98118", border:"1px solid #10B98140", display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, color:"#10B981" }}>✓</div>}
+                      <div style={{ width:32, height:32, borderRadius:10, background:"#1C1F25", border:"1px solid #282B33", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, color:"#3A3E48", fontSize:14 }}>›</div>
                     </div>
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              );
+            })}
           </div>
-        ))}
+        )}
+
       </div>
     </div>
   );
