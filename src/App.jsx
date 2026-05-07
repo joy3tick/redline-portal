@@ -1337,14 +1337,34 @@ function AdminPanel({ profile, onBack, w, onSignOut }) {
 
   const toggleRole = async (userId, currentRole) => {
     const newRole = currentRole === "admin" ? "rep" : "admin";
-    await supabase.from("profiles").update({ role: newRole }).eq("id", userId);
-    setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
+    const { data, error } = await supabase
+      .from("profiles")
+      .update({ role: newRole })
+      .eq("id", userId)
+      .select()
+      .single();
+    if (error || !data) {
+      console.error("toggleRole failed:", error);
+      alert(`Couldn't update role: ${error?.message ?? "no row updated (likely RLS)"}`);
+      return;
+    }
+    setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: data.role } : u));
   };
 
   const setTier = async (userId, tier) => {
     const next = tier || null;
-    await supabase.from("profiles").update({ tier: next }).eq("id", userId);
-    setUsers(prev => prev.map(u => u.id === userId ? { ...u, tier: next } : u));
+    const { data, error } = await supabase
+      .from("profiles")
+      .update({ tier: next })
+      .eq("id", userId)
+      .select()
+      .single();
+    if (error || !data) {
+      console.error("setTier failed:", error);
+      alert(`Couldn't save tier: ${error?.message ?? "no row updated (likely RLS or missing 'tier' column)"}`);
+      return;
+    }
+    setUsers(prev => prev.map(u => u.id === userId ? { ...u, tier: data.tier } : u));
   };
 
   return (
