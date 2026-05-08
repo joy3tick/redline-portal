@@ -711,6 +711,8 @@ function Scheduler({ session, profile, w }) {
   );
 }
 
+const TIER_GLOW = { trial:"rgba(6,214,240,0.3)", bronze:"rgba(184,115,42,0.35)", silver:"rgba(192,200,216,0.3)", gold:"rgba(255,215,0,0.4)", platinum:"rgba(167,139,250,0.35)", diamond:"rgba(204,255,0,0.4)" };
+
 function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab, onOpenModule }) {
   const [sales, setSales] = useState([]);
   const [schedule, setSchedule] = useState([]);
@@ -768,7 +770,6 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
   const doneQuizzes = CATS.filter(x => x.t === "QUIZ" && quizScores[x.k]).length;
 
   const nextModule = CATS.find(x => (x.t === "MODULE" || x.t === "BOOTCAMP") && !completedModules.has(x.k));
-
   const todaysReps = schedule.map(e => repProfiles[e.user_id] || "Rep");
   const recentSales = sales.slice(0, 5);
   const MEDALS = ["🥇","🥈","🥉"];
@@ -788,6 +789,9 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
   const teamWeekTotal = teamDailyAmount.reduce((a,b) => a+b, 0);
   const teamWeekCount = teamDaily.reduce((a,b) => a+b, 0);
   const todayIdx = Math.max(0, Math.min(6, Math.round((today - mon) / 86400000)));
+
+  const tierObj = TIERS.find(t => t.v === profile?.tier) ?? null;
+  const tierIdx = tierObj ? TIERS.indexOf(tierObj) : -1;
 
   const onCardMove = (e) => {
     const r = e.currentTarget.getBoundingClientRect();
@@ -850,8 +854,9 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
     );
   };
 
-  const Card = ({ title, accent, action, actionOnClick, children }) => (
-    <div className="dash-card" onMouseMove={onCardMove} style={{ padding:dk?"22px 24px":"18px 20px" }}>
+  const Card = ({ title, accent, action, actionOnClick, children, fullWidth }) => (
+    <div className="dash-card" onMouseMove={onCardMove}
+      style={{ padding:dk?"22px 24px":"18px 20px", gridColumn: fullWidth && wd ? "1 / -1" : undefined }}>
       <div style={{ position:"absolute", top:0, left:0, right:0, height:2, background:`linear-gradient(90deg,transparent,${accent}80,transparent)`, opacity:0.4 }} />
       <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:16, position:"relative" }}>
         <div style={{ fontSize:10, fontWeight:800, color:accent, letterSpacing:2.5, textTransform:"uppercase" }}>{title}</div>
@@ -868,22 +873,60 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
     </div>
   );
 
-  if (loading) return <div style={{ textAlign:"center", padding:60, color:"#7E8290", fontSize:13 }}>Loading dashboard…</div>;
+  if (loading) return <div style={{ textAlign:"center", padding:60, color:"#7E8290", fontSize:13 }}>Loading…</div>;
 
   return (
     <div style={{ animation:"fadeUp 0.35s ease", display:"grid", gridTemplateColumns: wd ? "1fr 1fr" : "1fr", gap:dk?18:14 }}>
+
+      {/* Tier Card — full width */}
+      <div className="dash-card" onMouseMove={onCardMove}
+        style={{ padding:dk?"26px 28px":"20px 20px", gridColumn: wd ? "1 / -1" : undefined,
+          background: tierObj ? `linear-gradient(135deg, rgba(14,15,20,0.97) 0%, ${tierObj.color}10 100%)` : undefined,
+          borderColor: tierObj ? `${tierObj.color}22` : undefined }}>
+        {tierObj && <div style={{ position:"absolute", top:0, left:0, right:0, height:2, background:`linear-gradient(90deg,transparent,${tierObj.color}90,transparent)` }} />}
+        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:16 }}>
+          {/* Left: tier name */}
+          <div style={{ display:"flex", alignItems:"center", gap:dk?18:14 }}>
+            <div style={{ width:dk?62:52, height:dk?62:52, borderRadius:16, background: tierObj ? `radial-gradient(circle at 35% 35%, ${tierObj.color}30, ${tierObj.color}08)` : "rgba(255,255,255,0.04)", border:`2px solid ${tierObj ? tierObj.color+"55" : "rgba(255,255,255,0.08)"}`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, boxShadow: tierObj ? `0 0 28px ${TIER_GLOW[tierObj.v]}` : undefined, fontSize:dk?26:22, lineHeight:1 }}>
+              {tierObj ? tierObj.emoji : "?"}
+            </div>
+            <div>
+              <div style={{ fontSize:9, fontWeight:800, color:"#5E6376", letterSpacing:2.5, textTransform:"uppercase", marginBottom:4 }}>Current Tier</div>
+              <div style={{ fontSize:dk?30:24, fontWeight:900, color: tierObj ? tierObj.color : "#5E6376", letterSpacing:"-0.03em", lineHeight:1, textShadow: tierObj ? `0 0 24px ${TIER_GLOW[tierObj.v]}` : undefined }}>
+                {tierObj ? tierObj.label.toUpperCase() : "—"}
+              </div>
+              {!tierObj && <div style={{ fontSize:11, color:"#444856", marginTop:4 }}>No tier assigned yet</div>}
+            </div>
+          </div>
+          {/* Right: tier progression */}
+          <div style={{ display:"flex", gap:dk?6:4, alignItems:"center" }}>
+            {TIERS.map((t, i) => {
+              const active = t.v === profile?.tier;
+              const passed = tierIdx >= 0 && i < tierIdx;
+              return (
+                <div key={t.v} style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:4 }}>
+                  <div style={{ width:dk?34:26, height:dk?34:26, borderRadius:9, background: active ? `radial-gradient(circle, ${t.color}30, ${t.color}10)` : passed ? `${t.color}15` : "rgba(255,255,255,0.03)", border:`1.5px solid ${active ? t.color : passed ? t.color+"50" : "rgba(255,255,255,0.07)"}`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:dk?13:11, transition:"all 0.2s", boxShadow: active ? `0 0 14px ${TIER_GLOW[t.v]}` : undefined }}>
+                    {active ? <span style={{ fontSize:dk?15:13 }}>{t.emoji}</span> : passed ? <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={t.color} strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> : <div style={{ width:5, height:5, borderRadius:"50%", background:"rgba(255,255,255,0.12)" }} />}
+                  </div>
+                  {dk && <div style={{ fontSize:7.5, fontWeight:800, color: active ? t.color : passed ? t.color+"80" : "#5E6376", letterSpacing:1, textTransform:"uppercase" }}>{t.label}</div>}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
 
       {/* Your Week */}
       <Card title="Your Week" accent="#CCFF00">
         <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:8 }}>
           {[
             { v: myRankWeek >= 0 ? `#${myRankWeek + 1}` : "—", l: "Rank", c: "#FFD700" },
-            { v: myWeek.count, l: myWeek.count === 1 ? "Sale" : "Sales", c: "#CCFF00" },
+            { v: myWeek.count, l: "Sales", c: "#CCFF00" },
             { v: `${trainingPct}%`, l: "Training", c: "#22C55E" },
             { v: `${doneQuizzes}/${totalQuizzes}`, l: "Quizzes", c: "#10B981" },
           ].map(s => (
             <div key={s.l} style={{ background:`${s.c}10`, border:`1px solid ${s.c}20`, borderRadius:10, padding:"12px 8px", textAlign:"center" }}>
-              <div style={{ fontSize:dk?22:18, fontWeight:900, color:s.c, lineHeight:1, letterSpacing:"-0.02em" }}>{s.v}</div>
+              <div style={{ fontSize:dk?24:19, fontWeight:900, color:s.c, lineHeight:1, letterSpacing:"-0.02em" }}>{s.v}</div>
               <div style={{ fontSize:8.5, color:`${s.c}70`, textTransform:"uppercase", letterSpacing:1.5, fontWeight:700, marginTop:5 }}>{s.l}</div>
             </div>
           ))}
@@ -900,9 +943,12 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
       </Card>
 
       {/* Top Performers */}
-      <Card title="Top Performers · This Week" accent="#FFD700" action="Leaderboard" actionOnClick={() => onGoTab("leaderboard")}>
+      <Card title="This Week" accent="#FFD700" action="Leaderboard" actionOnClick={() => onGoTab("leaderboard")}>
         {rankedWeek.length === 0 ? (
-          <div style={{ fontSize:12, color:"#444856", padding:"12px 0" }}>No sales logged yet this week. Be the first.</div>
+          <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:8, padding:"16px 0", color:"#2E3140" }}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+            <span style={{ fontSize:11, color:"#5E6376" }}>No sales yet this week</span>
+          </div>
         ) : (
           <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
             {rankedWeek.slice(0, 3).map((rep, i) => {
@@ -913,12 +959,12 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
               return (
                 <div key={rep.uid} style={{ position:"relative", overflow:"hidden", background: isMe ? "rgba(204,255,0,0.06)" : i===0 ? "rgba(255,215,0,0.04)" : "rgba(255,255,255,0.025)", border:`1px solid ${isMe ? "rgba(204,255,0,0.18)" : i===0 ? "rgba(255,215,0,0.12)" : "rgba(255,255,255,0.06)"}`, borderRadius:10, padding:"10px 12px" }}>
                   <div style={{ position:"absolute", inset:0, width:`${pct}%`, background:`linear-gradient(90deg,${barColor}18,${barColor}04)`, transition:"width 0.6s ease" }} />
-                  <div style={{ position:"relative", display:"flex", alignItems:"center", gap:12 }}>
-                    <div style={{ fontSize:18, minWidth:26, textAlign:"center" }}>{MEDALS[i]}</div>
-                    <div style={{ flex:1, minWidth:0, fontSize:13, fontWeight:700, color: isMe ? "#F2F4F8" : "#D6DAE2" }}>
-                      {rep.name}{isMe ? <span style={{ fontSize:9, fontWeight:700, color:"#CCFF00", letterSpacing:1.5, marginLeft:8, textTransform:"uppercase" }}>you</span> : ""}
+                  <div style={{ position:"relative", display:"flex", alignItems:"center", gap:10 }}>
+                    <div style={{ fontSize:16, minWidth:22, textAlign:"center" }}>{MEDALS[i]}</div>
+                    <div style={{ flex:1, minWidth:0, fontSize:12.5, fontWeight:700, color: isMe ? "#F2F4F8" : "#D6DAE2", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                      {rep.name}{isMe ? <span style={{ fontSize:9, fontWeight:700, color:"#CCFF00", letterSpacing:1.5, marginLeft:7, textTransform:"uppercase" }}>you</span> : ""}
                     </div>
-                    <div style={{ fontSize:18, fontWeight:900, color: barColor, lineHeight:1 }}>{rep.count}</div>
+                    <div style={{ fontSize:17, fontWeight:900, color: barColor, lineHeight:1 }}>{rep.count}</div>
                   </div>
                 </div>
               );
@@ -928,42 +974,51 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
       </Card>
 
       {/* Continue Training */}
-      <Card title="Continue Training" accent="#CCFF00" action="All Modules" actionOnClick={() => onGoTab("training")}>
+      <Card title="Training" accent="#CCFF00" action="All Modules" actionOnClick={() => onGoTab("training")}>
         <div style={{ display:"flex", alignItems:"center", gap:dk?18:14 }}>
           <Ring pct={trainingPct} accent="#CCFF00" size={dk?92:78} stroke={dk?9:8} label={`${trainingPct}%`} sublabel={`${doneModules}/${totalModules}`} />
           <div style={{ flex:1, minWidth:0 }}>
             {nextModule ? (
-              <div className="card-hover" onClick={() => onOpenModule(nextModule.k)}
-                style={{ display:"flex", alignItems:"center", gap:12, cursor:"pointer", background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:12, padding:"10px 12px" }}>
-                <div style={{ width:42, height:42, borderRadius:11, background:IC_GRAD[nextModule.t], display:"flex", alignItems:"center", justifyContent:"center", fontSize:19, flexShrink:0, boxShadow:IC_SHADOW[nextModule.t] }}>{nextModule.ic}</div>
+              <div onClick={() => onOpenModule(nextModule.k)}
+                style={{ display:"flex", alignItems:"center", gap:12, cursor:"pointer", background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:12, padding:"10px 12px", transition:"border-color 0.2s" }}
+                onMouseEnter={e => e.currentTarget.style.borderColor="rgba(204,255,0,0.2)"}
+                onMouseLeave={e => e.currentTarget.style.borderColor="rgba(255,255,255,0.06)"}>
+                <div style={{ width:42, height:42, borderRadius:11, background:IC_GRAD[nextModule.t], display:"flex", alignItems:"center", justifyContent:"center", fontSize:18, flexShrink:0, boxShadow:IC_SHADOW[nextModule.t] }}>{nextModule.ic}</div>
                 <div style={{ flex:1, minWidth:0 }}>
-                  <div style={{ fontSize:8.5, fontWeight:800, color: nextModule.t === "MODULE" ? "#CCFF00" : "#F59E0B", letterSpacing:2.2, marginBottom:2, textTransform:"uppercase" }}>{nextModule.n || nextModule.t} · Up Next</div>
-                  <h3 style={{ fontSize:13, fontWeight:700, color:"#EEF2F8", margin:"0 0 2px", lineHeight:1.3, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{nextModule.sub}</h3>
-                  <p style={{ fontSize:10.5, color:"#666C7E", margin:0, lineHeight:1.4, fontWeight:500, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{nextModule.d}</p>
+                  <div style={{ fontSize:9, fontWeight:800, color: nextModule.t === "MODULE" ? "#CCFF00" : "#F59E0B", letterSpacing:2, marginBottom:3, textTransform:"uppercase" }}>Up Next</div>
+                  <div style={{ fontSize:13, fontWeight:700, color:"#EEF2F8", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{nextModule.sub}</div>
                 </div>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#666C7E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0 }}><polyline points="9 18 15 12 9 6"/></svg>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#555A6A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0 }}><polyline points="9 18 15 12 9 6"/></svg>
               </div>
             ) : (
-              <div style={{ fontSize:13, color:"#22C55E", fontWeight:700 }}>🎉 All modules complete.<div style={{ fontSize:11, color:"#666C7E", marginTop:4, fontWeight:500 }}>You're a closer.</div></div>
+              <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                <div style={{ width:36, height:36, borderRadius:10, background:"rgba(34,197,94,0.12)", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <div style={{ fontSize:13, fontWeight:700, color:"#22C55E" }}>All modules complete</div>
+              </div>
             )}
           </div>
         </div>
       </Card>
 
       {/* Today on the Floor */}
-      <Card title="Today on the Floor" accent="#F59E0B" action="Schedule" actionOnClick={() => onGoTab("scheduling")}>
+      <Card title="On the Floor Today" accent="#F59E0B" action="Schedule" actionOnClick={() => onGoTab("scheduling")}>
         {todaysReps.length === 0 ? (
-          <div style={{ fontSize:12, color:"#444856", padding:"12px 0" }}>Nobody scheduled today. Tap Schedule to add yourself.</div>
+          <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:8, padding:"16px 0", color:"#2E3140" }}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <span style={{ fontSize:11, color:"#5E6376" }}>Nobody in today</span>
+          </div>
         ) : (
           <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
             {todaysReps.map((name, i) => {
               const isMe = schedule[i]?.user_id === session.user.id;
               return (
-                <div key={i} style={{ display:"flex", alignItems:"center", gap:8, background:isMe?"rgba(204,255,0,0.08)":"rgba(255,255,255,0.04)", border:`1px solid ${isMe?"rgba(204,255,0,0.2)":"rgba(255,255,255,0.07)"}`, borderRadius:8, padding:"6px 10px" }}>
-                  <div style={{ width:22, height:22, borderRadius:6, background: isMe ? "linear-gradient(135deg,#CCFF00,#6E9100)" : "linear-gradient(135deg,#2A2D38,#1E2028)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, fontWeight:800, color: isMe?"#15171E":"#888D9C" }}>
+                <div key={i} style={{ display:"flex", alignItems:"center", gap:7, background:isMe?"rgba(204,255,0,0.08)":"rgba(255,255,255,0.04)", border:`1px solid ${isMe?"rgba(204,255,0,0.2)":"rgba(255,255,255,0.07)"}`, borderRadius:8, padding:"6px 10px" }}>
+                  <div style={{ width:22, height:22, borderRadius:6, background: isMe ? "linear-gradient(135deg,#CCFF00,#6E9100)" : "rgba(255,255,255,0.06)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, fontWeight:800, color: isMe?"#15171E":"#666C7E" }}>
                     {name[0]?.toUpperCase()}
                   </div>
-                  <div style={{ fontSize:12, fontWeight:600, color: isMe?"#F2F4F8":"#D6DAE2" }}>{name}</div>
+                  <div style={{ fontSize:12, fontWeight:600, color: isMe?"#F2F4F8":"#B0B5C4" }}>{name}</div>
                 </div>
               );
             })}
@@ -993,20 +1048,23 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
       </Card>
 
       {/* Recent Sales */}
-      <Card title="Recent Sales" accent="#22C55E" action="Leaderboard" actionOnClick={() => onGoTab("leaderboard")}>
+      <Card title="Recent Sales" accent="#22C55E" action="All Sales" actionOnClick={() => onGoTab("leaderboard")}>
         {recentSales.length === 0 ? (
-          <div style={{ fontSize:12, color:"#444856", padding:"12px 0" }}>No sales logged yet.</div>
+          <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:8, padding:"16px 0", color:"#2E3140" }}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            <span style={{ fontSize:11, color:"#5E6376" }}>No sales logged yet</span>
+          </div>
         ) : (
           <div style={{ display:"flex", flexDirection:"column", gap:5 }}>
             {recentSales.map(s => (
               <div key={s.id} style={{ display:"flex", alignItems:"center", gap:10, padding:"8px 12px", background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.05)", borderRadius:9 }}>
-                <div style={{ width:24, height:24, borderRadius:6, background: s.user_id===session.user.id ? "linear-gradient(135deg,#CCFF00,#6E9100)" : "rgba(255,255,255,0.05)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, fontWeight:800, color: s.user_id===session.user.id ? "#15171E" : "#666C7E", flexShrink:0 }}>
+                <div style={{ width:28, height:28, borderRadius:8, background: s.user_id===session.user.id ? "linear-gradient(135deg,#CCFF00,#6E9100)" : "rgba(255,255,255,0.05)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, fontWeight:800, color: s.user_id===session.user.id ? "#15171E" : "#555A6A", flexShrink:0 }}>
                   {(repProfiles[s.user_id] || "R")[0]?.toUpperCase()}
                 </div>
-                <div style={{ flex:1, minWidth:0, fontSize:11.5, color:"#D6DAE2", fontWeight:600, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
-                  {repProfiles[s.user_id] || "Rep"}{s.note ? <span style={{ color:"#444856", fontWeight:500 }}> — {s.note}</span> : ""}
+                <div style={{ flex:1, minWidth:0, fontSize:12, color:"#C4C9D4", fontWeight:600, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                  {repProfiles[s.user_id] || "Rep"}
                 </div>
-                {s.amount > 0 && <div style={{ fontSize:12, fontWeight:700, color:"#22C55E", flexShrink:0 }}>${Number(s.amount).toLocaleString()}</div>}
+                {s.amount > 0 && <div style={{ fontSize:13, fontWeight:800, color:"#22C55E", flexShrink:0 }}>${Number(s.amount).toLocaleString()}</div>}
               </div>
             ))}
           </div>
@@ -1030,14 +1088,14 @@ function Leaderboard({ session, profile, w }) {
   const [saving, setSaving] = useState(false);
   const [editingBonus, setEditingBonus] = useState(null);
   const [showAddBonus, setShowAddBonus] = useState(false);
-  const [bonusForm, setBonusForm] = useState({ label:"", threshold:"", amount:"", description:"" });
+  const [bonusForm, setBonusForm] = useState({ label:"", threshold:"", amount:"", period:"month", description:"" });
   const DEAL_OPTS = [1497, 2497, 4497];
   const RETAINER_OPTS = [49, 197, 297];
   const dk = w >= 768;
   const isAdmin = profile?.role === "admin";
 
   const loadBonuses = async () => {
-    const { data } = await supabase.from("monthly_bonuses").select("*").order("threshold", { ascending: true, nullsFirst: false }).order("amount");
+    const { data } = await supabase.from("monthly_bonuses").select("*").order("created_at", { ascending: false }).limit(1);
     setBonuses(data ?? []);
   };
 
@@ -1063,19 +1121,24 @@ function Leaderboard({ session, profile, w }) {
   }, []);
 
   const resetForm = () => { setDealAmt(null); setCustomAmt(""); setRetainer(null); setNote(""); setShowAdd(false); };
-  const resetBonusForm = () => { setBonusForm({ label:"", threshold:"", amount:"", description:"" }); setShowAddBonus(false); setEditingBonus(null); };
+  const resetBonusForm = () => { setBonusForm({ label:"", threshold:"", amount:"", period:"month", description:"" }); setShowAddBonus(false); setEditingBonus(null); };
 
   const saveBonus = async () => {
+    const threshold = parseInt(bonusForm.threshold);
+    const amount = parseFloat(bonusForm.amount);
+    if (isNaN(threshold) || threshold <= 0 || isNaN(amount) || amount <= 0) return;
     const payload = {
-      label: bonusForm.label.trim(),
-      threshold: bonusForm.threshold !== "" ? parseInt(bonusForm.threshold) : null,
-      amount: parseFloat(bonusForm.amount),
+      label: bonusForm.label.trim() || null,
+      threshold,
+      amount,
+      period: bonusForm.period === "week" ? "week" : "month",
       description: bonusForm.description.trim() || null,
     };
-    if (!payload.label || isNaN(payload.amount)) return;
     if (editingBonus) {
       await supabase.from("monthly_bonuses").update(payload).eq("id", editingBonus.id);
     } else {
+      // Replace any prior active bonus with the new one.
+      await supabase.from("monthly_bonuses").delete().not("id", "is", null);
       await supabase.from("monthly_bonuses").insert(payload);
     }
     resetBonusForm();
@@ -1311,90 +1374,117 @@ function Leaderboard({ session, profile, w }) {
         </div>
       )}
 
-      {/* Monthly Bonuses */}
-      <div style={{ marginTop:40 }}>
-        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:16 }}>
-          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-            <div style={{ fontSize:16 }}>🏆</div>
-            <div style={{ fontSize:10, fontWeight:800, color:"#FFD700", letterSpacing:3, textTransform:"uppercase" }}>Monthly Bonuses</div>
-          </div>
-          {isAdmin && (
-            <button onClick={() => { resetBonusForm(); setShowAddBonus(true); }}
-              style={{ background:"rgba(255,215,0,0.08)", border:"1px solid rgba(255,215,0,0.2)", borderRadius:8, color:"#FFD700", fontSize:10, fontWeight:700, letterSpacing:1.5, padding:"7px 14px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>
-              + Add Tier
-            </button>
-          )}
-        </div>
+      {/* Active Bonus */}
+      {(() => {
+        const activeBonus = bonuses[0] ?? null;
+        const computeMyCount = (b) => sales.filter(s => {
+          if (s.user_id !== session.user.id) return false;
+          const d = new Date(s.sale_date);
+          if (b.period === "week") {
+            const mon = new Date(now); mon.setHours(0,0,0,0);
+            mon.setDate(now.getDate() - (now.getDay() === 0 ? 6 : now.getDay() - 1));
+            const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+            return d >= mon && d <= sun;
+          }
+          return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+        }).length;
+        return (
+          <div style={{ marginTop:40 }}>
+            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:16 }}>
+              <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                <div style={{ fontSize:16 }}>🏆</div>
+                <div style={{ fontSize:10, fontWeight:800, color:"#FFD700", letterSpacing:3, textTransform:"uppercase" }}>Active Bonus</div>
+              </div>
+              {isAdmin && !activeBonus && !showAddBonus && (
+                <button onClick={() => { resetBonusForm(); setShowAddBonus(true); }}
+                  style={{ background:"rgba(255,215,0,0.08)", border:"1px solid rgba(255,215,0,0.2)", borderRadius:8, color:"#FFD700", fontSize:10, fontWeight:700, letterSpacing:1.5, padding:"7px 14px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>
+                  + Set Bonus
+                </button>
+              )}
+            </div>
 
-        {/* Add / Edit bonus form (admin only) */}
-        {isAdmin && (showAddBonus || editingBonus) && (
-          <div style={{ background:"#1A1C24", border:"1px solid rgba(255,215,0,0.12)", borderRadius:14, padding:18, marginBottom:16, animation:"fadeUp 0.2s ease" }}>
-            <div style={{ fontSize:10, fontWeight:700, color:"#666C7E", letterSpacing:2, textTransform:"uppercase", marginBottom:14 }}>{editingBonus ? "Edit Bonus Tier" : "New Bonus Tier"}</div>
-            <div style={{ display:"flex", gap:10, flexWrap:"wrap", marginBottom:10 }}>
-              <div style={{ flex:"2 1 160px" }}>
-                <div style={{ fontSize:9, fontWeight:700, color:"#444856", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Label</div>
-                <input value={bonusForm.label} onChange={e => setBonusForm(p=>({...p, label:e.target.value}))} placeholder="e.g. Bronze, 5-Sale Bonus…"
-                  style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:500, padding:"9px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }} />
+            {/* Add / Edit bonus form (admin only) */}
+            {isAdmin && (showAddBonus || editingBonus) && (
+              <div style={{ background:"#1A1C24", border:"1px solid rgba(255,215,0,0.12)", borderRadius:14, padding:18, marginBottom:16, animation:"fadeUp 0.2s ease" }}>
+                <div style={{ fontSize:10, fontWeight:700, color:"#666C7E", letterSpacing:2, textTransform:"uppercase", marginBottom:14 }}>{editingBonus ? "Edit Active Bonus" : "Set Active Bonus"}</div>
+                <div style={{ marginBottom:12 }}>
+                  <div style={{ fontSize:9, fontWeight:700, color:"#444856", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Period</div>
+                  <div style={{ display:"flex", gap:6 }}>
+                    {[{v:"week", l:"This Week"}, {v:"month", l:"This Month"}].map(p => (
+                      <button key={p.v} type="button" onClick={() => setBonusForm(f => ({...f, period:p.v}))}
+                        style={{ flex:1, background: bonusForm.period===p.v ? "rgba(255,215,0,0.15)" : "rgba(255,255,255,0.04)", border:`1px solid ${bonusForm.period===p.v ? "rgba(255,215,0,0.4)" : "rgba(255,255,255,0.08)"}`, borderRadius:8, color: bonusForm.period===p.v ? "#FFD700" : "#9CA3AF", fontSize:12, fontWeight:700, padding:"10px 0", cursor:"pointer", fontFamily:"inherit" }}>
+                        {p.l}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div style={{ display:"flex", gap:10, flexWrap:"wrap", marginBottom:10 }}>
+                  <div style={{ flex:"1 1 120px" }}>
+                    <div style={{ fontSize:9, fontWeight:700, color:"#444856", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Sales Needed</div>
+                    <input type="number" min="1" value={bonusForm.threshold} onChange={e => setBonusForm(p=>({...p, threshold:e.target.value}))} placeholder="e.g. 5"
+                      style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:600, padding:"9px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }} />
+                  </div>
+                  <div style={{ flex:"1 1 120px" }}>
+                    <div style={{ fontSize:9, fontWeight:700, color:"#444856", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Bonus ($)</div>
+                    <input type="number" min="1" value={bonusForm.amount} onChange={e => setBonusForm(p=>({...p, amount:e.target.value}))} placeholder="e.g. 500"
+                      style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:600, padding:"9px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }} />
+                  </div>
+                </div>
+                <div style={{ marginBottom:8, fontSize:11, color:"#7E8595", fontWeight:500 }}>
+                  Hit <span style={{ color:"#FFD700", fontWeight:700 }}>{bonusForm.threshold || "?"} sale{bonusForm.threshold==="1"?"":"s"}</span> {bonusForm.period === "week" ? "this week" : "this month"} to earn <span style={{ color:"#FFD700", fontWeight:700 }}>${bonusForm.amount ? Number(bonusForm.amount).toLocaleString() : "?"}</span>.
+                </div>
+                <div style={{ marginBottom:12 }}>
+                  <div style={{ fontSize:9, fontWeight:700, color:"#444856", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Description (optional)</div>
+                  <input value={bonusForm.description} onChange={e => setBonusForm(p=>({...p, description:e.target.value}))} placeholder="Any extra details…"
+                    style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:500, padding:"9px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }} />
+                </div>
+                <div style={{ display:"flex", gap:8 }}>
+                  <button onClick={saveBonus} style={{ background:"#FFD700", border:"none", borderRadius:8, color:"#111", fontSize:12, fontWeight:800, letterSpacing:1, padding:"10px 22px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Save</button>
+                  <button onClick={resetBonusForm} style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:8, color:"#666C7E", fontSize:12, fontWeight:700, padding:"10px 16px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Cancel</button>
+                </div>
               </div>
-              <div style={{ flex:"1 1 100px" }}>
-                <div style={{ fontSize:9, fontWeight:700, color:"#444856", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Sales Needed</div>
-                <input type="number" min="0" value={bonusForm.threshold} onChange={e => setBonusForm(p=>({...p, threshold:e.target.value}))} placeholder="e.g. 5"
-                  style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:600, padding:"9px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }} />
-              </div>
-              <div style={{ flex:"1 1 100px" }}>
-                <div style={{ fontSize:9, fontWeight:700, color:"#444856", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Bonus ($)</div>
-                <input type="number" min="0" value={bonusForm.amount} onChange={e => setBonusForm(p=>({...p, amount:e.target.value}))} placeholder="e.g. 500"
-                  style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:600, padding:"9px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }} />
-              </div>
-            </div>
-            <div style={{ marginBottom:12 }}>
-              <div style={{ fontSize:9, fontWeight:700, color:"#444856", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Description (optional)</div>
-              <input value={bonusForm.description} onChange={e => setBonusForm(p=>({...p, description:e.target.value}))} placeholder="Any extra details…"
-                style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:500, padding:"9px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }} />
-            </div>
-            <div style={{ display:"flex", gap:8 }}>
-              <button onClick={saveBonus} style={{ background:"#FFD700", border:"none", borderRadius:8, color:"#111", fontSize:12, fontWeight:800, letterSpacing:1, padding:"10px 22px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Save</button>
-              <button onClick={resetBonusForm} style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:8, color:"#666C7E", fontSize:12, fontWeight:700, padding:"10px 16px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Cancel</button>
-            </div>
-          </div>
-        )}
+            )}
 
-        {/* Bonus tier cards */}
-        {bonuses.length === 0 && !showAddBonus ? (
-          <div style={{ fontSize:12, color:"#5E6376", padding:"20px 0" }}>{isAdmin ? "No bonus tiers set yet. Add one above." : "No bonuses set this month yet."}</div>
-        ) : (
-          <div style={{ display:"grid", gridTemplateColumns:dk?"repeat(auto-fill, minmax(220px, 1fr))":"1fr", gap:10 }}>
-            {bonuses.map(b => {
-              const myCount = sales.filter(s => {
-                if (s.user_id !== session.user.id) return false;
-                const d = new Date(s.sale_date);
-                return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
-              }).length;
-              const reached = b.threshold != null ? myCount >= b.threshold : false;
+            {/* Active bonus card */}
+            {!activeBonus && !showAddBonus ? (
+              <div style={{ fontSize:12, color:"#5E6376", padding:"20px 0" }}>{isAdmin ? "No active bonus. Click + Set Bonus to create one." : "No active bonus right now."}</div>
+            ) : activeBonus ? (() => {
+              const b = activeBonus;
+              const myCount = computeMyCount(b);
+              const reached = myCount >= (b.threshold ?? Infinity);
+              const pct = Math.min(100, b.threshold ? (myCount / b.threshold) * 100 : 0);
+              const periodLabel = b.period === "week" ? "this week" : "this month";
               return (
-                <div key={b.id} style={{ background: reached ? "rgba(255,215,0,0.06)" : "rgba(255,255,255,0.025)", border:`1px solid ${reached ? "rgba(255,215,0,0.2)" : "rgba(255,255,255,0.07)"}`, borderRadius:14, padding:"16px 18px", position:"relative" }}>
-                  {reached && <div style={{ position:"absolute", top:12, right:12, fontSize:9, fontWeight:800, color:"#FFD700", letterSpacing:1.5, textTransform:"uppercase" }}>✓ Reached</div>}
-                  <div style={{ fontSize:22, fontWeight:900, color: reached ? "#FFD700" : "#D6DAE2", lineHeight:1, marginBottom:4 }}>${Number(b.amount).toLocaleString()}</div>
-                  <div style={{ fontSize:12, fontWeight:700, color: reached ? "#FFD700" : "#9CA3AF", marginBottom:b.description?4:0 }}>{b.label}</div>
-                  {b.threshold != null && (
-                    <div style={{ fontSize:10, color:"#444856", marginBottom:b.description?4:0 }}>{b.threshold} {b.threshold===1?"sale":"sales"} needed{b.threshold != null && ` · ${myCount}/${b.threshold} this month`}</div>
-                  )}
-                  {b.description && <div style={{ fontSize:11, color:"#5E6376" }}>{b.description}</div>}
+                <div style={{ background: reached ? "linear-gradient(180deg,rgba(255,215,0,0.10),rgba(255,215,0,0.04))" : "rgba(255,255,255,0.03)", border:`1px solid ${reached ? "rgba(255,215,0,0.32)" : "rgba(255,255,255,0.08)"}`, borderRadius:16, padding:dk?"22px 26px":"18px 20px", position:"relative" }}>
+                  {reached && <div style={{ position:"absolute", top:14, right:16, fontSize:10, fontWeight:800, color:"#FFD700", letterSpacing:1.5, textTransform:"uppercase" }}>✓ Reached</div>}
+                  <div style={{ fontSize:9.5, fontWeight:800, color:"#FFD700", letterSpacing:2.5, textTransform:"uppercase", marginBottom:6 }}>{b.period === "week" ? "Weekly Goal" : "Monthly Goal"}</div>
+                  <div style={{ display:"flex", alignItems:"baseline", gap:10, flexWrap:"wrap", marginBottom:10 }}>
+                    <div style={{ fontSize:dk?34:28, fontWeight:900, color: reached ? "#FFD700" : "#F2F4F8", lineHeight:1, letterSpacing:"-0.02em" }}>${Number(b.amount).toLocaleString()}</div>
+                    <div style={{ fontSize:13, fontWeight:600, color:"#9CA3AF" }}>for {b.threshold} {b.threshold===1?"sale":"sales"} {periodLabel}</div>
+                  </div>
+                  {b.label && <div style={{ fontSize:13, fontWeight:600, color:"#D6DAE2", marginBottom:b.description?4:10 }}>{b.label}</div>}
+                  {b.description && <div style={{ fontSize:12, color:"#7E8595", marginBottom:10 }}>{b.description}</div>}
+                  <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:6 }}>
+                    <div style={{ flex:1, height:6, background:"rgba(255,255,255,0.06)", borderRadius:4, overflow:"hidden" }}>
+                      <div style={{ height:"100%", width:`${pct}%`, background:"linear-gradient(90deg,#CCFF00,#FFD700)", borderRadius:4, transition:"width 0.4s" }} />
+                    </div>
+                    <div style={{ fontSize:12, fontWeight:700, color: reached ? "#FFD700" : "#D6DAE2", whiteSpace:"nowrap" }}>{myCount} / {b.threshold}</div>
+                  </div>
                   {isAdmin && (
-                    <div style={{ display:"flex", gap:8, marginTop:12 }}>
-                      <button onClick={() => { setEditingBonus(b); setBonusForm({ label:b.label, threshold:b.threshold??'', amount:b.amount, description:b.description??'' }); setShowAddBonus(false); }}
-                        style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:6, color:"#666C7E", fontSize:10, fontWeight:700, padding:"5px 12px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", letterSpacing:1 }}>Edit</button>
+                    <div style={{ display:"flex", gap:8, marginTop:14 }}>
+                      <button onClick={() => { setEditingBonus(b); setBonusForm({ label:b.label??'', threshold:b.threshold??'', amount:b.amount, period:b.period||"month", description:b.description??'' }); setShowAddBonus(false); }}
+                        style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:6, color:"#9CA3AF", fontSize:10, fontWeight:700, padding:"6px 14px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", letterSpacing:1 }}>Edit</button>
                       <button onClick={() => deleteBonus(b.id)}
-                        style={{ background:"none", border:"none", color:"#5E6376", fontSize:10, fontWeight:700, padding:"5px 8px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", letterSpacing:1, transition:"color 0.15s" }}
-                        onMouseEnter={e=>e.target.style.color="#CCFF00"} onMouseLeave={e=>e.target.style.color="#5E6376"}>Delete</button>
+                        style={{ background:"none", border:"none", color:"#5E6376", fontSize:10, fontWeight:700, padding:"6px 10px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", letterSpacing:1, transition:"color 0.15s" }}
+                        onMouseEnter={e=>e.target.style.color="#FF3370"} onMouseLeave={e=>e.target.style.color="#5E6376"}>End Bonus</button>
                     </div>
                   )}
                 </div>
               );
-            })}
+            })() : null}
           </div>
-        )}
-      </div>
+        );
+      })()}
 
     </div>
   );
@@ -1868,12 +1958,12 @@ export default function App() {
   const referenceItems = CATS.filter(x=>x.t==="REFERENCE");
   const quizItems = CATS.filter(x=>x.t==="QUIZ");
   const TABS = [
-    { key:"dashboard", label:"Dashboard", color:"#22C55E" },
-    { key:"leaderboard", label:"Leaderboard", color:"#FFD700" },
-    { key:"scheduling", label:"Scheduling", color:"#F59E0B" },
-    { key:"training", label:"Training", color:"#CCFF00" },
-    { key:"reference", label:"Reference", color:"#06D6F0" },
-    { key:"quizzes", label:"Quizzes", color:"#10B981" },
+    { key:"dashboard",    label:"Dashboard",    short:"Home",     color:"#22C55E" },
+    { key:"leaderboard",  label:"Leaderboard",  short:"Board",    color:"#FFD700" },
+    { key:"scheduling",   label:"Scheduling",   short:"Schedule", color:"#F59E0B" },
+    { key:"training",     label:"Training",     short:"Train",    color:"#CCFF00" },
+    { key:"reference",    label:"Reference",    short:"Ref",      color:"#06D6F0" },
+    { key:"quizzes",      label:"Quizzes",      short:"Quizzes",  color:"#10B981" },
   ];
 
   if (loading) return (
@@ -1952,20 +2042,20 @@ export default function App() {
               </div>
 
               {/* Right actions */}
-              <div style={{ display:"flex", alignItems:"center", gap:8, animation:"fadeUp 0.5s ease 0.06s both" }}>
+              <div style={{ display:"flex", alignItems:"center", gap:dk?8:6, animation:"fadeUp 0.5s ease 0.06s both" }}>
                 {profile?.role === "admin" && (
-                  <button onClick={() => setView("__admin")} className="btn-ghost" style={{ fontSize:10, padding:"9px 14px", color:"#F59E0B", borderColor:"rgba(245,158,11,0.22)", background:"rgba(245,158,11,0.06)" }}>Admin</button>
+                  <button onClick={() => setView("__admin")} className="btn-ghost" style={{ fontSize:10, padding:dk?"9px 14px":"7px 10px", color:"#F59E0B", borderColor:"rgba(245,158,11,0.22)", background:"rgba(245,158,11,0.06)" }}>Admin</button>
                 )}
 
-                {/* Avatar + name edit grouped */}
+                {/* Avatar + name edit */}
                 <div style={{ position:"relative", display:"flex", alignItems:"center", gap:0 }}>
                   <div className="profile-pill"
                     onClick={() => { setShowNameEdit(v => !v); setNameEdit(profile?.name ?? ""); }}>
                     <div style={{ width:30, height:30, borderRadius:9, background:"linear-gradient(135deg,#CCFF00,#88AB00)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Plus Jakarta Sans',sans-serif", fontSize:13, fontWeight:900, color:"#15171E", flexShrink:0, boxShadow:"0 2px 10px rgba(204,255,0,0.4), inset 0 1px 0 rgba(255,255,255,0.4)" }}>
                       {profile?.name?.[0]?.toUpperCase() ?? "R"}
                     </div>
-                    <span style={{ fontSize:12.5, fontWeight:600, color:"#D6DAE2", letterSpacing:0.2 }}>{profile?.name ?? "Rep"}</span>
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#5E6376" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft:2 }}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    {dk && <span style={{ fontSize:12.5, fontWeight:600, color:"#D6DAE2", letterSpacing:0.2 }}>{profile?.name ?? "Rep"}</span>}
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#5E6376" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft:dk?2:0 }}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                   </div>
                   {showNameEdit && (
                     <div className="glass" style={{ position:"absolute", top:"calc(100% + 10px)", right:0, borderRadius:14, padding:18, width:240, zIndex:200, boxShadow:"0 24px 60px rgba(0,0,0,0.7)", animation:"popIn 0.18s ease" }}>
@@ -1986,54 +2076,29 @@ export default function App() {
                   )}
                 </div>
 
-                <button onClick={signOut} className="btn-ghost" style={{ fontSize:10, padding:"9px 14px" }}>Sign Out</button>
+                <button onClick={signOut} className="btn-ghost" style={{ fontSize:10, padding:dk?"9px 14px":"7px 10px" }}>{dk ? "Sign Out" : "Out"}</button>
               </div>
             </div>
 
-            {/* Tab Nav */}
-            <div style={{ display:"flex", gap:4, overflowX:"auto", paddingBottom:10, marginBottom:-1, animation:"fadeUp 0.5s ease 0.1s both" }}>
+            {/* Tab Nav — scrollable, no scrollbar */}
+            <div style={{ display:"flex", gap:4, overflowX:"auto", paddingBottom:10, marginBottom:-1, animation:"fadeUp 0.5s ease 0.1s both", scrollbarWidth:"none", msOverflowStyle:"none" }}>
               {TABS.map(t => (
                 <button key={t.key} onClick={() => setTab(t.key)}
                   className={"tab-pill" + (tab===t.key ? " active" : "")}
-                  style={{ fontSize:10.5, padding:dk?"10px 18px":"9px 14px", whiteSpace:"nowrap" }}>
+                  style={{ fontSize:10.5, padding:dk?"10px 18px":"9px 12px", whiteSpace:"nowrap", flexShrink:0 }}>
                   <span className="tab-bg" />
-                  <span>{t.label}</span>
+                  <span>{dk ? t.label : t.short}</span>
                 </button>
               ))}
             </div>
-
           </div>
         </div>
       </div>
 
-      {/* Welcome + stats row */}
-      <div style={{ position:"relative", zIndex:1, padding:wd?"22px 56px 0":dk?"20px 36px 0":"16px 20px 0" }}>
-        <div style={{ maxWidth:1300, margin:"0 auto", display:"flex", alignItems:"center", justifyContent:"space-between", gap:16, flexWrap:"wrap", animation:"fadeUp 0.5s ease 0.16s both" }}>
-          <div>
-            <div style={{ fontSize:dk?22:18, fontWeight:800, color:"#F2F4F8", letterSpacing:"-0.02em", lineHeight:1.2 }}>
-              {profile?.name ? <>Welcome back, <span className="red-gradient-text">{profile.name}</span></> : "Welcome back"}
-            </div>
-            <p style={{ fontSize:dk?13:12, color:"#666C7E", margin:"6px 0 0", fontWeight:500 }}>Master every module. Close more deals.</p>
-          </div>
-          <div style={{ display:"flex", gap:8 }}>
-            {[
-              [completedModules.size, "Done", "#22C55E"],
-              ["13", "Modules", "#CCFF00"],
-              ["2", "Camps", "#F59E0B"],
-              ["6", "Quizzes", "#10B981"],
-            ].map(([n, l, col]) => (
-              <div key={l} className="stat-card" style={{ background:`linear-gradient(180deg,${col}14,${col}06)`, border:`1px solid ${col}26`, borderRadius:12, padding:"11px 16px", textAlign:"center", minWidth:62 }}>
-                <div style={{ fontSize:dk?22:18, fontWeight:900, color:col, lineHeight:1, letterSpacing:"-0.02em" }}>{n}</div>
-                <div style={{ fontSize:8.5, color:`${col}90`, textTransform:"uppercase", letterSpacing:1.5, fontWeight:800, marginTop:5 }}>{l}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+
 
       {/* Tab Content */}
-      {/* LEADERBOARD TAB is rendered below */}
-      <div style={{ position:"relative", zIndex:1, maxWidth:1300, margin:"0 auto", padding:wd?"28px 56px 90px":dk?"24px 36px 90px":"18px 20px 90px" }}>
+      <div style={{ position:"relative", zIndex:1, maxWidth:1300, margin:"0 auto", padding:wd?"28px 56px 90px":dk?"24px 36px 90px":"16px 16px 90px" }}>
 
         {/* DASHBOARD TAB */}
         {tab === "dashboard" && (

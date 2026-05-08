@@ -132,12 +132,20 @@ create policy "Admins read all scores"
 -- ─── MONTHLY BONUSES ────────────────────────────────────────
 create table if not exists public.monthly_bonuses (
   id          uuid default gen_random_uuid() primary key,
-  label       text not null,
+  label       text,
   threshold   integer,
   amount      numeric not null,
+  period      text not null default 'month' check (period in ('week', 'month')),
   description text,
   created_at  timestamptz default now()
 );
+
+-- For existing deployments
+alter table public.monthly_bonuses add column if not exists period text not null default 'month';
+alter table public.monthly_bonuses drop constraint if exists monthly_bonuses_period_check;
+alter table public.monthly_bonuses add constraint monthly_bonuses_period_check
+  check (period in ('week', 'month'));
+alter table public.monthly_bonuses alter column label drop not null;
 
 alter table public.monthly_bonuses enable row level security;
 
