@@ -264,3 +264,47 @@ begin
     end if;
   end loop;
 end $$;
+
+
+-- ─── INBOUND LEADS ──────────────────────────────────────────
+-- Admin uploads a CSV; each row becomes a lead assigned to a single rep.
+create table if not exists public.leads (
+  id           uuid default gen_random_uuid() primary key,
+  assigned_to  uuid references auth.users(id) on delete cascade not null,
+  assigned_by  uuid references auth.users(id) on delete set null,
+  data         jsonb not null default '{}'::jsonb,
+  status       text not null default 'new' check (status in ('new','contacted','quoted','closed','dead')),
+  note         text,
+  created_at   timestamptz default now()
+);
+
+create index if not exists leads_assigned_to_idx on public.leads (assigned_to, created_at desc);
+
+alter table public.leads enable row level security;
+
+create policy "Reps read own leads"
+  on public.leads for select
+  using (auth.uid() = assigned_to);
+
+create policy "Admins read all leads"
+  on public.leads for select
+  using (public.is_admin());
+
+create policy "Reps update own leads"
+  on public.leads for update
+  using (auth.uid() = assigned_to);
+
+create policy "Admins manage leads"
+  on public.leads for all
+  using (public.is_admin());
+
+-- Live updates for the leads inbox
+do $$
+begin
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'leads'
+  ) then
+    alter publication supabase_realtime add table public.leads;
+  end if;
+end $$;

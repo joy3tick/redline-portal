@@ -902,6 +902,382 @@ function Announcements({ session, profile, w }) {
   );
 }
 
+function Leads({ session, profile, w }) {
+  const [leads, setLeads] = useState([]);
+  const [reps, setReps] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [expandedId, setExpandedId] = useState(null);
+  const [draftNote, setDraftNote] = useState("");
+  // Admin upload state
+  const [uploading, setUploading] = useState(false);
+  const [parsed, setParsed] = useState(null); // { headers, rows, fileName }
+  const [assignTo, setAssignTo] = useState("");
+  const fileInputRef = useRef(null);
+  const dk = w >= 768;
+  const isAdmin = profile?.role === "admin";
+
+  const load = async () => {
+    const [leadsRes, profRes] = await Promise.all([
+      supabase.from("leads")
+        .select("id, assigned_to, assigned_by, data, status, note, created_at")
+        .order("created_at", { ascending: false }),
+      supabase.from("profiles").select("id, name, role").order("name"),
+    ]);
+    setLeads(leadsRes.data ?? []);
+    const repList = (profRes.data ?? []).filter(p => p.role === "rep");
+    setReps(repList);
+    if (!assignTo && repList.length) setAssignTo(repList[0].id);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    load();
+    const ch = supabase.channel("leads-rt")
+      .on("postgres_changes", { event: "*", schema: "public", table: "leads" }, load)
+      .subscribe();
+    return () => supabase.removeChannel(ch);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const repById = Object.fromEntries(reps.map(r => [r.id, r.name || "Rep"]));
+
+  // CSV parser handles quoted fields, embedded commas/newlines, and "" escapes.
+  const parseCSV = (text) => {
+    const rows = []; let row = [], cur = "", inQ = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (inQ) {
+        if (c === '"') {
+          if (text[i+1] === '"') { cur += '"'; i++; } else inQ = false;
+        } else cur += c;
+      } else {
+        if (c === '"') inQ = true;
+        else if (c === ',') { row.push(cur); cur = ""; }
+        else if (c === '\n') { row.push(cur); cur = ""; rows.push(row); row = []; }
+        else if (c !== '\r') cur += c;
+      }
+    }
+    if (cur.length || row.length) { row.push(cur); rows.push(row); }
+    return rows.filter(r => r.some(c => (c ?? "").trim() !== ""));
+  };
+
+  const onFile = async (file) => {
+    if (!file) return;
+    const text = await file.text();
+    const rows = parseCSV(text);
+    if (rows.length < 2) {
+      alert("CSV needs a header row and at least one data row.");
+      return;
+    }
+    const headers = rows[0].map(h => h.trim());
+    const data = rows.slice(1).map(r => {
+      const o = {};
+      headers.forEach((h, i) => { o[h] = (r[i] ?? "").trim(); });
+      return o;
+    });
+    setParsed({ headers, rows: data, fileName: file.name });
+  };
+
+  const upload = async () => {
+    if (!parsed || !assignTo || uploading) return;
+    setUploading(true);
+    const payload = parsed.rows.map(d => ({
+      assigned_to: assignTo,
+      assigned_by: session.user.id,
+      data: d,
+    }));
+    const { error } = await supabase.from("leads").insert(payload);
+    setUploading(false);
+    if (error) {
+      alert(`Upload failed: ${error.message}`);
+      return;
+    }
+    setParsed(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    load();
+  };
+
+  const setStatus = async (id, status) => {
+    const { data, error } = await supabase
+      .from("leads")
+      .update({ status })
+      .eq("id", id)
+      .select()
+      .single();
+    if (error || !data) {
+      alert(`Couldn't update: ${error?.message ?? "no row returned (RLS?)"}`);
+      return;
+    }
+    setLeads(prev => prev.map(l => l.id === id ? { ...l, status: data.status } : l));
+  };
+
+  const saveNote = async (id) => {
+    const { data, error } = await supabase
+      .from("leads")
+      .update({ note: draftNote.trim() || null })
+      .eq("id", id)
+      .select()
+      .single();
+    if (error || !data) {
+      alert(`Couldn't save note: ${error?.message ?? "no row returned"}`);
+      return;
+    }
+    setLeads(prev => prev.map(l => l.id === id ? { ...l, note: data.note } : l));
+  };
+
+  const removeLead = async (id) => {
+    if (!confirm("Delete this lead?")) return;
+    const { error } = await supabase.from("leads").delete().eq("id", id);
+    if (error) { alert(`Couldn't delete: ${error.message}`); return; }
+    setLeads(prev => prev.filter(l => l.id !== id));
+  };
+
+  const STATUSES = [
+    { v: "new",       label: "New",       color: "#06D6F0" },
+    { v: "contacted", label: "Contacted", color: "#F59E0B" },
+    { v: "quoted",    label: "Quoted",    color: "#A78BFA" },
+    { v: "closed",    label: "Closed",    color: "#22C55E" },
+    { v: "dead",      label: "Dead",      color: "#FF3370" },
+  ];
+  const statusByV = Object.fromEntries(STATUSES.map(s => [s.v, s]));
+
+  const visible = leads.filter(l => {
+    if (!isAdmin && l.assigned_to !== session.user.id) return false;
+    if (statusFilter !== "all" && l.status !== statusFilter) return false;
+    return true;
+  });
+
+  const counts = STATUSES.reduce((acc, s) => {
+    acc[s.v] = leads.filter(l => (isAdmin || l.assigned_to === session.user.id) && l.status === s.v).length;
+    return acc;
+  }, {});
+  const totalForFilter = leads.filter(l => isAdmin || l.assigned_to === session.user.id).length;
+
+  // Pretty primary line: try common keys, else first non-empty value
+  const primaryLine = (d) => {
+    if (!d) return "Lead";
+    const keys = Object.keys(d);
+    const lower = keys.map(k => k.toLowerCase());
+    const PREF = ["business","company","name","business name","client","title"];
+    for (const p of PREF) {
+      const idx = lower.indexOf(p);
+      if (idx >= 0 && (d[keys[idx]] ?? "").toString().trim()) return d[keys[idx]];
+    }
+    for (const k of keys) {
+      const v = (d[k] ?? "").toString().trim();
+      if (v) return v;
+    }
+    return "Lead";
+  };
+  const secondaryLine = (d) => {
+    if (!d) return "";
+    const lower = Object.keys(d).reduce((a,k) => (a[k.toLowerCase()] = d[k], a), {});
+    const phone = lower.phone || lower["phone number"] || lower.tel;
+    const email = lower.email || lower["email address"];
+    const city = lower.city || lower.location;
+    const niche = lower.niche || lower.industry || lower.category;
+    return [phone, email, city, niche].filter(Boolean).join(" · ");
+  };
+
+  return (
+    <div style={{ animation:"fadeUp 0.35s ease", display:"flex", flexDirection:"column", gap:14 }}>
+
+      {/* Admin upload card */}
+      {isAdmin && (
+        <div className="dash-card" style={{ padding:dk?"20px 22px":"16px 18px" }}>
+          <div style={{ position:"absolute", top:0, left:0, right:0, height:2, background:"linear-gradient(90deg,transparent,#F59E0B80,transparent)", opacity:0.5 }} />
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:14, flexWrap:"wrap", gap:10 }}>
+            <div style={{ fontSize:10, fontWeight:800, color:"#F59E0B", letterSpacing:2.5, textTransform:"uppercase" }}>Assign Leads · CSV Upload</div>
+          </div>
+
+          {!parsed ? (
+            <div>
+              <label
+                htmlFor="leads-csv-input"
+                style={{ display:"flex", alignItems:"center", gap:14, padding:"16px 18px", background:"rgba(255,255,255,0.02)", border:"1px dashed rgba(255,255,255,0.1)", borderRadius:12, cursor:"pointer", transition:"all 0.18s" }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor="rgba(245,158,11,0.35)"; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor="rgba(255,255,255,0.1)"; }}>
+                <div style={{ width:38, height:38, borderRadius:11, background:"rgba(245,158,11,0.12)", border:"1px solid rgba(245,158,11,0.22)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 12 15 15"/></svg>
+                </div>
+                <div style={{ flex:1, minWidth:0 }}>
+                  <div style={{ fontSize:13, fontWeight:700, color:"#EEF2F8" }}>Upload a CSV file</div>
+                  <div style={{ fontSize:11, color:"#666C7E", marginTop:3 }}>First row should be column headers (Business, Phone, Email, etc.)</div>
+                </div>
+              </label>
+              <input
+                id="leads-csv-input"
+                ref={fileInputRef}
+                type="file"
+                accept=".csv,text/csv"
+                onChange={e => onFile(e.target.files?.[0])}
+                style={{ display:"none" }}
+              />
+            </div>
+          ) : (
+            <div>
+              <div style={{ display:"flex", alignItems:"center", gap:12, padding:"10px 14px", background:"rgba(34,197,94,0.06)", border:"1px solid rgba(34,197,94,0.2)", borderRadius:10, marginBottom:14 }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <div style={{ flex:1, minWidth:0, fontSize:12, fontWeight:600, color:"#D6DAE2" }}>
+                  <span style={{ color:"#22C55E", fontWeight:800 }}>{parsed.rows.length}</span> {parsed.rows.length === 1 ? "lead" : "leads"} parsed from <span style={{ color:"#F2F4F8" }}>{parsed.fileName}</span>
+                </div>
+                <button onClick={() => { setParsed(null); if (fileInputRef.current) fileInputRef.current.value=""; }}
+                  style={{ background:"none", border:"none", color:"#666C7E", fontSize:11, fontWeight:700, cursor:"pointer", textTransform:"uppercase", letterSpacing:1.5, padding:"4px 8px", fontFamily:"inherit" }}>Clear</button>
+              </div>
+
+              {/* Preview a few rows */}
+              <div style={{ overflow:"auto", border:"1px solid rgba(255,255,255,0.06)", borderRadius:10, marginBottom:14, maxHeight:200 }}>
+                <table style={{ width:"100%", borderCollapse:"collapse", fontSize:11.5 }}>
+                  <thead style={{ position:"sticky", top:0, background:"rgba(20,22,28,0.95)", backdropFilter:"blur(8px)" }}>
+                    <tr>
+                      {parsed.headers.map(h => (
+                        <th key={h} style={{ textAlign:"left", padding:"8px 12px", fontSize:9.5, fontWeight:800, color:"#666C7E", letterSpacing:1.5, textTransform:"uppercase", borderBottom:"1px solid rgba(255,255,255,0.05)" }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {parsed.rows.slice(0, 6).map((r, i) => (
+                      <tr key={i} style={{ borderBottom:"1px solid rgba(255,255,255,0.04)" }}>
+                        {parsed.headers.map(h => (
+                          <td key={h} style={{ padding:"8px 12px", color:"#C4C8D4", whiteSpace:"nowrap", maxWidth:200, overflow:"hidden", textOverflow:"ellipsis" }}>{r[h] || "—"}</td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {parsed.rows.length > 6 && (
+                  <div style={{ padding:"8px 12px", fontSize:10.5, color:"#5E6376", textAlign:"center", borderTop:"1px solid rgba(255,255,255,0.04)" }}>+ {parsed.rows.length - 6} more row{parsed.rows.length - 6 === 1 ? "" : "s"}</div>
+                )}
+              </div>
+
+              <div style={{ display:"flex", gap:10, alignItems:"center", flexWrap:"wrap" }}>
+                <div style={{ flex:"1 1 200px" }}>
+                  <div style={{ fontSize:9.5, fontWeight:700, color:"#666C7E", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Assign to rep</div>
+                  <select value={assignTo} onChange={e => setAssignTo(e.target.value)}
+                    style={{ width:"100%", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:10, color:"#F2F4F8", fontSize:13, fontWeight:600, padding:"10px 12px", fontFamily:"inherit", outline:"none", cursor:"pointer" }}>
+                    {reps.length === 0 && <option>No reps available</option>}
+                    {reps.map(r => <option key={r.id} value={r.id}>{r.name || "Rep"}</option>)}
+                  </select>
+                </div>
+                <button onClick={upload} disabled={uploading || !assignTo || !parsed.rows.length} className="btn-primary"
+                  style={{ padding:"10px 22px", fontSize:11, opacity: uploading || !assignTo ? 0.5 : 1, cursor: uploading || !assignTo ? "default" : "pointer", flexShrink:0 }}>
+                  {uploading ? "Uploading…" : `Send to rep`}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Status filter row */}
+      <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
+        <button onClick={() => setStatusFilter("all")}
+          style={{ background: statusFilter === "all" ? "rgba(204,255,0,0.1)" : "rgba(255,255,255,0.04)", border:`1px solid ${statusFilter === "all" ? "rgba(204,255,0,0.25)" : "rgba(255,255,255,0.07)"}`, color: statusFilter === "all" ? "#CCFF00" : "#9098A8", fontSize:10.5, fontWeight:800, letterSpacing:1.5, textTransform:"uppercase", padding:"7px 12px", borderRadius:8, cursor:"pointer", fontFamily:"inherit", transition:"all 0.18s", display:"flex", alignItems:"center", gap:8 }}>
+          All <span style={{ background:"rgba(255,255,255,0.06)", padding:"1px 6px", borderRadius:4, fontSize:10 }}>{totalForFilter}</span>
+        </button>
+        {STATUSES.map(s => (
+          <button key={s.v} onClick={() => setStatusFilter(s.v)}
+            style={{ background: statusFilter === s.v ? `${s.color}14` : "rgba(255,255,255,0.04)", border:`1px solid ${statusFilter === s.v ? `${s.color}40` : "rgba(255,255,255,0.07)"}`, color: statusFilter === s.v ? s.color : "#9098A8", fontSize:10.5, fontWeight:800, letterSpacing:1.5, textTransform:"uppercase", padding:"7px 12px", borderRadius:8, cursor:"pointer", fontFamily:"inherit", transition:"all 0.18s", display:"flex", alignItems:"center", gap:8 }}>
+            {s.label} <span style={{ background:"rgba(255,255,255,0.06)", padding:"1px 6px", borderRadius:4, fontSize:10 }}>{counts[s.v] ?? 0}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Leads list */}
+      {loading ? (
+        <div style={{ textAlign:"center", padding:60, color:"#666C7E", fontSize:13 }}>Loading…</div>
+      ) : visible.length === 0 ? (
+        <div className="dash-card" style={{ padding:"48px 24px", textAlign:"center" }}>
+          <div style={{ width:54, height:54, borderRadius:16, background:"rgba(6,214,240,0.08)", border:"1px solid rgba(6,214,240,0.2)", display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 16px" }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#06D6F0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+          </div>
+          <div style={{ fontSize:14, fontWeight:700, color:"#D6DAE2", marginBottom:6 }}>No leads {statusFilter === "all" ? "yet" : `· ${statusByV[statusFilter]?.label ?? statusFilter}`}</div>
+          <div style={{ fontSize:12, color:"#666C7E" }}>{isAdmin ? "Upload a CSV above to assign leads to a rep." : "When admin sends you leads, they'll show up here."}</div>
+        </div>
+      ) : (
+        <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+          {visible.map((l, i) => {
+            const s = statusByV[l.status] ?? STATUSES[0];
+            const isExpanded = expandedId === l.id;
+            const data = l.data || {};
+            return (
+              <div key={l.id} className="dash-card" style={{ padding:dk?"14px 18px":"12px 14px", animation:`fadeUp 0.3s ease ${0.03*i}s both` }}>
+                <div onClick={() => { setExpandedId(isExpanded ? null : l.id); setDraftNote(l.note || ""); }}
+                  style={{ display:"flex", alignItems:"center", gap:14, cursor:"pointer" }}>
+                  <div style={{ width:38, height:38, borderRadius:10, background:`${s.color}14`, border:`1px solid ${s.color}30`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={s.color} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+                  </div>
+                  <div style={{ flex:1, minWidth:0 }}>
+                    <div style={{ fontSize:13.5, fontWeight:700, color:"#EEF2F8", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{primaryLine(data)}</div>
+                    {secondaryLine(data) && <div style={{ fontSize:11.5, color:"#666C7E", marginTop:3, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{secondaryLine(data)}</div>}
+                  </div>
+                  <span style={{ fontSize:9, fontWeight:800, color:s.color, background:`${s.color}14`, border:`1px solid ${s.color}30`, padding:"4px 9px", borderRadius:5, letterSpacing:1.5, textTransform:"uppercase", flexShrink:0 }}>{s.label}</span>
+                  {isAdmin && (
+                    <span style={{ fontSize:10.5, fontWeight:700, color:"#9098A8", flexShrink:0, paddingLeft:4 }}>→ {repById[l.assigned_to] || "Rep"}</span>
+                  )}
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5E6376" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0, transform: isExpanded ? "rotate(90deg)" : "none", transition:"transform 0.18s" }}><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+
+                {isExpanded && (
+                  <div style={{ marginTop:14, paddingTop:14, borderTop:"1px solid rgba(255,255,255,0.05)", display:"flex", flexDirection:"column", gap:12, animation:"fadeUp 0.2s ease" }}>
+                    {/* All CSV fields */}
+                    <div style={{ display:"grid", gridTemplateColumns:dk?"repeat(auto-fill, minmax(200px, 1fr))":"1fr", gap:10 }}>
+                      {Object.entries(data).map(([k, v]) => (
+                        <div key={k}>
+                          <div style={{ fontSize:9, fontWeight:800, color:"#5E6376", letterSpacing:1.5, textTransform:"uppercase", marginBottom:3 }}>{k}</div>
+                          <div style={{ fontSize:12.5, color:"#EEF2F8", fontWeight:500, wordBreak:"break-word" }}>{(v ?? "").toString() || <span style={{ color:"#3A3D47" }}>—</span>}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Status setter */}
+                    <div>
+                      <div style={{ fontSize:9, fontWeight:800, color:"#5E6376", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Update status</div>
+                      <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
+                        {STATUSES.map(opt => (
+                          <button key={opt.v} onClick={() => setStatus(l.id, opt.v)}
+                            style={{ background: l.status === opt.v ? `${opt.color}18` : "rgba(255,255,255,0.04)", border:`1px solid ${l.status === opt.v ? `${opt.color}55` : "rgba(255,255,255,0.07)"}`, color: l.status === opt.v ? opt.color : "#9098A8", fontSize:10, fontWeight:800, letterSpacing:1.3, textTransform:"uppercase", padding:"6px 12px", borderRadius:7, cursor:"pointer", fontFamily:"inherit", transition:"all 0.18s" }}>
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Note */}
+                    <div>
+                      <div style={{ fontSize:9, fontWeight:800, color:"#5E6376", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Note</div>
+                      <textarea
+                        value={draftNote}
+                        onChange={e => setDraftNote(e.target.value)}
+                        placeholder="Call notes, contact attempts, next steps…"
+                        rows={2}
+                        style={{ width:"100%", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:10, color:"#F2F4F8", fontSize:12.5, fontWeight:500, padding:"10px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box", resize:"vertical", lineHeight:1.5 }}
+                      />
+                      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginTop:8 }}>
+                        <div style={{ fontSize:10, color:"#5E6376" }}>
+                          Assigned {new Date(l.created_at).toLocaleDateString("en-US",{ month:"short", day:"numeric" })}
+                          {l.assigned_by && repById[l.assigned_by] ? ` · by ${repById[l.assigned_by]}` : ""}
+                        </div>
+                        <div style={{ display:"flex", gap:6 }}>
+                          {isAdmin && (
+                            <button onClick={() => removeLead(l.id)} className="btn-ghost" style={{ fontSize:10, padding:"7px 12px", color:"#FF3370", borderColor:"rgba(255,51,112,0.25)", background:"rgba(255,51,112,0.05)" }}>Delete</button>
+                          )}
+                          <button onClick={() => saveNote(l.id)} className="btn-primary" style={{ fontSize:10, padding:"7px 14px" }}>Save note</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Chat({ session, profile, w, width, minW = 220, maxW = 520, onResize }) {
   const [msgs, setMsgs] = useState([]);
   const [reps, setReps] = useState({});
@@ -2532,6 +2908,7 @@ export default function App() {
   const TABS = [
     { key:"dashboard",     label:"Dashboard",     short:"Home",     color:"#22C55E" },
     { key:"announcements", label:"Announcements", short:"News",     color:"#F59E0B" },
+    { key:"leads",         label:"Leads",         short:"Leads",    color:"#06D6F0" },
     { key:"leaderboard",   label:"Leaderboard",   short:"Board",    color:"#FFD700" },
     { key:"scheduling",    label:"Scheduling",    short:"Schedule", color:"#F59E0B" },
     { key:"training",      label:"Training",      short:"Train",    color:"#CCFF00" },
@@ -2692,6 +3069,11 @@ export default function App() {
         {/* ANNOUNCEMENTS TAB */}
         {tab === "announcements" && (
           <Announcements session={session} profile={profile} w={w} />
+        )}
+
+        {/* LEADS TAB */}
+        {tab === "leads" && (
+          <Leads session={session} profile={profile} w={w} />
         )}
 
         {/* LEADERBOARD TAB */}
