@@ -902,7 +902,7 @@ function Announcements({ session, profile, w }) {
   );
 }
 
-function Chat({ session, profile, w, open, onToggle }) {
+function Chat({ session, profile, w, width, minW = 220, maxW = 520, onResize }) {
   const [msgs, setMsgs] = useState([]);
   const [reps, setReps] = useState({});
   const [loading, setLoading] = useState(true);
@@ -1077,7 +1077,35 @@ function Chat({ session, profile, w, open, onToggle }) {
 
   // Hide on small mobile screens (no room for a permanent sidebar).
   if (w < 768) return null;
-  const sidebarW = w >= 1280 ? 320 : 280;
+  const sidebarW = typeof width === "number" ? width : (w >= 1280 ? 320 : 280);
+
+  // Drag-to-resize the sidebar
+  const dragRef = useRef({ active: false });
+  const startDrag = (e) => {
+    e.preventDefault();
+    dragRef.current.active = true;
+    document.body.style.cursor = "ew-resize";
+    document.body.style.userSelect = "none";
+    const move = (ev) => {
+      if (!dragRef.current.active) return;
+      const x = ev.clientX ?? (ev.touches && ev.touches[0]?.clientX) ?? 0;
+      const next = Math.max(minW, Math.min(maxW, x));
+      onResize?.(next);
+    };
+    const up = () => {
+      dragRef.current.active = false;
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      window.removeEventListener("mousemove", move);
+      window.removeEventListener("mouseup", up);
+      window.removeEventListener("touchmove", move);
+      window.removeEventListener("touchend", up);
+    };
+    window.addEventListener("mousemove", move);
+    window.addEventListener("mouseup", up);
+    window.addEventListener("touchmove", move);
+    window.addEventListener("touchend", up);
+  };
 
   return (
     <>
@@ -1095,6 +1123,24 @@ function Chat({ session, profile, w, open, onToggle }) {
         }}>
         <div style={{ position:"absolute", top:0, left:0, right:0, height:2, background:"linear-gradient(90deg,transparent,#CCFF0080,transparent)", opacity:0.5 }} />
 
+        {/* Resize handle */}
+        <div
+          onMouseDown={startDrag}
+          onTouchStart={startDrag}
+          title="Drag to resize"
+          className="chat-resize-handle"
+          style={{
+            position:"absolute", top:0, bottom:0, right:-4, width:10,
+            cursor:"ew-resize", zIndex:41, touchAction:"none",
+          }}>
+          <div className="chat-resize-grip" style={{
+            position:"absolute", top:"50%", right:1, transform:"translateY(-50%)",
+            width:3, height:46, borderRadius:2,
+            background:"rgba(255,255,255,0.07)",
+            transition:"background 0.15s ease, height 0.15s ease",
+          }} />
+        </div>
+
         {/* Header */}
         <div style={{ display:"flex", alignItems:"center", padding:"16px 18px", borderBottom:"1px solid rgba(255,255,255,0.05)", flexShrink:0 }}>
           <div style={{ display:"flex", alignItems:"center", gap:12 }}>
@@ -1106,12 +1152,6 @@ function Chat({ session, profile, w, open, onToggle }) {
               <div style={{ fontSize:9.5, fontWeight:800, color:"#666C7E", letterSpacing:2, textTransform:"uppercase", marginTop:2 }}>{Object.keys(reps).length} {Object.keys(reps).length === 1 ? "Rep" : "Reps"} · #general</div>
             </div>
           </div>
-          <button onClick={onToggle} title="Minimize"
-            style={{ width:30, height:30, borderRadius:8, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", color:"#9098A8", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", padding:0, transition:"all 0.18s" }}
-            onMouseEnter={e => { e.currentTarget.style.color="#F2F4F8"; e.currentTarget.style.borderColor="rgba(255,255,255,0.16)"; }}
-            onMouseLeave={e => { e.currentTarget.style.color="#9098A8"; e.currentTarget.style.borderColor="rgba(255,255,255,0.08)"; }}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          </button>
         </div>
 
         {/* Messages */}
@@ -1222,6 +1262,8 @@ function Chat({ session, profile, w, open, onToggle }) {
         .typing-dots span { width:4px; height:4px; border-radius:50%; background:#CCFF00; display:inline-block; animation: typingBounce 1.2s ease-in-out infinite }
         .typing-dots span:nth-child(2) { animation-delay: 0.15s }
         .typing-dots span:nth-child(3) { animation-delay: 0.3s }
+        .chat-resize-handle:hover .chat-resize-grip,
+        .chat-resize-handle:active .chat-resize-grip { background: #CCFF00 !important; height: 60px !important; box-shadow: 0 0 12px rgba(204,255,0,0.5); }
       `}</style>
     </>
   );
@@ -2450,7 +2492,22 @@ export default function App() {
   const [tab, setTab] = useState("dashboard");
   const [showNameEdit, setShowNameEdit] = useState(false);
   const [nameEdit, setNameEdit] = useState("");
-  const chatSidebarW = w >= 1280 ? 320 : w >= 768 ? 280 : 0;
+
+  const CHAT_MIN = 220, CHAT_MAX = 520;
+  const chatDefault = w >= 1280 ? 320 : 280;
+  const [chatW, setChatW] = useState(() => {
+    try {
+      const saved = parseInt(localStorage.getItem("chatSidebarW") || "", 10);
+      if (!isNaN(saved) && saved >= CHAT_MIN && saved <= CHAT_MAX) return saved;
+    } catch { /* ignore */ }
+    return chatDefault;
+  });
+  const persistChatW = (px) => {
+    const clamped = Math.max(CHAT_MIN, Math.min(CHAT_MAX, Math.round(px)));
+    setChatW(clamped);
+    try { localStorage.setItem("chatSidebarW", String(clamped)); } catch { /* ignore */ }
+  };
+  const chatSidebarW = w >= 768 ? chatW : 0;
 
   const saveName = async () => {
     const trimmed = nameEdit.trim();
@@ -2509,7 +2566,7 @@ export default function App() {
       <style>{GLOBAL_CSS}</style>
       <link href={FONT_LINK} rel="stylesheet" />
       <AdminPanel profile={profile} onBack={() => setView(null)} w={w} onSignOut={signOut} />
-      <Chat session={session} profile={profile} w={w} />
+      <Chat session={session} profile={profile} w={w} width={chatSidebarW} onResize={persistChatW} minW={CHAT_MIN} maxW={CHAT_MAX} />
     </div>
   );
 
@@ -2518,7 +2575,7 @@ export default function App() {
       <style>{GLOBAL_CSS}</style>
       <link href={FONT_LINK} rel="stylesheet" />
       <Quiz quizKey={view} onBack={() => { setView(null); setTimeout(top, 50); }} w={w} onComplete={(sc, tot) => saveScore(view, sc, tot)} />
-      <Chat session={session} profile={profile} w={w} />
+      <Chat session={session} profile={profile} w={w} width={chatSidebarW} onResize={persistChatW} minW={CHAT_MIN} maxW={CHAT_MAX} />
     </div>
   );
 
@@ -2527,7 +2584,7 @@ export default function App() {
       <style>{GLOBAL_CSS}</style>
       <link href={FONT_LINK} rel="stylesheet" />
       <Viewer ck={view} onBack={() => { setView(null); setTimeout(top, 50); }} w={w} onComplete={markComplete} />
-      <Chat session={session} profile={profile} w={w} />
+      <Chat session={session} profile={profile} w={w} width={chatSidebarW} onResize={persistChatW} minW={CHAT_MIN} maxW={CHAT_MAX} />
     </div>
   );
 
@@ -2750,7 +2807,7 @@ export default function App() {
 
       </div>
 
-      <Chat session={session} profile={profile} w={w} />
+      <Chat session={session} profile={profile} w={w} width={chatSidebarW} onResize={persistChatW} minW={CHAT_MIN} maxW={CHAT_MAX} />
     </div>
   );
 }
