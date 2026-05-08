@@ -902,13 +902,16 @@ function Announcements({ session, profile, w }) {
   );
 }
 
-function Chat({ session, profile, w }) {
+function Chat({ session, profile, w, open, onToggle }) {
   const [msgs, setMsgs] = useState([]);
   const [reps, setReps] = useState({});
   const [loading, setLoading] = useState(true);
   const [body, setBody] = useState("");
   const [sending, setSending] = useState(false);
   const [typing, setTyping] = useState({}); // { uid: { name, t: epoch } }
+  const [unread, setUnread] = useState(0);
+  const openRef = useRef(open);
+  useEffect(() => { openRef.current = open; if (open) setUnread(0); }, [open]);
   const scrollRef = useRef(null);
   const stickyRef = useRef(true);
   const channelRef = useRef(null);
@@ -939,6 +942,10 @@ function Chat({ session, profile, w }) {
           if (!prev[payload.new.user_id]) return prev;
           const next = { ...prev }; delete next[payload.new.user_id]; return next;
         });
+        // Bump unread badge if widget is closed and the message isn't ours
+        if (!openRef.current && payload.new.user_id !== session.user.id) {
+          setUnread(u => u + 1);
+        }
       })
       .on("postgres_changes", { event: "DELETE", schema: "public", table: "messages" }, (payload) => {
         setMsgs(prev => prev.filter(m => m.id !== payload.old.id));
@@ -1099,6 +1106,12 @@ function Chat({ session, profile, w }) {
               <div style={{ fontSize:9.5, fontWeight:800, color:"#666C7E", letterSpacing:2, textTransform:"uppercase", marginTop:2 }}>{Object.keys(reps).length} {Object.keys(reps).length === 1 ? "Rep" : "Reps"} · #general</div>
             </div>
           </div>
+          <button onClick={onToggle} title="Minimize"
+            style={{ width:30, height:30, borderRadius:8, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", color:"#9098A8", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", padding:0, transition:"all 0.18s" }}
+            onMouseEnter={e => { e.currentTarget.style.color="#F2F4F8"; e.currentTarget.style.borderColor="rgba(255,255,255,0.16)"; }}
+            onMouseLeave={e => { e.currentTarget.style.color="#9098A8"; e.currentTarget.style.borderColor="rgba(255,255,255,0.08)"; }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
         </div>
 
         {/* Messages */}
