@@ -660,6 +660,22 @@ function Scheduler({ session, profile, w }) {
 
   return (
     <div>
+      {/* Policy notice */}
+      <div style={{ display:"flex", alignItems:"flex-start", gap:14, padding:dk?"16px 20px":"14px 16px", background:"linear-gradient(135deg, rgba(255,51,112,0.08), rgba(245,158,11,0.06))", border:"1px solid rgba(255,51,112,0.25)", borderRadius:14, marginBottom:24, animation:"fadeUp 0.4s ease" }}>
+        <div style={{ width:38, height:38, borderRadius:11, background:"rgba(255,51,112,0.12)", border:"1px solid rgba(255,51,112,0.3)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#FF3370" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div style={{ flex:1, minWidth:0 }}>
+          <div style={{ fontSize:9.5, fontWeight:800, color:"#FF3370", letterSpacing:2.5, textTransform:"uppercase", marginBottom:4 }}>Mandatory Policy</div>
+          <div style={{ fontSize:dk?13.5:12.5, fontWeight:700, color:"#F2F4F8", lineHeight:1.45, marginBottom:4 }}>
+            2-day minimum office attendance per week
+          </div>
+          <div style={{ fontSize:dk?12.5:11.5, color:"#C4C8D4", lineHeight:1.55, fontWeight:500 }}>
+            Every rep must book at least <span style={{ color:"#FF3370", fontWeight:700 }}>2 days</span> in the office each week. Failure to meet this minimum is grounds for <span style={{ color:"#FF3370", fontWeight:700 }}>termination</span>. No exceptions.
+          </div>
+        </div>
+      </div>
+
       {[0,1].map(week => (
         <div key={week} style={{ marginBottom:32, animation:"fadeUp 0.4s ease" }}>
           <div style={{ display:"flex", alignItems:"center", gap:12, paddingBottom:14 }}>
