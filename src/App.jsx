@@ -713,6 +713,195 @@ function Scheduler({ session, profile, w }) {
 
 const TIER_GLOW = { trial:"rgba(6,214,240,0.3)", bronze:"rgba(184,115,42,0.35)", silver:"rgba(192,200,216,0.3)", gold:"rgba(255,215,0,0.4)", platinum:"rgba(167,139,250,0.35)", diamond:"rgba(204,255,0,0.4)" };
 
+function Announcements({ session, profile, w }) {
+  const [items, setItems] = useState([]);
+  const [authors, setAuthors] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [composing, setComposing] = useState(false);
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const [saving, setSaving] = useState(false);
+  const dk = w >= 768;
+  const isAdmin = profile?.role === "admin";
+
+  const load = async () => {
+    const [annRes, profRes] = await Promise.all([
+      supabase.from("announcements").select("id, posted_by, title, body, pinned, created_at").order("pinned", { ascending: false }).order("created_at", { ascending: false }),
+      supabase.from("profiles").select("id, name"),
+    ]);
+    setItems(annRes.data ?? []);
+    const am = {};
+    for (const p of profRes.data ?? []) am[p.id] = p.name || "Admin";
+    setAuthors(am);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    load();
+    const ch = supabase.channel("announcements-rt")
+      .on("postgres_changes", { event: "*", schema: "public", table: "announcements" }, load)
+      .subscribe();
+    return () => supabase.removeChannel(ch);
+  }, []);
+
+  const post = async () => {
+    const trimmedBody = body.trim();
+    if (!trimmedBody) return;
+    setSaving(true);
+    const { data, error } = await supabase
+      .from("announcements")
+      .insert({ posted_by: session.user.id, title: title.trim() || null, body: trimmedBody })
+      .select()
+      .single();
+    setSaving(false);
+    if (error || !data) {
+      alert(`Couldn't post: ${error?.message ?? "no row returned"}`);
+      return;
+    }
+    setTitle(""); setBody(""); setComposing(false);
+    setItems(prev => [data, ...prev]);
+  };
+
+  const remove = async (id) => {
+    if (!confirm("Delete this announcement?")) return;
+    const { error } = await supabase.from("announcements").delete().eq("id", id);
+    if (error) {
+      alert(`Couldn't delete: ${error.message}`);
+      return;
+    }
+    setItems(prev => prev.filter(i => i.id !== id));
+  };
+
+  const togglePin = async (id, pinned) => {
+    const { data, error } = await supabase
+      .from("announcements")
+      .update({ pinned: !pinned })
+      .eq("id", id)
+      .select()
+      .single();
+    if (error || !data) {
+      alert(`Couldn't update: ${error?.message ?? "no row returned"}`);
+      return;
+    }
+    setItems(prev => {
+      const next = prev.map(i => i.id === id ? { ...i, pinned: data.pinned } : i);
+      next.sort((a, b) => (b.pinned - a.pinned) || (new Date(b.created_at) - new Date(a.created_at)));
+      return next;
+    });
+  };
+
+  const fmtWhen = (iso) => {
+    const d = new Date(iso);
+    const today = new Date(); today.setHours(0,0,0,0);
+    const ds = new Date(d); ds.setHours(0,0,0,0);
+    const diff = Math.round((today - ds) / 86400000);
+    const time = d.toLocaleTimeString("en-US",{ hour:"numeric", minute:"2-digit" });
+    if (diff === 0) return `Today · ${time}`;
+    if (diff === 1) return `Yesterday · ${time}`;
+    if (diff < 7) return d.toLocaleDateString("en-US",{ weekday:"long" }) + ` · ${time}`;
+    return d.toLocaleDateString("en-US",{ month:"short", day:"numeric", year: d.getFullYear() === today.getFullYear() ? undefined : "numeric" });
+  };
+
+  return (
+    <div style={{ animation:"fadeUp 0.35s ease", display:"flex", flexDirection:"column", gap:14 }}>
+
+      {isAdmin && (
+        <div className="dash-card" style={{ padding:dk?"20px 22px":"16px 18px" }}>
+          <div style={{ position:"absolute", top:0, left:0, right:0, height:2, background:"linear-gradient(90deg,transparent,#F59E0B80,transparent)", opacity:0.5 }} />
+          {!composing ? (
+            <button onClick={() => setComposing(true)}
+              style={{ display:"flex", alignItems:"center", gap:12, width:"100%", background:"rgba(255,255,255,0.02)", border:"1px dashed rgba(255,255,255,0.1)", borderRadius:12, padding:"14px 16px", cursor:"pointer", fontFamily:"inherit", textAlign:"left", color:"#666C7E", fontSize:13, fontWeight:600, transition:"all 0.18s" }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor="rgba(245,158,11,0.35)"; e.currentTarget.style.color="#F59E0B"; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor="rgba(255,255,255,0.1)"; e.currentTarget.style.color="#666C7E"; }}>
+              <div style={{ width:32, height:32, borderRadius:9, background:"rgba(245,158,11,0.12)", border:"1px solid rgba(245,158,11,0.22)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </div>
+              Post a new announcement…
+            </button>
+          ) : (
+            <div>
+              <div style={{ fontSize:10, fontWeight:800, color:"#F59E0B", letterSpacing:2.5, textTransform:"uppercase", marginBottom:14 }}>New Announcement</div>
+              <input
+                autoFocus
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+                placeholder="Title (optional)"
+                style={{ width:"100%", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:10, color:"#F2F4F8", fontSize:14, fontWeight:700, padding:"11px 14px", fontFamily:"inherit", outline:"none", boxSizing:"border-box", marginBottom:8 }}
+              />
+              <textarea
+                value={body}
+                onChange={e => setBody(e.target.value)}
+                placeholder="What do reps need to know?"
+                rows={4}
+                style={{ width:"100%", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:10, color:"#F2F4F8", fontSize:13, fontWeight:500, padding:"11px 14px", fontFamily:"inherit", outline:"none", boxSizing:"border-box", resize:"vertical", lineHeight:1.5 }}
+              />
+              <div style={{ display:"flex", gap:8, marginTop:12, justifyContent:"flex-end" }}>
+                <button onClick={() => { setComposing(false); setTitle(""); setBody(""); }} className="btn-ghost" style={{ fontSize:11, padding:"10px 18px" }}>Cancel</button>
+                <button onClick={post} disabled={saving || !body.trim()} className="btn-primary" style={{ fontSize:11, padding:"10px 22px", opacity: saving || !body.trim() ? 0.5 : 1, cursor: saving || !body.trim() ? "default" : "pointer" }}>
+                  {saving ? "Posting…" : "Post"}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {loading ? (
+        <div style={{ textAlign:"center", padding:60, color:"#666C7E", fontSize:13 }}>Loading…</div>
+      ) : items.length === 0 ? (
+        <div className="dash-card" style={{ padding:"48px 24px", textAlign:"center" }}>
+          <div style={{ width:54, height:54, borderRadius:16, background:"rgba(245,158,11,0.08)", border:"1px solid rgba(245,158,11,0.2)", display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 16px" }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
+          </div>
+          <div style={{ fontSize:14, fontWeight:700, color:"#D6DAE2", marginBottom:6 }}>No announcements yet</div>
+          <div style={{ fontSize:12, color:"#666C7E" }}>{isAdmin ? "Post the first one above." : "Check back soon — leadership posts updates here."}</div>
+        </div>
+      ) : (
+        items.map((a, i) => {
+          const accent = a.pinned ? "#F59E0B" : "#06D6F0";
+          return (
+            <div key={a.id} className="dash-card" style={{ padding:dk?"20px 22px":"16px 18px", animation:`fadeUp 0.35s ease ${0.04*i}s both`, borderColor: a.pinned ? "rgba(245,158,11,0.22)" : undefined }}>
+              <div style={{ position:"absolute", top:0, left:0, right:0, height:2, background:`linear-gradient(90deg,transparent,${accent}80,transparent)`, opacity:0.5 }} />
+              <div style={{ display:"flex", alignItems:"flex-start", gap:14 }}>
+                <div style={{ width:38, height:38, borderRadius:11, background: a.pinned ? "linear-gradient(135deg,#F59E0B,#B45309)" : "linear-gradient(135deg,#06D6F0,#0891B2)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, boxShadow: a.pinned ? "0 4px 14px rgba(245,158,11,0.35)" : "0 4px 14px rgba(6,214,240,0.3)" }}>
+                  {a.pinned ? (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#15171E" stroke="#15171E" strokeWidth="0.5" strokeLinecap="round" strokeLinejoin="round"><path d="M16 4l4 4-7 7-1 4-4-4 4-1 7-7-3-3z"/></svg>
+                  ) : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15171E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
+                  )}
+                </div>
+                <div style={{ flex:1, minWidth:0 }}>
+                  <div style={{ display:"flex", alignItems:"center", gap:8, flexWrap:"wrap", marginBottom:a.title?6:4 }}>
+                    {a.pinned && <span style={{ fontSize:8.5, fontWeight:800, color:"#F59E0B", background:"rgba(245,158,11,0.12)", border:"1px solid rgba(245,158,11,0.25)", padding:"3px 8px", borderRadius:5, letterSpacing:1.5, textTransform:"uppercase" }}>Pinned</span>}
+                    <span style={{ fontSize:10.5, fontWeight:700, color:"#D6DAE2" }}>{authors[a.posted_by] || "Admin"}</span>
+                    <span style={{ fontSize:10, color:"#5E6376" }}>· {fmtWhen(a.created_at)}</span>
+                  </div>
+                  {a.title && <div style={{ fontSize:dk?17:15, fontWeight:800, color:"#F2F4F8", letterSpacing:"-0.01em", lineHeight:1.3, marginBottom:6 }}>{a.title}</div>}
+                  <div style={{ fontSize:dk?13.5:12.5, color:"#C4C8D4", lineHeight:1.6, fontWeight:500, whiteSpace:"pre-wrap" }}>{a.body}</div>
+                </div>
+                {isAdmin && (
+                  <div style={{ display:"flex", flexDirection:"column", gap:6, flexShrink:0 }}>
+                    <button onClick={() => togglePin(a.id, a.pinned)} title={a.pinned ? "Unpin" : "Pin"}
+                      style={{ width:30, height:30, borderRadius:8, background:"rgba(255,255,255,0.04)", border:`1px solid ${a.pinned ? "rgba(245,158,11,0.3)" : "rgba(255,255,255,0.08)"}`, color: a.pinned ? "#F59E0B" : "#666C7E", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", padding:0, transition:"all 0.18s" }}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill={a.pinned ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg>
+                    </button>
+                    <button onClick={() => remove(a.id)} title="Delete"
+                      style={{ width:30, height:30, borderRadius:8, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", color:"#666C7E", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", padding:0, transition:"all 0.18s" }}
+                      onMouseEnter={e => { e.currentTarget.style.color="#FF3370"; e.currentTarget.style.borderColor="rgba(255,51,112,0.3)"; }}
+                      onMouseLeave={e => { e.currentTarget.style.color="#666C7E"; e.currentTarget.style.borderColor="rgba(255,255,255,0.08)"; }}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })
+      )}
+    </div>
+  );
+}
+
 function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab, onOpenModule }) {
   const [sales, setSales] = useState([]);
   const [schedule, setSchedule] = useState([]);
@@ -1958,12 +2147,13 @@ export default function App() {
   const referenceItems = CATS.filter(x=>x.t==="REFERENCE");
   const quizItems = CATS.filter(x=>x.t==="QUIZ");
   const TABS = [
-    { key:"dashboard",    label:"Dashboard",    short:"Home",     color:"#22C55E" },
-    { key:"leaderboard",  label:"Leaderboard",  short:"Board",    color:"#FFD700" },
-    { key:"scheduling",   label:"Scheduling",   short:"Schedule", color:"#F59E0B" },
-    { key:"training",     label:"Training",     short:"Train",    color:"#CCFF00" },
-    { key:"reference",    label:"Reference",    short:"Ref",      color:"#06D6F0" },
-    { key:"quizzes",      label:"Quizzes",      short:"Quizzes",  color:"#10B981" },
+    { key:"dashboard",     label:"Dashboard",     short:"Home",     color:"#22C55E" },
+    { key:"announcements", label:"Announcements", short:"News",     color:"#F59E0B" },
+    { key:"leaderboard",   label:"Leaderboard",   short:"Board",    color:"#FFD700" },
+    { key:"scheduling",    label:"Scheduling",    short:"Schedule", color:"#F59E0B" },
+    { key:"training",      label:"Training",      short:"Train",    color:"#CCFF00" },
+    { key:"reference",     label:"Reference",     short:"Ref",      color:"#06D6F0" },
+    { key:"quizzes",       label:"Quizzes",       short:"Quizzes",  color:"#10B981" },
   ];
 
   if (loading) return (
@@ -2111,6 +2301,11 @@ export default function App() {
             onGoTab={setTab}
             onOpenModule={(k) => { setView(k); setTimeout(top, 50); }}
           />
+        )}
+
+        {/* ANNOUNCEMENTS TAB */}
+        {tab === "announcements" && (
+          <Announcements session={session} profile={profile} w={w} />
         )}
 
         {/* LEADERBOARD TAB */}

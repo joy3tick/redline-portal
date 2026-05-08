@@ -198,3 +198,24 @@ create policy "Authenticated users read schedule"
 create policy "Users manage own schedule"
   on public.schedule for all
   using (auth.uid() = user_id);
+
+
+-- ─── ANNOUNCEMENTS ──────────────────────────────────────────
+create table if not exists public.announcements (
+  id         uuid default gen_random_uuid() primary key,
+  posted_by  uuid references auth.users(id) on delete set null,
+  title      text,
+  body       text not null,
+  pinned     boolean not null default false,
+  created_at timestamptz default now()
+);
+
+alter table public.announcements enable row level security;
+
+create policy "Authenticated users read announcements"
+  on public.announcements for select
+  using (auth.role() = 'authenticated');
+
+create policy "Admins manage announcements"
+  on public.announcements for all
+  using (public.is_admin());
