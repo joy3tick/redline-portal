@@ -219,3 +219,33 @@ create policy "Authenticated users read announcements"
 create policy "Admins manage announcements"
   on public.announcements for all
   using (public.is_admin());
+
+
+-- ─── TEAM CHAT MESSAGES ─────────────────────────────────────
+create table if not exists public.messages (
+  id         uuid default gen_random_uuid() primary key,
+  user_id    uuid references auth.users(id) on delete cascade not null,
+  body       text not null,
+  created_at timestamptz default now()
+);
+
+create index if not exists messages_created_at_idx
+  on public.messages (created_at desc);
+
+alter table public.messages enable row level security;
+
+create policy "Authenticated users read messages"
+  on public.messages for select
+  using (auth.role() = 'authenticated');
+
+create policy "Users insert own messages"
+  on public.messages for insert
+  with check (auth.uid() = user_id);
+
+create policy "Users delete own messages"
+  on public.messages for delete
+  using (auth.uid() = user_id);
+
+create policy "Admins delete any message"
+  on public.messages for delete
+  using (public.is_admin());
