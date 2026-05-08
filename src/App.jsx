@@ -774,6 +774,22 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
   const recentSales = sales.slice(0, 5);
   const MEDALS = ["🥇","🥈","🥉"];
 
+  // Daily breakdown (Mon..Sun) for the current week
+  const dayLabels = ["M","T","W","T","F","S","S"];
+  const myDaily = Array(7).fill(0);
+  const teamDaily = Array(7).fill(0);
+  const teamDailyAmount = Array(7).fill(0);
+  for (const s of weekSales) {
+    const d = new Date(s.sale_date); d.setHours(0,0,0,0);
+    const idx = Math.max(0, Math.min(6, Math.round((d - mon) / 86400000)));
+    if (s.user_id === session.user.id) myDaily[idx]++;
+    teamDaily[idx]++;
+    teamDailyAmount[idx] += s.amount ?? 0;
+  }
+  const teamWeekTotal = teamDailyAmount.reduce((a,b) => a+b, 0);
+  const teamWeekCount = teamDaily.reduce((a,b) => a+b, 0);
+  const todayIdx = Math.max(0, Math.min(6, Math.round((today - mon) / 86400000)));
+
   const tierObj = TIERS.find(t => t.v === profile?.tier) ?? null;
   const tierIdx = tierObj ? TIERS.indexOf(tierObj) : -1;
 
@@ -781,6 +797,61 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
     const r = e.currentTarget.getBoundingClientRect();
     e.currentTarget.style.setProperty("--mx", `${e.clientX - r.left}px`);
     e.currentTarget.style.setProperty("--my", `${e.clientY - r.top}px`);
+  };
+
+  // Weekly sales bar chart (SVG)
+  const BarChart = ({ data, accent, height = 64, highlight = -1 }) => {
+    const max = Math.max(1, ...data);
+    const cols = data.length;
+    const gap = 8;
+    return (
+      <div style={{ display:"grid", gridTemplateColumns:`repeat(${cols},1fr)`, gap, alignItems:"end", height:height+22 }}>
+        {data.map((v, i) => {
+          const h = Math.round((v / max) * height);
+          const isToday = i === highlight;
+          return (
+            <div key={i} style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6 }}>
+              <div style={{ height, width:"100%", display:"flex", alignItems:"flex-end", justifyContent:"center" }}>
+                <div style={{
+                  width:"100%",
+                  height: h || 3,
+                  background: v > 0
+                    ? `linear-gradient(180deg,${accent},${accent}66)`
+                    : "rgba(255,255,255,0.06)",
+                  borderRadius:6,
+                  boxShadow: v > 0 ? `0 0 12px ${accent}40` : "none",
+                  border: isToday ? `1px solid ${accent}` : "none",
+                  transition:"height 0.5s cubic-bezier(0.4,0,0.2,1)"
+                }} />
+              </div>
+              <div style={{ fontSize:9, fontWeight:800, color: isToday ? accent : "#5E6376", letterSpacing:1 }}>{dayLabels[i]}</div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
+  // Circular progress ring
+  const Ring = ({ pct, accent, size = 88, stroke = 8, label, sublabel }) => {
+    const r = (size - stroke) / 2;
+    const c = 2 * Math.PI * r;
+    const offset = c * (1 - Math.max(0, Math.min(100, pct)) / 100);
+    return (
+      <div style={{ position:"relative", width:size, height:size, flexShrink:0 }}>
+        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+          <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={stroke} />
+          <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={accent} strokeWidth={stroke} strokeLinecap="round"
+            strokeDasharray={c} strokeDashoffset={offset}
+            transform={`rotate(-90 ${size/2} ${size/2})`}
+            style={{ transition:"stroke-dashoffset 0.7s cubic-bezier(0.4,0,0.2,1)", filter:`drop-shadow(0 0 6px ${accent}55)` }} />
+        </svg>
+        <div style={{ position:"absolute", inset:0, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center" }}>
+          <div style={{ fontSize:18, fontWeight:900, color:"#F2F4F8", lineHeight:1, letterSpacing:"-0.02em" }}>{label}</div>
+          {sublabel && <div style={{ fontSize:8.5, fontWeight:800, color:"#666C7E", letterSpacing:1.5, textTransform:"uppercase", marginTop:3 }}>{sublabel}</div>}
+        </div>
+      </div>
+    );
   };
 
   const Card = ({ title, accent, action, actionOnClick, children, fullWidth }) => (
@@ -860,11 +931,15 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
             </div>
           ))}
         </div>
-        {myWeek.total > 0 && (
-          <div style={{ marginTop:10, fontSize:11.5, color:"#22C55E", fontWeight:700, textAlign:"center", letterSpacing:0.3 }}>
-            ${myWeek.total.toLocaleString()} closed
+        <div style={{ marginTop:16, padding:"14px 14px 10px", background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.05)", borderRadius:12 }}>
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:10 }}>
+            <div style={{ fontSize:9, fontWeight:800, color:"#666C7E", letterSpacing:1.8, textTransform:"uppercase" }}>Daily Activity</div>
+            {myWeek.total > 0 && (
+              <div style={{ fontSize:11, fontWeight:700, color:"#22C55E" }}>${myWeek.total.toLocaleString()}</div>
+            )}
           </div>
-        )}
+          <BarChart data={myDaily} accent="#CCFF00" highlight={todayIdx} height={dk?56:48} />
+        </div>
       </Card>
 
       {/* Top Performers */}
@@ -875,16 +950,22 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
             <span style={{ fontSize:11, color:"#5E6376" }}>No sales yet this week</span>
           </div>
         ) : (
-          <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
+          <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
             {rankedWeek.slice(0, 3).map((rep, i) => {
               const isMe = rep.uid === session.user.id;
+              const leadCount = rankedWeek[0]?.count || 1;
+              const pct = Math.max(8, Math.round((rep.count / leadCount) * 100));
+              const barColor = isMe ? "#CCFF00" : i===0 ? "#FFD700" : "#888D9C";
               return (
-                <div key={rep.uid} style={{ display:"flex", alignItems:"center", gap:10, background: isMe ? "rgba(204,255,0,0.06)" : i===0 ? "rgba(255,215,0,0.04)" : "rgba(255,255,255,0.025)", border:`1px solid ${isMe ? "rgba(204,255,0,0.18)" : i===0 ? "rgba(255,215,0,0.12)" : "rgba(255,255,255,0.06)"}`, borderRadius:10, padding:"10px 12px" }}>
-                  <div style={{ fontSize:16, minWidth:22, textAlign:"center" }}>{MEDALS[i]}</div>
-                  <div style={{ flex:1, minWidth:0, fontSize:12.5, fontWeight:700, color: isMe ? "#F2F4F8" : "#D6DAE2", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
-                    {rep.name}{isMe ? <span style={{ fontSize:9, fontWeight:700, color:"#CCFF00", letterSpacing:1.5, marginLeft:7, textTransform:"uppercase" }}>you</span> : ""}
+                <div key={rep.uid} style={{ position:"relative", overflow:"hidden", background: isMe ? "rgba(204,255,0,0.06)" : i===0 ? "rgba(255,215,0,0.04)" : "rgba(255,255,255,0.025)", border:`1px solid ${isMe ? "rgba(204,255,0,0.18)" : i===0 ? "rgba(255,215,0,0.12)" : "rgba(255,255,255,0.06)"}`, borderRadius:10, padding:"10px 12px" }}>
+                  <div style={{ position:"absolute", inset:0, width:`${pct}%`, background:`linear-gradient(90deg,${barColor}18,${barColor}04)`, transition:"width 0.6s ease" }} />
+                  <div style={{ position:"relative", display:"flex", alignItems:"center", gap:10 }}>
+                    <div style={{ fontSize:16, minWidth:22, textAlign:"center" }}>{MEDALS[i]}</div>
+                    <div style={{ flex:1, minWidth:0, fontSize:12.5, fontWeight:700, color: isMe ? "#F2F4F8" : "#D6DAE2", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                      {rep.name}{isMe ? <span style={{ fontSize:9, fontWeight:700, color:"#CCFF00", letterSpacing:1.5, marginLeft:7, textTransform:"uppercase" }}>you</span> : ""}
+                    </div>
+                    <div style={{ fontSize:17, fontWeight:900, color: barColor, lineHeight:1 }}>{rep.count}</div>
                   </div>
-                  <div style={{ fontSize:17, fontWeight:900, color: i===0 ? "#FFD700" : "#555A6A", lineHeight:1 }}>{rep.count}</div>
                 </div>
               );
             })}
@@ -894,32 +975,30 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
 
       {/* Continue Training */}
       <Card title="Training" accent="#CCFF00" action="All Modules" actionOnClick={() => onGoTab("training")}>
-        {nextModule ? (
-          <div onClick={() => onOpenModule(nextModule.k)}
-            style={{ display:"flex", alignItems:"center", gap:12, cursor:"pointer", background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:12, padding:"12px 14px", transition:"border-color 0.2s" }}
-            onMouseEnter={e => e.currentTarget.style.borderColor="rgba(204,255,0,0.2)"}
-            onMouseLeave={e => e.currentTarget.style.borderColor="rgba(255,255,255,0.06)"}>
-            <div style={{ width:42, height:42, borderRadius:11, background:IC_GRAD[nextModule.t], display:"flex", alignItems:"center", justifyContent:"center", fontSize:18, flexShrink:0, boxShadow:IC_SHADOW[nextModule.t] }}>{nextModule.ic}</div>
-            <div style={{ flex:1, minWidth:0 }}>
-              <div style={{ fontSize:9, fontWeight:800, color: nextModule.t === "MODULE" ? "#CCFF00" : "#F59E0B", letterSpacing:2, marginBottom:3, textTransform:"uppercase" }}>Up Next</div>
-              <div style={{ fontSize:13, fontWeight:700, color:"#EEF2F8", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{nextModule.sub}</div>
-            </div>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#555A6A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0 }}><polyline points="9 18 15 12 9 6"/></svg>
+        <div style={{ display:"flex", alignItems:"center", gap:dk?18:14 }}>
+          <Ring pct={trainingPct} accent="#CCFF00" size={dk?92:78} stroke={dk?9:8} label={`${trainingPct}%`} sublabel={`${doneModules}/${totalModules}`} />
+          <div style={{ flex:1, minWidth:0 }}>
+            {nextModule ? (
+              <div onClick={() => onOpenModule(nextModule.k)}
+                style={{ display:"flex", alignItems:"center", gap:12, cursor:"pointer", background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:12, padding:"10px 12px", transition:"border-color 0.2s" }}
+                onMouseEnter={e => e.currentTarget.style.borderColor="rgba(204,255,0,0.2)"}
+                onMouseLeave={e => e.currentTarget.style.borderColor="rgba(255,255,255,0.06)"}>
+                <div style={{ width:42, height:42, borderRadius:11, background:IC_GRAD[nextModule.t], display:"flex", alignItems:"center", justifyContent:"center", fontSize:18, flexShrink:0, boxShadow:IC_SHADOW[nextModule.t] }}>{nextModule.ic}</div>
+                <div style={{ flex:1, minWidth:0 }}>
+                  <div style={{ fontSize:9, fontWeight:800, color: nextModule.t === "MODULE" ? "#CCFF00" : "#F59E0B", letterSpacing:2, marginBottom:3, textTransform:"uppercase" }}>Up Next</div>
+                  <div style={{ fontSize:13, fontWeight:700, color:"#EEF2F8", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{nextModule.sub}</div>
+                </div>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#555A6A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0 }}><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+            ) : (
+              <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                <div style={{ width:36, height:36, borderRadius:10, background:"rgba(34,197,94,0.12)", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <div style={{ fontSize:13, fontWeight:700, color:"#22C55E" }}>All modules complete</div>
+              </div>
+            )}
           </div>
-        ) : (
-          <div style={{ display:"flex", alignItems:"center", gap:10, padding:"10px 0" }}>
-            <div style={{ width:36, height:36, borderRadius:10, background:"rgba(34,197,94,0.12)", display:"flex", alignItems:"center", justifyContent:"center" }}>
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            </div>
-            <div style={{ fontSize:13, fontWeight:700, color:"#22C55E" }}>All modules complete</div>
-          </div>
-        )}
-        <div style={{ marginTop:14, height:5, borderRadius:3, background:"rgba(255,255,255,0.05)", overflow:"hidden" }}>
-          <div style={{ width:`${trainingPct}%`, height:"100%", background:"linear-gradient(90deg,#CCFF00,#F59E0B)", transition:"width 0.5s" }} />
-        </div>
-        <div style={{ display:"flex", justifyContent:"space-between", marginTop:6 }}>
-          <div style={{ fontSize:9.5, color:"#444856", letterSpacing:1, textTransform:"uppercase", fontWeight:700 }}>{doneModules}/{totalModules} modules</div>
-          <div style={{ fontSize:9.5, color:"#CCFF00", fontWeight:800 }}>{trainingPct}%</div>
         </div>
       </Card>
 
@@ -945,6 +1024,27 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
             })}
           </div>
         )}
+      </Card>
+
+      {/* Team Pulse */}
+      <Card title="Team Pulse · This Week" accent="#06D6F0">
+        <div style={{ display:"flex", alignItems:"baseline", justifyContent:"space-between", marginBottom:12 }}>
+          <div>
+            <div style={{ fontSize:dk?28:24, fontWeight:900, color:"#F2F4F8", lineHeight:1, letterSpacing:"-0.03em" }}>
+              {teamWeekCount} <span style={{ fontSize:13, color:"#666C7E", fontWeight:700 }}>{teamWeekCount === 1 ? "sale" : "sales"}</span>
+            </div>
+            {teamWeekTotal > 0 && (
+              <div style={{ fontSize:12, color:"#22C55E", fontWeight:700, marginTop:5 }}>
+                ${teamWeekTotal.toLocaleString()} <span style={{ color:"#666C7E", fontWeight:600 }}>team revenue</span>
+              </div>
+            )}
+          </div>
+          <div style={{ textAlign:"right" }}>
+            <div style={{ fontSize:18, fontWeight:900, color:"#06D6F0", lineHeight:1 }}>{rankedWeek.length}</div>
+            <div style={{ fontSize:8.5, color:"#06D6F099", textTransform:"uppercase", letterSpacing:1.5, fontWeight:800, marginTop:4 }}>Active reps</div>
+          </div>
+        </div>
+        <BarChart data={teamDaily} accent="#06D6F0" highlight={todayIdx} height={dk?72:60} />
       </Card>
 
       {/* Recent Sales */}
