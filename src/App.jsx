@@ -902,6 +902,222 @@ function Announcements({ session, profile, w }) {
   );
 }
 
+function Chat({ session, profile, w }) {
+  const [msgs, setMsgs] = useState([]);
+  const [reps, setReps] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [body, setBody] = useState("");
+  const [sending, setSending] = useState(false);
+  const scrollRef = useRef(null);
+  const stickyRef = useRef(true);
+  const dk = w >= 768;
+  const isAdmin = profile?.role === "admin";
+
+  const load = async () => {
+    const [mRes, pRes] = await Promise.all([
+      supabase.from("messages").select("id, user_id, body, created_at").order("created_at", { ascending: true }).limit(200),
+      supabase.from("profiles").select("id, name, role"),
+    ]);
+    setMsgs(mRes.data ?? []);
+    const pm = {};
+    for (const p of pRes.data ?? []) pm[p.id] = { name: p.name || "Rep", role: p.role };
+    setReps(pm);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    load();
+    const ch = supabase.channel("messages-rt")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, (payload) => {
+        setMsgs(prev => prev.some(m => m.id === payload.new.id) ? prev : [...prev, payload.new]);
+      })
+      .on("postgres_changes", { event: "DELETE", schema: "public", table: "messages" }, (payload) => {
+        setMsgs(prev => prev.filter(m => m.id !== payload.old.id));
+      })
+      .subscribe();
+    return () => supabase.removeChannel(ch);
+  }, []);
+
+  const onScroll = () => {
+    const el = scrollRef.current; if (!el) return;
+    stickyRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+  };
+
+  useEffect(() => {
+    if (loading) return;
+    const el = scrollRef.current; if (!el) return;
+    if (stickyRef.current) el.scrollTop = el.scrollHeight;
+  }, [msgs, loading]);
+
+  const send = async () => {
+    const trimmed = body.trim();
+    if (!trimmed || sending) return;
+    setSending(true);
+    const { data, error } = await supabase
+      .from("messages")
+      .insert({ user_id: session.user.id, body: trimmed })
+      .select()
+      .single();
+    setSending(false);
+    if (error || !data) {
+      alert(`Couldn't send: ${error?.message ?? "no row returned (likely RLS or missing 'messages' table)"}`);
+      return;
+    }
+    setBody("");
+    stickyRef.current = true;
+    setMsgs(prev => prev.some(m => m.id === data.id) ? prev : [...prev, data]);
+  };
+
+  const remove = async (id) => {
+    if (!confirm("Delete this message?")) return;
+    const { error } = await supabase.from("messages").delete().eq("id", id);
+    if (error) { alert(`Couldn't delete: ${error.message}`); return; }
+    setMsgs(prev => prev.filter(m => m.id !== id));
+  };
+
+  const fmtTime = (iso) => new Date(iso).toLocaleTimeString("en-US",{ hour:"numeric", minute:"2-digit" });
+  const fmtDay = (iso) => {
+    const d = new Date(iso);
+    const today = new Date(); today.setHours(0,0,0,0);
+    const ds = new Date(d); ds.setHours(0,0,0,0);
+    const diff = Math.round((today - ds) / 86400000);
+    if (diff === 0) return "Today";
+    if (diff === 1) return "Yesterday";
+    if (diff < 7) return d.toLocaleDateString("en-US",{ weekday:"long" });
+    return d.toLocaleDateString("en-US",{ month:"short", day:"numeric", year: d.getFullYear() === today.getFullYear() ? undefined : "numeric" });
+  };
+
+  // Group messages by day, then collapse runs by same author within 3 minutes
+  const grouped = [];
+  let lastDay = null, lastUid = null, lastTs = 0;
+  for (const m of msgs) {
+    const day = fmtDay(m.created_at);
+    if (day !== lastDay) {
+      grouped.push({ kind: "day", id: `d-${day}-${m.id}`, label: day });
+      lastDay = day; lastUid = null;
+    }
+    const ts = new Date(m.created_at).getTime();
+    const continued = m.user_id === lastUid && (ts - lastTs) < 3 * 60 * 1000;
+    grouped.push({ kind: "msg", continued, ...m });
+    lastUid = m.user_id; lastTs = ts;
+  }
+
+  const onKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
+  };
+
+  const palette = ["#CCFF00","#06D6F0","#F59E0B","#FFD700","#A78BFA","#22C55E","#FF7AB6","#FB7185"];
+  const colorFor = (uid) => {
+    let h = 0; for (let i = 0; i < uid.length; i++) h = (h * 31 + uid.charCodeAt(i)) >>> 0;
+    return palette[h % palette.length];
+  };
+
+  return (
+    <div style={{ animation:"fadeUp 0.35s ease", display:"flex", flexDirection:"column", height:`calc(100dvh - ${dk?260:220}px)`, minHeight:480 }}>
+      <div className="dash-card" style={{ display:"flex", flexDirection:"column", flex:1, padding:0, overflow:"hidden" }}>
+        <div style={{ position:"absolute", top:0, left:0, right:0, height:2, background:"linear-gradient(90deg,transparent,#CCFF0080,transparent)", opacity:0.5 }} />
+
+        {/* Header */}
+        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:dk?"18px 22px":"14px 18px", borderBottom:"1px solid rgba(255,255,255,0.05)", flexShrink:0 }}>
+          <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+            <div style={{ width:36, height:36, borderRadius:10, background:"linear-gradient(135deg,#CCFF00,#88AB00)", display:"flex", alignItems:"center", justifyContent:"center", boxShadow:"0 4px 14px rgba(204,255,0,0.35), inset 0 1px 0 rgba(255,255,255,0.4)" }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15171E" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <div>
+              <div style={{ fontSize:13, fontWeight:800, color:"#F2F4F8", letterSpacing:"-0.01em" }}>Team Chat</div>
+              <div style={{ fontSize:9.5, fontWeight:800, color:"#666C7E", letterSpacing:2, textTransform:"uppercase", marginTop:2 }}>{Object.keys(reps).length} {Object.keys(reps).length === 1 ? "Rep" : "Reps"} · #general</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Messages */}
+        <div ref={scrollRef} onScroll={onScroll} style={{ flex:1, overflowY:"auto", padding:dk?"16px 22px":"14px 16px" }}>
+          {loading ? (
+            <div style={{ textAlign:"center", padding:60, color:"#666C7E", fontSize:13 }}>Loading…</div>
+          ) : msgs.length === 0 ? (
+            <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", height:"100%", textAlign:"center", color:"#666C7E", padding:"40px 20px" }}>
+              <div style={{ width:54, height:54, borderRadius:16, background:"rgba(204,255,0,0.08)", border:"1px solid rgba(204,255,0,0.2)", display:"flex", alignItems:"center", justifyContent:"center", marginBottom:14 }}>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#CCFF00" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              </div>
+              <div style={{ fontSize:14, fontWeight:700, color:"#D6DAE2", marginBottom:6 }}>No messages yet</div>
+              <div style={{ fontSize:12 }}>Say hi to the team — break the ice.</div>
+            </div>
+          ) : (
+            <div style={{ display:"flex", flexDirection:"column", gap:2 }}>
+              {grouped.map(g => {
+                if (g.kind === "day") return (
+                  <div key={g.id} style={{ display:"flex", alignItems:"center", gap:12, margin:"16px 0 10px" }}>
+                    <div style={{ flex:1, height:1, background:"rgba(255,255,255,0.05)" }} />
+                    <div style={{ fontSize:9.5, fontWeight:800, color:"#666C7E", letterSpacing:2, textTransform:"uppercase" }}>{g.label}</div>
+                    <div style={{ flex:1, height:1, background:"rgba(255,255,255,0.05)" }} />
+                  </div>
+                );
+                const isMe = g.user_id === session.user.id;
+                const r = reps[g.user_id];
+                const name = r?.name || "Rep";
+                const isAdminMsg = r?.role === "admin";
+                const c = colorFor(g.user_id);
+                return (
+                  <div key={g.id} style={{ display:"flex", flexDirection: isMe ? "row-reverse" : "row", gap:10, marginTop:g.continued?2:8, alignItems:"flex-end" }}>
+                    <div style={{ width:30, height:30, flexShrink:0, visibility: g.continued ? "hidden" : "visible" }}>
+                      <div style={{ width:30, height:30, borderRadius:9, background: isMe ? "linear-gradient(135deg,#CCFF00,#88AB00)" : `linear-gradient(135deg,${c},${c}99)`, display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Plus Jakarta Sans',sans-serif", fontSize:12, fontWeight:900, color:"#15171E", boxShadow: isMe ? "0 2px 10px rgba(204,255,0,0.35)" : `0 2px 8px ${c}55` }}>
+                        {name[0]?.toUpperCase()}
+                      </div>
+                    </div>
+                    <div style={{ maxWidth:"min(72%, 560px)", display:"flex", flexDirection:"column", alignItems: isMe ? "flex-end" : "flex-start" }}>
+                      {!g.continued && (
+                        <div style={{ display:"flex", gap:8, alignItems:"baseline", padding: isMe ? "0 4px 4px 0" : "0 0 4px 4px", flexDirection: isMe ? "row-reverse" : "row" }}>
+                          <span style={{ fontSize:11, fontWeight:700, color: isMe ? "#CCFF00" : "#D6DAE2" }}>{isMe ? "You" : name}</span>
+                          {isAdminMsg && !isMe && <span style={{ fontSize:8, fontWeight:800, color:"#F59E0B", background:"rgba(245,158,11,0.12)", border:"1px solid rgba(245,158,11,0.25)", padding:"1.5px 6px", borderRadius:4, letterSpacing:1.5, textTransform:"uppercase" }}>Admin</span>}
+                          <span style={{ fontSize:9.5, color:"#5E6376" }}>{fmtTime(g.created_at)}</span>
+                        </div>
+                      )}
+                      <div className="chat-bubble" style={{ position:"relative", padding:"9px 13px", background: isMe ? "linear-gradient(135deg,rgba(204,255,0,0.14),rgba(204,255,0,0.06))" : "rgba(255,255,255,0.04)", border:`1px solid ${isMe ? "rgba(204,255,0,0.25)" : "rgba(255,255,255,0.07)"}`, borderRadius: g.continued
+                        ? (isMe ? "16px 6px 16px 16px" : "6px 16px 16px 16px")
+                        : (isMe ? "16px 4px 16px 16px" : "4px 16px 16px 16px"),
+                        color:"#EEF2F8", fontSize:13.5, lineHeight:1.5, fontWeight:500, whiteSpace:"pre-wrap", wordBreak:"break-word" }}>
+                        {g.body}
+                        {(isMe || isAdmin) && (
+                          <button onClick={() => remove(g.id)} title="Delete message" className="msg-del"
+                            style={{ position:"absolute", top:-8, right: isMe ? -8 : "auto", left: isMe ? "auto" : -8, width:22, height:22, borderRadius:6, background:"rgba(20,22,28,0.95)", border:"1px solid rgba(255,255,255,0.1)", color:"#666C7E", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", padding:0, transition:"all 0.15s", opacity:0, pointerEvents:"none" }}>
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Composer */}
+        <div style={{ display:"flex", gap:10, padding:dk?"14px 18px":"12px 14px", borderTop:"1px solid rgba(255,255,255,0.05)", background:"rgba(255,255,255,0.015)", flexShrink:0 }}>
+          <textarea
+            value={body}
+            onChange={e => setBody(e.target.value)}
+            onKeyDown={onKeyDown}
+            placeholder="Message the team…"
+            rows={1}
+            style={{ flex:1, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:12, color:"#F2F4F8", fontSize:13.5, fontWeight:500, padding:"11px 14px", fontFamily:"inherit", outline:"none", boxSizing:"border-box", resize:"none", lineHeight:1.5, maxHeight:140 }}
+          />
+          <button onClick={send} disabled={sending || !body.trim()} className="btn-primary"
+            style={{ padding:"0 18px", fontSize:11, opacity: sending || !body.trim() ? 0.45 : 1, cursor: sending || !body.trim() ? "default" : "pointer", display:"flex", alignItems:"center", gap:8, flexShrink:0 }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            {sending ? "Sending" : "Send"}
+          </button>
+        </div>
+      </div>
+
+      <style>{`
+        .chat-bubble:hover .msg-del { opacity: 1 !important; pointer-events: auto !important; }
+        .msg-del:hover { color: #FF3370 !important; border-color: rgba(255,51,112,0.4) !important; }
+      `}</style>
+    </div>
+  );
+}
+
 function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab, onOpenModule }) {
   const [sales, setSales] = useState([]);
   const [schedule, setSchedule] = useState([]);
@@ -2149,6 +2365,7 @@ export default function App() {
   const TABS = [
     { key:"dashboard",     label:"Dashboard",     short:"Home",     color:"#22C55E" },
     { key:"announcements", label:"Announcements", short:"News",     color:"#F59E0B" },
+    { key:"chat",          label:"Chat",          short:"Chat",     color:"#CCFF00" },
     { key:"leaderboard",   label:"Leaderboard",   short:"Board",    color:"#FFD700" },
     { key:"scheduling",    label:"Scheduling",    short:"Schedule", color:"#F59E0B" },
     { key:"training",      label:"Training",      short:"Train",    color:"#CCFF00" },
@@ -2306,6 +2523,11 @@ export default function App() {
         {/* ANNOUNCEMENTS TAB */}
         {tab === "announcements" && (
           <Announcements session={session} profile={profile} w={w} />
+        )}
+
+        {/* CHAT TAB */}
+        {tab === "chat" && (
+          <Chat session={session} profile={profile} w={w} />
         )}
 
         {/* LEADERBOARD TAB */}
