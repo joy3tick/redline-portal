@@ -908,10 +908,14 @@ function Chat({ session, profile, w }) {
   const [loading, setLoading] = useState(true);
   const [body, setBody] = useState("");
   const [sending, setSending] = useState(false);
+  const [typing, setTyping] = useState({}); // { uid: { name, t: epoch } }
   const scrollRef = useRef(null);
   const stickyRef = useRef(true);
+  const channelRef = useRef(null);
+  const lastTypingSentRef = useRef(0);
   const dk = w >= 768;
   const isAdmin = profile?.role === "admin";
+  const myName = profile?.name || "Rep";
 
   const load = async () => {
     const [mRes, pRes] = await Promise.all([
@@ -927,16 +931,61 @@ function Chat({ session, profile, w }) {
 
   useEffect(() => {
     load();
-    const ch = supabase.channel("messages-rt")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, (payload) => {
+    const ch = supabase.channel("messages-rt", { config: { broadcast: { self: false } } });
+    ch.on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, (payload) => {
         setMsgs(prev => prev.some(m => m.id === payload.new.id) ? prev : [...prev, payload.new]);
+        // Hide typing indicator for the sender as soon as their message arrives
+        setTyping(prev => {
+          if (!prev[payload.new.user_id]) return prev;
+          const next = { ...prev }; delete next[payload.new.user_id]; return next;
+        });
       })
       .on("postgres_changes", { event: "DELETE", schema: "public", table: "messages" }, (payload) => {
         setMsgs(prev => prev.filter(m => m.id !== payload.old.id));
       })
+      .on("broadcast", { event: "typing" }, ({ payload }) => {
+        if (!payload?.uid || payload.uid === session.user.id) return;
+        setTyping(prev => ({ ...prev, [payload.uid]: { name: payload.name || "Rep", t: Date.now() } }));
+      })
+      .on("broadcast", { event: "stop_typing" }, ({ payload }) => {
+        if (!payload?.uid) return;
+        setTyping(prev => {
+          if (!prev[payload.uid]) return prev;
+          const next = { ...prev }; delete next[payload.uid]; return next;
+        });
+      })
       .subscribe();
-    return () => supabase.removeChannel(ch);
+    channelRef.current = ch;
+
+    // Tick to expire stale typing entries after 4s of silence
+    const tick = setInterval(() => {
+      const now = Date.now();
+      setTyping(prev => {
+        let changed = false;
+        const next = {};
+        for (const [uid, info] of Object.entries(prev)) {
+          if (now - info.t < 4000) next[uid] = info; else changed = true;
+        }
+        return changed ? next : prev;
+      });
+    }, 1000);
+
+    return () => { clearInterval(tick); supabase.removeChannel(ch); channelRef.current = null; };
   }, []);
+
+  const broadcastTyping = () => {
+    if (!channelRef.current) return;
+    const now = Date.now();
+    if (now - lastTypingSentRef.current < 1500) return;
+    lastTypingSentRef.current = now;
+    channelRef.current.send({ type:"broadcast", event:"typing", payload: { uid: session.user.id, name: myName } });
+  };
+
+  const broadcastStopTyping = () => {
+    if (!channelRef.current) return;
+    lastTypingSentRef.current = 0;
+    channelRef.current.send({ type:"broadcast", event:"stop_typing", payload: { uid: session.user.id } });
+  };
 
   const onScroll = () => {
     const el = scrollRef.current; if (!el) return;
@@ -964,8 +1013,15 @@ function Chat({ session, profile, w }) {
       return;
     }
     setBody("");
+    broadcastStopTyping();
     stickyRef.current = true;
     setMsgs(prev => prev.some(m => m.id === data.id) ? prev : [...prev, data]);
+  };
+
+  const onBodyChange = (val) => {
+    setBody(val);
+    if (val.trim()) broadcastTyping();
+    else broadcastStopTyping();
   };
 
   const remove = async (id) => {
@@ -1092,11 +1148,31 @@ function Chat({ session, profile, w }) {
           )}
         </div>
 
+        {/* Typing indicator */}
+        {(() => {
+          const others = Object.entries(typing).filter(([uid]) => uid !== session.user.id).map(([, v]) => v.name);
+          if (others.length === 0) return null;
+          const label = others.length === 1
+            ? `${others[0]} is typing`
+            : others.length === 2
+              ? `${others[0]} and ${others[1]} are typing`
+              : `${others.length} people are typing`;
+          return (
+            <div style={{ display:"flex", alignItems:"center", gap:10, padding:dk?"6px 22px 0":"4px 16px 0", flexShrink:0, color:"#9098A8", fontSize:11.5, fontWeight:600, height:22 }}>
+              <span className="typing-dots" aria-hidden="true">
+                <span /><span /><span />
+              </span>
+              <span>{label}</span>
+            </div>
+          );
+        })()}
+
         {/* Composer */}
-        <div style={{ display:"flex", gap:10, padding:dk?"14px 18px":"12px 14px", borderTop:"1px solid rgba(255,255,255,0.05)", background:"rgba(255,255,255,0.015)", flexShrink:0 }}>
+        <div style={{ display:"flex", gap:10, padding:dk?"10px 18px 14px":"8px 14px 12px", borderTop:"1px solid rgba(255,255,255,0.05)", background:"rgba(255,255,255,0.015)", flexShrink:0 }}>
           <textarea
             value={body}
-            onChange={e => setBody(e.target.value)}
+            onChange={e => onBodyChange(e.target.value)}
+            onBlur={() => { if (!body.trim()) broadcastStopTyping(); }}
             onKeyDown={onKeyDown}
             placeholder="Message the team…"
             rows={1}
@@ -1113,6 +1189,11 @@ function Chat({ session, profile, w }) {
       <style>{`
         .chat-bubble:hover .msg-del { opacity: 1 !important; pointer-events: auto !important; }
         .msg-del:hover { color: #FF3370 !important; border-color: rgba(255,51,112,0.4) !important; }
+        @keyframes typingBounce { 0%,80%,100% { transform: translateY(0); opacity: 0.4 } 40% { transform: translateY(-3px); opacity: 1 } }
+        .typing-dots { display:inline-flex; gap:3px; align-items:center }
+        .typing-dots span { width:4px; height:4px; border-radius:50%; background:#CCFF00; display:inline-block; animation: typingBounce 1.2s ease-in-out infinite }
+        .typing-dots span:nth-child(2) { animation-delay: 0.15s }
+        .typing-dots span:nth-child(3) { animation-delay: 0.3s }
       `}</style>
     </div>
   );
