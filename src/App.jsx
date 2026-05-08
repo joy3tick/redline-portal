@@ -387,6 +387,21 @@ button{font-family:inherit}
 }
 .btn-ghost:hover { background:rgba(255,255,255,0.07); color:#D6DAE2; border-color:rgba(255,255,255,0.14) }
 
+/* Header pill buttons — Admin / Sign Out / Profile */
+.btn-pill {
+  display:inline-flex; align-items:center; justify-content:center; gap:7px;
+  height:42px; padding:0 14px; font-size:11px; font-weight:700;
+  letter-spacing:1.4px; text-transform:uppercase; border-radius:12px;
+  cursor:pointer; transition: all 0.18s ease; font-family:inherit;
+  background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255,255,255,0.08); color:#9098A8;
+}
+.btn-pill:hover { background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03)); color:#D6DAE2; border-color:rgba(255,255,255,0.16) }
+.btn-pill.amber { color:#F59E0B; background: linear-gradient(180deg, rgba(245,158,11,0.10), rgba(245,158,11,0.04)); border-color:rgba(245,158,11,0.22) }
+.btn-pill.amber:hover { background: linear-gradient(180deg, rgba(245,158,11,0.16), rgba(245,158,11,0.06)); border-color:rgba(245,158,11,0.36); color:#FBBF24 }
+.btn-pill.icon-only { padding:0; width:42px; gap:0 }
+.btn-pill svg { display:block }
+
 /* Gradient text */
 .red-gradient-text {
   background: linear-gradient(135deg, #DDFF40 0%, #CCFF00 50%, #E5FF1A 100%);
@@ -2532,7 +2547,10 @@ export default function App() {
               {/* Right actions */}
               <div style={{ display:"flex", alignItems:"center", gap:dk?8:6, animation:"fadeUp 0.5s ease 0.06s both" }}>
                 {profile?.role === "admin" && (
-                  <button onClick={() => setView("__admin")} className="btn-ghost" style={{ fontSize:10, padding:dk?"9px 14px":"7px 10px", color:"#F59E0B", borderColor:"rgba(245,158,11,0.22)", background:"rgba(245,158,11,0.06)" }}>Admin</button>
+                  <button onClick={() => setView("__admin")} className={`btn-pill amber${dk?"":" icon-only"}`} aria-label="Admin">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    {dk && "Admin"}
+                  </button>
                 )}
 
                 {/* Avatar + name edit */}
@@ -2543,7 +2561,7 @@ export default function App() {
                       {profile?.name?.[0]?.toUpperCase() ?? "R"}
                     </div>
                     {dk && <span style={{ fontSize:12.5, fontWeight:600, color:"#D6DAE2", letterSpacing:0.2 }}>{profile?.name ?? "Rep"}</span>}
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#5E6376" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft:dk?2:0 }}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    {dk && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7E8595" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft:2, transform: showNameEdit?"rotate(180deg)":"none", transition:"transform 0.18s ease" }}><polyline points="6 9 12 15 18 9"/></svg>}
                   </div>
                   {showNameEdit && (
                     <div className="glass" style={{ position:"absolute", top:"calc(100% + 10px)", right:0, borderRadius:14, padding:18, width:240, zIndex:200, boxShadow:"0 24px 60px rgba(0,0,0,0.7)", animation:"popIn 0.18s ease" }}>
@@ -2564,7 +2582,10 @@ export default function App() {
                   )}
                 </div>
 
-                <button onClick={signOut} className="btn-ghost" style={{ fontSize:10, padding:dk?"9px 14px":"7px 10px" }}>{dk ? "Sign Out" : "Out"}</button>
+                <button onClick={signOut} className={`btn-pill${dk?"":" icon-only"}`} aria-label="Sign Out">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                  {dk && "Sign Out"}
+                </button>
               </div>
             </div>
 
