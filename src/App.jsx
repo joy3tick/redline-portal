@@ -1033,6 +1033,16 @@ function Leads({ session, profile, w }) {
     setLeads(prev => prev.filter(l => l.id !== id));
   };
 
+  const clearDead = async () => {
+    const targets = leads.filter(l => l.status === "dead" && (isAdmin || l.assigned_to === session.user.id));
+    if (targets.length === 0) return;
+    if (!confirm(`Delete ${targets.length} dead lead${targets.length === 1 ? "" : "s"}? This can't be undone.`)) return;
+    const ids = targets.map(t => t.id);
+    const { error } = await supabase.from("leads").delete().in("id", ids);
+    if (error) { alert(`Couldn't clear: ${error.message}`); return; }
+    setLeads(prev => prev.filter(l => !ids.includes(l.id)));
+  };
+
   const STATUSES = [
     { v: "new",       label: "New",       color: "#06D6F0" },
     { v: "contacted", label: "Contacted", color: "#F59E0B" },
@@ -1172,17 +1182,28 @@ function Leads({ session, profile, w }) {
       )}
 
       {/* Status filter row */}
-      <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
-        <button onClick={() => setStatusFilter("all")}
-          style={{ background: statusFilter === "all" ? "rgba(204,255,0,0.1)" : "rgba(255,255,255,0.04)", border:`1px solid ${statusFilter === "all" ? "rgba(204,255,0,0.25)" : "rgba(255,255,255,0.07)"}`, color: statusFilter === "all" ? "#CCFF00" : "#9098A8", fontSize:10.5, fontWeight:800, letterSpacing:1.5, textTransform:"uppercase", padding:"7px 12px", borderRadius:8, cursor:"pointer", fontFamily:"inherit", transition:"all 0.18s", display:"flex", alignItems:"center", gap:8 }}>
-          All <span style={{ background:"rgba(255,255,255,0.06)", padding:"1px 6px", borderRadius:4, fontSize:10 }}>{totalForFilter}</span>
-        </button>
-        {STATUSES.map(s => (
-          <button key={s.v} onClick={() => setStatusFilter(s.v)}
-            style={{ background: statusFilter === s.v ? `${s.color}14` : "rgba(255,255,255,0.04)", border:`1px solid ${statusFilter === s.v ? `${s.color}40` : "rgba(255,255,255,0.07)"}`, color: statusFilter === s.v ? s.color : "#9098A8", fontSize:10.5, fontWeight:800, letterSpacing:1.5, textTransform:"uppercase", padding:"7px 12px", borderRadius:8, cursor:"pointer", fontFamily:"inherit", transition:"all 0.18s", display:"flex", alignItems:"center", gap:8 }}>
-            {s.label} <span style={{ background:"rgba(255,255,255,0.06)", padding:"1px 6px", borderRadius:4, fontSize:10 }}>{counts[s.v] ?? 0}</span>
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", gap:10, flexWrap:"wrap" }}>
+        <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
+          <button onClick={() => setStatusFilter("all")}
+            style={{ background: statusFilter === "all" ? "rgba(204,255,0,0.1)" : "rgba(255,255,255,0.04)", border:`1px solid ${statusFilter === "all" ? "rgba(204,255,0,0.25)" : "rgba(255,255,255,0.07)"}`, color: statusFilter === "all" ? "#CCFF00" : "#9098A8", fontSize:10.5, fontWeight:800, letterSpacing:1.5, textTransform:"uppercase", padding:"7px 12px", borderRadius:8, cursor:"pointer", fontFamily:"inherit", transition:"all 0.18s", display:"flex", alignItems:"center", gap:8 }}>
+            All <span style={{ background:"rgba(255,255,255,0.06)", padding:"1px 6px", borderRadius:4, fontSize:10 }}>{totalForFilter}</span>
           </button>
-        ))}
+          {STATUSES.map(s => (
+            <button key={s.v} onClick={() => setStatusFilter(s.v)}
+              style={{ background: statusFilter === s.v ? `${s.color}14` : "rgba(255,255,255,0.04)", border:`1px solid ${statusFilter === s.v ? `${s.color}40` : "rgba(255,255,255,0.07)"}`, color: statusFilter === s.v ? s.color : "#9098A8", fontSize:10.5, fontWeight:800, letterSpacing:1.5, textTransform:"uppercase", padding:"7px 12px", borderRadius:8, cursor:"pointer", fontFamily:"inherit", transition:"all 0.18s", display:"flex", alignItems:"center", gap:8 }}>
+              {s.label} <span style={{ background:"rgba(255,255,255,0.06)", padding:"1px 6px", borderRadius:4, fontSize:10 }}>{counts[s.v] ?? 0}</span>
+            </button>
+          ))}
+        </div>
+        {statusFilter === "dead" && (counts.dead ?? 0) > 0 && (
+          <button onClick={clearDead}
+            style={{ background:"rgba(255,51,112,0.08)", border:"1px solid rgba(255,51,112,0.3)", color:"#FF3370", fontSize:10.5, fontWeight:800, letterSpacing:1.5, textTransform:"uppercase", padding:"7px 14px", borderRadius:8, cursor:"pointer", fontFamily:"inherit", transition:"all 0.18s", display:"flex", alignItems:"center", gap:8 }}
+            onMouseEnter={e => { e.currentTarget.style.background="rgba(255,51,112,0.16)"; e.currentTarget.style.borderColor="rgba(255,51,112,0.5)"; }}
+            onMouseLeave={e => { e.currentTarget.style.background="rgba(255,51,112,0.08)"; e.currentTarget.style.borderColor="rgba(255,51,112,0.3)"; }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+            Clear all ({counts.dead})
+          </button>
+        )}
       </div>
 
       {/* Leads list */}
