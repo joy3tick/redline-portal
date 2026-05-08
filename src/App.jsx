@@ -902,13 +902,16 @@ function Announcements({ session, profile, w }) {
   );
 }
 
-function Chat({ session, profile, w }) {
+function Chat({ session, profile, w, open, onToggle }) {
   const [msgs, setMsgs] = useState([]);
   const [reps, setReps] = useState({});
   const [loading, setLoading] = useState(true);
   const [body, setBody] = useState("");
   const [sending, setSending] = useState(false);
   const [typing, setTyping] = useState({}); // { uid: { name, t: epoch } }
+  const [unread, setUnread] = useState(0);
+  const openRef = useRef(open);
+  useEffect(() => { openRef.current = open; if (open) setUnread(0); }, [open]);
   const scrollRef = useRef(null);
   const stickyRef = useRef(true);
   const channelRef = useRef(null);
@@ -939,6 +942,10 @@ function Chat({ session, profile, w }) {
           if (!prev[payload.new.user_id]) return prev;
           const next = { ...prev }; delete next[payload.new.user_id]; return next;
         });
+        // Bump unread badge if widget is closed and the message isn't ours
+        if (!openRef.current && payload.new.user_id !== session.user.id) {
+          setUnread(u => u + 1);
+        }
       })
       .on("postgres_changes", { event: "DELETE", schema: "public", table: "messages" }, (payload) => {
         setMsgs(prev => prev.filter(m => m.id !== payload.old.id));
@@ -1068,22 +1075,70 @@ function Chat({ session, profile, w }) {
     return palette[h % palette.length];
   };
 
+  const panelW = w >= 540 ? 380 : Math.min(w - 24, 360);
+  const panelH = dk ? Math.min(640, w >= 768 ? 0.78 * (typeof window !== "undefined" ? window.innerHeight : 800) : 540) : 520;
+
   return (
-    <div style={{ animation:"fadeUp 0.35s ease", display:"flex", flexDirection:"column", height:`calc(100dvh - ${dk?260:220}px)`, minHeight:480 }}>
-      <div className="dash-card" style={{ display:"flex", flexDirection:"column", flex:1, padding:0, overflow:"hidden" }}>
+    <>
+      {/* Collapsed launcher */}
+      <button onClick={onToggle} aria-label={open ? "Close chat" : "Open chat"}
+        style={{
+          position:"fixed", right:dk?22:14, bottom:dk?22:14, zIndex:90,
+          width:dk?58:54, height:dk?58:54, borderRadius:"50%",
+          background: open ? "linear-gradient(135deg,#23262E,#15171E)" : "linear-gradient(135deg,#CCFF00,#88AB00)",
+          border: open ? "1px solid rgba(255,255,255,0.12)" : "none",
+          color:"#15171E", cursor:"pointer", padding:0,
+          boxShadow: open ? "0 10px 28px rgba(0,0,0,0.5)" : "0 10px 30px rgba(204,255,0,0.45), inset 0 1px 0 rgba(255,255,255,0.4)",
+          display:"flex", alignItems:"center", justifyContent:"center",
+          transition:"transform 0.22s cubic-bezier(0.4,0,0.2,1), box-shadow 0.22s ease, background 0.22s ease",
+        }}
+        onMouseEnter={e => e.currentTarget.style.transform="translateY(-2px)"}
+        onMouseLeave={e => e.currentTarget.style.transform="translateY(0)"}>
+        {open ? (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D6DAE2" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        ) : (
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15171E" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        )}
+        {!open && unread > 0 && (
+          <span style={{ position:"absolute", top:-4, right:-4, minWidth:22, height:22, padding:"0 6px", borderRadius:11, background:"#FF3370", color:"#FFF", fontSize:11, fontWeight:800, display:"flex", alignItems:"center", justifyContent:"center", boxShadow:"0 4px 12px rgba(255,51,112,0.5)", border:"2px solid #0E0F14" }}>
+            {unread > 99 ? "99+" : unread}
+          </span>
+        )}
+      </button>
+
+      {/* Slide-in panel */}
+      <div aria-hidden={!open}
+        style={{
+          position:"fixed", right:dk?22:12, bottom:dk?92:78, zIndex:89,
+          width:panelW, maxWidth:"calc(100vw - 24px)",
+          height:panelH, maxHeight:"calc(100dvh - 110px)",
+          display:"flex", flexDirection:"column",
+          transform: open ? "translateY(0) scale(1)" : "translateY(16px) scale(0.96)",
+          opacity: open ? 1 : 0,
+          pointerEvents: open ? "auto" : "none",
+          transition:"transform 0.25s cubic-bezier(0.4,0,0.2,1), opacity 0.22s ease",
+          transformOrigin:"bottom right",
+        }}>
+      <div className="dash-card" style={{ display:"flex", flexDirection:"column", flex:1, padding:0, overflow:"hidden", boxShadow:"0 24px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(204,255,0,0.05)" }}>
         <div style={{ position:"absolute", top:0, left:0, right:0, height:2, background:"linear-gradient(90deg,transparent,#CCFF0080,transparent)", opacity:0.5 }} />
 
         {/* Header */}
-        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:dk?"18px 22px":"14px 18px", borderBottom:"1px solid rgba(255,255,255,0.05)", flexShrink:0 }}>
+        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:dk?"14px 18px":"12px 14px", borderBottom:"1px solid rgba(255,255,255,0.05)", flexShrink:0 }}>
           <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-            <div style={{ width:36, height:36, borderRadius:10, background:"linear-gradient(135deg,#CCFF00,#88AB00)", display:"flex", alignItems:"center", justifyContent:"center", boxShadow:"0 4px 14px rgba(204,255,0,0.35), inset 0 1px 0 rgba(255,255,255,0.4)" }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15171E" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <div style={{ width:34, height:34, borderRadius:10, background:"linear-gradient(135deg,#CCFF00,#88AB00)", display:"flex", alignItems:"center", justifyContent:"center", boxShadow:"0 4px 14px rgba(204,255,0,0.35), inset 0 1px 0 rgba(255,255,255,0.4)" }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#15171E" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
             </div>
             <div>
               <div style={{ fontSize:13, fontWeight:800, color:"#F2F4F8", letterSpacing:"-0.01em" }}>Team Chat</div>
               <div style={{ fontSize:9.5, fontWeight:800, color:"#666C7E", letterSpacing:2, textTransform:"uppercase", marginTop:2 }}>{Object.keys(reps).length} {Object.keys(reps).length === 1 ? "Rep" : "Reps"} · #general</div>
             </div>
           </div>
+          <button onClick={onToggle} title="Minimize"
+            style={{ width:30, height:30, borderRadius:8, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", color:"#9098A8", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", padding:0, transition:"all 0.18s" }}
+            onMouseEnter={e => { e.currentTarget.style.color="#F2F4F8"; e.currentTarget.style.borderColor="rgba(255,255,255,0.16)"; }}
+            onMouseLeave={e => { e.currentTarget.style.color="#9098A8"; e.currentTarget.style.borderColor="rgba(255,255,255,0.08)"; }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
         </div>
 
         {/* Messages */}
@@ -1185,6 +1240,7 @@ function Chat({ session, profile, w }) {
           </button>
         </div>
       </div>
+      </div>
 
       <style>{`
         .chat-bubble:hover .msg-del { opacity: 1 !important; pointer-events: auto !important; }
@@ -1195,7 +1251,7 @@ function Chat({ session, profile, w }) {
         .typing-dots span:nth-child(2) { animation-delay: 0.15s }
         .typing-dots span:nth-child(3) { animation-delay: 0.3s }
       `}</style>
-    </div>
+    </>
   );
 }
 
@@ -2422,6 +2478,7 @@ export default function App() {
   const [tab, setTab] = useState("dashboard");
   const [showNameEdit, setShowNameEdit] = useState(false);
   const [nameEdit, setNameEdit] = useState("");
+  const [chatOpen, setChatOpen] = useState(false);
 
   const saveName = async () => {
     const trimmed = nameEdit.trim();
@@ -2446,7 +2503,6 @@ export default function App() {
   const TABS = [
     { key:"dashboard",     label:"Dashboard",     short:"Home",     color:"#22C55E" },
     { key:"announcements", label:"Announcements", short:"News",     color:"#F59E0B" },
-    { key:"chat",          label:"Chat",          short:"Chat",     color:"#CCFF00" },
     { key:"leaderboard",   label:"Leaderboard",   short:"Board",    color:"#FFD700" },
     { key:"scheduling",    label:"Scheduling",    short:"Schedule", color:"#F59E0B" },
     { key:"training",      label:"Training",      short:"Train",    color:"#CCFF00" },
@@ -2481,6 +2537,7 @@ export default function App() {
       <style>{GLOBAL_CSS}</style>
       <link href={FONT_LINK} rel="stylesheet" />
       <AdminPanel profile={profile} onBack={() => setView(null)} w={w} onSignOut={signOut} />
+      <Chat session={session} profile={profile} w={w} open={chatOpen} onToggle={() => setChatOpen(o => !o)} />
     </div>
   );
 
@@ -2489,6 +2546,7 @@ export default function App() {
       <style>{GLOBAL_CSS}</style>
       <link href={FONT_LINK} rel="stylesheet" />
       <Quiz quizKey={view} onBack={() => { setView(null); setTimeout(top, 50); }} w={w} onComplete={(sc, tot) => saveScore(view, sc, tot)} />
+      <Chat session={session} profile={profile} w={w} open={chatOpen} onToggle={() => setChatOpen(o => !o)} />
     </div>
   );
 
@@ -2497,6 +2555,7 @@ export default function App() {
       <style>{GLOBAL_CSS}</style>
       <link href={FONT_LINK} rel="stylesheet" />
       <Viewer ck={view} onBack={() => { setView(null); setTimeout(top, 50); }} w={w} onComplete={markComplete} />
+      <Chat session={session} profile={profile} w={w} open={chatOpen} onToggle={() => setChatOpen(o => !o)} />
     </div>
   );
 
@@ -2604,11 +2663,6 @@ export default function App() {
         {/* ANNOUNCEMENTS TAB */}
         {tab === "announcements" && (
           <Announcements session={session} profile={profile} w={w} />
-        )}
-
-        {/* CHAT TAB */}
-        {tab === "chat" && (
-          <Chat session={session} profile={profile} w={w} />
         )}
 
         {/* LEADERBOARD TAB */}
@@ -2723,6 +2777,8 @@ export default function App() {
         )}
 
       </div>
+
+      <Chat session={session} profile={profile} w={w} open={chatOpen} onToggle={() => setChatOpen(o => !o)} />
     </div>
   );
 }
