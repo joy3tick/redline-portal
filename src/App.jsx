@@ -1091,6 +1091,32 @@ function Leads({ session, profile, w }) {
     return [phone, email, city, niche].filter(Boolean).join(" · ");
   };
 
+  // Render a CSV value: if it looks like a URL/email/phone, make it clickable.
+  const renderValue = (v) => {
+    const s = (v ?? "").toString().trim();
+    if (!s) return <span style={{ color:"#3A3D47" }}>—</span>;
+    const linkStyle = { color:"#CCFF00", textDecoration:"none", borderBottom:"1px dotted rgba(204,255,0,0.4)" };
+    // Explicit URL
+    if (/^https?:\/\//i.test(s)) {
+      return <a href={s} target="_blank" rel="noreferrer" style={linkStyle}>{s}</a>;
+    }
+    // www.something or bare domain like business.com / example.co.uk
+    if (/^(www\.)?[a-z0-9-]+(\.[a-z0-9-]+)+(\/\S*)?$/i.test(s) && /\.[a-z]{2,}/i.test(s)) {
+      const href = /^www\./i.test(s) ? `https://${s}` : (s.includes(".") ? `https://${s}` : s);
+      return <a href={href} target="_blank" rel="noreferrer" style={linkStyle}>{s}</a>;
+    }
+    // Email
+    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s)) {
+      return <a href={`mailto:${s}`} style={linkStyle}>{s}</a>;
+    }
+    // Phone — mostly digits with separators, ≥7 digits
+    const digits = s.replace(/\D/g, "");
+    if (digits.length >= 7 && digits.length <= 15 && /^\+?[\d\s().+-]+$/.test(s)) {
+      return <a href={`tel:${s.replace(/[^\d+]/g, "")}`} style={linkStyle}>{s}</a>;
+    }
+    return s;
+  };
+
   return (
     <div style={{ animation:"fadeUp 0.35s ease", display:"flex", flexDirection:"column", gap:14 }}>
 
@@ -1248,7 +1274,7 @@ function Leads({ session, profile, w }) {
                       {Object.entries(data).map(([k, v]) => (
                         <div key={k}>
                           <div style={{ fontSize:9, fontWeight:800, color:"#5E6376", letterSpacing:1.5, textTransform:"uppercase", marginBottom:3 }}>{k}</div>
-                          <div style={{ fontSize:12.5, color:"#EEF2F8", fontWeight:500, wordBreak:"break-word" }}>{(v ?? "").toString() || <span style={{ color:"#3A3D47" }}>—</span>}</div>
+                          <div style={{ fontSize:12.5, color:"#EEF2F8", fontWeight:500, wordBreak:"break-word" }}>{renderValue(v)}</div>
                         </div>
                       ))}
                     </div>
