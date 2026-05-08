@@ -249,3 +249,18 @@ create policy "Users delete own messages"
 create policy "Admins delete any message"
   on public.messages for delete
   using (public.is_admin());
+
+-- Realtime: ensure all live-updating tables are in the supabase_realtime
+-- publication so INSERT/UPDATE/DELETE events broadcast to subscribed clients.
+do $$
+declare t text;
+begin
+  foreach t in array array['messages','announcements','sales','schedule'] loop
+    if not exists (
+      select 1 from pg_publication_tables
+      where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = t
+    ) then
+      execute format('alter publication supabase_realtime add table public.%I', t);
+    end if;
+  end loop;
+end $$;
