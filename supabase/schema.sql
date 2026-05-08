@@ -273,12 +273,17 @@ create table if not exists public.leads (
   assigned_to  uuid references auth.users(id) on delete cascade not null,
   assigned_by  uuid references auth.users(id) on delete set null,
   data         jsonb not null default '{}'::jsonb,
-  status       text not null default 'new' check (status in ('new','contacted','quoted','closed','dead')),
+  status       text not null default 'new' check (status in ('new','contacted','quoted','booked','closed','dead')),
   note         text,
   created_at   timestamptz default now()
 );
 
 create index if not exists leads_assigned_to_idx on public.leads (assigned_to, created_at desc);
+
+-- For existing deployments — allow the new 'booked' status
+alter table public.leads drop constraint if exists leads_status_check;
+alter table public.leads add constraint leads_status_check
+  check (status in ('new','contacted','quoted','booked','closed','dead'));
 
 alter table public.leads enable row level security;
 
