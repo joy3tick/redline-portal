@@ -1589,7 +1589,6 @@ function Chat({ session, profile, w, width, minW = 220, maxW = 520, onResize }) 
             </div>
             <div>
               <div style={{ fontSize:13, fontWeight:800, color:"#F2F4F8", letterSpacing:"-0.01em" }}>Team Chat</div>
-              <div style={{ fontSize:9.5, fontWeight:800, color:"#666C7E", letterSpacing:2, textTransform:"uppercase", marginTop:2 }}>{Object.keys(reps).length} {Object.keys(reps).length === 1 ? "Rep" : "Reps"} · #general</div>
             </div>
           </div>
         </div>
