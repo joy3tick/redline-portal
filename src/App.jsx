@@ -1602,14 +1602,7 @@ function Chat({ session, profile, w, width, minW = 220, maxW = 520, onResize }) 
 
         {/* Header */}
         <div style={{ display:"flex", alignItems:"center", padding:"16px 18px", borderBottom:"1px solid rgba(255,255,255,0.05)", flexShrink:0 }}>
-          <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-            <div style={{ width:34, height:34, borderRadius:10, background:"linear-gradient(135deg,#CCFF00,#88AB00)", display:"flex", alignItems:"center", justifyContent:"center", boxShadow:"0 4px 14px rgba(204,255,0,0.35), inset 0 1px 0 rgba(255,255,255,0.4)" }}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#15171E" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            </div>
-            <div>
-              <div style={{ fontSize:13, fontWeight:800, color:"#F2F4F8", letterSpacing:"-0.01em" }}>Team Chat</div>
-            </div>
-          </div>
+          <div style={{ fontSize:13, fontWeight:800, color:"#F2F4F8", letterSpacing:"-0.01em" }}>Team Chat</div>
         </div>
 
         {/* Messages */}
