@@ -1,26 +1,26 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "./lib/supabase";
 const C = {
-  "m1": { t: "Module 1 — Onboarding & Training", st: "Your foundation for closing deals and driving revenue.", vid: "https://youtu.be/Xfhpyj7Fhdw", s: [
+  "m1": { t: "Module 1 — Onboarding & Training", st: "Your foundation for closing deals and driving revenue.", s: [
     { h: "🏢  WHAT WE DO", b: "We deliver a premium experience for service-based small businesses — HVAC, plumbing, electrical, roofing, landscaping, and more.\n\n⚡ End-to-End Execution\nWe don't just \"help with a website.\" We handle strategy, design, development, optimization, and launch. The client's only job is to fill out a 5-minute form and keep answering their phone.\n\n⚡ Streamlined Process\nEvery project follows the same proven system: Onboarding Form → Discovery → Design → Build → Optimize → Launch. No scope creep. No surprises.\n\n⚡ Business Growth Focus\nWe don't sell pixels. We sell leads, calls, and revenue. If a site looks beautiful but doesn't convert, it's a liability. Every design choice we make is tied to a business outcome." },
     { h: "🔴  THE Redline DIFFERENCE", b: "Most agencies sell design. We sell outcomes.\n\nWhat clients actually get:\n→ Custom site built for their specific market and audience\n→ SEO baked in from day one (not bolted on later)\n→ Mobile-first design (60%+ of their traffic is on a phone)\n→ Conversion-optimized CTAs, forms, and trust signals\n→ AI chatbot capturing leads 24/7 while they sleep\n→ Ongoing maintenance so the site never degrades\n\nOur service tiers:\n• Starter — $1,497 → Conversion-focused site, fast turnaround\n• Pro — $2,497 → Advanced design + lead gen features\n• Elite — $4,497 → Premium design, full CRO, maximum conversion\n• Custom/Enterprise — $5,000+ → Fully scoped to the business\n\nFirm deadlines. No scope creep. We don't deliver and disappear — ongoing monitoring and revisions are standard." },
     { h: "🎯  YOUR ROLE", b: "Find the clients. Bring them in. Our team builds the site.\n\nWHAT YOU NEED TO KNOW\n• Master Redline's service tiers and what's included at each level\n• Understand the technical basics (SEO, CRO, page speed, mobile) — the Technical Bootcamp covers this\n• Know the target market inside and out (Module 2)\n• Internalize the scripts and objection handlers\n\nYOUR SUCCESS DRIVER\nCold calls and closing calls are the core of your role. Everything else — design, development, delivery — is handled by our build team. Your job is pipeline and revenue." },
     { h: "📊  ACTIVITY EXPECTATIONS", b: "100 COLD CALLS / WEEK\nThis is the baseline. No exceptions. No excuses.\n\nAll activity is tracked in a centralized Google Sheet with full transparency. Your numbers are visible. Results speak.\n\n→ Consistency beats talent. The rep who dials 100 quality calls every single week will outperform the \"natural salesperson\" who wings it.\n→ Success is a volume game multiplied by quality. More targeted outreach = more conversations = more audits = more closes.\n→ Show up every single week. Momentum compounds." },
     { h: "💰  COMPENSATION", b: "High-ticket, commission-only. Unlimited upside.\n\nDEAL SIZE: $1,500 – $4,500+ per closed deal\nEnterprise packages go well above $4,500.\n\nYou earn 25-35% of every deal depending on your tier:\n• Tier 1 (Day 1): 25% commission\n• Tier 2 (20 deals): 30% commission\n• Tier 3 (50 deals): 35% commission\n\nPlus $100 bonus per website deal at month-end.\nPlus $25/month recurring for every maintenance client.\n\nTop performers clear $8,000+/month within 6 months. Year 1 projection for high performers: $104,000+.\n\nSee the full Compensation Plan for detailed breakdowns and real-world examples." },
   ]},
-  "m2": { t: "Module 2 — Target Market & Lead Generation", st: "Find the right businesses. Build the right list.", vid: "https://youtu.be/PGaMSwhRirQ", s: [
+  "m2": { t: "Module 2 — Target Market & Lead Generation", st: "Find the right businesses. Build the right list.", s: [
     { h: "🎯  WHO WE TARGET", b: "We don't target everyone. We target the right ones.\n\n✅ Revenue Necessity — Businesses where a website rebuild directly drives revenue. Not vanity projects. Not \"nice to have.\" The site is either making them money or losing them money.\n\n✅ Local Operators — Single-owner, local businesses. The owner answers the phone, makes the decisions, and feels the pain daily. Avoid franchises, multi-location chains, and corporate accounts.\n\n✅ Clear Pain Points — Outdated, slow, or non-mobile sites with no CTAs, no quote forms, and no way to convert a visitor into a lead. These are businesses bleeding money and they don't even know it." },
     { h: "🔧  TARGET NICHES", b: "HVAC • Plumbers • Electricians • Landscapers • Florists • Roofers • Solar Installers • Pest Control • Painters\n\nTHE PAIN POINT\n→ Outdated, slow, or non-mobile websites\n→ No clear calls-to-action\n→ No \"Request a Quote\" or \"Book Now\" forms\n→ Generic stock photos, no social proof\n→ Competitors with better sites are stealing their leads\n\nTHE SIGNAL\nIf their website doesn't actively generate leads, it's costing them money every single day. That gap between where they are and where they could be — that's our opening." },
     { h: "🗺️  LEAD GENERATION — GOOGLE MAPS", b: "Google Maps is your lead goldmine.\n\n1️⃣ Zoom into a specific town/city on Google Maps\n2️⃣ Search for a niche: \"Plumber near Waltham, MA\"\n3️⃣ Open their website. Assess in 30 seconds. If it's poor → it's a lead.\n4️⃣ Aim for 10–15 solid leads per town/search\n\n🔍 ORGANIC DISCOVERY\nZoom to street level in commercial areas. Look for small family-owned shops, cafes, gyms, salons. No digital presence or a bad site = money left on the table.\n\nThe best leads are businesses that are clearly good at what they do but terrible online. Their work speaks for itself — their website doesn't." },
     { h: "📞  CONTACT STRATEGY", b: "Skip the front desk. Get to the owner.\n\n🚫 THE REALITY\nIf you call a general business line, you're talking to a receptionist or a teenager who won't pass on your message. Front-desk lines are a dead end.\n\n✅ THE STRATEGY\n→ Find the owner's direct cell or personal number\n→ Check Google Business Profile for owner name\n→ Look for personal emails on the website's About page\n→ LinkedIn can sometimes surface direct contact info\n→ Your goal: decision-maker on the first dial" },
     { h: "📋  DAILY WORKFLOW", b: "100 HIGH-QUALITY LEADS / WEEK\nLogged in the provided Excel spreadsheet.\n\nWHAT TO LOG FOR EVERY LEAD:\n→ Business name\n→ Owner name (if found)\n→ Website URL\n→ Phone number (direct if possible)\n→ Quick note on what's wrong with their site\n\nThe quality of your list directly determines the quality of your results. 100 garbage leads = 0 deals. 100 targeted, researched leads = a full pipeline." },
   ]},
-  "m3": { t: "Module 3 — Positioning & Call Strategy", st: "You're not a freelancer. You're a revenue consultant.", vid: "https://youtu.be/DxbkUwYUpBI", s: [
+  "m3": { t: "Module 3 — Positioning & Call Strategy", st: "You're not a freelancer. You're a revenue consultant.", s: [
     { h: "👔  YOUR POSITIONING", b: "Act like a Revenue Consultant. Not a freelancer.\n\n🧠 THE MINDSET\n→ You're diagnosing a sickness (their website) and providing the only cure\n→ Shift the power dynamic early — you are busy, they need your help\n→ You are not begging for their business. You are offering to solve a problem that's costing them real money.\n\n📊 THE RESULT\n→ If you act like a freelancer, they will haggle, ghost you, and treat you like a vendor\n→ If you act like a consultant, they will listen, respect your time, and pay your price\n\nThe difference is not what you say — it's how you carry yourself on every single call." },
     { h: "🚪  THE GATEKEEPER PROBLEM", b: "Don't waste time on low-conversion activities.\n\n→ Calling a service business often leads to a receptionist or junior staff who won't pass your message\n→ Your time is valuable — don't trade hours for dead-end conversations\n→ Prioritize direct owner contact over calling front desks\n→ If you can't get the owner, move on. 100 other leads are waiting." },
     { h: "📧  POST-CALL FOLLOW-UP PROTOCOL", b: "After every cold call where there was interest, send a follow-up email. Structure with precision.\n\n1️⃣ SUBJECT LINE — Clear, professional, non-spammy\n2️⃣ THE HOOK — Reference the specific issue you discussed on the call\n3️⃣ THE VALUE — How a rebuild increases their lead flow\n4️⃣ THE CTA — \"Want me to send over that video audit we discussed?\"\n\n⚠️ This is NOT cold email outreach. This is a follow-up touchpoint after your cold call to reinforce the conversation and move toward the audit." },
   ]},
-  "m4": { t: "Module 4 — Cold Call Mastery", st: "Earn attention. Don't demand it.", vid: "https://youtu.be/3jIfae8L30", s: [
+  "m4": { t: "Module 4 — Cold Call Mastery", st: "Earn attention. Don't demand it.", s: [
     { h: "🧠  THE MINDSET", b: "Most cold calls fail because they sound like a sales pitch.\n\n→ Cold calling works because of relevance, not volume\n→ Every business owner is bombarded with spam calls — your job is to earn attention, not demand it\n→ They don't care about our features. They care about their problems.\n→ The call has ONE job: book the video audit. That's it. Nothing else." },
     { h: "🚫  DO THIS, NOT THAT", b: "IF YOU DO THIS, YOU LOSE:\n→ Explain too much — you sound desperate\n→ Sound salesy — they hang up\n→ Use scripts they can smell — instant credibility death\n\n✅ INSTEAD:\n→ Observe something they already feel (\"I noticed your site doesn't have a quote form\")\n→ Keep it short and specific — under 2 minutes\n→ Focus on their pain, not your service\n→ Sound like a human having a real conversation" },
     { h: "⚡  CORE PRINCIPLES", b: "Personalization. Specificity. Brevity.\n\n🎯 PERSONALIZE — Proves you actually looked at their business. \"I was on your site this morning\" beats \"I help businesses like yours.\"\n\n🔍 BE SPECIFIC — \"Your site doesn't have a quote form\" beats \"I can help with your website.\" Specificity = credibility.\n\n✂️ BE BRIEF — Get to the point in the first 10 seconds. Rambling kills calls.\n\n👃 SMELL TEST — Business owners smell scripts instantly. No \"just checking in.\" No \"I came across your business.\" Sound real." },
@@ -30,42 +30,42 @@ const C = {
     { h: "⚠️  COMMON MISTAKES", b: "If it sounds like a pitch, it already failed.\n\n→ Long calls — get to the point. Don't ramble.\n→ The \"I/We\" trap — talking about yourself or Redline too much. They don't care about us yet.\n→ The \"Formal\" trap — buzzwords, \"Hope this finds you well,\" corporate speak\n→ The Multi-Task — trying to accomplish more than one thing per call. Book the audit. That's it.\n→ Not shutting up — ask a question, then let them answer. Silence is power." },
     { h: "🔄  FOLLOW-UP PROTOCOL", b: "Silence is not rejection.\n\n📌 THE 2-3 RULE:\n→ Most responses come on the 2nd or 3rd touch\n→ Follow up max 3 times\n→ Each follow-up should be shorter than the last\n\n📌 THE TONE:\n→ Calm, respectful, direct\n→ No pressure. No guilt trips.\n→ Persistence with professionalism\n\nThe rep who follows up wins the deal the lazy rep left on the table." },
   ]},
-  "m5": { t: "Module 5 — Reply Handling & Call Booking", st: "Move fast. Get on the phone. Close.", vid: "https://youtu.be/AMRjCkgIYLg", s: [
+  "m5": { t: "Module 5 — Reply Handling & Call Booking", st: "Move fast. Get on the phone. Close.", s: [
     { h: "⚡  PROTECT THE MOMENTUM", b: "Most deals die immediately after the first reply.\n\n→ Reps kill momentum by over-explaining or hesitating\n→ After a reply, your ONLY job is to move to a call\n→ The longer you stay in email, the weaker your position\n→ Email is for starting conversations. Calls are for selling.\n\nSpeed wins. The first rep to get on the phone usually wins the deal." },
     { h: "🔍  DECODING REPLIES", b: "What they say vs. what they actually mean:\n\n\"Sounds interesting\" → Open but needs a leader. They won't take the next step themselves — you need to direct them.\n\n\"Can you send more info?\" → Looking for a reason to say No. Don't send a brochure. Suggest a call.\n\n\"How much does this cost?\" → Trying to commoditize you. They want to compare you to the $500 Fiverr guy. Don't let them.\n\n\"Maybe later\" → Has pain but no urgency. Your job is to create urgency through opportunity cost.\n\nNone of these require a long explanation. All of them require direction toward a call." },
     { h: "📝  RESPONSE FORMULA", b: "Acknowledge + Short Value + Call Invitation.\n\n→ Keep it short: max 2–3 sentences\n→ Suggest a call immediately — don't ask, suggest\n→ Offer 2–3 specific time slots or your calendar link\n→ Speed > Perfection. Same business day replies.\n\nExample: \"Hey [Name], glad it caught your eye. Easiest next step is a quick 5-min call where I can walk you through what I found. How's Thursday at 2 or Friday at 10?\"" },
     { h: "🚫  THE NEVER LIST", b: "Protect your authority.\n\n→ NEVER pitch features over email\n→ NEVER send long PDF explanations\n→ NEVER negotiate or justify price over email\n→ NEVER wait 24+ hours to respond to a warm reply\n\nYou lose authority the second you start chasing them in the inbox. Email is a tool to get to the phone. That's it." },
     { h: "📅  DAILY DISCIPLINE", b: "Calls create leverage. Emails create busy work.\n\n→ Clean out the \"Pending Reply\" folder every morning and afternoon\n→ Clean, fast replies protect the Redline brand\n→ Your job is to guide, not convince\n→ If someone is warm, get them on the phone within 24 hours or the lead goes cold" },
   ]},
-  "m6": { t: "Module 6 — Sales Call Framework", st: "Control the call. Close the deal.", vid: "https://youtu.be/boWThJ6ob7I", s: [
+  "m6": { t: "Module 6 — Sales Call Framework", st: "Control the call. Close the deal.", s: [
     { h: "👑  ESTABLISH AUTHORITY", b: "They've been pitched by \"web guys\" before. They're skeptical.\n\n→ Confidence and visible structure build immediate trust\n→ You are not a salesperson — you are an authority diagnosing a problem\n→ You are the leader of this conversation. Rambling kills authority.\n→ If the prospect goes off-track, you pull them back\n→ Speak with certainty. If you sound unsure, they won't trust you with their money." },
     { h: "📋  THE 6-STEP CALL STRUCTURE", b: "Follow the sequence. No shortcuts.\n\n1️⃣ Opening & Agenda → Set the tone\n2️⃣ Business Discovery → Understand their operations\n3️⃣ Pain Identification → Where is the leak?\n4️⃣ Website Diagnosis → The technical \"why\"\n5️⃣ Redline Positioning → The solution\n6️⃣ The Close → Finalize the next step\n\nEvery step builds on the last. Skip one and the close falls apart." },
     { h: "🎤  OPENING & DISCOVERY", b: "Set the frame. Then listen.\n\nTHE AGENDA:\n\"The goal of today is to see if we can actually help you grow. I'll ask some questions, show you what we found, and we'll see if it's a fit. Sound good?\"\n\nDISCOVERY QUESTIONS:\n→ \"How are most of your jobs coming in right now?\"\n→ \"What does your ideal customer look like?\"\n→ \"What are your revenue goals for this year?\"\n→ \"When someone lands on your site, what do you want them to do?\"\n\nLet them talk. Take notes. The more they talk, the more ammunition you have for the close." },
     { h: "🩺  PAIN & DIAGNOSIS", b: "Make them feel the cost of their current site.\n\n→ \"How many customers are you losing because they can't find your 'Book' button?\"\n→ \"Your site loads in 6 seconds — 40% of visitors leave after 3. How many leads is that per month?\"\n→ Drop real data: load speeds, mobile errors, missing conversion triggers\n\n📌 LISTENING RULES:\n→ 80/20 rule — listen 80% of the time\n→ Use open-ended questions\n→ They buy when they feel understood, not when they feel sold to\n→ The best closers barely talk. They ask the right questions and let the prospect sell themselves." },
     { h: "🤝  REDIRECTING & CLOSING", b: "Every call ends with a clear, defined next step.\n\n🔄 REDIRECT TACTICS:\n→ \"That's an interesting point, but let's stay on track for your goals...\"\n→ Never accept \"Business is okay.\" Ask: \"What does 'okay' look like in monthly leads?\"\n→ Keep it centered on revenue and results\n\n💰 HANDLING \"I'LL THINK ABOUT IT\":\n→ \"What specifically do you need to look at?\"\n→ \"Is it the timing, the investment, or something else?\"\n→ Move to invoice or a scheduled follow-up with the decision-maker\n→ Never leave a call without the next step locked in" },
   ]},
-  "m7": { t: "Module 7 — Value Proposition & Messaging", st: "We sell outcomes. Not design.", vid: "https://youtu.be/9F4K9dCRe5g", s: [
+  "m7": { t: "Module 7 — Value Proposition & Messaging", st: "We sell outcomes. Not design.", s: [
     { h: "💡  THE SHIFT", b: "Most agencies sell design. We sell business outcomes.\n\n→ A \"clean, modern site\" is the baseline — it doesn't justify our pricing\n→ Sell more leads, more calls, more revenue\n→ If a site looks good but doesn't convert, it's a liability\n→ Every design choice is tied to user behavior, trust, and CTAs\n\nWhen a prospect says \"I want a nice website,\" your job is to reframe: \"You don't need a nice website. You need a website that makes your phone ring.\"" },
     { h: "🏗️  THE APPROACH", b: "We don't just build. We optimize.\n\n🎯 User Behavior & Clarity — Every element serves a conversion purpose. Nothing is decorative.\n\n🛡️ Building Trust — Design that makes visitors confident to buy. Reviews, badges, real photos, professional layout.\n\n📍 Strategic CTAs — \"Get My Free Quote\" placed exactly where visitors are ready to act. Above the fold, after testimonials, at the bottom.\n\nA website is a sales asset, not a digital brochure. If it's not generating leads, it's a cost center." },
     { h: "📈  THE LEVERAGE PLAY", b: "A conversion fix has a 10x impact on the bottom line.\n\n🔥 THE OUTSIZED IMPACT RULE:\n→ A better site amplifies the traffic and reputation they already have\n→ If they're getting 500 visitors/month and converting at 1%, that's 5 leads\n→ We take them to 5-10% — that's 25-50 leads from the same traffic\n→ No extra ad spend. No extra work. Just a better machine.\n\n⚠️ THE Redline STANDARD:\n→ Never promise specific numbers\n→ Always anchor to the leverage the asset provides\n→ \"We can't guarantee 50 leads, but we can guarantee your site will be built to convert every visitor possible.\"" },
     { h: "🗣️  LANGUAGE GUIDE", b: "When they talk about colors, you talk about conversions.\n\n🚫 STOP SAYING:\n→ \"We'll make your site look better\"\n→ \"We do web design\"\n→ \"We build websites\"\n\n✅ START SAYING:\n→ \"Your website should be generating leads consistently\"\n→ \"We build revenue systems for service businesses\"\n→ \"We turn your website into your best salesperson\"\n\nEvery word matters. Design language attracts tire-kickers. Revenue language attracts buyers." },
   ]},
-  "m8": { t: "Module 8 — Pricing & Objection Handling", st: "Price with confidence. Walk away if needed.", vid: "https://youtu.be/SEZ00YEKy5w", s: [
+  "m8": { t: "Module 8 — Pricing & Objection Handling", st: "Price with confidence. Walk away if needed.", s: [
     { h: "💰  PRICING MINDSET", b: "Pricing only feels expensive if the leverage wasn't explained.\n\n→ We don't justify our price — we explain the outcome\n→ If they understand the ROI, the price is a logical next step\n→ State the price clearly and calmly\n→ Never apologize for the number. Never discount without removing scope.\n\nIf you've done your job in the call — stacked the value, identified the pain, shown the gap — the price should feel like a relief, not a shock." },
     { h: "🤫  THE GOLDEN RULE", b: "The first person to speak after the price is revealed loses leverage.\n\nSay the number. Stop talking. Let them process.\n\nSilence signals confidence and professionalism. Filling the silence with justification signals insecurity.\n\nThey might take 5 seconds. They might take 15. Let them think. The close is happening in their head right now. Don't interrupt it." },
     { h: "🛡️  OBJECTION FRAMEWORK", b: "Acknowledge. Re-anchor. Ask.\n\n1️⃣ ACKNOWLEDGE — Don't argue with the concern.\n\"That makes total sense. A lot of our clients felt the same way before they saw the results.\"\n\n2️⃣ RE-ANCHOR — Bring it back to business impact and revenue loss.\n\"The question isn't whether $2,497 is a lot — it's whether losing 10-15 leads per month is costing you more than that.\"\n\n3️⃣ ASK — Use a clarifying or closing question.\n\"If we could solve that, would you be ready to move forward?\"\n\nObjections usually mean uncertainty, not a final \"No.\" Your job is to resolve the uncertainty." },
     { h: "🚶  KNOW WHEN TO WALK", b: "Not every business is a Redline fit.\n\n→ Discounting destroys positioning. The moment you drop the price, you confirm their suspicion that it wasn't worth it.\n→ We do not compete on price — we compete on execution\n→ Walking away preserves your authority for the next deal\n→ A bad client at a discount is worse than no client at all\n\nIf they only care about the cheapest option, they're not our client. Let them hire the nephew." },
   ]},
-  "m9": { t: "Module 9 — Post-Close & Client Handoff", st: "Precision in the handoff is non-negotiable.", vid: "https://youtu.be/6iq3JNdpMSA", s: [
+  "m9": { t: "Module 9 — Post-Close & Client Handoff", st: "Precision in the handoff is non-negotiable.", s: [
     { h: "⚠️  WHY THIS MATTERS", b: "Clients judge us most intensely after they pay.\n\n→ A sloppy post-close experience kills referral potential and trust\n→ Precision in the handoff is non-negotiable\n→ The client should feel they are in a machine, not a chaotic workshop\n→ This is where lifetime value is built or destroyed\n\nEvery closed deal should generate 2-3 referrals. That only happens if the experience after the sale is as sharp as the pitch before it." },
     { h: "✅  THE HANDOFF CHECKLIST", b: "Execute every step. Every time. No shortcuts.\n\n1️⃣ Confirm Payment — Verify Stripe payment has cleared\n2️⃣ Restate Expectations — Recap exactly what they purchased and what's included\n3️⃣ Document Project Details — All info from the onboarding form logged and shared with the build team\n4️⃣ Explain 7–10 Day Delivery — Set the timeline clearly. No vague promises.\n\nThe client should leave the handoff knowing exactly what happens next, when it happens, and who to contact if they have questions." },
     { h: "🛡️  BRAND PROTECTION", b: "Professional and direct. Always.\n\n📌 THE VOICE:\n→ Professional and direct\n→ No slang, no emojis, no casual guarantees\n→ No personal opinions in client comms\n→ Write like you're representing a premium firm — because you are\n\n📌 THE RULE:\n→ Never speak negatively about competitors\n→ It makes us look small and insecure\n→ Let our work do the talking\n→ If they mention a competitor, acknowledge and redirect: \"Our focus is on what we can deliver for you.\"" },
   ]},
-  "m10": { t: "Module 10 — Compensation & Growth", st: "Outcomes, not busy work. This is how you get paid.", vid: "https://youtu.be/EzBhLyGKqF4", s: [
+  "m10": { t: "Module 10 — Compensation & Growth", st: "Outcomes, not busy work. This is how you get paid.", s: [
     { h: "📊  HOW YOU'RE MEASURED", b: "This role rewards outcomes, not busy work.\n\n📌 WHAT COUNTS:\n→ Outreach quality & reply rates\n→ Calls booked & deals closed\n→ Activity matters, but the P&L matters more\n→ 100 calls that book 0 audits = a process problem, not an effort problem\n\n💰 COMMISSION STRUCTURE:\n→ Commission earned per closed deal\n→ Paid immediately after client payment clears\n→ Better positioning → higher deal value → higher commissions\n→ Maintenance clients = recurring monthly income that compounds" },
     { h: "🚀  THE GROWTH PATH", b: "This isn't a gig. It's a path to leadership.\n\n→ Top performers advance to Senior Closer and Leadership roles\n→ We are building a high-finance-style culture — performance is everything\n→ Treat this like a real business — because it is one\n\nRedline is scaling. The people who show up now, execute consistently, and close deals are the people who will be leading teams in 6 months." },
   ]},
-  "m11": { t: "Module 11 — Full Deal Walkthrough", st: "Locate. Call. Book. Pitch. Close. Start to finish.", vid: "https://youtu.be/XOy3tkW6cds", s: [
+  "m11": { t: "Module 11 — Full Deal Walkthrough", st: "Locate. Call. Book. Pitch. Close. Start to finish.", s: [
     { h: "🔄  THE FULL CYCLE", b: "Every deal follows the same 5-step process:\n\n1️⃣ LOCATE → Find the prospect\n2️⃣ CALL → Cold call the owner\n3️⃣ BOOK → Lock in the video audit\n4️⃣ PITCH → Deliver the audit + run the sales call\n5️⃣ CLOSE → Handle objections, get the signature\n\nThis module walks through a real deal from first touch to signed contract." },
     { h: "1️⃣  LOCATE", b: "→ Search Google Maps: \"HVAC near Waltham, MA\"\n→ Open their website — assess in 30 seconds\n→ Look for: outdated design, no CTAs, no quote form, slow load, broken mobile\n→ Check Google reviews — good reviews + bad site = perfect lead\n→ Find the owner's name and direct number\n→ Log it in the spreadsheet" },
     { h: "2️⃣  CALL", b: "→ Run the Redline Trigger: 90 seconds of research before you dial\n→ Open with pattern interrupt: \"I promise I'm not selling you a warranty\"\n→ Deliver your specific observation about their site\n→ Identify the pain in under 2 minutes\n→ ONE goal: get them to agree to the video audit\n→ If they're busy, offer a callback time. If not interested, leave clean." },
@@ -263,7 +263,7 @@ const GLOBAL_CSS = `
 
 *{margin:0;padding:0;box-sizing:border-box}
 html,body,#root{min-height:100dvh;background:#0E0F14}
-body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden;font-family:'Plus Jakarta Sans',system-ui,sans-serif;letter-spacing:-0.005em}
+body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden;font-family:'Inter',system-ui,sans-serif;letter-spacing:-0.011em;font-feature-settings:"kern","liga","calt","ss01","cv11"}
 ::selection{background:rgba(204,255,0,0.32);color:#15171E}
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -346,6 +346,10 @@ button{font-family:inherit}
 .stat-card { transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease }
 .stat-card:hover { transform:translateY(-2px); box-shadow:0 10px 30px rgba(0,0,0,0.4) !important }
 
+/* Tabular numerals for any displayed numeric data */
+.num-display, .stat-card, .dash-card { font-variant-numeric: tabular-nums }
+.num-display { letter-spacing: -0.04em; font-feature-settings: "tnum","ss01","cv11" }
+
 /* Quiz options */
 .quiz-opt { transition: all 0.18s ease }
 .quiz-opt:hover:not(:disabled) { transform:translateX(3px) }
@@ -386,6 +390,21 @@ button{font-family:inherit}
   border-radius:10px; cursor:pointer; transition: all 0.18s ease;
 }
 .btn-ghost:hover { background:rgba(255,255,255,0.07); color:#D6DAE2; border-color:rgba(255,255,255,0.14) }
+
+/* Header pill buttons — Admin / Sign Out / Profile */
+.btn-pill {
+  display:inline-flex; align-items:center; justify-content:center; gap:7px;
+  height:42px; padding:0 14px; font-size:11px; font-weight:700;
+  letter-spacing:1.4px; text-transform:uppercase; border-radius:12px;
+  cursor:pointer; transition: all 0.18s ease; font-family:inherit;
+  background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255,255,255,0.08); color:#9098A8;
+}
+.btn-pill:hover { background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03)); color:#D6DAE2; border-color:rgba(255,255,255,0.16) }
+.btn-pill.amber { color:#F59E0B; background: linear-gradient(180deg, rgba(245,158,11,0.10), rgba(245,158,11,0.04)); border-color:rgba(245,158,11,0.22) }
+.btn-pill.amber:hover { background: linear-gradient(180deg, rgba(245,158,11,0.16), rgba(245,158,11,0.06)); border-color:rgba(245,158,11,0.36); color:#FBBF24 }
+.btn-pill.icon-only { padding:0; width:42px; gap:0 }
+.btn-pill svg { display:block }
 
 /* Gradient text */
 .red-gradient-text {
@@ -1623,7 +1642,7 @@ function Chat({ session, profile, w, width, minW = 220, maxW = 520, onResize }) 
                 return (
                   <div key={g.id} style={{ display:"flex", flexDirection: isMe ? "row-reverse" : "row", gap:10, marginTop:g.continued?2:8, alignItems:"flex-end" }}>
                     <div style={{ width:30, height:30, flexShrink:0, visibility: g.continued ? "hidden" : "visible" }}>
-                      <div style={{ width:30, height:30, borderRadius:9, background: isMe ? "linear-gradient(135deg,#CCFF00,#88AB00)" : `linear-gradient(135deg,${c},${c}99)`, display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Plus Jakarta Sans',sans-serif", fontSize:12, fontWeight:900, color:"#15171E", boxShadow: isMe ? "0 2px 10px rgba(204,255,0,0.35)" : `0 2px 8px ${c}55` }}>
+                      <div style={{ width:30, height:30, borderRadius:9, background: isMe ? "linear-gradient(135deg,#CCFF00,#88AB00)" : `linear-gradient(135deg,${c},${c}99)`, display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Inter',sans-serif", fontSize:12, fontWeight:900, color:"#15171E", boxShadow: isMe ? "0 2px 10px rgba(204,255,0,0.35)" : `0 2px 8px ${c}55` }}>
                         {name[0]?.toUpperCase()}
                       </div>
                     </div>
@@ -2311,7 +2330,7 @@ function Leaderboard({ session, profile, w }) {
                 <div style={{ fontSize: isTop ? 22 : 14, fontWeight:800, color:"#444856", minWidth:32, textAlign:"center", lineHeight:1 }}>
                   {medal ?? `#${i+1}`}
                 </div>
-                <div style={{ width:36, height:36, borderRadius:9, background: isMe ? "linear-gradient(135deg,#CCFF00,#6E9100)" : "linear-gradient(135deg,#2A2D38,#1E2028)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Plus Jakarta Sans',sans-serif", fontSize:14, fontWeight:800, color: isMe ? "#15171E" : "#888D9C", flexShrink:0, boxShadow: isMe ? "0 2px 10px rgba(204,255,0,0.3)" : "none" }}>
+                <div style={{ width:36, height:36, borderRadius:9, background: isMe ? "linear-gradient(135deg,#CCFF00,#6E9100)" : "linear-gradient(135deg,#2A2D38,#1E2028)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Inter',sans-serif", fontSize:14, fontWeight:800, color: isMe ? "#15171E" : "#888D9C", flexShrink:0, boxShadow: isMe ? "0 2px 10px rgba(204,255,0,0.3)" : "none" }}>
                   {rep.name[0]?.toUpperCase()}
                 </div>
                 <div style={{ flex:1, minWidth:0 }}>
@@ -2687,20 +2706,6 @@ function Viewer({ ck, onBack, w, onComplete }) {
           <p style={{ fontSize:14, color:"#7E8595", margin:0, lineHeight:1.6, fontWeight:500 }}>{c.st}</p>
         </div>
 
-        {/* Video */}
-        {c.vid && (
-          <a href={c.vid} target="_blank" rel="noreferrer" className="vid-card"
-            style={{ display:"flex", alignItems:"center", gap:18, background:"linear-gradient(135deg,rgba(20,14,16,0.9),rgba(16,12,20,0.9))", border:"1px solid rgba(204,255,0,0.18)", borderRadius:18, padding:"20px 24px", textDecoration:"none", marginBottom:28, animation:"fadeUp 0.55s ease 0.1s both", boxShadow:"0 4px 24px rgba(0,0,0,0.3)" }}>
-            <div className="play-pulse" style={{ width:54, height:54, borderRadius:16, background:"linear-gradient(135deg,#CCFF00,#6E9100)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, boxShadow:"0 6px 24px rgba(204,255,0,0.4)" }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="#15171E"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-            </div>
-            <div style={{ flex:1 }}>
-              <div style={{ fontSize:14, fontWeight:700, color:"#F2F4F8", marginBottom:3 }}>Watch Training Video</div>
-              <div style={{ fontSize:12, color:"#7E8595" }}>Complete before continuing with this module</div>
-            </div>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#CCFF00" strokeWidth="2" strokeLinecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          </a>
-        )}
 
         {/* Sections */}
         <div style={{ paddingBottom:90 }}>
@@ -2958,7 +2963,7 @@ export default function App() {
 
   const signOut = async () => { await supabase.auth.signOut(); setView(null); };
 
-  const FONT_LINK = "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap";
+  const FONT_LINK = "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap";
   const baseStyle = { minHeight:"100dvh", background:"#0E0F14", color:"#FFF" };
 
   const bc = { MODULE:"#CCFF00", BOOTCAMP:"#F59E0B", REFERENCE:"#06D6F0", QUIZ:"#10B981" };
@@ -2976,7 +2981,6 @@ export default function App() {
     { key:"scheduling",    label:"Scheduling",    short:"Schedule", color:"#F59E0B" },
     { key:"training",      label:"Training",      short:"Train",    color:"#CCFF00" },
     { key:"reference",     label:"Reference",     short:"Ref",      color:"#06D6F0" },
-    { key:"quizzes",       label:"Quizzes",       short:"Quizzes",  color:"#10B981" },
   ];
 
   if (loading) return (
@@ -3060,18 +3064,21 @@ export default function App() {
               {/* Right actions */}
               <div style={{ display:"flex", alignItems:"center", gap:dk?8:6, animation:"fadeUp 0.5s ease 0.06s both" }}>
                 {profile?.role === "admin" && (
-                  <button onClick={() => setView("__admin")} className="btn-ghost" style={{ fontSize:10, padding:dk?"9px 14px":"7px 10px", color:"#F59E0B", borderColor:"rgba(245,158,11,0.22)", background:"rgba(245,158,11,0.06)" }}>Admin</button>
+                  <button onClick={() => setView("__admin")} className={`btn-pill amber${dk?"":" icon-only"}`} aria-label="Admin">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    {dk && "Admin"}
+                  </button>
                 )}
 
                 {/* Avatar + name edit */}
                 <div style={{ position:"relative", display:"flex", alignItems:"center", gap:0 }}>
                   <div className="profile-pill"
                     onClick={() => { setShowNameEdit(v => !v); setNameEdit(profile?.name ?? ""); }}>
-                    <div style={{ width:30, height:30, borderRadius:9, background:"linear-gradient(135deg,#CCFF00,#88AB00)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Plus Jakarta Sans',sans-serif", fontSize:13, fontWeight:900, color:"#15171E", flexShrink:0, boxShadow:"0 2px 10px rgba(204,255,0,0.4), inset 0 1px 0 rgba(255,255,255,0.4)" }}>
+                    <div style={{ width:30, height:30, borderRadius:9, background:"linear-gradient(135deg,#CCFF00,#88AB00)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Inter',sans-serif", fontSize:13, fontWeight:900, color:"#15171E", flexShrink:0, boxShadow:"0 2px 10px rgba(204,255,0,0.4), inset 0 1px 0 rgba(255,255,255,0.4)" }}>
                       {profile?.name?.[0]?.toUpperCase() ?? "R"}
                     </div>
                     {dk && <span style={{ fontSize:12.5, fontWeight:600, color:"#D6DAE2", letterSpacing:0.2 }}>{profile?.name ?? "Rep"}</span>}
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#5E6376" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft:dk?2:0 }}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    {dk && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7E8595" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft:2, transform: showNameEdit?"rotate(180deg)":"none", transition:"transform 0.18s ease" }}><polyline points="6 9 12 15 18 9"/></svg>}
                   </div>
                   {showNameEdit && (
                     <div className="glass" style={{ position:"absolute", top:"calc(100% + 10px)", right:0, borderRadius:14, padding:18, width:240, zIndex:200, boxShadow:"0 24px 60px rgba(0,0,0,0.7)", animation:"popIn 0.18s ease" }}>
@@ -3092,7 +3099,10 @@ export default function App() {
                   )}
                 </div>
 
-                <button onClick={signOut} className="btn-ghost" style={{ fontSize:10, padding:dk?"9px 14px":"7px 10px" }}>{dk ? "Sign Out" : "Out"}</button>
+                <button onClick={signOut} className={`btn-pill${dk?"":" icon-only"}`} aria-label="Sign Out">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                  {dk && "Sign Out"}
+                </button>
               </div>
             </div>
 
@@ -3184,6 +3194,33 @@ export default function App() {
                 </div>
               </div>
             ))}
+            <SectionLabel color="#10B981" label="QUIZZES" delay={0.04 * trainingGroups.length} />
+            <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr 1fr":dk?"1fr 1fr":"1fr", gap:dk?10:8 }}>
+              {quizItems.map((x, i) => {
+                const qs = quizScores[x.k];
+                return (
+                  <div key={x.id} className="card-hover" onClick={() => { setView(x.k); setTimeout(top, 50); }}
+                    style={{ background:"linear-gradient(135deg,rgba(16,18,24,0.98),rgba(11,12,16,0.98))", border:`1px solid ${qs ? "rgba(16,185,129,0.15)" : "rgba(255,255,255,0.055)"}`, borderRadius:16, padding:dk?"20px 18px":"17px 15px", cursor:"pointer", animation:`fadeUp 0.38s ease ${0.05*i}s both`, boxShadow:"0 4px 20px rgba(0,0,0,0.3)" }}>
+                    <div style={{ display:"flex", alignItems:"center", gap:14 }}>
+                      <div style={{ width:50, height:50, borderRadius:14, background:IC_GRAD.QUIZ, display:"flex", alignItems:"center", justifyContent:"center", fontSize:22, flexShrink:0, boxShadow:IC_SHADOW.QUIZ }}>{x.ic}</div>
+                      <div style={{ flex:1, minWidth:0 }}>
+                        <div style={{ fontSize:9, fontWeight:800, color:"#10B981", letterSpacing:2.5, marginBottom:4, textTransform:"uppercase" }}>QUIZ</div>
+                        <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF2F8", margin:"0 0 3px", lineHeight:1.3 }}>{x.sub}</h3>
+                        <p style={{ fontSize:11.5, color: qs ? "#10B981" : "#666C7E", margin:0, lineHeight:1.4, fontWeight: qs ? 600 : 500 }}>
+                          {qs ? `Best: ${Math.round(qs.score/qs.total*100)}%` : x.d}
+                        </p>
+                      </div>
+                      <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6 }}>
+                        {qs && <div style={{ width:20, height:20, borderRadius:6, background:"rgba(16,185,129,0.12)", border:"1px solid rgba(16,185,129,0.3)", display:"flex", alignItems:"center", justifyContent:"center" }}><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>}
+                        <div style={{ width:32, height:32, borderRadius:10, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.06)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#666C7E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
 
@@ -3217,36 +3254,6 @@ export default function App() {
                 </div>
               ))}
             </div>
-          </div>
-        )}
-
-        {/* QUIZZES TAB */}
-        {tab === "quizzes" && (
-          <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr 1fr":dk?"1fr 1fr":"1fr", gap:dk?10:8, animation:"fadeUp 0.35s ease" }}>
-            {quizItems.map((x, i) => {
-              const qs = quizScores[x.k];
-              return (
-                <div key={x.id} className="card-hover" onClick={() => { setView(x.k); setTimeout(top, 50); }}
-                  style={{ background:"linear-gradient(135deg,rgba(16,18,24,0.98),rgba(11,12,16,0.98))", border:`1px solid ${qs ? "rgba(16,185,129,0.15)" : "rgba(255,255,255,0.055)"}`, borderRadius:16, padding:dk?"20px 18px":"17px 15px", cursor:"pointer", animation:`fadeUp 0.38s ease ${0.05*i}s both`, boxShadow:"0 4px 20px rgba(0,0,0,0.3)" }}>
-                  <div style={{ display:"flex", alignItems:"center", gap:14 }}>
-                    <div style={{ width:50, height:50, borderRadius:14, background:IC_GRAD.QUIZ, display:"flex", alignItems:"center", justifyContent:"center", fontSize:22, flexShrink:0, boxShadow:IC_SHADOW.QUIZ }}>{x.ic}</div>
-                    <div style={{ flex:1, minWidth:0 }}>
-                      <div style={{ fontSize:9, fontWeight:800, color:"#10B981", letterSpacing:2.5, marginBottom:4, textTransform:"uppercase" }}>QUIZ</div>
-                      <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF2F8", margin:"0 0 3px", lineHeight:1.3 }}>{x.sub}</h3>
-                      <p style={{ fontSize:11.5, color: qs ? "#10B981" : "#666C7E", margin:0, lineHeight:1.4, fontWeight: qs ? 600 : 500 }}>
-                        {qs ? `Best: ${Math.round(qs.score/qs.total*100)}%` : x.d}
-                      </p>
-                    </div>
-                    <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6 }}>
-                      {qs && <div style={{ width:20, height:20, borderRadius:6, background:"rgba(16,185,129,0.12)", border:"1px solid rgba(16,185,129,0.3)", display:"flex", alignItems:"center", justifyContent:"center" }}><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>}
-                      <div style={{ width:32, height:32, borderRadius:10, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.06)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#666C7E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
           </div>
         )}
 
