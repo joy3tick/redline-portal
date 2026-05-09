@@ -132,12 +132,20 @@ create policy "Admins read all scores"
 -- ─── MONTHLY BONUSES ────────────────────────────────────────
 create table if not exists public.monthly_bonuses (
   id          uuid default gen_random_uuid() primary key,
-  label       text not null,
+  label       text,
   threshold   integer,
   amount      numeric not null,
+  period      text not null default 'month' check (period in ('week', 'month')),
   description text,
   created_at  timestamptz default now()
 );
+
+-- For existing deployments
+alter table public.monthly_bonuses add column if not exists period text not null default 'month';
+alter table public.monthly_bonuses drop constraint if exists monthly_bonuses_period_check;
+alter table public.monthly_bonuses add constraint monthly_bonuses_period_check
+  check (period in ('week', 'month'));
+alter table public.monthly_bonuses alter column label drop not null;
 
 alter table public.monthly_bonuses enable row level security;
 
@@ -190,3 +198,118 @@ create policy "Authenticated users read schedule"
 create policy "Users manage own schedule"
   on public.schedule for all
   using (auth.uid() = user_id);
+
+
+-- ─── ANNOUNCEMENTS ──────────────────────────────────────────
+create table if not exists public.announcements (
+  id         uuid default gen_random_uuid() primary key,
+  posted_by  uuid references auth.users(id) on delete set null,
+  title      text,
+  body       text not null,
+  pinned     boolean not null default false,
+  created_at timestamptz default now()
+);
+
+alter table public.announcements enable row level security;
+
+create policy "Authenticated users read announcements"
+  on public.announcements for select
+  using (auth.role() = 'authenticated');
+
+create policy "Admins manage announcements"
+  on public.announcements for all
+  using (public.is_admin());
+
+
+-- ─── TEAM CHAT MESSAGES ─────────────────────────────────────
+create table if not exists public.messages (
+  id         uuid default gen_random_uuid() primary key,
+  user_id    uuid references auth.users(id) on delete cascade not null,
+  body       text not null,
+  created_at timestamptz default now()
+);
+
+create index if not exists messages_created_at_idx
+  on public.messages (created_at desc);
+
+alter table public.messages enable row level security;
+
+create policy "Authenticated users read messages"
+  on public.messages for select
+  using (auth.role() = 'authenticated');
+
+create policy "Users insert own messages"
+  on public.messages for insert
+  with check (auth.uid() = user_id);
+
+create policy "Users delete own messages"
+  on public.messages for delete
+  using (auth.uid() = user_id);
+
+create policy "Admins delete any message"
+  on public.messages for delete
+  using (public.is_admin());
+
+-- Realtime: ensure all live-updating tables are in the supabase_realtime
+-- publication so INSERT/UPDATE/DELETE events broadcast to subscribed clients.
+do $$
+declare t text;
+begin
+  foreach t in array array['messages','announcements','sales','schedule'] loop
+    if not exists (
+      select 1 from pg_publication_tables
+      where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = t
+    ) then
+      execute format('alter publication supabase_realtime add table public.%I', t);
+    end if;
+  end loop;
+end $$;
+
+
+-- ─── INBOUND LEADS ──────────────────────────────────────────
+-- Admin uploads a CSV; each row becomes a lead assigned to a single rep.
+create table if not exists public.leads (
+  id           uuid default gen_random_uuid() primary key,
+  assigned_to  uuid references auth.users(id) on delete cascade not null,
+  assigned_by  uuid references auth.users(id) on delete set null,
+  data         jsonb not null default '{}'::jsonb,
+  status       text not null default 'new' check (status in ('new','contacted','quoted','booked','closed','dead')),
+  note         text,
+  created_at   timestamptz default now()
+);
+
+create index if not exists leads_assigned_to_idx on public.leads (assigned_to, created_at desc);
+
+-- For existing deployments — allow the new 'booked' status
+alter table public.leads drop constraint if exists leads_status_check;
+alter table public.leads add constraint leads_status_check
+  check (status in ('new','contacted','quoted','booked','closed','dead'));
+
+alter table public.leads enable row level security;
+
+create policy "Reps read own leads"
+  on public.leads for select
+  using (auth.uid() = assigned_to);
+
+create policy "Admins read all leads"
+  on public.leads for select
+  using (public.is_admin());
+
+create policy "Reps update own leads"
+  on public.leads for update
+  using (auth.uid() = assigned_to);
+
+create policy "Admins manage leads"
+  on public.leads for all
+  using (public.is_admin());
+
+-- Live updates for the leads inbox
+do $$
+begin
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'leads'
+  ) then
+    alter publication supabase_realtime add table public.leads;
+  end if;
+end $$;

@@ -1,26 +1,26 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "./lib/supabase";
 const C = {
-  "m1": { t: "Module 1 — Onboarding & Training", st: "Your foundation for closing deals and driving revenue.", vid: "https://youtu.be/Xfhpyj7Fhdw", s: [
+  "m1": { t: "Module 1 — Onboarding & Training", st: "Your foundation for closing deals and driving revenue.", s: [
     { h: "🏢  WHAT WE DO", b: "We deliver a premium experience for service-based small businesses — HVAC, plumbing, electrical, roofing, landscaping, and more.\n\n⚡ End-to-End Execution\nWe don't just \"help with a website.\" We handle strategy, design, development, optimization, and launch. The client's only job is to fill out a 5-minute form and keep answering their phone.\n\n⚡ Streamlined Process\nEvery project follows the same proven system: Onboarding Form → Discovery → Design → Build → Optimize → Launch. No scope creep. No surprises.\n\n⚡ Business Growth Focus\nWe don't sell pixels. We sell leads, calls, and revenue. If a site looks beautiful but doesn't convert, it's a liability. Every design choice we make is tied to a business outcome." },
     { h: "🔴  THE Redline DIFFERENCE", b: "Most agencies sell design. We sell outcomes.\n\nWhat clients actually get:\n→ Custom site built for their specific market and audience\n→ SEO baked in from day one (not bolted on later)\n→ Mobile-first design (60%+ of their traffic is on a phone)\n→ Conversion-optimized CTAs, forms, and trust signals\n→ AI chatbot capturing leads 24/7 while they sleep\n→ Ongoing maintenance so the site never degrades\n\nOur service tiers:\n• Starter — $1,497 → Conversion-focused site, fast turnaround\n• Pro — $2,497 → Advanced design + lead gen features\n• Elite — $4,497 → Premium design, full CRO, maximum conversion\n• Custom/Enterprise — $5,000+ → Fully scoped to the business\n\nFirm deadlines. No scope creep. We don't deliver and disappear — ongoing monitoring and revisions are standard." },
     { h: "🎯  YOUR ROLE", b: "Find the clients. Bring them in. Our team builds the site.\n\nWHAT YOU NEED TO KNOW\n• Master Redline's service tiers and what's included at each level\n• Understand the technical basics (SEO, CRO, page speed, mobile) — the Technical Bootcamp covers this\n• Know the target market inside and out (Module 2)\n• Internalize the scripts and objection handlers\n\nYOUR SUCCESS DRIVER\nCold calls and closing calls are the core of your role. Everything else — design, development, delivery — is handled by our build team. Your job is pipeline and revenue." },
     { h: "📊  ACTIVITY EXPECTATIONS", b: "100 COLD CALLS / WEEK\nThis is the baseline. No exceptions. No excuses.\n\nAll activity is tracked in a centralized Google Sheet with full transparency. Your numbers are visible. Results speak.\n\n→ Consistency beats talent. The rep who dials 100 quality calls every single week will outperform the \"natural salesperson\" who wings it.\n→ Success is a volume game multiplied by quality. More targeted outreach = more conversations = more audits = more closes.\n→ Show up every single week. Momentum compounds." },
     { h: "💰  COMPENSATION", b: "High-ticket, commission-only. Unlimited upside.\n\nDEAL SIZE: $1,500 – $4,500+ per closed deal\nEnterprise packages go well above $4,500.\n\nYou earn 25-35% of every deal depending on your tier:\n• Tier 1 (Day 1): 25% commission\n• Tier 2 (20 deals): 30% commission\n• Tier 3 (50 deals): 35% commission\n\nPlus $100 bonus per website deal at month-end.\nPlus $25/month recurring for every maintenance client.\n\nTop performers clear $8,000+/month within 6 months. Year 1 projection for high performers: $104,000+.\n\nSee the full Compensation Plan for detailed breakdowns and real-world examples." },
   ]},
-  "m2": { t: "Module 2 — Target Market & Lead Generation", st: "Find the right businesses. Build the right list.", vid: "https://youtu.be/PGaMSwhRirQ", s: [
+  "m2": { t: "Module 2 — Target Market & Lead Generation", st: "Find the right businesses. Build the right list.", s: [
     { h: "🎯  WHO WE TARGET", b: "We don't target everyone. We target the right ones.\n\n✅ Revenue Necessity — Businesses where a website rebuild directly drives revenue. Not vanity projects. Not \"nice to have.\" The site is either making them money or losing them money.\n\n✅ Local Operators — Single-owner, local businesses. The owner answers the phone, makes the decisions, and feels the pain daily. Avoid franchises, multi-location chains, and corporate accounts.\n\n✅ Clear Pain Points — Outdated, slow, or non-mobile sites with no CTAs, no quote forms, and no way to convert a visitor into a lead. These are businesses bleeding money and they don't even know it." },
     { h: "🔧  TARGET NICHES", b: "HVAC • Plumbers • Electricians • Landscapers • Florists • Roofers • Solar Installers • Pest Control • Painters\n\nTHE PAIN POINT\n→ Outdated, slow, or non-mobile websites\n→ No clear calls-to-action\n→ No \"Request a Quote\" or \"Book Now\" forms\n→ Generic stock photos, no social proof\n→ Competitors with better sites are stealing their leads\n\nTHE SIGNAL\nIf their website doesn't actively generate leads, it's costing them money every single day. That gap between where they are and where they could be — that's our opening." },
     { h: "🗺️  LEAD GENERATION — GOOGLE MAPS", b: "Google Maps is your lead goldmine.\n\n1️⃣ Zoom into a specific town/city on Google Maps\n2️⃣ Search for a niche: \"Plumber near Waltham, MA\"\n3️⃣ Open their website. Assess in 30 seconds. If it's poor → it's a lead.\n4️⃣ Aim for 10–15 solid leads per town/search\n\n🔍 ORGANIC DISCOVERY\nZoom to street level in commercial areas. Look for small family-owned shops, cafes, gyms, salons. No digital presence or a bad site = money left on the table.\n\nThe best leads are businesses that are clearly good at what they do but terrible online. Their work speaks for itself — their website doesn't." },
     { h: "📞  CONTACT STRATEGY", b: "Skip the front desk. Get to the owner.\n\n🚫 THE REALITY\nIf you call a general business line, you're talking to a receptionist or a teenager who won't pass on your message. Front-desk lines are a dead end.\n\n✅ THE STRATEGY\n→ Find the owner's direct cell or personal number\n→ Check Google Business Profile for owner name\n→ Look for personal emails on the website's About page\n→ LinkedIn can sometimes surface direct contact info\n→ Your goal: decision-maker on the first dial" },
     { h: "📋  DAILY WORKFLOW", b: "100 HIGH-QUALITY LEADS / WEEK\nLogged in the provided Excel spreadsheet.\n\nWHAT TO LOG FOR EVERY LEAD:\n→ Business name\n→ Owner name (if found)\n→ Website URL\n→ Phone number (direct if possible)\n→ Quick note on what's wrong with their site\n\nThe quality of your list directly determines the quality of your results. 100 garbage leads = 0 deals. 100 targeted, researched leads = a full pipeline." },
   ]},
-  "m3": { t: "Module 3 — Positioning & Call Strategy", st: "You're not a freelancer. You're a revenue consultant.", vid: "https://youtu.be/DxbkUwYUpBI", s: [
+  "m3": { t: "Module 3 — Positioning & Call Strategy", st: "You're not a freelancer. You're a revenue consultant.", s: [
     { h: "👔  YOUR POSITIONING", b: "Act like a Revenue Consultant. Not a freelancer.\n\n🧠 THE MINDSET\n→ You're diagnosing a sickness (their website) and providing the only cure\n→ Shift the power dynamic early — you are busy, they need your help\n→ You are not begging for their business. You are offering to solve a problem that's costing them real money.\n\n📊 THE RESULT\n→ If you act like a freelancer, they will haggle, ghost you, and treat you like a vendor\n→ If you act like a consultant, they will listen, respect your time, and pay your price\n\nThe difference is not what you say — it's how you carry yourself on every single call." },
     { h: "🚪  THE GATEKEEPER PROBLEM", b: "Don't waste time on low-conversion activities.\n\n→ Calling a service business often leads to a receptionist or junior staff who won't pass your message\n→ Your time is valuable — don't trade hours for dead-end conversations\n→ Prioritize direct owner contact over calling front desks\n→ If you can't get the owner, move on. 100 other leads are waiting." },
     { h: "📧  POST-CALL FOLLOW-UP PROTOCOL", b: "After every cold call where there was interest, send a follow-up email. Structure with precision.\n\n1️⃣ SUBJECT LINE — Clear, professional, non-spammy\n2️⃣ THE HOOK — Reference the specific issue you discussed on the call\n3️⃣ THE VALUE — How a rebuild increases their lead flow\n4️⃣ THE CTA — \"Want me to send over that video audit we discussed?\"\n\n⚠️ This is NOT cold email outreach. This is a follow-up touchpoint after your cold call to reinforce the conversation and move toward the audit." },
   ]},
-  "m4": { t: "Module 4 — Cold Call Mastery", st: "Earn attention. Don't demand it.", vid: "https://youtu.be/3jIfae8L30", s: [
+  "m4": { t: "Module 4 — Cold Call Mastery", st: "Earn attention. Don't demand it.", s: [
     { h: "🧠  THE MINDSET", b: "Most cold calls fail because they sound like a sales pitch.\n\n→ Cold calling works because of relevance, not volume\n→ Every business owner is bombarded with spam calls — your job is to earn attention, not demand it\n→ They don't care about our features. They care about their problems.\n→ The call has ONE job: book the video audit. That's it. Nothing else." },
     { h: "🚫  DO THIS, NOT THAT", b: "IF YOU DO THIS, YOU LOSE:\n→ Explain too much — you sound desperate\n→ Sound salesy — they hang up\n→ Use scripts they can smell — instant credibility death\n\n✅ INSTEAD:\n→ Observe something they already feel (\"I noticed your site doesn't have a quote form\")\n→ Keep it short and specific — under 2 minutes\n→ Focus on their pain, not your service\n→ Sound like a human having a real conversation" },
     { h: "⚡  CORE PRINCIPLES", b: "Personalization. Specificity. Brevity.\n\n🎯 PERSONALIZE — Proves you actually looked at their business. \"I was on your site this morning\" beats \"I help businesses like yours.\"\n\n🔍 BE SPECIFIC — \"Your site doesn't have a quote form\" beats \"I can help with your website.\" Specificity = credibility.\n\n✂️ BE BRIEF — Get to the point in the first 10 seconds. Rambling kills calls.\n\n👃 SMELL TEST — Business owners smell scripts instantly. No \"just checking in.\" No \"I came across your business.\" Sound real." },
@@ -30,42 +30,42 @@ const C = {
     { h: "⚠️  COMMON MISTAKES", b: "If it sounds like a pitch, it already failed.\n\n→ Long calls — get to the point. Don't ramble.\n→ The \"I/We\" trap — talking about yourself or Redline too much. They don't care about us yet.\n→ The \"Formal\" trap — buzzwords, \"Hope this finds you well,\" corporate speak\n→ The Multi-Task — trying to accomplish more than one thing per call. Book the audit. That's it.\n→ Not shutting up — ask a question, then let them answer. Silence is power." },
     { h: "🔄  FOLLOW-UP PROTOCOL", b: "Silence is not rejection.\n\n📌 THE 2-3 RULE:\n→ Most responses come on the 2nd or 3rd touch\n→ Follow up max 3 times\n→ Each follow-up should be shorter than the last\n\n📌 THE TONE:\n→ Calm, respectful, direct\n→ No pressure. No guilt trips.\n→ Persistence with professionalism\n\nThe rep who follows up wins the deal the lazy rep left on the table." },
   ]},
-  "m5": { t: "Module 5 — Reply Handling & Call Booking", st: "Move fast. Get on the phone. Close.", vid: "https://youtu.be/AMRjCkgIYLg", s: [
+  "m5": { t: "Module 5 — Reply Handling & Call Booking", st: "Move fast. Get on the phone. Close.", s: [
     { h: "⚡  PROTECT THE MOMENTUM", b: "Most deals die immediately after the first reply.\n\n→ Reps kill momentum by over-explaining or hesitating\n→ After a reply, your ONLY job is to move to a call\n→ The longer you stay in email, the weaker your position\n→ Email is for starting conversations. Calls are for selling.\n\nSpeed wins. The first rep to get on the phone usually wins the deal." },
     { h: "🔍  DECODING REPLIES", b: "What they say vs. what they actually mean:\n\n\"Sounds interesting\" → Open but needs a leader. They won't take the next step themselves — you need to direct them.\n\n\"Can you send more info?\" → Looking for a reason to say No. Don't send a brochure. Suggest a call.\n\n\"How much does this cost?\" → Trying to commoditize you. They want to compare you to the $500 Fiverr guy. Don't let them.\n\n\"Maybe later\" → Has pain but no urgency. Your job is to create urgency through opportunity cost.\n\nNone of these require a long explanation. All of them require direction toward a call." },
     { h: "📝  RESPONSE FORMULA", b: "Acknowledge + Short Value + Call Invitation.\n\n→ Keep it short: max 2–3 sentences\n→ Suggest a call immediately — don't ask, suggest\n→ Offer 2–3 specific time slots or your calendar link\n→ Speed > Perfection. Same business day replies.\n\nExample: \"Hey [Name], glad it caught your eye. Easiest next step is a quick 5-min call where I can walk you through what I found. How's Thursday at 2 or Friday at 10?\"" },
     { h: "🚫  THE NEVER LIST", b: "Protect your authority.\n\n→ NEVER pitch features over email\n→ NEVER send long PDF explanations\n→ NEVER negotiate or justify price over email\n→ NEVER wait 24+ hours to respond to a warm reply\n\nYou lose authority the second you start chasing them in the inbox. Email is a tool to get to the phone. That's it." },
     { h: "📅  DAILY DISCIPLINE", b: "Calls create leverage. Emails create busy work.\n\n→ Clean out the \"Pending Reply\" folder every morning and afternoon\n→ Clean, fast replies protect the Redline brand\n→ Your job is to guide, not convince\n→ If someone is warm, get them on the phone within 24 hours or the lead goes cold" },
   ]},
-  "m6": { t: "Module 6 — Sales Call Framework", st: "Control the call. Close the deal.", vid: "https://youtu.be/boWThJ6ob7I", s: [
+  "m6": { t: "Module 6 — Sales Call Framework", st: "Control the call. Close the deal.", s: [
     { h: "👑  ESTABLISH AUTHORITY", b: "They've been pitched by \"web guys\" before. They're skeptical.\n\n→ Confidence and visible structure build immediate trust\n→ You are not a salesperson — you are an authority diagnosing a problem\n→ You are the leader of this conversation. Rambling kills authority.\n→ If the prospect goes off-track, you pull them back\n→ Speak with certainty. If you sound unsure, they won't trust you with their money." },
     { h: "📋  THE 6-STEP CALL STRUCTURE", b: "Follow the sequence. No shortcuts.\n\n1️⃣ Opening & Agenda → Set the tone\n2️⃣ Business Discovery → Understand their operations\n3️⃣ Pain Identification → Where is the leak?\n4️⃣ Website Diagnosis → The technical \"why\"\n5️⃣ Redline Positioning → The solution\n6️⃣ The Close → Finalize the next step\n\nEvery step builds on the last. Skip one and the close falls apart." },
     { h: "🎤  OPENING & DISCOVERY", b: "Set the frame. Then listen.\n\nTHE AGENDA:\n\"The goal of today is to see if we can actually help you grow. I'll ask some questions, show you what we found, and we'll see if it's a fit. Sound good?\"\n\nDISCOVERY QUESTIONS:\n→ \"How are most of your jobs coming in right now?\"\n→ \"What does your ideal customer look like?\"\n→ \"What are your revenue goals for this year?\"\n→ \"When someone lands on your site, what do you want them to do?\"\n\nLet them talk. Take notes. The more they talk, the more ammunition you have for the close." },
     { h: "🩺  PAIN & DIAGNOSIS", b: "Make them feel the cost of their current site.\n\n→ \"How many customers are you losing because they can't find your 'Book' button?\"\n→ \"Your site loads in 6 seconds — 40% of visitors leave after 3. How many leads is that per month?\"\n→ Drop real data: load speeds, mobile errors, missing conversion triggers\n\n📌 LISTENING RULES:\n→ 80/20 rule — listen 80% of the time\n→ Use open-ended questions\n→ They buy when they feel understood, not when they feel sold to\n→ The best closers barely talk. They ask the right questions and let the prospect sell themselves." },
     { h: "🤝  REDIRECTING & CLOSING", b: "Every call ends with a clear, defined next step.\n\n🔄 REDIRECT TACTICS:\n→ \"That's an interesting point, but let's stay on track for your goals...\"\n→ Never accept \"Business is okay.\" Ask: \"What does 'okay' look like in monthly leads?\"\n→ Keep it centered on revenue and results\n\n💰 HANDLING \"I'LL THINK ABOUT IT\":\n→ \"What specifically do you need to look at?\"\n→ \"Is it the timing, the investment, or something else?\"\n→ Move to invoice or a scheduled follow-up with the decision-maker\n→ Never leave a call without the next step locked in" },
   ]},
-  "m7": { t: "Module 7 — Value Proposition & Messaging", st: "We sell outcomes. Not design.", vid: "https://youtu.be/9F4K9dCRe5g", s: [
+  "m7": { t: "Module 7 — Value Proposition & Messaging", st: "We sell outcomes. Not design.", s: [
     { h: "💡  THE SHIFT", b: "Most agencies sell design. We sell business outcomes.\n\n→ A \"clean, modern site\" is the baseline — it doesn't justify our pricing\n→ Sell more leads, more calls, more revenue\n→ If a site looks good but doesn't convert, it's a liability\n→ Every design choice is tied to user behavior, trust, and CTAs\n\nWhen a prospect says \"I want a nice website,\" your job is to reframe: \"You don't need a nice website. You need a website that makes your phone ring.\"" },
     { h: "🏗️  THE APPROACH", b: "We don't just build. We optimize.\n\n🎯 User Behavior & Clarity — Every element serves a conversion purpose. Nothing is decorative.\n\n🛡️ Building Trust — Design that makes visitors confident to buy. Reviews, badges, real photos, professional layout.\n\n📍 Strategic CTAs — \"Get My Free Quote\" placed exactly where visitors are ready to act. Above the fold, after testimonials, at the bottom.\n\nA website is a sales asset, not a digital brochure. If it's not generating leads, it's a cost center." },
     { h: "📈  THE LEVERAGE PLAY", b: "A conversion fix has a 10x impact on the bottom line.\n\n🔥 THE OUTSIZED IMPACT RULE:\n→ A better site amplifies the traffic and reputation they already have\n→ If they're getting 500 visitors/month and converting at 1%, that's 5 leads\n→ We take them to 5-10% — that's 25-50 leads from the same traffic\n→ No extra ad spend. No extra work. Just a better machine.\n\n⚠️ THE Redline STANDARD:\n→ Never promise specific numbers\n→ Always anchor to the leverage the asset provides\n→ \"We can't guarantee 50 leads, but we can guarantee your site will be built to convert every visitor possible.\"" },
     { h: "🗣️  LANGUAGE GUIDE", b: "When they talk about colors, you talk about conversions.\n\n🚫 STOP SAYING:\n→ \"We'll make your site look better\"\n→ \"We do web design\"\n→ \"We build websites\"\n\n✅ START SAYING:\n→ \"Your website should be generating leads consistently\"\n→ \"We build revenue systems for service businesses\"\n→ \"We turn your website into your best salesperson\"\n\nEvery word matters. Design language attracts tire-kickers. Revenue language attracts buyers." },
   ]},
-  "m8": { t: "Module 8 — Pricing & Objection Handling", st: "Price with confidence. Walk away if needed.", vid: "https://youtu.be/SEZ00YEKy5w", s: [
+  "m8": { t: "Module 8 — Pricing & Objection Handling", st: "Price with confidence. Walk away if needed.", s: [
     { h: "💰  PRICING MINDSET", b: "Pricing only feels expensive if the leverage wasn't explained.\n\n→ We don't justify our price — we explain the outcome\n→ If they understand the ROI, the price is a logical next step\n→ State the price clearly and calmly\n→ Never apologize for the number. Never discount without removing scope.\n\nIf you've done your job in the call — stacked the value, identified the pain, shown the gap — the price should feel like a relief, not a shock." },
     { h: "🤫  THE GOLDEN RULE", b: "The first person to speak after the price is revealed loses leverage.\n\nSay the number. Stop talking. Let them process.\n\nSilence signals confidence and professionalism. Filling the silence with justification signals insecurity.\n\nThey might take 5 seconds. They might take 15. Let them think. The close is happening in their head right now. Don't interrupt it." },
     { h: "🛡️  OBJECTION FRAMEWORK", b: "Acknowledge. Re-anchor. Ask.\n\n1️⃣ ACKNOWLEDGE — Don't argue with the concern.\n\"That makes total sense. A lot of our clients felt the same way before they saw the results.\"\n\n2️⃣ RE-ANCHOR — Bring it back to business impact and revenue loss.\n\"The question isn't whether $2,497 is a lot — it's whether losing 10-15 leads per month is costing you more than that.\"\n\n3️⃣ ASK — Use a clarifying or closing question.\n\"If we could solve that, would you be ready to move forward?\"\n\nObjections usually mean uncertainty, not a final \"No.\" Your job is to resolve the uncertainty." },
     { h: "🚶  KNOW WHEN TO WALK", b: "Not every business is a Redline fit.\n\n→ Discounting destroys positioning. The moment you drop the price, you confirm their suspicion that it wasn't worth it.\n→ We do not compete on price — we compete on execution\n→ Walking away preserves your authority for the next deal\n→ A bad client at a discount is worse than no client at all\n\nIf they only care about the cheapest option, they're not our client. Let them hire the nephew." },
   ]},
-  "m9": { t: "Module 9 — Post-Close & Client Handoff", st: "Precision in the handoff is non-negotiable.", vid: "https://youtu.be/6iq3JNdpMSA", s: [
+  "m9": { t: "Module 9 — Post-Close & Client Handoff", st: "Precision in the handoff is non-negotiable.", s: [
     { h: "⚠️  WHY THIS MATTERS", b: "Clients judge us most intensely after they pay.\n\n→ A sloppy post-close experience kills referral potential and trust\n→ Precision in the handoff is non-negotiable\n→ The client should feel they are in a machine, not a chaotic workshop\n→ This is where lifetime value is built or destroyed\n\nEvery closed deal should generate 2-3 referrals. That only happens if the experience after the sale is as sharp as the pitch before it." },
     { h: "✅  THE HANDOFF CHECKLIST", b: "Execute every step. Every time. No shortcuts.\n\n1️⃣ Confirm Payment — Verify Stripe payment has cleared\n2️⃣ Restate Expectations — Recap exactly what they purchased and what's included\n3️⃣ Document Project Details — All info from the onboarding form logged and shared with the build team\n4️⃣ Explain 7–10 Day Delivery — Set the timeline clearly. No vague promises.\n\nThe client should leave the handoff knowing exactly what happens next, when it happens, and who to contact if they have questions." },
     { h: "🛡️  BRAND PROTECTION", b: "Professional and direct. Always.\n\n📌 THE VOICE:\n→ Professional and direct\n→ No slang, no emojis, no casual guarantees\n→ No personal opinions in client comms\n→ Write like you're representing a premium firm — because you are\n\n📌 THE RULE:\n→ Never speak negatively about competitors\n→ It makes us look small and insecure\n→ Let our work do the talking\n→ If they mention a competitor, acknowledge and redirect: \"Our focus is on what we can deliver for you.\"" },
   ]},
-  "m10": { t: "Module 10 — Compensation & Growth", st: "Outcomes, not busy work. This is how you get paid.", vid: "https://youtu.be/EzBhLyGKqF4", s: [
+  "m10": { t: "Module 10 — Compensation & Growth", st: "Outcomes, not busy work. This is how you get paid.", s: [
     { h: "📊  HOW YOU'RE MEASURED", b: "This role rewards outcomes, not busy work.\n\n📌 WHAT COUNTS:\n→ Outreach quality & reply rates\n→ Calls booked & deals closed\n→ Activity matters, but the P&L matters more\n→ 100 calls that book 0 audits = a process problem, not an effort problem\n\n💰 COMMISSION STRUCTURE:\n→ Commission earned per closed deal\n→ Paid immediately after client payment clears\n→ Better positioning → higher deal value → higher commissions\n→ Maintenance clients = recurring monthly income that compounds" },
     { h: "🚀  THE GROWTH PATH", b: "This isn't a gig. It's a path to leadership.\n\n→ Top performers advance to Senior Closer and Leadership roles\n→ We are building a high-finance-style culture — performance is everything\n→ Treat this like a real business — because it is one\n\nRedline is scaling. The people who show up now, execute consistently, and close deals are the people who will be leading teams in 6 months." },
   ]},
-  "m11": { t: "Module 11 — Full Deal Walkthrough", st: "Locate. Call. Book. Pitch. Close. Start to finish.", vid: "https://youtu.be/XOy3tkW6cds", s: [
+  "m11": { t: "Module 11 — Full Deal Walkthrough", st: "Locate. Call. Book. Pitch. Close. Start to finish.", s: [
     { h: "🔄  THE FULL CYCLE", b: "Every deal follows the same 5-step process:\n\n1️⃣ LOCATE → Find the prospect\n2️⃣ CALL → Cold call the owner\n3️⃣ BOOK → Lock in the video audit\n4️⃣ PITCH → Deliver the audit + run the sales call\n5️⃣ CLOSE → Handle objections, get the signature\n\nThis module walks through a real deal from first touch to signed contract." },
     { h: "1️⃣  LOCATE", b: "→ Search Google Maps: \"HVAC near Waltham, MA\"\n→ Open their website — assess in 30 seconds\n→ Look for: outdated design, no CTAs, no quote form, slow load, broken mobile\n→ Check Google reviews — good reviews + bad site = perfect lead\n→ Find the owner's name and direct number\n→ Log it in the spreadsheet" },
     { h: "2️⃣  CALL", b: "→ Run the Redline Trigger: 90 seconds of research before you dial\n→ Open with pattern interrupt: \"I promise I'm not selling you a warranty\"\n→ Deliver your specific observation about their site\n→ Identify the pain in under 2 minutes\n→ ONE goal: get them to agree to the video audit\n→ If they're busy, offer a callback time. If not interested, leave clean." },
@@ -263,7 +263,7 @@ const GLOBAL_CSS = `
 
 *{margin:0;padding:0;box-sizing:border-box}
 html,body,#root{min-height:100dvh;background:#0E0F14}
-body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden;font-family:'Plus Jakarta Sans',system-ui,sans-serif;letter-spacing:-0.005em}
+body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden;font-family:'Inter',system-ui,sans-serif;letter-spacing:-0.011em;font-feature-settings:"kern","liga","calt","ss01","cv11"}
 ::selection{background:rgba(204,255,0,0.32);color:#15171E}
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -346,6 +346,10 @@ button{font-family:inherit}
 .stat-card { transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease }
 .stat-card:hover { transform:translateY(-2px); box-shadow:0 10px 30px rgba(0,0,0,0.4) !important }
 
+/* Tabular numerals for any displayed numeric data */
+.num-display, .stat-card, .dash-card { font-variant-numeric: tabular-nums }
+.num-display { letter-spacing: -0.04em; font-feature-settings: "tnum","ss01","cv11" }
+
 /* Quiz options */
 .quiz-opt { transition: all 0.18s ease }
 .quiz-opt:hover:not(:disabled) { transform:translateX(3px) }
@@ -386,6 +390,21 @@ button{font-family:inherit}
   border-radius:10px; cursor:pointer; transition: all 0.18s ease;
 }
 .btn-ghost:hover { background:rgba(255,255,255,0.07); color:#D6DAE2; border-color:rgba(255,255,255,0.14) }
+
+/* Header pill buttons — Admin / Sign Out / Profile */
+.btn-pill {
+  display:inline-flex; align-items:center; justify-content:center; gap:7px;
+  height:42px; padding:0 14px; font-size:11px; font-weight:700;
+  letter-spacing:1.4px; text-transform:uppercase; border-radius:12px;
+  cursor:pointer; transition: all 0.18s ease; font-family:inherit;
+  background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255,255,255,0.08); color:#9098A8;
+}
+.btn-pill:hover { background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03)); color:#D6DAE2; border-color:rgba(255,255,255,0.16) }
+.btn-pill.amber { color:#F59E0B; background: linear-gradient(180deg, rgba(245,158,11,0.10), rgba(245,158,11,0.04)); border-color:rgba(245,158,11,0.22) }
+.btn-pill.amber:hover { background: linear-gradient(180deg, rgba(245,158,11,0.16), rgba(245,158,11,0.06)); border-color:rgba(245,158,11,0.36); color:#FBBF24 }
+.btn-pill.icon-only { padding:0; width:42px; gap:0 }
+.btn-pill svg { display:block }
 
 /* Gradient text */
 .red-gradient-text {
@@ -700,6 +719,22 @@ function Scheduler({ session, profile, w }) {
 
   return (
     <div>
+      {/* Policy notice */}
+      <div style={{ display:"flex", alignItems:"flex-start", gap:14, padding:dk?"16px 20px":"14px 16px", background:"linear-gradient(135deg, rgba(255,51,112,0.08), rgba(245,158,11,0.06))", border:"1px solid rgba(255,51,112,0.25)", borderRadius:14, marginBottom:24, animation:"fadeUp 0.4s ease" }}>
+        <div style={{ width:38, height:38, borderRadius:11, background:"rgba(255,51,112,0.12)", border:"1px solid rgba(255,51,112,0.3)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#FF3370" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div style={{ flex:1, minWidth:0 }}>
+          <div style={{ fontSize:9.5, fontWeight:800, color:"#FF3370", letterSpacing:2.5, textTransform:"uppercase", marginBottom:4 }}>Mandatory Policy</div>
+          <div style={{ fontSize:dk?13.5:12.5, fontWeight:700, color:"#F2F4F8", lineHeight:1.45, marginBottom:4 }}>
+            2-day minimum office attendance per week
+          </div>
+          <div style={{ fontSize:dk?12.5:11.5, color:"#C4C8D4", lineHeight:1.55, fontWeight:500 }}>
+            Every rep must book at least <span style={{ color:"#FF3370", fontWeight:700 }}>2 days</span> in the office each week. Failure to meet this minimum is grounds for <span style={{ color:"#FF3370", fontWeight:700 }}>termination</span>. No exceptions.
+          </div>
+        </div>
+      </div>
+
       {[0,1].map(week => (
         <div key={week} style={{ marginBottom:32, animation:"fadeUp 0.4s ease" }}>
           <div style={{ display:"flex", alignItems:"center", gap:12, paddingBottom:14 }}>
@@ -752,6 +787,978 @@ function Scheduler({ session, profile, w }) {
 }
 
 const TIER_GLOW = { trial:"rgba(6,214,240,0.3)", bronze:"rgba(184,115,42,0.35)", silver:"rgba(192,200,216,0.3)", gold:"rgba(255,215,0,0.4)", platinum:"rgba(167,139,250,0.35)", diamond:"rgba(204,255,0,0.4)" };
+
+function Announcements({ session, profile, w }) {
+  const [items, setItems] = useState([]);
+  const [authors, setAuthors] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [composing, setComposing] = useState(false);
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const [saving, setSaving] = useState(false);
+  const dk = w >= 768;
+  const isAdmin = profile?.role === "admin";
+
+  const load = async () => {
+    const [annRes, profRes] = await Promise.all([
+      supabase.from("announcements").select("id, posted_by, title, body, pinned, created_at").order("pinned", { ascending: false }).order("created_at", { ascending: false }),
+      supabase.from("profiles").select("id, name"),
+    ]);
+    setItems(annRes.data ?? []);
+    const am = {};
+    for (const p of profRes.data ?? []) am[p.id] = p.name || "Admin";
+    setAuthors(am);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    load();
+    const ch = supabase.channel("announcements-rt")
+      .on("postgres_changes", { event: "*", schema: "public", table: "announcements" }, load)
+      .subscribe();
+    return () => supabase.removeChannel(ch);
+  }, []);
+
+  const post = async () => {
+    const trimmedBody = body.trim();
+    if (!trimmedBody) return;
+    setSaving(true);
+    const { data, error } = await supabase
+      .from("announcements")
+      .insert({ posted_by: session.user.id, title: title.trim() || null, body: trimmedBody })
+      .select()
+      .single();
+    setSaving(false);
+    if (error || !data) {
+      alert(`Couldn't post: ${error?.message ?? "no row returned"}`);
+      return;
+    }
+    setTitle(""); setBody(""); setComposing(false);
+    setItems(prev => [data, ...prev]);
+  };
+
+  const remove = async (id) => {
+    if (!confirm("Delete this announcement?")) return;
+    const { error } = await supabase.from("announcements").delete().eq("id", id);
+    if (error) {
+      alert(`Couldn't delete: ${error.message}`);
+      return;
+    }
+    setItems(prev => prev.filter(i => i.id !== id));
+  };
+
+  const togglePin = async (id, pinned) => {
+    const { data, error } = await supabase
+      .from("announcements")
+      .update({ pinned: !pinned })
+      .eq("id", id)
+      .select()
+      .single();
+    if (error || !data) {
+      alert(`Couldn't update: ${error?.message ?? "no row returned"}`);
+      return;
+    }
+    setItems(prev => {
+      const next = prev.map(i => i.id === id ? { ...i, pinned: data.pinned } : i);
+      next.sort((a, b) => (b.pinned - a.pinned) || (new Date(b.created_at) - new Date(a.created_at)));
+      return next;
+    });
+  };
+
+  const fmtWhen = (iso) => {
+    const d = new Date(iso);
+    const today = new Date(); today.setHours(0,0,0,0);
+    const ds = new Date(d); ds.setHours(0,0,0,0);
+    const diff = Math.round((today - ds) / 86400000);
+    const time = d.toLocaleTimeString("en-US",{ hour:"numeric", minute:"2-digit" });
+    if (diff === 0) return `Today · ${time}`;
+    if (diff === 1) return `Yesterday · ${time}`;
+    if (diff < 7) return d.toLocaleDateString("en-US",{ weekday:"long" }) + ` · ${time}`;
+    return d.toLocaleDateString("en-US",{ month:"short", day:"numeric", year: d.getFullYear() === today.getFullYear() ? undefined : "numeric" });
+  };
+
+  return (
+    <div style={{ animation:"fadeUp 0.35s ease", display:"flex", flexDirection:"column", gap:14 }}>
+
+      {isAdmin && (
+        <div className="dash-card" style={{ padding:dk?"20px 22px":"16px 18px" }}>
+          <div style={{ position:"absolute", top:0, left:0, right:0, height:2, background:"linear-gradient(90deg,transparent,#F59E0B80,transparent)", opacity:0.5 }} />
+          {!composing ? (
+            <button onClick={() => setComposing(true)}
+              style={{ display:"flex", alignItems:"center", gap:12, width:"100%", background:"rgba(255,255,255,0.02)", border:"1px dashed rgba(255,255,255,0.1)", borderRadius:12, padding:"14px 16px", cursor:"pointer", fontFamily:"inherit", textAlign:"left", color:"#666C7E", fontSize:13, fontWeight:600, transition:"all 0.18s" }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor="rgba(245,158,11,0.35)"; e.currentTarget.style.color="#F59E0B"; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor="rgba(255,255,255,0.1)"; e.currentTarget.style.color="#666C7E"; }}>
+              <div style={{ width:32, height:32, borderRadius:9, background:"rgba(245,158,11,0.12)", border:"1px solid rgba(245,158,11,0.22)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </div>
+              Post a new announcement…
+            </button>
+          ) : (
+            <div>
+              <div style={{ fontSize:10, fontWeight:800, color:"#F59E0B", letterSpacing:2.5, textTransform:"uppercase", marginBottom:14 }}>New Announcement</div>
+              <input
+                autoFocus
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+                placeholder="Title (optional)"
+                style={{ width:"100%", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:10, color:"#F2F4F8", fontSize:14, fontWeight:700, padding:"11px 14px", fontFamily:"inherit", outline:"none", boxSizing:"border-box", marginBottom:8 }}
+              />
+              <textarea
+                value={body}
+                onChange={e => setBody(e.target.value)}
+                placeholder="What do reps need to know?"
+                rows={4}
+                style={{ width:"100%", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:10, color:"#F2F4F8", fontSize:13, fontWeight:500, padding:"11px 14px", fontFamily:"inherit", outline:"none", boxSizing:"border-box", resize:"vertical", lineHeight:1.5 }}
+              />
+              <div style={{ display:"flex", gap:8, marginTop:12, justifyContent:"flex-end" }}>
+                <button onClick={() => { setComposing(false); setTitle(""); setBody(""); }} className="btn-ghost" style={{ fontSize:11, padding:"10px 18px" }}>Cancel</button>
+                <button onClick={post} disabled={saving || !body.trim()} className="btn-primary" style={{ fontSize:11, padding:"10px 22px", opacity: saving || !body.trim() ? 0.5 : 1, cursor: saving || !body.trim() ? "default" : "pointer" }}>
+                  {saving ? "Posting…" : "Post"}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {loading ? (
+        <div style={{ textAlign:"center", padding:60, color:"#666C7E", fontSize:13 }}>Loading…</div>
+      ) : items.length === 0 ? (
+        <div className="dash-card" style={{ padding:"48px 24px", textAlign:"center" }}>
+          <div style={{ width:54, height:54, borderRadius:16, background:"rgba(245,158,11,0.08)", border:"1px solid rgba(245,158,11,0.2)", display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 16px" }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
+          </div>
+          <div style={{ fontSize:14, fontWeight:700, color:"#D6DAE2", marginBottom:6 }}>No announcements yet</div>
+          <div style={{ fontSize:12, color:"#666C7E" }}>{isAdmin ? "Post the first one above." : "Check back soon — leadership posts updates here."}</div>
+        </div>
+      ) : (
+        items.map((a, i) => {
+          const accent = a.pinned ? "#F59E0B" : "#06D6F0";
+          return (
+            <div key={a.id} className="dash-card" style={{ padding:dk?"20px 22px":"16px 18px", animation:`fadeUp 0.35s ease ${0.04*i}s both`, borderColor: a.pinned ? "rgba(245,158,11,0.22)" : undefined }}>
+              <div style={{ position:"absolute", top:0, left:0, right:0, height:2, background:`linear-gradient(90deg,transparent,${accent}80,transparent)`, opacity:0.5 }} />
+              <div style={{ display:"flex", alignItems:"flex-start", gap:14 }}>
+                <div style={{ width:38, height:38, borderRadius:11, background: a.pinned ? "linear-gradient(135deg,#F59E0B,#B45309)" : "linear-gradient(135deg,#06D6F0,#0891B2)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, boxShadow: a.pinned ? "0 4px 14px rgba(245,158,11,0.35)" : "0 4px 14px rgba(6,214,240,0.3)" }}>
+                  {a.pinned ? (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#15171E" stroke="#15171E" strokeWidth="0.5" strokeLinecap="round" strokeLinejoin="round"><path d="M16 4l4 4-7 7-1 4-4-4 4-1 7-7-3-3z"/></svg>
+                  ) : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15171E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
+                  )}
+                </div>
+                <div style={{ flex:1, minWidth:0 }}>
+                  <div style={{ display:"flex", alignItems:"center", gap:8, flexWrap:"wrap", marginBottom:a.title?6:4 }}>
+                    {a.pinned && <span style={{ fontSize:8.5, fontWeight:800, color:"#F59E0B", background:"rgba(245,158,11,0.12)", border:"1px solid rgba(245,158,11,0.25)", padding:"3px 8px", borderRadius:5, letterSpacing:1.5, textTransform:"uppercase" }}>Pinned</span>}
+                    <span style={{ fontSize:10.5, fontWeight:700, color:"#D6DAE2" }}>{authors[a.posted_by] || "Admin"}</span>
+                    <span style={{ fontSize:10, color:"#5E6376" }}>· {fmtWhen(a.created_at)}</span>
+                  </div>
+                  {a.title && <div style={{ fontSize:dk?17:15, fontWeight:800, color:"#F2F4F8", letterSpacing:"-0.01em", lineHeight:1.3, marginBottom:6 }}>{a.title}</div>}
+                  <div style={{ fontSize:dk?13.5:12.5, color:"#C4C8D4", lineHeight:1.6, fontWeight:500, whiteSpace:"pre-wrap" }}>{a.body}</div>
+                </div>
+                {isAdmin && (
+                  <div style={{ display:"flex", flexDirection:"column", gap:6, flexShrink:0 }}>
+                    <button onClick={() => togglePin(a.id, a.pinned)} title={a.pinned ? "Unpin" : "Pin"}
+                      style={{ width:30, height:30, borderRadius:8, background:"rgba(255,255,255,0.04)", border:`1px solid ${a.pinned ? "rgba(245,158,11,0.3)" : "rgba(255,255,255,0.08)"}`, color: a.pinned ? "#F59E0B" : "#666C7E", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", padding:0, transition:"all 0.18s" }}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill={a.pinned ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg>
+                    </button>
+                    <button onClick={() => remove(a.id)} title="Delete"
+                      style={{ width:30, height:30, borderRadius:8, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", color:"#666C7E", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", padding:0, transition:"all 0.18s" }}
+                      onMouseEnter={e => { e.currentTarget.style.color="#FF3370"; e.currentTarget.style.borderColor="rgba(255,51,112,0.3)"; }}
+                      onMouseLeave={e => { e.currentTarget.style.color="#666C7E"; e.currentTarget.style.borderColor="rgba(255,255,255,0.08)"; }}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })
+      )}
+    </div>
+  );
+}
+
+function Leads({ session, profile, w }) {
+  const [leads, setLeads] = useState([]);
+  const [reps, setReps] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [expandedId, setExpandedId] = useState(null);
+  const [draftNote, setDraftNote] = useState("");
+  // Admin upload state
+  const [uploading, setUploading] = useState(false);
+  const [parsed, setParsed] = useState(null); // { headers, rows, fileName }
+  const [assignTo, setAssignTo] = useState("");
+  const fileInputRef = useRef(null);
+  const dk = w >= 768;
+  const isAdmin = profile?.role === "admin";
+
+  const load = async () => {
+    const [leadsRes, profRes] = await Promise.all([
+      supabase.from("leads")
+        .select("id, assigned_to, assigned_by, data, status, note, created_at")
+        .order("created_at", { ascending: false }),
+      supabase.from("profiles").select("id, name, role").order("name"),
+    ]);
+    setLeads(leadsRes.data ?? []);
+    const repList = (profRes.data ?? []).filter(p => p.role === "rep");
+    setReps(repList);
+    if (!assignTo && repList.length) setAssignTo(repList[0].id);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    load();
+    const ch = supabase.channel("leads-rt")
+      .on("postgres_changes", { event: "*", schema: "public", table: "leads" }, load)
+      .subscribe();
+    return () => supabase.removeChannel(ch);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const repById = Object.fromEntries(reps.map(r => [r.id, r.name || "Rep"]));
+
+  // CSV parser handles quoted fields, embedded commas/newlines, and "" escapes.
+  const parseCSV = (text) => {
+    const rows = []; let row = [], cur = "", inQ = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (inQ) {
+        if (c === '"') {
+          if (text[i+1] === '"') { cur += '"'; i++; } else inQ = false;
+        } else cur += c;
+      } else {
+        if (c === '"') inQ = true;
+        else if (c === ',') { row.push(cur); cur = ""; }
+        else if (c === '\n') { row.push(cur); cur = ""; rows.push(row); row = []; }
+        else if (c !== '\r') cur += c;
+      }
+    }
+    if (cur.length || row.length) { row.push(cur); rows.push(row); }
+    return rows.filter(r => r.some(c => (c ?? "").trim() !== ""));
+  };
+
+  const onFile = async (file) => {
+    if (!file) return;
+    const text = await file.text();
+    const rows = parseCSV(text);
+    if (rows.length < 2) {
+      alert("CSV needs a header row and at least one data row.");
+      return;
+    }
+    const headers = rows[0].map(h => h.trim());
+    const data = rows.slice(1).map(r => {
+      const o = {};
+      headers.forEach((h, i) => { o[h] = (r[i] ?? "").trim(); });
+      return o;
+    });
+    setParsed({ headers, rows: data, fileName: file.name });
+  };
+
+  const upload = async () => {
+    if (!parsed || !assignTo || uploading) return;
+    setUploading(true);
+    const payload = parsed.rows.map(d => ({
+      assigned_to: assignTo,
+      assigned_by: session.user.id,
+      data: d,
+    }));
+    const { error } = await supabase.from("leads").insert(payload);
+    setUploading(false);
+    if (error) {
+      alert(`Upload failed: ${error.message}`);
+      return;
+    }
+    setParsed(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    load();
+  };
+
+  const setStatus = async (id, status) => {
+    const { data, error } = await supabase
+      .from("leads")
+      .update({ status })
+      .eq("id", id)
+      .select()
+      .single();
+    if (error || !data) {
+      alert(`Couldn't update: ${error?.message ?? "no row returned (RLS?)"}`);
+      return;
+    }
+    setLeads(prev => prev.map(l => l.id === id ? { ...l, status: data.status } : l));
+  };
+
+  const saveNote = async (id) => {
+    const { data, error } = await supabase
+      .from("leads")
+      .update({ note: draftNote.trim() || null })
+      .eq("id", id)
+      .select()
+      .single();
+    if (error || !data) {
+      alert(`Couldn't save note: ${error?.message ?? "no row returned"}`);
+      return;
+    }
+    setLeads(prev => prev.map(l => l.id === id ? { ...l, note: data.note } : l));
+  };
+
+  const removeLead = async (id) => {
+    if (!confirm("Delete this lead?")) return;
+    const { error } = await supabase.from("leads").delete().eq("id", id);
+    if (error) { alert(`Couldn't delete: ${error.message}`); return; }
+    setLeads(prev => prev.filter(l => l.id !== id));
+  };
+
+  const clearDead = async () => {
+    const targets = leads.filter(l => l.status === "dead" && (isAdmin || l.assigned_to === session.user.id));
+    if (targets.length === 0) return;
+    if (!confirm(`Delete ${targets.length} dead lead${targets.length === 1 ? "" : "s"}? This can't be undone.`)) return;
+    const ids = targets.map(t => t.id);
+    const { error } = await supabase.from("leads").delete().in("id", ids);
+    if (error) { alert(`Couldn't clear: ${error.message}`); return; }
+    setLeads(prev => prev.filter(l => !ids.includes(l.id)));
+  };
+
+  const STATUSES = [
+    { v: "new",       label: "New",       color: "#06D6F0" },
+    { v: "contacted", label: "Contacted", color: "#F59E0B" },
+    { v: "quoted",    label: "Quoted",    color: "#A78BFA" },
+    { v: "booked",    label: "Booked",    color: "#14B8A6" },
+    { v: "closed",    label: "Closed",    color: "#22C55E" },
+    { v: "dead",      label: "Dead",      color: "#FF3370" },
+  ];
+  const statusByV = Object.fromEntries(STATUSES.map(s => [s.v, s]));
+
+  const visible = leads.filter(l => {
+    if (!isAdmin && l.assigned_to !== session.user.id) return false;
+    if (statusFilter !== "all" && l.status !== statusFilter) return false;
+    return true;
+  });
+
+  const counts = STATUSES.reduce((acc, s) => {
+    acc[s.v] = leads.filter(l => (isAdmin || l.assigned_to === session.user.id) && l.status === s.v).length;
+    return acc;
+  }, {});
+  const totalForFilter = leads.filter(l => isAdmin || l.assigned_to === session.user.id).length;
+
+  // Pretty primary line: try common keys, else first non-empty value
+  const primaryLine = (d) => {
+    if (!d) return "Lead";
+    const keys = Object.keys(d);
+    const lower = keys.map(k => k.toLowerCase());
+    const PREF = ["business","company","name","business name","client","title"];
+    for (const p of PREF) {
+      const idx = lower.indexOf(p);
+      if (idx >= 0 && (d[keys[idx]] ?? "").toString().trim()) return d[keys[idx]];
+    }
+    for (const k of keys) {
+      const v = (d[k] ?? "").toString().trim();
+      if (v) return v;
+    }
+    return "Lead";
+  };
+  const secondaryLine = (d) => {
+    if (!d) return "";
+    const lower = Object.keys(d).reduce((a,k) => (a[k.toLowerCase()] = d[k], a), {});
+    const phone = lower.phone || lower["phone number"] || lower.tel;
+    const email = lower.email || lower["email address"];
+    const city = lower.city || lower.location;
+    const niche = lower.niche || lower.industry || lower.category;
+    return [phone, email, city, niche].filter(Boolean).join(" · ");
+  };
+
+  // Render a CSV value: if it looks like a URL/email/phone, make it clickable.
+  const renderValue = (v) => {
+    const s = (v ?? "").toString().trim();
+    if (!s) return <span style={{ color:"#3A3D47" }}>—</span>;
+    const linkStyle = { color:"#CCFF00", textDecoration:"none", borderBottom:"1px dotted rgba(204,255,0,0.4)" };
+    // Explicit URL
+    if (/^https?:\/\//i.test(s)) {
+      return <a href={s} target="_blank" rel="noreferrer" style={linkStyle}>{s}</a>;
+    }
+    // www.something or bare domain like business.com / example.co.uk
+    if (/^(www\.)?[a-z0-9-]+(\.[a-z0-9-]+)+(\/\S*)?$/i.test(s) && /\.[a-z]{2,}/i.test(s)) {
+      const href = /^www\./i.test(s) ? `https://${s}` : (s.includes(".") ? `https://${s}` : s);
+      return <a href={href} target="_blank" rel="noreferrer" style={linkStyle}>{s}</a>;
+    }
+    // Email
+    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s)) {
+      return <a href={`mailto:${s}`} style={linkStyle}>{s}</a>;
+    }
+    // Phone — mostly digits with separators, ≥7 digits
+    const digits = s.replace(/\D/g, "");
+    if (digits.length >= 7 && digits.length <= 15 && /^\+?[\d\s().+-]+$/.test(s)) {
+      return <a href={`tel:${s.replace(/[^\d+]/g, "")}`} style={linkStyle}>{s}</a>;
+    }
+    return s;
+  };
+
+  return (
+    <div style={{ animation:"fadeUp 0.35s ease", display:"flex", flexDirection:"column", gap:14 }}>
+
+      {/* Admin upload card */}
+      {isAdmin && (
+        <div className="dash-card" style={{ padding:dk?"20px 22px":"16px 18px" }}>
+          <div style={{ position:"absolute", top:0, left:0, right:0, height:2, background:"linear-gradient(90deg,transparent,#F59E0B80,transparent)", opacity:0.5 }} />
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:14, flexWrap:"wrap", gap:10 }}>
+            <div style={{ fontSize:10, fontWeight:800, color:"#F59E0B", letterSpacing:2.5, textTransform:"uppercase" }}>Assign Leads · CSV Upload</div>
+          </div>
+
+          {!parsed ? (
+            <div>
+              <label
+                htmlFor="leads-csv-input"
+                style={{ display:"flex", alignItems:"center", gap:14, padding:"16px 18px", background:"rgba(255,255,255,0.02)", border:"1px dashed rgba(255,255,255,0.1)", borderRadius:12, cursor:"pointer", transition:"all 0.18s" }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor="rgba(245,158,11,0.35)"; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor="rgba(255,255,255,0.1)"; }}>
+                <div style={{ width:38, height:38, borderRadius:11, background:"rgba(245,158,11,0.12)", border:"1px solid rgba(245,158,11,0.22)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 12 15 15"/></svg>
+                </div>
+                <div style={{ flex:1, minWidth:0 }}>
+                  <div style={{ fontSize:13, fontWeight:700, color:"#EEF2F8" }}>Upload a CSV file</div>
+                  <div style={{ fontSize:11, color:"#666C7E", marginTop:3 }}>First row should be column headers (Business, Phone, Email, etc.)</div>
+                </div>
+              </label>
+              <input
+                id="leads-csv-input"
+                ref={fileInputRef}
+                type="file"
+                accept=".csv,text/csv"
+                onChange={e => onFile(e.target.files?.[0])}
+                style={{ display:"none" }}
+              />
+            </div>
+          ) : (
+            <div>
+              <div style={{ display:"flex", alignItems:"center", gap:12, padding:"10px 14px", background:"rgba(34,197,94,0.06)", border:"1px solid rgba(34,197,94,0.2)", borderRadius:10, marginBottom:14 }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <div style={{ flex:1, minWidth:0, fontSize:12, fontWeight:600, color:"#D6DAE2" }}>
+                  <span style={{ color:"#22C55E", fontWeight:800 }}>{parsed.rows.length}</span> {parsed.rows.length === 1 ? "lead" : "leads"} parsed from <span style={{ color:"#F2F4F8" }}>{parsed.fileName}</span>
+                </div>
+                <button onClick={() => { setParsed(null); if (fileInputRef.current) fileInputRef.current.value=""; }}
+                  style={{ background:"none", border:"none", color:"#666C7E", fontSize:11, fontWeight:700, cursor:"pointer", textTransform:"uppercase", letterSpacing:1.5, padding:"4px 8px", fontFamily:"inherit" }}>Clear</button>
+              </div>
+
+              {/* Preview a few rows */}
+              <div style={{ overflow:"auto", border:"1px solid rgba(255,255,255,0.06)", borderRadius:10, marginBottom:14, maxHeight:200 }}>
+                <table style={{ width:"100%", borderCollapse:"collapse", fontSize:11.5 }}>
+                  <thead style={{ position:"sticky", top:0, background:"rgba(20,22,28,0.95)", backdropFilter:"blur(8px)" }}>
+                    <tr>
+                      {parsed.headers.map(h => (
+                        <th key={h} style={{ textAlign:"left", padding:"8px 12px", fontSize:9.5, fontWeight:800, color:"#666C7E", letterSpacing:1.5, textTransform:"uppercase", borderBottom:"1px solid rgba(255,255,255,0.05)" }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {parsed.rows.slice(0, 6).map((r, i) => (
+                      <tr key={i} style={{ borderBottom:"1px solid rgba(255,255,255,0.04)" }}>
+                        {parsed.headers.map(h => (
+                          <td key={h} style={{ padding:"8px 12px", color:"#C4C8D4", whiteSpace:"nowrap", maxWidth:200, overflow:"hidden", textOverflow:"ellipsis" }}>{r[h] || "—"}</td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {parsed.rows.length > 6 && (
+                  <div style={{ padding:"8px 12px", fontSize:10.5, color:"#5E6376", textAlign:"center", borderTop:"1px solid rgba(255,255,255,0.04)" }}>+ {parsed.rows.length - 6} more row{parsed.rows.length - 6 === 1 ? "" : "s"}</div>
+                )}
+              </div>
+
+              <div style={{ display:"flex", gap:10, alignItems:"center", flexWrap:"wrap" }}>
+                <div style={{ flex:"1 1 200px" }}>
+                  <div style={{ fontSize:9.5, fontWeight:700, color:"#666C7E", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Assign to rep</div>
+                  <select value={assignTo} onChange={e => setAssignTo(e.target.value)}
+                    style={{ width:"100%", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:10, color:"#F2F4F8", fontSize:13, fontWeight:600, padding:"10px 12px", fontFamily:"inherit", outline:"none", cursor:"pointer" }}>
+                    {reps.length === 0 && <option>No reps available</option>}
+                    {reps.map(r => <option key={r.id} value={r.id}>{r.name || "Rep"}</option>)}
+                  </select>
+                </div>
+                <button onClick={upload} disabled={uploading || !assignTo || !parsed.rows.length} className="btn-primary"
+                  style={{ padding:"10px 22px", fontSize:11, opacity: uploading || !assignTo ? 0.5 : 1, cursor: uploading || !assignTo ? "default" : "pointer", flexShrink:0 }}>
+                  {uploading ? "Uploading…" : `Send to rep`}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Status filter row */}
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", gap:10, flexWrap:"wrap" }}>
+        <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
+          <button onClick={() => setStatusFilter("all")}
+            style={{ background: statusFilter === "all" ? "rgba(204,255,0,0.1)" : "rgba(255,255,255,0.04)", border:`1px solid ${statusFilter === "all" ? "rgba(204,255,0,0.25)" : "rgba(255,255,255,0.07)"}`, color: statusFilter === "all" ? "#CCFF00" : "#9098A8", fontSize:10.5, fontWeight:800, letterSpacing:1.5, textTransform:"uppercase", padding:"7px 12px", borderRadius:8, cursor:"pointer", fontFamily:"inherit", transition:"all 0.18s", display:"flex", alignItems:"center", gap:8 }}>
+            All <span style={{ background:"rgba(255,255,255,0.06)", padding:"1px 6px", borderRadius:4, fontSize:10 }}>{totalForFilter}</span>
+          </button>
+          {STATUSES.map(s => (
+            <button key={s.v} onClick={() => setStatusFilter(s.v)}
+              style={{ background: statusFilter === s.v ? `${s.color}14` : "rgba(255,255,255,0.04)", border:`1px solid ${statusFilter === s.v ? `${s.color}40` : "rgba(255,255,255,0.07)"}`, color: statusFilter === s.v ? s.color : "#9098A8", fontSize:10.5, fontWeight:800, letterSpacing:1.5, textTransform:"uppercase", padding:"7px 12px", borderRadius:8, cursor:"pointer", fontFamily:"inherit", transition:"all 0.18s", display:"flex", alignItems:"center", gap:8 }}>
+              {s.label} <span style={{ background:"rgba(255,255,255,0.06)", padding:"1px 6px", borderRadius:4, fontSize:10 }}>{counts[s.v] ?? 0}</span>
+            </button>
+          ))}
+        </div>
+        {statusFilter === "dead" && (counts.dead ?? 0) > 0 && (
+          <button onClick={clearDead}
+            style={{ background:"rgba(255,51,112,0.08)", border:"1px solid rgba(255,51,112,0.3)", color:"#FF3370", fontSize:10.5, fontWeight:800, letterSpacing:1.5, textTransform:"uppercase", padding:"7px 14px", borderRadius:8, cursor:"pointer", fontFamily:"inherit", transition:"all 0.18s", display:"flex", alignItems:"center", gap:8 }}
+            onMouseEnter={e => { e.currentTarget.style.background="rgba(255,51,112,0.16)"; e.currentTarget.style.borderColor="rgba(255,51,112,0.5)"; }}
+            onMouseLeave={e => { e.currentTarget.style.background="rgba(255,51,112,0.08)"; e.currentTarget.style.borderColor="rgba(255,51,112,0.3)"; }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+            Clear all ({counts.dead})
+          </button>
+        )}
+      </div>
+
+      {/* Leads list */}
+      {loading ? (
+        <div style={{ textAlign:"center", padding:60, color:"#666C7E", fontSize:13 }}>Loading…</div>
+      ) : visible.length === 0 ? (
+        <div className="dash-card" style={{ padding:"48px 24px", textAlign:"center" }}>
+          <div style={{ width:54, height:54, borderRadius:16, background:"rgba(6,214,240,0.08)", border:"1px solid rgba(6,214,240,0.2)", display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 16px" }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#06D6F0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+          </div>
+          <div style={{ fontSize:14, fontWeight:700, color:"#D6DAE2", marginBottom:6 }}>No leads {statusFilter === "all" ? "yet" : `· ${statusByV[statusFilter]?.label ?? statusFilter}`}</div>
+          <div style={{ fontSize:12, color:"#666C7E" }}>{isAdmin ? "Upload a CSV above to assign leads to a rep." : "When admin sends you leads, they'll show up here."}</div>
+        </div>
+      ) : (
+        <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+          {visible.map((l, i) => {
+            const s = statusByV[l.status] ?? STATUSES[0];
+            const isExpanded = expandedId === l.id;
+            const data = l.data || {};
+            return (
+              <div key={l.id} className="dash-card" style={{ padding:dk?"14px 18px":"12px 14px", animation:`fadeUp 0.3s ease ${0.03*i}s both` }}>
+                <div onClick={() => { setExpandedId(isExpanded ? null : l.id); setDraftNote(l.note || ""); }}
+                  style={{ display:"flex", alignItems:"center", gap:14, cursor:"pointer" }}>
+                  <div style={{ width:38, height:38, borderRadius:10, background:`${s.color}14`, border:`1px solid ${s.color}30`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={s.color} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+                  </div>
+                  <div style={{ flex:1, minWidth:0 }}>
+                    <div style={{ fontSize:13.5, fontWeight:700, color:"#EEF2F8", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{primaryLine(data)}</div>
+                    {secondaryLine(data) && <div style={{ fontSize:11.5, color:"#666C7E", marginTop:3, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{secondaryLine(data)}</div>}
+                  </div>
+                  <span style={{ fontSize:9, fontWeight:800, color:s.color, background:`${s.color}14`, border:`1px solid ${s.color}30`, padding:"4px 9px", borderRadius:5, letterSpacing:1.5, textTransform:"uppercase", flexShrink:0 }}>{s.label}</span>
+                  {isAdmin && (
+                    <span style={{ fontSize:10.5, fontWeight:700, color:"#9098A8", flexShrink:0, paddingLeft:4 }}>→ {repById[l.assigned_to] || "Rep"}</span>
+                  )}
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5E6376" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0, transform: isExpanded ? "rotate(90deg)" : "none", transition:"transform 0.18s" }}><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+
+                {isExpanded && (
+                  <div style={{ marginTop:14, paddingTop:14, borderTop:"1px solid rgba(255,255,255,0.05)", display:"flex", flexDirection:"column", gap:12, animation:"fadeUp 0.2s ease" }}>
+                    {/* All CSV fields */}
+                    <div style={{ display:"grid", gridTemplateColumns:dk?"repeat(auto-fill, minmax(200px, 1fr))":"1fr", gap:10 }}>
+                      {Object.entries(data).map(([k, v]) => (
+                        <div key={k}>
+                          <div style={{ fontSize:9, fontWeight:800, color:"#5E6376", letterSpacing:1.5, textTransform:"uppercase", marginBottom:3 }}>{k}</div>
+                          <div style={{ fontSize:12.5, color:"#EEF2F8", fontWeight:500, wordBreak:"break-word" }}>{renderValue(v)}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Status setter */}
+                    <div>
+                      <div style={{ fontSize:9, fontWeight:800, color:"#5E6376", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Update status</div>
+                      <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
+                        {STATUSES.map(opt => (
+                          <button key={opt.v} onClick={() => setStatus(l.id, opt.v)}
+                            style={{ background: l.status === opt.v ? `${opt.color}18` : "rgba(255,255,255,0.04)", border:`1px solid ${l.status === opt.v ? `${opt.color}55` : "rgba(255,255,255,0.07)"}`, color: l.status === opt.v ? opt.color : "#9098A8", fontSize:10, fontWeight:800, letterSpacing:1.3, textTransform:"uppercase", padding:"6px 12px", borderRadius:7, cursor:"pointer", fontFamily:"inherit", transition:"all 0.18s" }}>
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Note */}
+                    <div>
+                      <div style={{ fontSize:9, fontWeight:800, color:"#5E6376", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Note</div>
+                      <textarea
+                        value={draftNote}
+                        onChange={e => setDraftNote(e.target.value)}
+                        placeholder="Call notes, contact attempts, next steps…"
+                        rows={2}
+                        style={{ width:"100%", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:10, color:"#F2F4F8", fontSize:12.5, fontWeight:500, padding:"10px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box", resize:"vertical", lineHeight:1.5 }}
+                      />
+                      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginTop:8 }}>
+                        <div style={{ fontSize:10, color:"#5E6376" }}>
+                          Assigned {new Date(l.created_at).toLocaleDateString("en-US",{ month:"short", day:"numeric" })}
+                          {l.assigned_by && repById[l.assigned_by] ? ` · by ${repById[l.assigned_by]}` : ""}
+                        </div>
+                        <div style={{ display:"flex", gap:6 }}>
+                          {isAdmin && (
+                            <button onClick={() => removeLead(l.id)} className="btn-ghost" style={{ fontSize:10, padding:"7px 12px", color:"#FF3370", borderColor:"rgba(255,51,112,0.25)", background:"rgba(255,51,112,0.05)" }}>Delete</button>
+                          )}
+                          <button onClick={() => saveNote(l.id)} className="btn-primary" style={{ fontSize:10, padding:"7px 14px" }}>Save note</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Chat({ session, profile, w, width, minW = 220, maxW = 520, onResize }) {
+  const [msgs, setMsgs] = useState([]);
+  const [reps, setReps] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [body, setBody] = useState("");
+  const [sending, setSending] = useState(false);
+  const [typing, setTyping] = useState({}); // { uid: { name, t: epoch } }
+  const [unread, setUnread] = useState(0);
+  const openRef = useRef(open);
+  useEffect(() => { openRef.current = open; if (open) setUnread(0); }, [open]);
+  const scrollRef = useRef(null);
+  const stickyRef = useRef(true);
+  const channelRef = useRef(null);
+  const lastTypingSentRef = useRef(0);
+  const dk = w >= 768;
+  const isAdmin = profile?.role === "admin";
+  const myName = profile?.name || "Rep";
+
+  const load = async () => {
+    const [mRes, pRes] = await Promise.all([
+      supabase.from("messages").select("id, user_id, body, created_at").order("created_at", { ascending: true }).limit(200),
+      supabase.from("profiles").select("id, name, role"),
+    ]);
+    setMsgs(mRes.data ?? []);
+    const pm = {};
+    for (const p of pRes.data ?? []) pm[p.id] = { name: p.name || "Rep", role: p.role };
+    setReps(pm);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    load();
+    const ch = supabase.channel("messages-rt", { config: { broadcast: { self: false } } });
+    ch.on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, (payload) => {
+        setMsgs(prev => prev.some(m => m.id === payload.new.id) ? prev : [...prev, payload.new]);
+        // Hide typing indicator for the sender as soon as their message arrives
+        setTyping(prev => {
+          if (!prev[payload.new.user_id]) return prev;
+          const next = { ...prev }; delete next[payload.new.user_id]; return next;
+        });
+        // Bump unread badge if widget is closed and the message isn't ours
+        if (!openRef.current && payload.new.user_id !== session.user.id) {
+          setUnread(u => u + 1);
+        }
+      })
+      .on("postgres_changes", { event: "DELETE", schema: "public", table: "messages" }, (payload) => {
+        setMsgs(prev => prev.filter(m => m.id !== payload.old.id));
+      })
+      .on("broadcast", { event: "typing" }, ({ payload }) => {
+        if (!payload?.uid || payload.uid === session.user.id) return;
+        setTyping(prev => ({ ...prev, [payload.uid]: { name: payload.name || "Rep", t: Date.now() } }));
+      })
+      .on("broadcast", { event: "stop_typing" }, ({ payload }) => {
+        if (!payload?.uid) return;
+        setTyping(prev => {
+          if (!prev[payload.uid]) return prev;
+          const next = { ...prev }; delete next[payload.uid]; return next;
+        });
+      })
+      .subscribe();
+    channelRef.current = ch;
+
+    // Tick to expire stale typing entries after 4s of silence
+    const tick = setInterval(() => {
+      const now = Date.now();
+      setTyping(prev => {
+        let changed = false;
+        const next = {};
+        for (const [uid, info] of Object.entries(prev)) {
+          if (now - info.t < 4000) next[uid] = info; else changed = true;
+        }
+        return changed ? next : prev;
+      });
+    }, 1000);
+
+    return () => { clearInterval(tick); supabase.removeChannel(ch); channelRef.current = null; };
+  }, []);
+
+  const broadcastTyping = () => {
+    if (!channelRef.current) return;
+    const now = Date.now();
+    if (now - lastTypingSentRef.current < 1500) return;
+    lastTypingSentRef.current = now;
+    channelRef.current.send({ type:"broadcast", event:"typing", payload: { uid: session.user.id, name: myName } });
+  };
+
+  const broadcastStopTyping = () => {
+    if (!channelRef.current) return;
+    lastTypingSentRef.current = 0;
+    channelRef.current.send({ type:"broadcast", event:"stop_typing", payload: { uid: session.user.id } });
+  };
+
+  const onScroll = () => {
+    const el = scrollRef.current; if (!el) return;
+    stickyRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+  };
+
+  useEffect(() => {
+    if (loading) return;
+    const el = scrollRef.current; if (!el) return;
+    if (stickyRef.current) el.scrollTop = el.scrollHeight;
+  }, [msgs, loading]);
+
+  const send = async () => {
+    const trimmed = body.trim();
+    if (!trimmed || sending) return;
+    setSending(true);
+    const { data, error } = await supabase
+      .from("messages")
+      .insert({ user_id: session.user.id, body: trimmed })
+      .select()
+      .single();
+    setSending(false);
+    if (error || !data) {
+      alert(`Couldn't send: ${error?.message ?? "no row returned (likely RLS or missing 'messages' table)"}`);
+      return;
+    }
+    setBody("");
+    broadcastStopTyping();
+    stickyRef.current = true;
+    setMsgs(prev => prev.some(m => m.id === data.id) ? prev : [...prev, data]);
+  };
+
+  const onBodyChange = (val) => {
+    setBody(val);
+    if (val.trim()) broadcastTyping();
+    else broadcastStopTyping();
+  };
+
+  const remove = async (id) => {
+    if (!confirm("Delete this message?")) return;
+    const { error } = await supabase.from("messages").delete().eq("id", id);
+    if (error) { alert(`Couldn't delete: ${error.message}`); return; }
+    setMsgs(prev => prev.filter(m => m.id !== id));
+  };
+
+  const fmtTime = (iso) => new Date(iso).toLocaleTimeString("en-US",{ hour:"numeric", minute:"2-digit" });
+  const fmtDay = (iso) => {
+    const d = new Date(iso);
+    const today = new Date(); today.setHours(0,0,0,0);
+    const ds = new Date(d); ds.setHours(0,0,0,0);
+    const diff = Math.round((today - ds) / 86400000);
+    if (diff === 0) return "Today";
+    if (diff === 1) return "Yesterday";
+    if (diff < 7) return d.toLocaleDateString("en-US",{ weekday:"long" });
+    return d.toLocaleDateString("en-US",{ month:"short", day:"numeric", year: d.getFullYear() === today.getFullYear() ? undefined : "numeric" });
+  };
+
+  // Group messages by day, then collapse runs by same author within 3 minutes
+  const grouped = [];
+  let lastDay = null, lastUid = null, lastTs = 0;
+  for (const m of msgs) {
+    const day = fmtDay(m.created_at);
+    if (day !== lastDay) {
+      grouped.push({ kind: "day", id: `d-${day}-${m.id}`, label: day });
+      lastDay = day; lastUid = null;
+    }
+    const ts = new Date(m.created_at).getTime();
+    const continued = m.user_id === lastUid && (ts - lastTs) < 3 * 60 * 1000;
+    grouped.push({ kind: "msg", continued, ...m });
+    lastUid = m.user_id; lastTs = ts;
+  }
+
+  const onKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
+  };
+
+  const palette = ["#CCFF00","#06D6F0","#F59E0B","#FFD700","#A78BFA","#22C55E","#FF7AB6","#FB7185"];
+  const colorFor = (uid) => {
+    let h = 0; for (let i = 0; i < uid.length; i++) h = (h * 31 + uid.charCodeAt(i)) >>> 0;
+    return palette[h % palette.length];
+  };
+
+  // Hide on small mobile screens (no room for a permanent sidebar).
+  if (w < 768) return null;
+  const sidebarW = typeof width === "number" ? width : (w >= 1280 ? 320 : 280);
+
+  // Drag-to-resize the sidebar
+  const dragRef = useRef({ active: false });
+  const startDrag = (e) => {
+    e.preventDefault();
+    dragRef.current.active = true;
+    document.body.style.cursor = "ew-resize";
+    document.body.style.userSelect = "none";
+    const move = (ev) => {
+      if (!dragRef.current.active) return;
+      const x = ev.clientX ?? (ev.touches && ev.touches[0]?.clientX) ?? 0;
+      const next = Math.max(minW, Math.min(maxW, x));
+      onResize?.(next);
+    };
+    const up = () => {
+      dragRef.current.active = false;
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      window.removeEventListener("mousemove", move);
+      window.removeEventListener("mouseup", up);
+      window.removeEventListener("touchmove", move);
+      window.removeEventListener("touchend", up);
+    };
+    window.addEventListener("mousemove", move);
+    window.addEventListener("mouseup", up);
+    window.addEventListener("touchmove", move);
+    window.addEventListener("touchend", up);
+  };
+
+  return (
+    <>
+      {/* Permanent left sidebar */}
+      <aside
+        style={{
+          position:"fixed", left:0, top:0, bottom:0, zIndex:40,
+          width:sidebarW,
+          display:"flex", flexDirection:"column",
+          background:"linear-gradient(180deg, rgba(14,15,20,0.96), rgba(11,12,16,0.96))",
+          backdropFilter:"blur(22px) saturate(140%)",
+          WebkitBackdropFilter:"blur(22px) saturate(140%)",
+          borderRight:"1px solid rgba(255,255,255,0.06)",
+          boxShadow:"6px 0 30px rgba(0,0,0,0.35)",
+        }}>
+        <div style={{ position:"absolute", top:0, left:0, right:0, height:2, background:"linear-gradient(90deg,transparent,#CCFF0080,transparent)", opacity:0.5 }} />
+
+        {/* Resize handle */}
+        <div
+          onMouseDown={startDrag}
+          onTouchStart={startDrag}
+          title="Drag to resize"
+          className="chat-resize-handle"
+          style={{
+            position:"absolute", top:0, bottom:0, right:-4, width:10,
+            cursor:"ew-resize", zIndex:41, touchAction:"none",
+          }}>
+          <div className="chat-resize-grip" style={{
+            position:"absolute", top:"50%", right:1, transform:"translateY(-50%)",
+            width:3, height:46, borderRadius:2,
+            background:"rgba(255,255,255,0.07)",
+            transition:"background 0.15s ease, height 0.15s ease",
+          }} />
+        </div>
+
+        {/* Header */}
+        <div style={{ display:"flex", alignItems:"center", padding:"16px 18px", borderBottom:"1px solid rgba(255,255,255,0.05)", flexShrink:0 }}>
+          <div style={{ fontSize:13, fontWeight:800, color:"#F2F4F8", letterSpacing:"-0.01em" }}>Team Chat</div>
+        </div>
+
+        {/* Messages */}
+        <div ref={scrollRef} onScroll={onScroll} style={{ flex:1, overflowY:"auto", padding:dk?"16px 22px":"14px 16px" }}>
+          {loading ? (
+            <div style={{ textAlign:"center", padding:60, color:"#666C7E", fontSize:13 }}>Loading…</div>
+          ) : msgs.length === 0 ? (
+            <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", height:"100%", textAlign:"center", color:"#666C7E", padding:"40px 20px" }}>
+              <div style={{ width:54, height:54, borderRadius:16, background:"rgba(204,255,0,0.08)", border:"1px solid rgba(204,255,0,0.2)", display:"flex", alignItems:"center", justifyContent:"center", marginBottom:14 }}>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#CCFF00" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              </div>
+              <div style={{ fontSize:14, fontWeight:700, color:"#D6DAE2", marginBottom:6 }}>No messages yet</div>
+              <div style={{ fontSize:12 }}>Say hi to the team — break the ice.</div>
+            </div>
+          ) : (
+            <div style={{ display:"flex", flexDirection:"column", gap:2 }}>
+              {grouped.map(g => {
+                if (g.kind === "day") return (
+                  <div key={g.id} style={{ display:"flex", alignItems:"center", gap:12, margin:"16px 0 10px" }}>
+                    <div style={{ flex:1, height:1, background:"rgba(255,255,255,0.05)" }} />
+                    <div style={{ fontSize:9.5, fontWeight:800, color:"#666C7E", letterSpacing:2, textTransform:"uppercase" }}>{g.label}</div>
+                    <div style={{ flex:1, height:1, background:"rgba(255,255,255,0.05)" }} />
+                  </div>
+                );
+                const isMe = g.user_id === session.user.id;
+                const r = reps[g.user_id];
+                const name = r?.name || "Rep";
+                const isAdminMsg = r?.role === "admin";
+                const c = colorFor(g.user_id);
+                return (
+                  <div key={g.id} style={{ display:"flex", flexDirection: isMe ? "row-reverse" : "row", gap:10, marginTop:g.continued?2:8, alignItems:"flex-end" }}>
+                    <div style={{ width:30, height:30, flexShrink:0, visibility: g.continued ? "hidden" : "visible" }}>
+                      <div style={{ width:30, height:30, borderRadius:9, background: isMe ? "linear-gradient(135deg,#CCFF00,#88AB00)" : `linear-gradient(135deg,${c},${c}99)`, display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Inter',sans-serif", fontSize:12, fontWeight:900, color:"#15171E", boxShadow: isMe ? "0 2px 10px rgba(204,255,0,0.35)" : `0 2px 8px ${c}55` }}>
+                        {name[0]?.toUpperCase()}
+                      </div>
+                    </div>
+                    <div style={{ maxWidth:"min(72%, 560px)", display:"flex", flexDirection:"column", alignItems: isMe ? "flex-end" : "flex-start" }}>
+                      {!g.continued && (
+                        <div style={{ display:"flex", gap:8, alignItems:"baseline", padding: isMe ? "0 4px 4px 0" : "0 0 4px 4px", flexDirection: isMe ? "row-reverse" : "row" }}>
+                          <span style={{ fontSize:11, fontWeight:700, color: isMe ? "#CCFF00" : "#D6DAE2" }}>{isMe ? "You" : name}</span>
+                          {isAdminMsg && !isMe && <span style={{ fontSize:8, fontWeight:800, color:"#F59E0B", background:"rgba(245,158,11,0.12)", border:"1px solid rgba(245,158,11,0.25)", padding:"1.5px 6px", borderRadius:4, letterSpacing:1.5, textTransform:"uppercase" }}>Admin</span>}
+                          <span style={{ fontSize:9.5, color:"#5E6376" }}>{fmtTime(g.created_at)}</span>
+                        </div>
+                      )}
+                      <div className="chat-bubble" style={{ position:"relative", padding:"9px 13px", background: isMe ? "linear-gradient(135deg,rgba(204,255,0,0.14),rgba(204,255,0,0.06))" : "rgba(255,255,255,0.04)", border:`1px solid ${isMe ? "rgba(204,255,0,0.25)" : "rgba(255,255,255,0.07)"}`, borderRadius: g.continued
+                        ? (isMe ? "16px 6px 16px 16px" : "6px 16px 16px 16px")
+                        : (isMe ? "16px 4px 16px 16px" : "4px 16px 16px 16px"),
+                        color:"#EEF2F8", fontSize:13.5, lineHeight:1.5, fontWeight:500, whiteSpace:"pre-wrap", wordBreak:"break-word" }}>
+                        {g.body}
+                        {(isMe || isAdmin) && (
+                          <button onClick={() => remove(g.id)} title="Delete message" className="msg-del"
+                            style={{ position:"absolute", top:-8, right: isMe ? -8 : "auto", left: isMe ? "auto" : -8, width:22, height:22, borderRadius:6, background:"rgba(20,22,28,0.95)", border:"1px solid rgba(255,255,255,0.1)", color:"#666C7E", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", padding:0, transition:"all 0.15s", opacity:0, pointerEvents:"none" }}>
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Typing indicator */}
+        {(() => {
+          const others = Object.entries(typing).filter(([uid]) => uid !== session.user.id).map(([, v]) => v.name);
+          if (others.length === 0) return null;
+          const label = others.length === 1
+            ? `${others[0]} is typing`
+            : others.length === 2
+              ? `${others[0]} and ${others[1]} are typing`
+              : `${others.length} people are typing`;
+          return (
+            <div style={{ display:"flex", alignItems:"center", gap:10, padding:dk?"6px 22px 0":"4px 16px 0", flexShrink:0, color:"#9098A8", fontSize:11.5, fontWeight:600, height:22 }}>
+              <span className="typing-dots" aria-hidden="true">
+                <span /><span /><span />
+              </span>
+              <span>{label}</span>
+            </div>
+          );
+        })()}
+
+        {/* Composer */}
+        <div style={{ display:"flex", gap:10, padding:dk?"10px 18px 14px":"8px 14px 12px", borderTop:"1px solid rgba(255,255,255,0.05)", background:"rgba(255,255,255,0.015)", flexShrink:0 }}>
+          <textarea
+            value={body}
+            onChange={e => onBodyChange(e.target.value)}
+            onBlur={() => { if (!body.trim()) broadcastStopTyping(); }}
+            onKeyDown={onKeyDown}
+            placeholder="Message the team…"
+            rows={1}
+            style={{ flex:1, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:12, color:"#F2F4F8", fontSize:13.5, fontWeight:500, padding:"11px 14px", fontFamily:"inherit", outline:"none", boxSizing:"border-box", resize:"none", lineHeight:1.5, maxHeight:140 }}
+          />
+          <button onClick={send} disabled={sending || !body.trim()} className="btn-primary"
+            style={{ padding:"0 18px", fontSize:11, opacity: sending || !body.trim() ? 0.45 : 1, cursor: sending || !body.trim() ? "default" : "pointer", display:"flex", alignItems:"center", gap:8, flexShrink:0 }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            {sending ? "Sending" : "Send"}
+          </button>
+        </div>
+      </aside>
+
+      <style>{`
+        .chat-bubble:hover .msg-del { opacity: 1 !important; pointer-events: auto !important; }
+        .msg-del:hover { color: #FF3370 !important; border-color: rgba(255,51,112,0.4) !important; }
+        @keyframes typingBounce { 0%,80%,100% { transform: translateY(0); opacity: 0.4 } 40% { transform: translateY(-3px); opacity: 1 } }
+        .typing-dots { display:inline-flex; gap:3px; align-items:center }
+        .typing-dots span { width:4px; height:4px; border-radius:50%; background:#CCFF00; display:inline-block; animation: typingBounce 1.2s ease-in-out infinite }
+        .typing-dots span:nth-child(2) { animation-delay: 0.15s }
+        .typing-dots span:nth-child(3) { animation-delay: 0.3s }
+        .chat-resize-handle:hover .chat-resize-grip,
+        .chat-resize-handle:active .chat-resize-grip { background: #CCFF00 !important; height: 60px !important; box-shadow: 0 0 12px rgba(204,255,0,0.5); }
+      `}</style>
+    </>
+  );
+}
 
 function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab, onOpenModule }) {
   const [sales, setSales] = useState([]);
@@ -814,6 +1821,22 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
   const recentSales = sales.slice(0, 5);
   const MEDALS = ["🥇","🥈","🥉"];
 
+  // Daily breakdown (Mon..Sun) for the current week
+  const dayLabels = ["M","T","W","T","F","S","S"];
+  const myDaily = Array(7).fill(0);
+  const teamDaily = Array(7).fill(0);
+  const teamDailyAmount = Array(7).fill(0);
+  for (const s of weekSales) {
+    const d = new Date(s.sale_date); d.setHours(0,0,0,0);
+    const idx = Math.max(0, Math.min(6, Math.round((d - mon) / 86400000)));
+    if (s.user_id === session.user.id) myDaily[idx]++;
+    teamDaily[idx]++;
+    teamDailyAmount[idx] += s.amount ?? 0;
+  }
+  const teamWeekTotal = teamDailyAmount.reduce((a,b) => a+b, 0);
+  const teamWeekCount = teamDaily.reduce((a,b) => a+b, 0);
+  const todayIdx = Math.max(0, Math.min(6, Math.round((today - mon) / 86400000)));
+
   const tierObj = TIERS.find(t => t.v === profile?.tier) ?? null;
   const tierIdx = tierObj ? TIERS.indexOf(tierObj) : -1;
 
@@ -821,6 +1844,61 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
     const r = e.currentTarget.getBoundingClientRect();
     e.currentTarget.style.setProperty("--mx", `${e.clientX - r.left}px`);
     e.currentTarget.style.setProperty("--my", `${e.clientY - r.top}px`);
+  };
+
+  // Weekly sales bar chart (SVG)
+  const BarChart = ({ data, accent, height = 64, highlight = -1 }) => {
+    const max = Math.max(1, ...data);
+    const cols = data.length;
+    const gap = 8;
+    return (
+      <div style={{ display:"grid", gridTemplateColumns:`repeat(${cols},1fr)`, gap, alignItems:"end", height:height+22 }}>
+        {data.map((v, i) => {
+          const h = Math.round((v / max) * height);
+          const isToday = i === highlight;
+          return (
+            <div key={i} style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6 }}>
+              <div style={{ height, width:"100%", display:"flex", alignItems:"flex-end", justifyContent:"center" }}>
+                <div style={{
+                  width:"100%",
+                  height: h || 3,
+                  background: v > 0
+                    ? `linear-gradient(180deg,${accent},${accent}66)`
+                    : "rgba(255,255,255,0.06)",
+                  borderRadius:6,
+                  boxShadow: v > 0 ? `0 0 12px ${accent}40` : "none",
+                  border: isToday ? `1px solid ${accent}` : "none",
+                  transition:"height 0.5s cubic-bezier(0.4,0,0.2,1)"
+                }} />
+              </div>
+              <div style={{ fontSize:9, fontWeight:800, color: isToday ? accent : "#5E6376", letterSpacing:1 }}>{dayLabels[i]}</div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
+  // Circular progress ring
+  const Ring = ({ pct, accent, size = 88, stroke = 8, label, sublabel }) => {
+    const r = (size - stroke) / 2;
+    const c = 2 * Math.PI * r;
+    const offset = c * (1 - Math.max(0, Math.min(100, pct)) / 100);
+    return (
+      <div style={{ position:"relative", width:size, height:size, flexShrink:0 }}>
+        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+          <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={stroke} />
+          <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={accent} strokeWidth={stroke} strokeLinecap="round"
+            strokeDasharray={c} strokeDashoffset={offset}
+            transform={`rotate(-90 ${size/2} ${size/2})`}
+            style={{ transition:"stroke-dashoffset 0.7s cubic-bezier(0.4,0,0.2,1)", filter:`drop-shadow(0 0 6px ${accent}55)` }} />
+        </svg>
+        <div style={{ position:"absolute", inset:0, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center" }}>
+          <div style={{ fontSize:18, fontWeight:900, color:"#F2F4F8", lineHeight:1, letterSpacing:"-0.02em" }}>{label}</div>
+          {sublabel && <div style={{ fontSize:8.5, fontWeight:800, color:"#666C7E", letterSpacing:1.5, textTransform:"uppercase", marginTop:3 }}>{sublabel}</div>}
+        </div>
+      </div>
+    );
   };
 
   const Card = ({ title, accent, action, actionOnClick, children, fullWidth }) => (
@@ -861,7 +1939,7 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
             </div>
             <div>
               <div style={{ fontSize:9, fontWeight:800, color:"#5E6376", letterSpacing:2.5, textTransform:"uppercase", marginBottom:4 }}>Current Tier</div>
-              <div style={{ fontSize:dk?30:24, fontWeight:900, color: tierObj ? tierObj.color : "#3A3E4A", letterSpacing:"-0.03em", lineHeight:1, textShadow: tierObj ? `0 0 24px ${TIER_GLOW[tierObj.v]}` : undefined }}>
+              <div style={{ fontSize:dk?30:24, fontWeight:900, color: tierObj ? tierObj.color : "#5E6376", letterSpacing:"-0.03em", lineHeight:1, textShadow: tierObj ? `0 0 24px ${TIER_GLOW[tierObj.v]}` : undefined }}>
                 {tierObj ? tierObj.label.toUpperCase() : "—"}
               </div>
               {!tierObj && <div style={{ fontSize:11, color:"#444856", marginTop:4 }}>No tier assigned yet</div>}
@@ -877,7 +1955,7 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
                   <div style={{ width:dk?34:26, height:dk?34:26, borderRadius:9, background: active ? `radial-gradient(circle, ${t.color}30, ${t.color}10)` : passed ? `${t.color}15` : "rgba(255,255,255,0.03)", border:`1.5px solid ${active ? t.color : passed ? t.color+"50" : "rgba(255,255,255,0.07)"}`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:dk?13:11, transition:"all 0.2s", boxShadow: active ? `0 0 14px ${TIER_GLOW[t.v]}` : undefined }}>
                     {active ? <span style={{ fontSize:dk?15:13 }}>{t.emoji}</span> : passed ? <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={t.color} strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> : <div style={{ width:5, height:5, borderRadius:"50%", background:"rgba(255,255,255,0.12)" }} />}
                   </div>
-                  {dk && <div style={{ fontSize:7.5, fontWeight:800, color: active ? t.color : passed ? t.color+"80" : "#3A3E4A", letterSpacing:1, textTransform:"uppercase" }}>{t.label}</div>}
+                  {dk && <div style={{ fontSize:7.5, fontWeight:800, color: active ? t.color : passed ? t.color+"80" : "#5E6376", letterSpacing:1, textTransform:"uppercase" }}>{t.label}</div>}
                 </div>
               );
             })}
@@ -900,11 +1978,15 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
             </div>
           ))}
         </div>
-        {myWeek.total > 0 && (
-          <div style={{ marginTop:10, fontSize:11.5, color:"#22C55E", fontWeight:700, textAlign:"center", letterSpacing:0.3 }}>
-            ${myWeek.total.toLocaleString()} closed
+        <div style={{ marginTop:16, padding:"14px 14px 10px", background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.05)", borderRadius:12 }}>
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:10 }}>
+            <div style={{ fontSize:9, fontWeight:800, color:"#666C7E", letterSpacing:1.8, textTransform:"uppercase" }}>Daily Activity</div>
+            {myWeek.total > 0 && (
+              <div style={{ fontSize:11, fontWeight:700, color:"#22C55E" }}>${myWeek.total.toLocaleString()}</div>
+            )}
           </div>
-        )}
+          <BarChart data={myDaily} accent="#CCFF00" highlight={todayIdx} height={dk?56:48} />
+        </div>
       </Card>
 
       {/* Top Performers */}
@@ -912,19 +1994,25 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
         {rankedWeek.length === 0 ? (
           <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:8, padding:"16px 0", color:"#2E3140" }}>
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
-            <span style={{ fontSize:11, color:"#3A3E4A" }}>No sales yet this week</span>
+            <span style={{ fontSize:11, color:"#5E6376" }}>No sales yet this week</span>
           </div>
         ) : (
-          <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
+          <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
             {rankedWeek.slice(0, 3).map((rep, i) => {
               const isMe = rep.uid === session.user.id;
+              const leadCount = rankedWeek[0]?.count || 1;
+              const pct = Math.max(8, Math.round((rep.count / leadCount) * 100));
+              const barColor = isMe ? "#CCFF00" : i===0 ? "#FFD700" : "#888D9C";
               return (
-                <div key={rep.uid} style={{ display:"flex", alignItems:"center", gap:10, background: isMe ? "rgba(204,255,0,0.06)" : i===0 ? "rgba(255,215,0,0.04)" : "rgba(255,255,255,0.025)", border:`1px solid ${isMe ? "rgba(204,255,0,0.18)" : i===0 ? "rgba(255,215,0,0.12)" : "rgba(255,255,255,0.06)"}`, borderRadius:10, padding:"10px 12px" }}>
-                  <div style={{ fontSize:16, minWidth:22, textAlign:"center" }}>{MEDALS[i]}</div>
-                  <div style={{ flex:1, minWidth:0, fontSize:12.5, fontWeight:700, color: isMe ? "#F2F4F8" : "#D6DAE2", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
-                    {rep.name}{isMe ? <span style={{ fontSize:9, fontWeight:700, color:"#CCFF00", letterSpacing:1.5, marginLeft:7, textTransform:"uppercase" }}>you</span> : ""}
+                <div key={rep.uid} style={{ position:"relative", overflow:"hidden", background: isMe ? "rgba(204,255,0,0.06)" : i===0 ? "rgba(255,215,0,0.04)" : "rgba(255,255,255,0.025)", border:`1px solid ${isMe ? "rgba(204,255,0,0.18)" : i===0 ? "rgba(255,215,0,0.12)" : "rgba(255,255,255,0.06)"}`, borderRadius:10, padding:"10px 12px" }}>
+                  <div style={{ position:"absolute", inset:0, width:`${pct}%`, background:`linear-gradient(90deg,${barColor}18,${barColor}04)`, transition:"width 0.6s ease" }} />
+                  <div style={{ position:"relative", display:"flex", alignItems:"center", gap:10 }}>
+                    <div style={{ fontSize:16, minWidth:22, textAlign:"center" }}>{MEDALS[i]}</div>
+                    <div style={{ flex:1, minWidth:0, fontSize:12.5, fontWeight:700, color: isMe ? "#F2F4F8" : "#D6DAE2", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                      {rep.name}{isMe ? <span style={{ fontSize:9, fontWeight:700, color:"#CCFF00", letterSpacing:1.5, marginLeft:7, textTransform:"uppercase" }}>you</span> : ""}
+                    </div>
+                    <div style={{ fontSize:17, fontWeight:900, color: barColor, lineHeight:1 }}>{rep.count}</div>
                   </div>
-                  <div style={{ fontSize:17, fontWeight:900, color: i===0 ? "#FFD700" : "#555A6A", lineHeight:1 }}>{rep.count}</div>
                 </div>
               );
             })}
@@ -934,32 +2022,30 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
 
       {/* Continue Training */}
       <Card title="Training" accent="#CCFF00" action="All Modules" actionOnClick={() => onGoTab("training")}>
-        {nextModule ? (
-          <div onClick={() => onOpenModule(nextModule.k)}
-            style={{ display:"flex", alignItems:"center", gap:12, cursor:"pointer", background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:12, padding:"12px 14px", transition:"border-color 0.2s" }}
-            onMouseEnter={e => e.currentTarget.style.borderColor="rgba(204,255,0,0.2)"}
-            onMouseLeave={e => e.currentTarget.style.borderColor="rgba(255,255,255,0.06)"}>
-            <div style={{ width:42, height:42, borderRadius:11, background:IC_GRAD[nextModule.t], display:"flex", alignItems:"center", justifyContent:"center", fontSize:18, flexShrink:0, boxShadow:IC_SHADOW[nextModule.t] }}>{nextModule.ic}</div>
-            <div style={{ flex:1, minWidth:0 }}>
-              <div style={{ fontSize:9, fontWeight:800, color: nextModule.t === "MODULE" ? "#CCFF00" : "#F59E0B", letterSpacing:2, marginBottom:3, textTransform:"uppercase" }}>Up Next</div>
-              <div style={{ fontSize:13, fontWeight:700, color:"#EEF2F8", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{nextModule.sub}</div>
-            </div>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#555A6A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0 }}><polyline points="9 18 15 12 9 6"/></svg>
+        <div style={{ display:"flex", alignItems:"center", gap:dk?18:14 }}>
+          <Ring pct={trainingPct} accent="#CCFF00" size={dk?92:78} stroke={dk?9:8} label={`${trainingPct}%`} sublabel={`${doneModules}/${totalModules}`} />
+          <div style={{ flex:1, minWidth:0 }}>
+            {nextModule ? (
+              <div onClick={() => onOpenModule(nextModule.k)}
+                style={{ display:"flex", alignItems:"center", gap:12, cursor:"pointer", background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:12, padding:"10px 12px", transition:"border-color 0.2s" }}
+                onMouseEnter={e => e.currentTarget.style.borderColor="rgba(204,255,0,0.2)"}
+                onMouseLeave={e => e.currentTarget.style.borderColor="rgba(255,255,255,0.06)"}>
+                <div style={{ width:42, height:42, borderRadius:11, background:IC_GRAD[nextModule.t], display:"flex", alignItems:"center", justifyContent:"center", fontSize:18, flexShrink:0, boxShadow:IC_SHADOW[nextModule.t] }}>{nextModule.ic}</div>
+                <div style={{ flex:1, minWidth:0 }}>
+                  <div style={{ fontSize:9, fontWeight:800, color: nextModule.t === "MODULE" ? "#CCFF00" : "#F59E0B", letterSpacing:2, marginBottom:3, textTransform:"uppercase" }}>Up Next</div>
+                  <div style={{ fontSize:13, fontWeight:700, color:"#EEF2F8", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{nextModule.sub}</div>
+                </div>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#555A6A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0 }}><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+            ) : (
+              <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                <div style={{ width:36, height:36, borderRadius:10, background:"rgba(34,197,94,0.12)", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <div style={{ fontSize:13, fontWeight:700, color:"#22C55E" }}>All modules complete</div>
+              </div>
+            )}
           </div>
-        ) : (
-          <div style={{ display:"flex", alignItems:"center", gap:10, padding:"10px 0" }}>
-            <div style={{ width:36, height:36, borderRadius:10, background:"rgba(34,197,94,0.12)", display:"flex", alignItems:"center", justifyContent:"center" }}>
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            </div>
-            <div style={{ fontSize:13, fontWeight:700, color:"#22C55E" }}>All modules complete</div>
-          </div>
-        )}
-        <div style={{ marginTop:14, height:5, borderRadius:3, background:"rgba(255,255,255,0.05)", overflow:"hidden" }}>
-          <div style={{ width:`${trainingPct}%`, height:"100%", background:"linear-gradient(90deg,#CCFF00,#F59E0B)", transition:"width 0.5s" }} />
-        </div>
-        <div style={{ display:"flex", justifyContent:"space-between", marginTop:6 }}>
-          <div style={{ fontSize:9.5, color:"#444856", letterSpacing:1, textTransform:"uppercase", fontWeight:700 }}>{doneModules}/{totalModules} modules</div>
-          <div style={{ fontSize:9.5, color:"#CCFF00", fontWeight:800 }}>{trainingPct}%</div>
         </div>
       </Card>
 
@@ -968,7 +2054,7 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
         {todaysReps.length === 0 ? (
           <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:8, padding:"16px 0", color:"#2E3140" }}>
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            <span style={{ fontSize:11, color:"#3A3E4A" }}>Nobody in today</span>
+            <span style={{ fontSize:11, color:"#5E6376" }}>Nobody in today</span>
           </div>
         ) : (
           <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
@@ -987,12 +2073,33 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
         )}
       </Card>
 
+      {/* Team Pulse */}
+      <Card title="Team Pulse · This Week" accent="#06D6F0">
+        <div style={{ display:"flex", alignItems:"baseline", justifyContent:"space-between", marginBottom:12 }}>
+          <div>
+            <div style={{ fontSize:dk?28:24, fontWeight:900, color:"#F2F4F8", lineHeight:1, letterSpacing:"-0.03em" }}>
+              {teamWeekCount} <span style={{ fontSize:13, color:"#666C7E", fontWeight:700 }}>{teamWeekCount === 1 ? "sale" : "sales"}</span>
+            </div>
+            {teamWeekTotal > 0 && (
+              <div style={{ fontSize:12, color:"#22C55E", fontWeight:700, marginTop:5 }}>
+                ${teamWeekTotal.toLocaleString()} <span style={{ color:"#666C7E", fontWeight:600 }}>team revenue</span>
+              </div>
+            )}
+          </div>
+          <div style={{ textAlign:"right" }}>
+            <div style={{ fontSize:18, fontWeight:900, color:"#06D6F0", lineHeight:1 }}>{rankedWeek.length}</div>
+            <div style={{ fontSize:8.5, color:"#06D6F099", textTransform:"uppercase", letterSpacing:1.5, fontWeight:800, marginTop:4 }}>Active reps</div>
+          </div>
+        </div>
+        <BarChart data={teamDaily} accent="#06D6F0" highlight={todayIdx} height={dk?72:60} />
+      </Card>
+
       {/* Recent Sales */}
       <Card title="Recent Sales" accent="#22C55E" action="All Sales" actionOnClick={() => onGoTab("leaderboard")}>
         {recentSales.length === 0 ? (
           <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:8, padding:"16px 0", color:"#2E3140" }}>
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-            <span style={{ fontSize:11, color:"#3A3E4A" }}>No sales logged yet</span>
+            <span style={{ fontSize:11, color:"#5E6376" }}>No sales logged yet</span>
           </div>
         ) : (
           <div style={{ display:"flex", flexDirection:"column", gap:5 }}>
@@ -1028,14 +2135,14 @@ function Leaderboard({ session, profile, w }) {
   const [saving, setSaving] = useState(false);
   const [editingBonus, setEditingBonus] = useState(null);
   const [showAddBonus, setShowAddBonus] = useState(false);
-  const [bonusForm, setBonusForm] = useState({ label:"", threshold:"", amount:"", description:"" });
+  const [bonusForm, setBonusForm] = useState({ label:"", threshold:"", amount:"", period:"month", description:"" });
   const DEAL_OPTS = [1497, 2497, 4497];
   const RETAINER_OPTS = [49, 197, 297];
   const dk = w >= 768;
   const isAdmin = profile?.role === "admin";
 
   const loadBonuses = async () => {
-    const { data } = await supabase.from("monthly_bonuses").select("*").order("threshold", { ascending: true, nullsFirst: false }).order("amount");
+    const { data } = await supabase.from("monthly_bonuses").select("*").order("created_at", { ascending: false }).limit(1);
     setBonuses(data ?? []);
   };
 
@@ -1061,19 +2168,24 @@ function Leaderboard({ session, profile, w }) {
   }, []);
 
   const resetForm = () => { setDealAmt(null); setCustomAmt(""); setRetainer(null); setNote(""); setShowAdd(false); };
-  const resetBonusForm = () => { setBonusForm({ label:"", threshold:"", amount:"", description:"" }); setShowAddBonus(false); setEditingBonus(null); };
+  const resetBonusForm = () => { setBonusForm({ label:"", threshold:"", amount:"", period:"month", description:"" }); setShowAddBonus(false); setEditingBonus(null); };
 
   const saveBonus = async () => {
+    const threshold = parseInt(bonusForm.threshold);
+    const amount = parseFloat(bonusForm.amount);
+    if (isNaN(threshold) || threshold <= 0 || isNaN(amount) || amount <= 0) return;
     const payload = {
-      label: bonusForm.label.trim(),
-      threshold: bonusForm.threshold !== "" ? parseInt(bonusForm.threshold) : null,
-      amount: parseFloat(bonusForm.amount),
+      label: bonusForm.label.trim() || null,
+      threshold,
+      amount,
+      period: bonusForm.period === "week" ? "week" : "month",
       description: bonusForm.description.trim() || null,
     };
-    if (!payload.label || isNaN(payload.amount)) return;
     if (editingBonus) {
       await supabase.from("monthly_bonuses").update(payload).eq("id", editingBonus.id);
     } else {
+      // Replace any prior active bonus with the new one.
+      await supabase.from("monthly_bonuses").delete().not("id", "is", null);
       await supabase.from("monthly_bonuses").insert(payload);
     }
     resetBonusForm();
@@ -1251,7 +2363,7 @@ function Leaderboard({ session, profile, w }) {
                 <div style={{ fontSize: isTop ? 22 : 14, fontWeight:800, color:"#444856", minWidth:32, textAlign:"center", lineHeight:1 }}>
                   {medal ?? `#${i+1}`}
                 </div>
-                <div style={{ width:36, height:36, borderRadius:9, background: isMe ? "linear-gradient(135deg,#CCFF00,#6E9100)" : "linear-gradient(135deg,#2A2D38,#1E2028)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Plus Jakarta Sans',sans-serif", fontSize:14, fontWeight:800, color: isMe ? "#15171E" : "#888D9C", flexShrink:0, boxShadow: isMe ? "0 2px 10px rgba(204,255,0,0.3)" : "none" }}>
+                <div style={{ width:36, height:36, borderRadius:9, background: isMe ? "linear-gradient(135deg,#CCFF00,#6E9100)" : "linear-gradient(135deg,#2A2D38,#1E2028)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Inter',sans-serif", fontSize:14, fontWeight:800, color: isMe ? "#15171E" : "#888D9C", flexShrink:0, boxShadow: isMe ? "0 2px 10px rgba(204,255,0,0.3)" : "none" }}>
                   {rep.name[0]?.toUpperCase()}
                 </div>
                 <div style={{ flex:1, minWidth:0 }}>
@@ -1309,90 +2421,117 @@ function Leaderboard({ session, profile, w }) {
         </div>
       )}
 
-      {/* Monthly Bonuses */}
-      <div style={{ marginTop:40 }}>
-        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:16 }}>
-          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-            <div style={{ fontSize:16 }}>🏆</div>
-            <div style={{ fontSize:10, fontWeight:800, color:"#FFD700", letterSpacing:3, textTransform:"uppercase" }}>Monthly Bonuses</div>
-          </div>
-          {isAdmin && (
-            <button onClick={() => { resetBonusForm(); setShowAddBonus(true); }}
-              style={{ background:"rgba(255,215,0,0.08)", border:"1px solid rgba(255,215,0,0.2)", borderRadius:8, color:"#FFD700", fontSize:10, fontWeight:700, letterSpacing:1.5, padding:"7px 14px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>
-              + Add Tier
-            </button>
-          )}
-        </div>
+      {/* Active Bonus */}
+      {(() => {
+        const activeBonus = bonuses[0] ?? null;
+        const computeMyCount = (b) => sales.filter(s => {
+          if (s.user_id !== session.user.id) return false;
+          const d = new Date(s.sale_date);
+          if (b.period === "week") {
+            const mon = new Date(now); mon.setHours(0,0,0,0);
+            mon.setDate(now.getDate() - (now.getDay() === 0 ? 6 : now.getDay() - 1));
+            const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+            return d >= mon && d <= sun;
+          }
+          return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+        }).length;
+        return (
+          <div style={{ marginTop:40 }}>
+            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:16 }}>
+              <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                <div style={{ fontSize:16 }}>🏆</div>
+                <div style={{ fontSize:10, fontWeight:800, color:"#FFD700", letterSpacing:3, textTransform:"uppercase" }}>Active Bonus</div>
+              </div>
+              {isAdmin && !activeBonus && !showAddBonus && (
+                <button onClick={() => { resetBonusForm(); setShowAddBonus(true); }}
+                  style={{ background:"rgba(255,215,0,0.08)", border:"1px solid rgba(255,215,0,0.2)", borderRadius:8, color:"#FFD700", fontSize:10, fontWeight:700, letterSpacing:1.5, padding:"7px 14px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>
+                  + Set Bonus
+                </button>
+              )}
+            </div>
 
-        {/* Add / Edit bonus form (admin only) */}
-        {isAdmin && (showAddBonus || editingBonus) && (
-          <div style={{ background:"#1A1C24", border:"1px solid rgba(255,215,0,0.12)", borderRadius:14, padding:18, marginBottom:16, animation:"fadeUp 0.2s ease" }}>
-            <div style={{ fontSize:10, fontWeight:700, color:"#666C7E", letterSpacing:2, textTransform:"uppercase", marginBottom:14 }}>{editingBonus ? "Edit Bonus Tier" : "New Bonus Tier"}</div>
-            <div style={{ display:"flex", gap:10, flexWrap:"wrap", marginBottom:10 }}>
-              <div style={{ flex:"2 1 160px" }}>
-                <div style={{ fontSize:9, fontWeight:700, color:"#444856", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Label</div>
-                <input value={bonusForm.label} onChange={e => setBonusForm(p=>({...p, label:e.target.value}))} placeholder="e.g. Bronze, 5-Sale Bonus…"
-                  style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:500, padding:"9px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }} />
+            {/* Add / Edit bonus form (admin only) */}
+            {isAdmin && (showAddBonus || editingBonus) && (
+              <div style={{ background:"#1A1C24", border:"1px solid rgba(255,215,0,0.12)", borderRadius:14, padding:18, marginBottom:16, animation:"fadeUp 0.2s ease" }}>
+                <div style={{ fontSize:10, fontWeight:700, color:"#666C7E", letterSpacing:2, textTransform:"uppercase", marginBottom:14 }}>{editingBonus ? "Edit Active Bonus" : "Set Active Bonus"}</div>
+                <div style={{ marginBottom:12 }}>
+                  <div style={{ fontSize:9, fontWeight:700, color:"#444856", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Period</div>
+                  <div style={{ display:"flex", gap:6 }}>
+                    {[{v:"week", l:"This Week"}, {v:"month", l:"This Month"}].map(p => (
+                      <button key={p.v} type="button" onClick={() => setBonusForm(f => ({...f, period:p.v}))}
+                        style={{ flex:1, background: bonusForm.period===p.v ? "rgba(255,215,0,0.15)" : "rgba(255,255,255,0.04)", border:`1px solid ${bonusForm.period===p.v ? "rgba(255,215,0,0.4)" : "rgba(255,255,255,0.08)"}`, borderRadius:8, color: bonusForm.period===p.v ? "#FFD700" : "#9CA3AF", fontSize:12, fontWeight:700, padding:"10px 0", cursor:"pointer", fontFamily:"inherit" }}>
+                        {p.l}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div style={{ display:"flex", gap:10, flexWrap:"wrap", marginBottom:10 }}>
+                  <div style={{ flex:"1 1 120px" }}>
+                    <div style={{ fontSize:9, fontWeight:700, color:"#444856", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Sales Needed</div>
+                    <input type="number" min="1" value={bonusForm.threshold} onChange={e => setBonusForm(p=>({...p, threshold:e.target.value}))} placeholder="e.g. 5"
+                      style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:600, padding:"9px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }} />
+                  </div>
+                  <div style={{ flex:"1 1 120px" }}>
+                    <div style={{ fontSize:9, fontWeight:700, color:"#444856", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Bonus ($)</div>
+                    <input type="number" min="1" value={bonusForm.amount} onChange={e => setBonusForm(p=>({...p, amount:e.target.value}))} placeholder="e.g. 500"
+                      style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:600, padding:"9px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }} />
+                  </div>
+                </div>
+                <div style={{ marginBottom:8, fontSize:11, color:"#7E8595", fontWeight:500 }}>
+                  Hit <span style={{ color:"#FFD700", fontWeight:700 }}>{bonusForm.threshold || "?"} sale{bonusForm.threshold==="1"?"":"s"}</span> {bonusForm.period === "week" ? "this week" : "this month"} to earn <span style={{ color:"#FFD700", fontWeight:700 }}>${bonusForm.amount ? Number(bonusForm.amount).toLocaleString() : "?"}</span>.
+                </div>
+                <div style={{ marginBottom:12 }}>
+                  <div style={{ fontSize:9, fontWeight:700, color:"#444856", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Description (optional)</div>
+                  <input value={bonusForm.description} onChange={e => setBonusForm(p=>({...p, description:e.target.value}))} placeholder="Any extra details…"
+                    style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:500, padding:"9px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }} />
+                </div>
+                <div style={{ display:"flex", gap:8 }}>
+                  <button onClick={saveBonus} style={{ background:"#FFD700", border:"none", borderRadius:8, color:"#111", fontSize:12, fontWeight:800, letterSpacing:1, padding:"10px 22px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Save</button>
+                  <button onClick={resetBonusForm} style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:8, color:"#666C7E", fontSize:12, fontWeight:700, padding:"10px 16px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Cancel</button>
+                </div>
               </div>
-              <div style={{ flex:"1 1 100px" }}>
-                <div style={{ fontSize:9, fontWeight:700, color:"#444856", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Sales Needed</div>
-                <input type="number" min="0" value={bonusForm.threshold} onChange={e => setBonusForm(p=>({...p, threshold:e.target.value}))} placeholder="e.g. 5"
-                  style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:600, padding:"9px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }} />
-              </div>
-              <div style={{ flex:"1 1 100px" }}>
-                <div style={{ fontSize:9, fontWeight:700, color:"#444856", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Bonus ($)</div>
-                <input type="number" min="0" value={bonusForm.amount} onChange={e => setBonusForm(p=>({...p, amount:e.target.value}))} placeholder="e.g. 500"
-                  style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:600, padding:"9px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }} />
-              </div>
-            </div>
-            <div style={{ marginBottom:12 }}>
-              <div style={{ fontSize:9, fontWeight:700, color:"#444856", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Description (optional)</div>
-              <input value={bonusForm.description} onChange={e => setBonusForm(p=>({...p, description:e.target.value}))} placeholder="Any extra details…"
-                style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:500, padding:"9px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }} />
-            </div>
-            <div style={{ display:"flex", gap:8 }}>
-              <button onClick={saveBonus} style={{ background:"#FFD700", border:"none", borderRadius:8, color:"#111", fontSize:12, fontWeight:800, letterSpacing:1, padding:"10px 22px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Save</button>
-              <button onClick={resetBonusForm} style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:8, color:"#666C7E", fontSize:12, fontWeight:700, padding:"10px 16px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Cancel</button>
-            </div>
-          </div>
-        )}
+            )}
 
-        {/* Bonus tier cards */}
-        {bonuses.length === 0 && !showAddBonus ? (
-          <div style={{ fontSize:12, color:"#5E6376", padding:"20px 0" }}>{isAdmin ? "No bonus tiers set yet. Add one above." : "No bonuses set this month yet."}</div>
-        ) : (
-          <div style={{ display:"grid", gridTemplateColumns:dk?"repeat(auto-fill, minmax(220px, 1fr))":"1fr", gap:10 }}>
-            {bonuses.map(b => {
-              const myCount = sales.filter(s => {
-                if (s.user_id !== session.user.id) return false;
-                const d = new Date(s.sale_date);
-                return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
-              }).length;
-              const reached = b.threshold != null ? myCount >= b.threshold : false;
+            {/* Active bonus card */}
+            {!activeBonus && !showAddBonus ? (
+              <div style={{ fontSize:12, color:"#5E6376", padding:"20px 0" }}>{isAdmin ? "No active bonus. Click + Set Bonus to create one." : "No active bonus right now."}</div>
+            ) : activeBonus ? (() => {
+              const b = activeBonus;
+              const myCount = computeMyCount(b);
+              const reached = myCount >= (b.threshold ?? Infinity);
+              const pct = Math.min(100, b.threshold ? (myCount / b.threshold) * 100 : 0);
+              const periodLabel = b.period === "week" ? "this week" : "this month";
               return (
-                <div key={b.id} style={{ background: reached ? "rgba(255,215,0,0.06)" : "rgba(255,255,255,0.025)", border:`1px solid ${reached ? "rgba(255,215,0,0.2)" : "rgba(255,255,255,0.07)"}`, borderRadius:14, padding:"16px 18px", position:"relative" }}>
-                  {reached && <div style={{ position:"absolute", top:12, right:12, fontSize:9, fontWeight:800, color:"#FFD700", letterSpacing:1.5, textTransform:"uppercase" }}>✓ Reached</div>}
-                  <div style={{ fontSize:22, fontWeight:900, color: reached ? "#FFD700" : "#D6DAE2", lineHeight:1, marginBottom:4 }}>${Number(b.amount).toLocaleString()}</div>
-                  <div style={{ fontSize:12, fontWeight:700, color: reached ? "#FFD700" : "#9CA3AF", marginBottom:b.description?4:0 }}>{b.label}</div>
-                  {b.threshold != null && (
-                    <div style={{ fontSize:10, color:"#444856", marginBottom:b.description?4:0 }}>{b.threshold} {b.threshold===1?"sale":"sales"} needed{b.threshold != null && ` · ${myCount}/${b.threshold} this month`}</div>
-                  )}
-                  {b.description && <div style={{ fontSize:11, color:"#5E6376" }}>{b.description}</div>}
+                <div style={{ background: reached ? "linear-gradient(180deg,rgba(255,215,0,0.10),rgba(255,215,0,0.04))" : "rgba(255,255,255,0.03)", border:`1px solid ${reached ? "rgba(255,215,0,0.32)" : "rgba(255,255,255,0.08)"}`, borderRadius:16, padding:dk?"22px 26px":"18px 20px", position:"relative" }}>
+                  {reached && <div style={{ position:"absolute", top:14, right:16, fontSize:10, fontWeight:800, color:"#FFD700", letterSpacing:1.5, textTransform:"uppercase" }}>✓ Reached</div>}
+                  <div style={{ fontSize:9.5, fontWeight:800, color:"#FFD700", letterSpacing:2.5, textTransform:"uppercase", marginBottom:6 }}>{b.period === "week" ? "Weekly Goal" : "Monthly Goal"}</div>
+                  <div style={{ display:"flex", alignItems:"baseline", gap:10, flexWrap:"wrap", marginBottom:10 }}>
+                    <div style={{ fontSize:dk?34:28, fontWeight:900, color: reached ? "#FFD700" : "#F2F4F8", lineHeight:1, letterSpacing:"-0.02em" }}>${Number(b.amount).toLocaleString()}</div>
+                    <div style={{ fontSize:13, fontWeight:600, color:"#9CA3AF" }}>for {b.threshold} {b.threshold===1?"sale":"sales"} {periodLabel}</div>
+                  </div>
+                  {b.label && <div style={{ fontSize:13, fontWeight:600, color:"#D6DAE2", marginBottom:b.description?4:10 }}>{b.label}</div>}
+                  {b.description && <div style={{ fontSize:12, color:"#7E8595", marginBottom:10 }}>{b.description}</div>}
+                  <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:6 }}>
+                    <div style={{ flex:1, height:6, background:"rgba(255,255,255,0.06)", borderRadius:4, overflow:"hidden" }}>
+                      <div style={{ height:"100%", width:`${pct}%`, background:"linear-gradient(90deg,#CCFF00,#FFD700)", borderRadius:4, transition:"width 0.4s" }} />
+                    </div>
+                    <div style={{ fontSize:12, fontWeight:700, color: reached ? "#FFD700" : "#D6DAE2", whiteSpace:"nowrap" }}>{myCount} / {b.threshold}</div>
+                  </div>
                   {isAdmin && (
-                    <div style={{ display:"flex", gap:8, marginTop:12 }}>
-                      <button onClick={() => { setEditingBonus(b); setBonusForm({ label:b.label, threshold:b.threshold??'', amount:b.amount, description:b.description??'' }); setShowAddBonus(false); }}
-                        style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:6, color:"#666C7E", fontSize:10, fontWeight:700, padding:"5px 12px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", letterSpacing:1 }}>Edit</button>
+                    <div style={{ display:"flex", gap:8, marginTop:14 }}>
+                      <button onClick={() => { setEditingBonus(b); setBonusForm({ label:b.label??'', threshold:b.threshold??'', amount:b.amount, period:b.period||"month", description:b.description??'' }); setShowAddBonus(false); }}
+                        style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:6, color:"#9CA3AF", fontSize:10, fontWeight:700, padding:"6px 14px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", letterSpacing:1 }}>Edit</button>
                       <button onClick={() => deleteBonus(b.id)}
-                        style={{ background:"none", border:"none", color:"#5E6376", fontSize:10, fontWeight:700, padding:"5px 8px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", letterSpacing:1, transition:"color 0.15s" }}
-                        onMouseEnter={e=>e.target.style.color="#CCFF00"} onMouseLeave={e=>e.target.style.color="#5E6376"}>Delete</button>
+                        style={{ background:"none", border:"none", color:"#5E6376", fontSize:10, fontWeight:700, padding:"6px 10px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", letterSpacing:1, transition:"color 0.15s" }}
+                        onMouseEnter={e=>e.target.style.color="#FF3370"} onMouseLeave={e=>e.target.style.color="#5E6376"}>End Bonus</button>
                     </div>
                   )}
                 </div>
               );
-            })}
+            })() : null}
           </div>
-        )}
-      </div>
+        );
+      })()}
 
     </div>
   );
@@ -1600,20 +2739,6 @@ function Viewer({ ck, onBack, w, onComplete }) {
           <p style={{ fontSize:14, color:"#7E8595", margin:0, lineHeight:1.6, fontWeight:500 }}>{c.st}</p>
         </div>
 
-        {/* Video */}
-        {c.vid && (
-          <a href={c.vid} target="_blank" rel="noreferrer" className="vid-card"
-            style={{ display:"flex", alignItems:"center", gap:18, background:"linear-gradient(135deg,rgba(20,14,16,0.9),rgba(16,12,20,0.9))", border:"1px solid rgba(204,255,0,0.18)", borderRadius:18, padding:"20px 24px", textDecoration:"none", marginBottom:28, animation:"fadeUp 0.55s ease 0.1s both", boxShadow:"0 4px 24px rgba(0,0,0,0.3)" }}>
-            <div className="play-pulse" style={{ width:54, height:54, borderRadius:16, background:"linear-gradient(135deg,#CCFF00,#6E9100)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, boxShadow:"0 6px 24px rgba(204,255,0,0.4)" }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="#15171E"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-            </div>
-            <div style={{ flex:1 }}>
-              <div style={{ fontSize:14, fontWeight:700, color:"#F2F4F8", marginBottom:3 }}>Watch Training Video</div>
-              <div style={{ fontSize:12, color:"#7E8595" }}>Complete before continuing with this module</div>
-            </div>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#CCFF00" strokeWidth="2" strokeLinecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          </a>
-        )}
 
         {/* Sections */}
         <div style={{ paddingBottom:90 }}>
@@ -1845,6 +2970,22 @@ export default function App() {
   const [showNameEdit, setShowNameEdit] = useState(false);
   const [nameEdit, setNameEdit] = useState("");
 
+  const CHAT_MIN = 220, CHAT_MAX = 520;
+  const chatDefault = w >= 1280 ? 320 : 280;
+  const [chatW, setChatW] = useState(() => {
+    try {
+      const saved = parseInt(localStorage.getItem("chatSidebarW") || "", 10);
+      if (!isNaN(saved) && saved >= CHAT_MIN && saved <= CHAT_MAX) return saved;
+    } catch { /* ignore */ }
+    return chatDefault;
+  });
+  const persistChatW = (px) => {
+    const clamped = Math.max(CHAT_MIN, Math.min(CHAT_MAX, Math.round(px)));
+    setChatW(clamped);
+    try { localStorage.setItem("chatSidebarW", String(clamped)); } catch { /* ignore */ }
+  };
+  const chatSidebarW = w >= 768 ? chatW : 0;
+
   const saveName = async () => {
     const trimmed = nameEdit.trim();
     if (!trimmed) return;
@@ -1855,7 +2996,7 @@ export default function App() {
 
   const signOut = async () => { await supabase.auth.signOut(); setView(null); };
 
-  const FONT_LINK = "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap";
+  const FONT_LINK = "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap";
   const baseStyle = { minHeight:"100dvh", background:"#0E0F14", color:"#FFF" };
 
   const bc = { MODULE:"#CCFF00", BOOTCAMP:"#F59E0B", REFERENCE:"#06D6F0", QUIZ:"#10B981" };
@@ -1866,12 +3007,13 @@ export default function App() {
   const referenceItems = CATS.filter(x=>x.t==="REFERENCE");
   const quizItems = CATS.filter(x=>x.t==="QUIZ");
   const TABS = [
-    { key:"dashboard",    label:"Dashboard",    short:"Home",     color:"#22C55E" },
-    { key:"leaderboard",  label:"Leaderboard",  short:"Board",    color:"#FFD700" },
-    { key:"scheduling",   label:"Scheduling",   short:"Schedule", color:"#F59E0B" },
-    { key:"training",     label:"Training",     short:"Train",    color:"#CCFF00" },
-    { key:"reference",    label:"Reference",    short:"Ref",      color:"#06D6F0" },
-    { key:"quizzes",      label:"Quizzes",      short:"Quizzes",  color:"#10B981" },
+    { key:"dashboard",     label:"Dashboard",     short:"Home",     color:"#22C55E" },
+    { key:"announcements", label:"Announcements", short:"News",     color:"#F59E0B" },
+    { key:"leads",         label:"Leads",         short:"Leads",    color:"#06D6F0" },
+    { key:"leaderboard",   label:"Leaderboard",   short:"Board",    color:"#FFD700" },
+    { key:"scheduling",    label:"Scheduling",    short:"Schedule", color:"#F59E0B" },
+    { key:"training",      label:"Training",      short:"Train",    color:"#CCFF00" },
+    { key:"reference",     label:"Reference",     short:"Ref",      color:"#06D6F0" },
   ];
 
   if (loading) return (
@@ -1897,31 +3039,34 @@ export default function App() {
   );
 
   if (view === "__admin" && profile?.role === "admin") return (
-    <div ref={ref} style={baseStyle}>
+    <div ref={ref} style={{ ...baseStyle, paddingLeft: chatSidebarW }}>
       <style>{GLOBAL_CSS}</style>
       <link href={FONT_LINK} rel="stylesheet" />
       <AdminPanel profile={profile} onBack={() => setView(null)} w={w} onSignOut={signOut} />
+      <Chat session={session} profile={profile} w={w} width={chatSidebarW} onResize={persistChatW} minW={CHAT_MIN} maxW={CHAT_MAX} />
     </div>
   );
 
   if (view && QUIZZES[view]) return (
-    <div ref={ref} style={baseStyle}>
+    <div ref={ref} style={{ ...baseStyle, paddingLeft: chatSidebarW }}>
       <style>{GLOBAL_CSS}</style>
       <link href={FONT_LINK} rel="stylesheet" />
       <Quiz quizKey={view} onBack={() => { setView(null); setTimeout(top, 50); }} w={w} onComplete={(sc, tot) => saveScore(view, sc, tot)} />
+      <Chat session={session} profile={profile} w={w} width={chatSidebarW} onResize={persistChatW} minW={CHAT_MIN} maxW={CHAT_MAX} />
     </div>
   );
 
   if (view) return (
-    <div ref={ref} style={baseStyle}>
+    <div ref={ref} style={{ ...baseStyle, paddingLeft: chatSidebarW }}>
       <style>{GLOBAL_CSS}</style>
       <link href={FONT_LINK} rel="stylesheet" />
       <Viewer ck={view} onBack={() => { setView(null); setTimeout(top, 50); }} w={w} onComplete={markComplete} />
+      <Chat session={session} profile={profile} w={w} width={chatSidebarW} onResize={persistChatW} minW={CHAT_MIN} maxW={CHAT_MAX} />
     </div>
   );
 
   return (
-    <div ref={ref} className="dotgrid" style={{ ...baseStyle, position:"relative" }}>
+    <div ref={ref} className="dotgrid" style={{ ...baseStyle, position:"relative", paddingLeft: chatSidebarW }}>
       <style>{GLOBAL_CSS}</style>
       <link href={FONT_LINK} rel="stylesheet" />
 
@@ -1952,18 +3097,21 @@ export default function App() {
               {/* Right actions */}
               <div style={{ display:"flex", alignItems:"center", gap:dk?8:6, animation:"fadeUp 0.5s ease 0.06s both" }}>
                 {profile?.role === "admin" && (
-                  <button onClick={() => setView("__admin")} className="btn-ghost" style={{ fontSize:10, padding:dk?"9px 14px":"7px 10px", color:"#F59E0B", borderColor:"rgba(245,158,11,0.22)", background:"rgba(245,158,11,0.06)" }}>Admin</button>
+                  <button onClick={() => setView("__admin")} className={`btn-pill amber${dk?"":" icon-only"}`} aria-label="Admin">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    {dk && "Admin"}
+                  </button>
                 )}
 
                 {/* Avatar + name edit */}
                 <div style={{ position:"relative", display:"flex", alignItems:"center", gap:0 }}>
                   <div className="profile-pill"
                     onClick={() => { setShowNameEdit(v => !v); setNameEdit(profile?.name ?? ""); }}>
-                    <div style={{ width:30, height:30, borderRadius:9, background:"linear-gradient(135deg,#CCFF00,#88AB00)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Plus Jakarta Sans',sans-serif", fontSize:13, fontWeight:900, color:"#15171E", flexShrink:0, boxShadow:"0 2px 10px rgba(204,255,0,0.4), inset 0 1px 0 rgba(255,255,255,0.4)" }}>
+                    <div style={{ width:30, height:30, borderRadius:9, background:"linear-gradient(135deg,#CCFF00,#88AB00)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Inter',sans-serif", fontSize:13, fontWeight:900, color:"#15171E", flexShrink:0, boxShadow:"0 2px 10px rgba(204,255,0,0.4), inset 0 1px 0 rgba(255,255,255,0.4)" }}>
                       {profile?.name?.[0]?.toUpperCase() ?? "R"}
                     </div>
                     {dk && <span style={{ fontSize:12.5, fontWeight:600, color:"#D6DAE2", letterSpacing:0.2 }}>{profile?.name ?? "Rep"}</span>}
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#5E6376" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft:dk?2:0 }}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    {dk && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7E8595" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft:2, transform: showNameEdit?"rotate(180deg)":"none", transition:"transform 0.18s ease" }}><polyline points="6 9 12 15 18 9"/></svg>}
                   </div>
                   {showNameEdit && (
                     <div className="glass" style={{ position:"absolute", top:"calc(100% + 10px)", right:0, borderRadius:14, padding:18, width:240, zIndex:200, boxShadow:"0 24px 60px rgba(0,0,0,0.7)", animation:"popIn 0.18s ease" }}>
@@ -1984,7 +3132,10 @@ export default function App() {
                   )}
                 </div>
 
-                <button onClick={signOut} className="btn-ghost" style={{ fontSize:10, padding:dk?"9px 14px":"7px 10px" }}>{dk ? "Sign Out" : "Out"}</button>
+                <button onClick={signOut} className={`btn-pill${dk?"":" icon-only"}`} aria-label="Sign Out">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                  {dk && "Sign Out"}
+                </button>
               </div>
             </div>
 
@@ -2026,6 +3177,16 @@ export default function App() {
             onGoTab={setTab}
             onOpenModule={(k) => { setView(k); setTimeout(top, 50); }}
           />
+        )}
+
+        {/* ANNOUNCEMENTS TAB */}
+        {tab === "announcements" && (
+          <Announcements session={session} profile={profile} w={w} />
+        )}
+
+        {/* LEADS TAB */}
+        {tab === "leads" && (
+          <Leads session={session} profile={profile} w={w} />
         )}
 
         {/* LEADERBOARD TAB */}
@@ -2073,6 +3234,33 @@ export default function App() {
                 </div>
               </div>
             ))}
+            <SectionLabel color="#10B981" label="QUIZZES" delay={0.04 * trainingGroups.length} />
+            <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr 1fr":dk?"1fr 1fr":"1fr", gap:dk?10:8 }}>
+              {quizItems.map((x, i) => {
+                const qs = quizScores[x.k];
+                return (
+                  <div key={x.id} className="card-hover" onClick={() => { setView(x.k); setTimeout(top, 50); }}
+                    style={{ background:"linear-gradient(135deg,rgba(16,18,24,0.98),rgba(11,12,16,0.98))", border:`1px solid ${qs ? "rgba(16,185,129,0.15)" : "rgba(255,255,255,0.055)"}`, borderRadius:16, padding:dk?"20px 18px":"17px 15px", cursor:"pointer", animation:`fadeUp 0.38s ease ${0.05*i}s both`, boxShadow:"0 4px 20px rgba(0,0,0,0.3)" }}>
+                    <div style={{ display:"flex", alignItems:"center", gap:14 }}>
+                      <div style={{ width:50, height:50, borderRadius:14, background:IC_GRAD.QUIZ, display:"flex", alignItems:"center", justifyContent:"center", fontSize:22, flexShrink:0, boxShadow:IC_SHADOW.QUIZ }}>{x.ic}</div>
+                      <div style={{ flex:1, minWidth:0 }}>
+                        <div style={{ fontSize:9, fontWeight:800, color:"#10B981", letterSpacing:2.5, marginBottom:4, textTransform:"uppercase" }}>QUIZ</div>
+                        <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF2F8", margin:"0 0 3px", lineHeight:1.3 }}>{x.sub}</h3>
+                        <p style={{ fontSize:11.5, color: qs ? "#10B981" : "#666C7E", margin:0, lineHeight:1.4, fontWeight: qs ? 600 : 500 }}>
+                          {qs ? `Best: ${Math.round(qs.score/qs.total*100)}%` : x.d}
+                        </p>
+                      </div>
+                      <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6 }}>
+                        {qs && <div style={{ width:20, height:20, borderRadius:6, background:"rgba(16,185,129,0.12)", border:"1px solid rgba(16,185,129,0.3)", display:"flex", alignItems:"center", justifyContent:"center" }}><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>}
+                        <div style={{ width:32, height:32, borderRadius:10, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.06)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#666C7E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
 
@@ -2109,36 +3297,6 @@ export default function App() {
           </div>
         )}
 
-        {/* QUIZZES TAB */}
-        {tab === "quizzes" && (
-          <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr 1fr":dk?"1fr 1fr":"1fr", gap:dk?10:8, animation:"fadeUp 0.35s ease" }}>
-            {quizItems.map((x, i) => {
-              const qs = quizScores[x.k];
-              return (
-                <div key={x.id} className="card-hover" onClick={() => { setView(x.k); setTimeout(top, 50); }}
-                  style={{ background:"linear-gradient(135deg,rgba(16,18,24,0.98),rgba(11,12,16,0.98))", border:`1px solid ${qs ? "rgba(16,185,129,0.15)" : "rgba(255,255,255,0.055)"}`, borderRadius:16, padding:dk?"20px 18px":"17px 15px", cursor:"pointer", animation:`fadeUp 0.38s ease ${0.05*i}s both`, boxShadow:"0 4px 20px rgba(0,0,0,0.3)" }}>
-                  <div style={{ display:"flex", alignItems:"center", gap:14 }}>
-                    <div style={{ width:50, height:50, borderRadius:14, background:IC_GRAD.QUIZ, display:"flex", alignItems:"center", justifyContent:"center", fontSize:22, flexShrink:0, boxShadow:IC_SHADOW.QUIZ }}>{x.ic}</div>
-                    <div style={{ flex:1, minWidth:0 }}>
-                      <div style={{ fontSize:9, fontWeight:800, color:"#10B981", letterSpacing:2.5, marginBottom:4, textTransform:"uppercase" }}>QUIZ</div>
-                      <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF2F8", margin:"0 0 3px", lineHeight:1.3 }}>{x.sub}</h3>
-                      <p style={{ fontSize:11.5, color: qs ? "#10B981" : "#666C7E", margin:0, lineHeight:1.4, fontWeight: qs ? 600 : 500 }}>
-                        {qs ? `Best: ${Math.round(qs.score/qs.total*100)}%` : x.d}
-                      </p>
-                    </div>
-                    <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6 }}>
-                      {qs && <div style={{ width:20, height:20, borderRadius:6, background:"rgba(16,185,129,0.12)", border:"1px solid rgba(16,185,129,0.3)", display:"flex", alignItems:"center", justifyContent:"center" }}><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>}
-                      <div style={{ width:32, height:32, borderRadius:10, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.06)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#666C7E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
       </div>
 
       {/* Bottom nav — mobile only */}
@@ -2154,6 +3312,7 @@ export default function App() {
           ))}
         </nav>
       )}
+      <Chat session={session} profile={profile} w={w} width={chatSidebarW} onResize={persistChatW} minW={CHAT_MIN} maxW={CHAT_MAX} />
     </div>
   );
 }
