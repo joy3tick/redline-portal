@@ -408,11 +408,51 @@ button{font-family:inherit}
   transition: all 0.2s ease;
 }
 .profile-pill:hover { border-color:rgba(204,255,0,0.25); background:linear-gradient(180deg, rgba(204,255,0,0.05), rgba(204,255,0,0.01)) }
+
+/* Bottom nav (mobile) */
+.bnav {
+  position:fixed; bottom:0; left:0; right:0; z-index:50;
+  background:rgba(9,10,15,0.97);
+  backdrop-filter:blur(28px); -webkit-backdrop-filter:blur(28px);
+  border-top:1px solid rgba(255,255,255,0.09);
+  display:flex;
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+.bnav-btn {
+  flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:4px; padding:10px 4px 8px;
+  background:none; border:none; cursor:pointer;
+  font-family:inherit; font-size:8px; font-weight:800; letter-spacing:1.2px;
+  text-transform:uppercase; color:#3A3E4A;
+  transition:color 0.2s ease; position:relative;
+}
+.bnav-btn::before {
+  content:""; position:absolute; top:0; left:50%; transform:translateX(-50%) scaleX(0);
+  width:28px; height:2.5px; border-radius:0 0 3px 3px;
+  background:currentColor; transition:transform 0.22s cubic-bezier(0.34,1.56,0.64,1);
+  box-shadow:0 0 10px currentColor;
+}
+.bnav-btn.active::before { transform:translateX(-50%) scaleX(1) }
 `;
 
 /* ═══════════════════════════════════════════
    RICH TEXT RENDERER
    ═══════════════════════════════════════════ */
+function TabIcon({ tabKey, active, size = 16, color }) {
+  const col = color ?? "currentColor";
+  const sw = active ? "2.2" : "1.8";
+  const p = { width:size, height:size, viewBox:"0 0 24 24", fill:"none", stroke:col, strokeWidth:sw, strokeLinecap:"round", strokeLinejoin:"round" };
+  switch (tabKey) {
+    case "dashboard":   return <svg {...p}><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>;
+    case "leaderboard": return <svg {...p}><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>;
+    case "scheduling":  return <svg {...p}><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>;
+    case "training":    return <svg {...p}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>;
+    case "reference":   return <svg {...p}><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>;
+    case "quizzes":     return <svg {...p}><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>;
+    default: return null;
+  }
+}
+
 function RedlineLogo({ height = 28, color = "#CCFF00", style }) {
   return (
     <svg height={height} viewBox="0 0 100 60" fill={color} style={{ flexShrink: 0, ...style }}>
@@ -1894,7 +1934,7 @@ export default function App() {
 
       {/* Sticky header */}
       <div className="app-header">
-        <div style={{ padding:wd?"22px 56px 0":dk?"18px 36px 0":"14px 20px 0" }}>
+        <div style={{ padding:wd?"22px 56px 0":dk?"18px 36px 0":"12px 16px 0" }}>
           <div style={{ maxWidth:1300, margin:"0 auto" }}>
 
             {/* Top row: logo + actions */}
@@ -1948,17 +1988,24 @@ export default function App() {
               </div>
             </div>
 
-            {/* Tab Nav — scrollable, no scrollbar */}
-            <div style={{ display:"flex", gap:4, overflowX:"auto", paddingBottom:10, marginBottom:-1, animation:"fadeUp 0.5s ease 0.1s both", scrollbarWidth:"none", msOverflowStyle:"none" }}>
-              {TABS.map(t => (
-                <button key={t.key} onClick={() => setTab(t.key)}
-                  className={"tab-pill" + (tab===t.key ? " active" : "")}
-                  style={{ fontSize:10.5, padding:dk?"10px 18px":"9px 12px", whiteSpace:"nowrap", flexShrink:0 }}>
-                  <span className="tab-bg" />
-                  <span>{dk ? t.label : t.short}</span>
-                </button>
-              ))}
-            </div>
+            {/* Tab Nav — desktop only */}
+            {dk && (
+              <div style={{ display:"flex", gap:3, paddingBottom:10, marginBottom:-1, animation:"fadeUp 0.5s ease 0.1s both" }}>
+                {TABS.map(t => (
+                  <button key={t.key} onClick={() => setTab(t.key)}
+                    className={"tab-pill" + (tab===t.key ? " active" : "")}
+                    style={{ fontSize:10, padding:"9px 15px", whiteSpace:"nowrap", flexShrink:0 }}>
+                    <span className="tab-bg" />
+                    <span style={{ display:"flex", alignItems:"center", gap:6 }}>
+                      <TabIcon tabKey={t.key} active={tab===t.key} size={13} />
+                      {t.label}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+            {/* Mobile: add spacing below top row */}
+            {!dk && <div style={{ height:10 }} />}
           </div>
         </div>
       </div>
@@ -1966,7 +2013,7 @@ export default function App() {
 
 
       {/* Tab Content */}
-      <div style={{ position:"relative", zIndex:1, maxWidth:1300, margin:"0 auto", padding:wd?"28px 56px 90px":dk?"24px 36px 90px":"16px 16px 90px" }}>
+      <div style={{ position:"relative", zIndex:1, maxWidth:1300, margin:"0 auto", padding:wd?"28px 56px 90px":dk?"24px 36px 90px":"16px 14px 96px" }}>
 
         {/* DASHBOARD TAB */}
         {tab === "dashboard" && (
@@ -2093,6 +2140,20 @@ export default function App() {
         )}
 
       </div>
+
+      {/* Bottom nav — mobile only */}
+      {!dk && (
+        <nav className="bnav">
+          {TABS.map(t => (
+            <button key={t.key} onClick={() => setTab(t.key)}
+              className={"bnav-btn" + (tab===t.key ? " active" : "")}
+              style={{ color: tab===t.key ? t.color : undefined }}>
+              <TabIcon tabKey={t.key} active={tab===t.key} size={22} color={tab===t.key ? t.color : "#3A3E4A"} />
+              {t.short}
+            </button>
+          ))}
+        </nav>
+      )}
     </div>
   );
 }
