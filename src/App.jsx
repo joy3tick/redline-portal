@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, Component } from "react";
-import { supabase } from "./lib/supabase";
+import { supabase, supabaseAdmin } from "./lib/supabase";
 
 class ErrorBoundary extends Component {
   constructor(props) { super(props); this.state = { err: null }; }
@@ -4044,12 +4044,80 @@ const ROLEABLE_TABS = [
   { key:"redline-ai",    label:"Redline AI",    color:"#F59E0B" },
 ];
 
+const PACKAGES = [
+  { label:"Starter Build", amount:1497 },
+  { label:"Pro Build",     amount:2497 },
+  { label:"Elite Build",   amount:4497 },
+  { label:"Custom",        amount:null },
+];
+
+function ClientForm({ repName, repEmail, onSave, onCancel, saving }) {
+  const [f, setF] = useState({
+    name:"", email:"", password:"", businessName:"",
+    packageName:"Starter Build", packageAmount:"1497",
+    phase:"onboarding", repName: repName || "", repEmail: repEmail || "", notes:"",
+  });
+  const set = (k, v) => setF(p => ({ ...p, [k]: v }));
+  const CYAN = "#06D6F0";
+
+  const inputStyle = { width:"100%", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:10, color:"#F2F4F8", fontSize:13, fontWeight:500, padding:"11px 13px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" };
+  const labelStyle = { display:"block", fontSize:9, fontWeight:800, color:"#5C6175", letterSpacing:2.2, textTransform:"uppercase", marginBottom:7 };
+
+  return (
+    <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
+        <div><label style={labelStyle}>Client Name *</label><input style={inputStyle} value={f.name} onChange={e=>set("name",e.target.value)} placeholder="John Smith" /></div>
+        <div><label style={labelStyle}>Business Name</label><input style={inputStyle} value={f.businessName} onChange={e=>set("businessName",e.target.value)} placeholder="ACME Plumbing" /></div>
+        <div><label style={labelStyle}>Email *</label><input style={inputStyle} type="email" value={f.email} onChange={e=>set("email",e.target.value)} placeholder="john@acmeplumbing.com" /></div>
+        <div><label style={labelStyle}>Password *</label><input style={inputStyle} type="text" value={f.password} onChange={e=>set("password",e.target.value)} placeholder="Temporary password" /></div>
+      </div>
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:12 }}>
+        <div>
+          <label style={labelStyle}>Package</label>
+          <select style={{ ...inputStyle, cursor:"pointer" }} value={f.packageName} onChange={e => { const pkg = PACKAGES.find(p=>p.label===e.target.value); set("packageName",e.target.value); if (pkg?.amount) set("packageAmount", String(pkg.amount)); }}>
+            {PACKAGES.map(p => <option key={p.label}>{p.label}</option>)}
+          </select>
+        </div>
+        <div><label style={labelStyle}>Amount ($)</label><input style={inputStyle} type="number" value={f.packageAmount} onChange={e=>set("packageAmount",e.target.value)} placeholder="2497" /></div>
+        <div>
+          <label style={labelStyle}>Phase</label>
+          <select style={{ ...inputStyle, cursor:"pointer" }} value={f.phase} onChange={e=>set("phase",e.target.value)}>
+            {CLIENT_PHASES.map(p => <option key={p.key} value={p.key}>{p.icon} {p.label}</option>)}
+          </select>
+        </div>
+      </div>
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
+        <div><label style={labelStyle}>Your Name (Rep)</label><input style={inputStyle} value={f.repName} onChange={e=>set("repName",e.target.value)} placeholder="Your name" /></div>
+        <div><label style={labelStyle}>Your Email (Rep)</label><input style={inputStyle} value={f.repEmail} onChange={e=>set("repEmail",e.target.value)} placeholder="you@redline.com" /></div>
+      </div>
+      <div><label style={labelStyle}>Message to Client</label><textarea style={{ ...inputStyle, resize:"vertical", minHeight:72 }} value={f.notes} onChange={e=>set("notes",e.target.value)} placeholder="Welcome! Your project is now underway…" /></div>
+      <div style={{ display:"flex", gap:10, justifyContent:"flex-end" }}>
+        <button onClick={onCancel} style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", color:"#7E8595", fontSize:11, fontWeight:700, cursor:"pointer", padding:"11px 20px", borderRadius:10, fontFamily:"inherit" }}>Cancel</button>
+        <button onClick={() => onSave(f)} disabled={saving || !f.name || !f.email || !f.password}
+          style={{ background: saving || !f.name || !f.email || !f.password ? `${CYAN}33` : `linear-gradient(135deg,${CYAN},#0588A0)`, border:"none", color: saving || !f.name || !f.email || !f.password ? "#4A4E5C" : "#0A1A1E", fontSize:11, fontWeight:800, cursor: saving || !f.name || !f.email || !f.password ? "default" : "pointer", padding:"11px 24px", borderRadius:10, fontFamily:"inherit", letterSpacing:0.5 }}>
+          {saving ? "Creating…" : "Create Client Account"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function AdminPanel({ profile, roles, setRoles, onBack, w, onSignOut }) {
+  const [adminTab, setAdminTab] = useState("reps"); // "reps" | "clients"
   const [users, setUsers] = useState([]);
+  const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingRole, setEditingRole] = useState(null); // role.name or "__new"
   const [draftRole, setDraftRole] = useState({ name:"", label:"", allowed_tabs:[] });
+  const [clientsLoading, setClientsLoading] = useState(true);
+  const [showCreate, setShowCreate] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [createErr, setCreateErr] = useState(null);
+  const [editingClient, setEditingClient] = useState(null); // client_id being edited
+  const [editFields, setEditFields] = useState({});
+  const [savingEdit, setSavingEdit] = useState(false);
   const dk = w >= 768;
+  const CYAN = "#06D6F0";
 
   useEffect(() => {
     const load = async () => {
@@ -4092,6 +4160,18 @@ function AdminPanel({ profile, roles, setRoles, onBack, w, onSignOut }) {
     setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: data.role } : u));
   };
 
+  const loadClients = async () => {
+    setClientsLoading(true);
+    const { data: profs } = await supabase.from("profiles").select("id, name, role").eq("role", "client");
+    const { data: projects } = await supabase.from("client_projects").select("*");
+    const projMap = {};
+    for (const p of projects ?? []) projMap[p.client_id] = p;
+    setClients((profs ?? []).map(u => ({ ...u, project: projMap[u.id] ?? null })));
+    setClientsLoading(false);
+  };
+
+  useEffect(() => { if (adminTab === "clients") loadClients(); }, [adminTab]);
+
   const startNewRole = () => {
     setEditingRole("__new");
     setDraftRole({ name:"", label:"", allowed_tabs:["dashboard"] });
@@ -4131,18 +4211,8 @@ function AdminPanel({ profile, roles, setRoles, onBack, w, onSignOut }) {
   };
 
   const setTier = async (userId, tier) => {
-    const next = tier || null;
-    const { data, error } = await supabase
-      .from("profiles")
-      .update({ tier: next })
-      .eq("id", userId)
-      .select()
-      .single();
-    if (error || !data) {
-      console.error("setTier failed:", error);
-      alert(`Couldn't save tier: ${error?.message ?? "no row updated (likely RLS or missing 'tier' column)"}`);
-      return;
-    }
+    const { data, error } = await supabase.from("profiles").update({ tier: tier || null }).eq("id", userId).select().single();
+    if (error || !data) { alert(`Couldn't save tier: ${error?.message}`); return; }
     setUsers(prev => prev.map(u => u.id === userId ? { ...u, tier: data.tier } : u));
   };
 
@@ -4153,10 +4223,62 @@ function AdminPanel({ profile, roles, setRoles, onBack, w, onSignOut }) {
     alert(`Final Exam attempt cleared for ${userName || "rep"}.`);
   };
 
+  const createClient = async (f) => {
+    if (!supabaseAdmin) { setCreateErr("Service key not configured."); return; }
+    setCreating(true); setCreateErr(null);
+    // 1. Create auth user
+    const { data: authData, error: authErr } = await supabaseAdmin.auth.admin.createUser({
+      email: f.email, password: f.password, email_confirm: true,
+      user_metadata: { name: f.name },
+    });
+    if (authErr) { setCreateErr(authErr.message); setCreating(false); return; }
+    const uid = authData.user.id;
+    // 2. Set profile role + name (trigger auto-creates profile)
+    await new Promise(r => setTimeout(r, 600)); // brief wait for trigger
+    await supabase.from("profiles").update({ name: f.name, role: "client" }).eq("id", uid);
+    // 3. Create project record
+    await supabase.from("client_projects").upsert({
+      client_id: uid,
+      business_name: f.businessName || null,
+      package_name: f.packageName || null,
+      package_amount: f.packageAmount ? Number(f.packageAmount) : null,
+      phase: f.phase || "onboarding",
+      rep_name: f.repName || null,
+      rep_email: f.repEmail || null,
+      client_notes: f.notes || null,
+    });
+    setCreating(false);
+    setShowCreate(false);
+    loadClients();
+  };
+
+  const saveClientEdit = async (clientId) => {
+    setSavingEdit(true);
+    await supabase.from("client_projects").update({
+      business_name: editFields.businessName,
+      package_name: editFields.packageName,
+      package_amount: editFields.packageAmount ? Number(editFields.packageAmount) : null,
+      phase: editFields.phase,
+      rep_name: editFields.repName,
+      rep_email: editFields.repEmail,
+      client_notes: editFields.notes,
+    }).eq("client_id", clientId);
+    setSavingEdit(false);
+    setEditingClient(null);
+    loadClients();
+  };
+
+  const inputStyle = { width:"100%", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:10, color:"#F2F4F8", fontSize:12, fontWeight:500, padding:"9px 11px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" };
+  const labelStyle = { display:"block", fontSize:8.5, fontWeight:800, color:"#5C6175", letterSpacing:2, textTransform:"uppercase", marginBottom:6 };
+
+  const reps = users.filter(u => u.role !== "client");
+
+
   return (
     <div>
+      {/* Sticky header */}
       <div style={{ position:"sticky", top:0, zIndex:20, background:"rgba(7,8,12,0.92)", backdropFilter:"blur(24px)", WebkitBackdropFilter:"blur(24px)", borderBottom:"1px solid rgba(255,255,255,0.05)" }}>
-        <div style={{ maxWidth:1000, margin:"0 auto", padding:dk?"0 44px":"0 20px", height:52, display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+        <div style={{ maxWidth:1100, margin:"0 auto", padding:dk?"0 44px":"0 20px", height:52, display:"flex", alignItems:"center", justifyContent:"space-between" }}>
           <button className="back-btn" onClick={onBack} style={{ background:"none", border:"none", color:"#CCFF00", fontSize:13, fontWeight:700, cursor:"pointer", padding:"6px 0", display:"flex", alignItems:"center", gap:8, fontFamily:"inherit" }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
             Back to Portal
@@ -4165,16 +4287,31 @@ function AdminPanel({ profile, roles, setRoles, onBack, w, onSignOut }) {
         </div>
       </div>
 
-      <div style={{ maxWidth:1000, margin:"0 auto", padding:dk?"0 44px 90px":"0 20px 90px" }}>
-        <div style={{ padding:"40px 0 28px", animation:"fadeUp 0.5s ease" }}>
-          <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:18 }}>
+      <div style={{ maxWidth:1100, margin:"0 auto", padding:dk?"0 44px 90px":"0 20px 90px" }}>
+        <div style={{ padding:"36px 0 24px", animation:"fadeUp 0.5s ease" }}>
+          <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:14 }}>
             <div style={{ width:32, height:4, background:"linear-gradient(90deg,#F59E0B,transparent)", borderRadius:4 }} />
             <div style={{ fontSize:9.5, fontWeight:800, color:"#F59E0B", letterSpacing:3.5, textTransform:"uppercase" }}>Admin</div>
           </div>
-          <h2 style={{ fontSize:dk?30:24, fontWeight:800, color:"#F2F4F8", margin:"0 0 8px", letterSpacing:"-0.03em" }}>Admin Panel</h2>
-          <p style={{ fontSize:14, color:"#7E8595", margin:0, fontWeight:500 }}>Rep accounts, progress, and access management.</p>
+          <h2 style={{ fontSize:dk?30:24, fontWeight:800, color:"#F2F4F8", margin:"0 0 20px", letterSpacing:"-0.03em" }}>Admin Panel</h2>
+
+          {/* Tab switcher */}
+          <div style={{ display:"flex", gap:6, background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:12, padding:5, width:"fit-content" }}>
+            {[
+              { key:"reps", label:"Reps & Admins", color:"#F59E0B" },
+              { key:"clients", label:"Clients", color:CYAN },
+            ].map(t => (
+              <button key={t.key} onClick={() => setAdminTab(t.key)}
+                style={{ padding:"9px 20px", borderRadius:8, border: adminTab===t.key ? `1px solid ${t.color}35` : "1px solid transparent", background: adminTab===t.key ? `${t.color}10` : "transparent", color: adminTab===t.key ? t.color : "#5C6175", fontFamily:"inherit", fontSize:12, fontWeight:700, cursor:"pointer", transition:"all 0.18s" }}>
+                {t.label}
+              </button>
+            ))}
+          </div>
         </div>
 
+        {/* ── REPS TAB ── */}
+        {adminTab === "reps" && (
+          <>
         <a href={SUPABASE_USERS_URL} target="_blank" rel="noreferrer" className="card-hover vid-card"
           style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:16, background:"linear-gradient(135deg,rgba(20,16,8,0.95),rgba(14,12,6,0.95))", border:"1px solid rgba(245,158,11,0.2)", borderRadius:18, padding:"20px 24px", marginBottom:28, textDecoration:"none", animation:"fadeUp 0.5s ease 0.1s both", boxShadow:"0 4px 24px rgba(0,0,0,0.35)" }}>
           <div>
@@ -4315,6 +4452,123 @@ function AdminPanel({ profile, roles, setRoles, onBack, w, onSignOut }) {
               </div>
             ))}
           </div>
+        )}
+          </>
+        )}
+
+        {/* ── CLIENTS TAB ── */}
+        {adminTab === "clients" && (
+          <>
+            {/* Create button / form */}
+            {!showCreate ? (
+              <button onClick={() => { setShowCreate(true); setCreateErr(null); }}
+                style={{ display:"flex", alignItems:"center", gap:10, background:`linear-gradient(135deg,${CYAN}15,${CYAN}06)`, border:`1px solid ${CYAN}30`, borderRadius:14, padding:"16px 22px", cursor:"pointer", fontFamily:"inherit", color:CYAN, fontSize:13, fontWeight:700, marginBottom:20, width:"100%", transition:"all 0.18s" }}
+                onMouseEnter={e=>e.currentTarget.style.borderColor=`${CYAN}55`}
+                onMouseLeave={e=>e.currentTarget.style.borderColor=`${CYAN}30`}>
+                <div style={{ width:30, height:30, borderRadius:9, background:`${CYAN}18`, border:`1px solid ${CYAN}35`, display:"flex", alignItems:"center", justifyContent:"center" }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={CYAN} strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </div>
+                Create New Client Account
+              </button>
+            ) : (
+              <div style={{ background:"linear-gradient(160deg,rgba(6,214,240,0.05),rgba(14,15,20,0.97))", border:`1px solid ${CYAN}22`, borderRadius:16, padding:"22px 24px", marginBottom:20 }}>
+                <div style={{ fontSize:12, fontWeight:800, color:CYAN, letterSpacing:0.5, marginBottom:18 }}>New Client Account</div>
+                {createErr && <div style={{ color:"#FF3370", fontSize:12, fontWeight:600, marginBottom:12, padding:"10px 14px", background:"rgba(255,51,112,0.08)", border:"1px solid rgba(255,51,112,0.2)", borderRadius:8 }}>{createErr}</div>}
+                <ClientForm
+                  repName={profile?.name}
+                  repEmail={null}
+                  onSave={createClient}
+                  onCancel={() => { setShowCreate(false); setCreateErr(null); }}
+                  saving={creating}
+                />
+              </div>
+            )}
+
+            {/* Client list */}
+            {clientsLoading ? (
+              <div style={{ textAlign:"center", padding:60, color:"#666C7E", fontSize:13 }}>Loading clients…</div>
+            ) : clients.length === 0 ? (
+              <div style={{ textAlign:"center", padding:"50px 20px", color:"#4A4E5C", background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.05)", borderRadius:16 }}>
+                <div style={{ fontSize:28, marginBottom:12 }}>👤</div>
+                <div style={{ fontSize:14, fontWeight:700, color:"#D6DAE2", marginBottom:6 }}>No clients yet</div>
+                <div style={{ fontSize:12 }}>Create your first client account above.</div>
+              </div>
+            ) : (
+              <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+                {clients.map((c, i) => {
+                  const proj = c.project;
+                  const phase = CLIENT_PHASES.find(p => p.key === proj?.phase);
+                  const isEditing = editingClient === c.id;
+                  return (
+                    <div key={c.id} style={{ background:"linear-gradient(135deg,rgba(16,18,24,0.98),rgba(11,12,16,0.98))", border:`1px solid ${isEditing ? CYAN+"44" : "rgba(255,255,255,0.06)"}`, borderRadius:16, padding:"20px 22px", animation:`fadeUp 0.4s ease ${0.05*i}s both` }}>
+                      {/* Header row */}
+                      <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom: isEditing ? 20 : 0 }}>
+                        <div style={{ width:42, height:42, borderRadius:12, background:`${CYAN}18`, border:`1.5px solid ${CYAN}40`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:17, fontWeight:900, color:CYAN, flexShrink:0 }}>
+                          {(c.name||"C")[0].toUpperCase()}
+                        </div>
+                        <div style={{ flex:1, minWidth:0 }}>
+                          <div style={{ fontSize:14, fontWeight:700, color:"#F2F4F8" }}>{c.name || "—"}</div>
+                          <div style={{ fontSize:11, color:"#5C6175", marginTop:2 }}>{proj?.business_name || "No business name set"}</div>
+                        </div>
+                        {proj && phase && !isEditing && (
+                          <div style={{ display:"flex", alignItems:"center", gap:6, padding:"5px 11px", background:`${CYAN}10`, border:`1px solid ${CYAN}28`, borderRadius:20 }}>
+                            <span style={{ fontSize:13 }}>{phase.icon}</span>
+                            <span style={{ fontSize:10, fontWeight:800, color:CYAN, letterSpacing:0.5 }}>{phase.label}</span>
+                          </div>
+                        )}
+                        {proj && !isEditing && (
+                          <span style={{ fontSize:11, fontWeight:700, color:"#CCFF00" }}>{proj.package_amount ? `$${Number(proj.package_amount).toLocaleString()}` : ""}</span>
+                        )}
+                        <button onClick={() => {
+                          if (isEditing) { setEditingClient(null); return; }
+                          setEditingClient(c.id);
+                          setEditFields({
+                            businessName: proj?.business_name||"", packageName: proj?.package_name||"Starter Build",
+                            packageAmount: proj?.package_amount||"", phase: proj?.phase||"onboarding",
+                            repName: proj?.rep_name||"", repEmail: proj?.rep_email||"", notes: proj?.client_notes||"",
+                          });
+                        }}
+                          style={{ background: isEditing ? "rgba(255,255,255,0.06)" : `${CYAN}15`, border:`1px solid ${isEditing ? "rgba(255,255,255,0.1)" : CYAN+"30"}`, color: isEditing ? "#7E8595" : CYAN, fontSize:11, fontWeight:700, cursor:"pointer", padding:"7px 14px", borderRadius:9, fontFamily:"inherit", transition:"all 0.18s" }}>
+                          {isEditing ? "Cancel" : "Edit"}
+                        </button>
+                      </div>
+
+                      {/* Edit form */}
+                      {isEditing && (
+                        <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
+                          <div style={{ display:"grid", gridTemplateColumns: dk?"1fr 1fr 1fr":"1fr 1fr", gap:10 }}>
+                            <div><label style={labelStyle}>Business Name</label><input style={inputStyle} value={editFields.businessName} onChange={e=>setEditFields(p=>({...p,businessName:e.target.value}))} /></div>
+                            <div>
+                              <label style={labelStyle}>Package</label>
+                              <select style={{ ...inputStyle, cursor:"pointer" }} value={editFields.packageName} onChange={e=>{const pkg=PACKAGES.find(p=>p.label===e.target.value); setEditFields(p=>({...p,packageName:e.target.value,...(pkg?.amount?{packageAmount:String(pkg.amount)}:{})}));}}>
+                                {PACKAGES.map(p=><option key={p.label}>{p.label}</option>)}
+                              </select>
+                            </div>
+                            <div><label style={labelStyle}>Amount ($)</label><input style={inputStyle} type="number" value={editFields.packageAmount} onChange={e=>setEditFields(p=>({...p,packageAmount:e.target.value}))} /></div>
+                            <div>
+                              <label style={labelStyle}>Phase</label>
+                              <select style={{ ...inputStyle, cursor:"pointer" }} value={editFields.phase} onChange={e=>setEditFields(p=>({...p,phase:e.target.value}))}>
+                                {CLIENT_PHASES.map(p=><option key={p.key} value={p.key}>{p.icon} {p.label}</option>)}
+                              </select>
+                            </div>
+                            <div><label style={labelStyle}>Rep Name</label><input style={inputStyle} value={editFields.repName} onChange={e=>setEditFields(p=>({...p,repName:e.target.value}))} /></div>
+                            <div><label style={labelStyle}>Rep Email</label><input style={inputStyle} value={editFields.repEmail} onChange={e=>setEditFields(p=>({...p,repEmail:e.target.value}))} /></div>
+                          </div>
+                          <div><label style={labelStyle}>Message to Client</label><textarea style={{ ...inputStyle, resize:"vertical", minHeight:60 }} value={editFields.notes} onChange={e=>setEditFields(p=>({...p,notes:e.target.value}))} /></div>
+                          <div style={{ display:"flex", justifyContent:"flex-end" }}>
+                            <button onClick={() => saveClientEdit(c.id)} disabled={savingEdit}
+                              style={{ background:savingEdit?`${CYAN}33`:`linear-gradient(135deg,${CYAN},#0588A0)`, border:"none", color:savingEdit?"#4A4E5C":"#0A1A1E", fontSize:11, fontWeight:800, cursor:savingEdit?"default":"pointer", padding:"10px 22px", borderRadius:9, fontFamily:"inherit" }}>
+                              {savingEdit ? "Saving…" : "Save Changes"}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
