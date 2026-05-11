@@ -1086,7 +1086,6 @@ function Leads({ session, profile, w }) {
   const STATUSES = [
     { v: "new",       label: "New",       color: "#06D6F0" },
     { v: "contacted", label: "Contacted", color: "#F59E0B" },
-    { v: "quoted",    label: "Quoted",    color: "#A78BFA" },
     { v: "booked",    label: "Booked",    color: "#14B8A6" },
     { v: "closed",    label: "Closed",    color: "#22C55E" },
     { v: "dead",      label: "Dead",      color: "#FF3370" },
