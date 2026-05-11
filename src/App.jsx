@@ -2520,9 +2520,22 @@ const TIERS = [
 ];
 const TIER_BY_VALUE = Object.fromEntries(TIERS.map(t => [t.v, t]));
 
-function AdminPanel({ profile, onBack, w, onSignOut }) {
+const ROLEABLE_TABS = [
+  { key:"dashboard",     label:"Dashboard",     color:"#22C55E" },
+  { key:"announcements", label:"Announcements", color:"#F59E0B" },
+  { key:"chat",          label:"Chat",          color:"#CCFF00" },
+  { key:"leads",         label:"Leads",         color:"#06D6F0" },
+  { key:"leaderboard",   label:"Leaderboard",   color:"#FFD700" },
+  { key:"scheduling",    label:"Scheduling",    color:"#F59E0B" },
+  { key:"training",      label:"Training",      color:"#CCFF00" },
+  { key:"reference",     label:"Reference",     color:"#06D6F0" },
+];
+
+function AdminPanel({ profile, roles, setRoles, onBack, w, onSignOut }) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [editingRole, setEditingRole] = useState(null); // role.name or "__new"
+  const [draftRole, setDraftRole] = useState({ name:"", label:"", allowed_tabs:[] });
   const dk = w >= 768;
 
   useEffect(() => {
@@ -2552,8 +2565,7 @@ function AdminPanel({ profile, onBack, w, onSignOut }) {
     load();
   }, []);
 
-  const toggleRole = async (userId, currentRole) => {
-    const newRole = currentRole === "admin" ? "rep" : "admin";
+  const setUserRole = async (userId, newRole) => {
     const { data, error } = await supabase
       .from("profiles")
       .update({ role: newRole })
@@ -2561,11 +2573,48 @@ function AdminPanel({ profile, onBack, w, onSignOut }) {
       .select()
       .single();
     if (error || !data) {
-      console.error("toggleRole failed:", error);
       alert(`Couldn't update role: ${error?.message ?? "no row updated (likely RLS)"}`);
       return;
     }
     setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: data.role } : u));
+  };
+
+  const startNewRole = () => {
+    setEditingRole("__new");
+    setDraftRole({ name:"", label:"", allowed_tabs:["dashboard"] });
+  };
+  const startEditRole = (r) => {
+    setEditingRole(r.name);
+    setDraftRole({ name:r.name, label:r.label, allowed_tabs:[...(r.allowed_tabs || [])] });
+  };
+  const cancelEditRole = () => { setEditingRole(null); setDraftRole({ name:"", label:"", allowed_tabs:[] }); };
+
+  const saveRole = async () => {
+    const slug = (draftRole.name || draftRole.label).toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+    if (!slug || !draftRole.label.trim()) { alert("Need a role label."); return; }
+    const payload = { name: slug, label: draftRole.label.trim(), allowed_tabs: draftRole.allowed_tabs };
+    const { data, error } = await supabase.from("roles").upsert(payload).select().single();
+    if (error || !data) { alert(`Couldn't save role: ${error?.message ?? "no row"}`); return; }
+    setRoles(prev => {
+      const i = prev.findIndex(r => r.name === data.name);
+      if (i >= 0) { const next = [...prev]; next[i] = { ...prev[i], ...data }; return next; }
+      return [...prev, data];
+    });
+    cancelEditRole();
+  };
+
+  const deleteRole = async (r) => {
+    if (r.is_builtin) { alert("Built-in roles can't be deleted."); return; }
+    const inUse = users.filter(u => u.role === r.name).length;
+    if (inUse > 0) { alert(`${inUse} user${inUse===1?" is":"s are"} still assigned to ${r.label}. Reassign them first.`); return; }
+    if (!confirm(`Delete role ${r.label}?`)) return;
+    const { error } = await supabase.from("roles").delete().eq("name", r.name);
+    if (error) { alert(`Couldn't delete: ${error.message}`); return; }
+    setRoles(prev => prev.filter(x => x.name !== r.name));
+  };
+
+  const toggleTabInDraft = (key) => {
+    setDraftRole(d => ({ ...d, allowed_tabs: d.allowed_tabs.includes(key) ? d.allowed_tabs.filter(k => k !== key) : [...d.allowed_tabs, key] }));
   };
 
   const setTier = async (userId, tier) => {
@@ -2615,12 +2664,80 @@ function AdminPanel({ profile, onBack, w, onSignOut }) {
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
         </a>
 
+        {/* Roles management section */}
+        <div style={{ marginBottom:28 }}>
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:14, gap:10 }}>
+            <div style={{ fontSize:9.5, fontWeight:800, color:"#A78BFA", letterSpacing:3, textTransform:"uppercase" }}>Roles & Access</div>
+            {editingRole === null && (
+              <button onClick={startNewRole} className="btn-primary" style={{ fontSize:10, padding:"7px 14px" }}>+ New Role</button>
+            )}
+          </div>
+
+          {editingRole !== null && (
+            <div style={{ background:"rgba(167,139,250,0.05)", border:"1px solid rgba(167,139,250,0.22)", borderRadius:14, padding:dk?"20px 22px":"16px 18px", marginBottom:14 }}>
+              <div style={{ display:"flex", gap:10, flexWrap:"wrap", marginBottom:14 }}>
+                <input value={draftRole.label} onChange={e => setDraftRole(d => ({ ...d, label: e.target.value }))} placeholder="Role name (e.g. Sales Manager)" autoFocus
+                  style={{ flex:"1 1 240px", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.10)", borderRadius:10, color:"#F2F4F8", fontSize:13, fontWeight:600, padding:"10px 12px", fontFamily:"inherit", outline:"none" }} />
+              </div>
+              <div style={{ fontSize:9.5, fontWeight:800, color:"#7E8595", letterSpacing:1.8, textTransform:"uppercase", marginBottom:10 }}>Allowed Tabs</div>
+              <div style={{ display:"flex", gap:6, flexWrap:"wrap", marginBottom:14 }}>
+                {ROLEABLE_TABS.map(t => {
+                  const on = draftRole.allowed_tabs.includes(t.key);
+                  return (
+                    <button key={t.key} onClick={() => toggleTabInDraft(t.key)}
+                      style={{ background: on ? `${t.color}18` : "rgba(255,255,255,0.03)", border:`1px solid ${on ? `${t.color}55` : "rgba(255,255,255,0.08)"}`, color: on ? t.color : "#7E8595", fontSize:11, fontWeight:700, letterSpacing:1.2, textTransform:"uppercase", padding:"7px 13px", borderRadius:9, cursor:"pointer", fontFamily:"inherit", display:"flex", alignItems:"center", gap:7 }}>
+                      <span style={{ width:6, height:6, borderRadius:"50%", background:t.color, opacity: on ? 1 : 0.4 }} />
+                      {t.label}
+                    </button>
+                  );
+                })}
+              </div>
+              <div style={{ display:"flex", gap:8 }}>
+                <button onClick={saveRole} className="btn-primary" style={{ fontSize:10, padding:"8px 18px" }}>Save role</button>
+                <button onClick={cancelEditRole} className="btn-ghost" style={{ fontSize:10, padding:"8px 16px" }}>Cancel</button>
+              </div>
+            </div>
+          )}
+
+          <div style={{ display:"grid", gridTemplateColumns:dk?"1fr 1fr":"1fr", gap:10 }}>
+            {roles.map(r => {
+              const userCount = users.filter(u => u.role === r.name).length;
+              const tabs = r.allowed_tabs || [];
+              return (
+                <div key={r.name} style={{ background:"rgba(255,255,255,0.022)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:14, padding:dk?"16px 18px":"14px 16px" }}>
+                  <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:10, marginBottom:10 }}>
+                    <div style={{ display:"flex", alignItems:"baseline", gap:10, minWidth:0 }}>
+                      <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:22, color:"#F2F4F8", letterSpacing:1.5, lineHeight:1 }}>{r.label}</div>
+                      {r.is_builtin && <span style={{ fontSize:9, fontWeight:800, color:"#7E8595", letterSpacing:1.5, textTransform:"uppercase" }}>Built-in</span>}
+                      <span style={{ fontSize:11, color:"#7E8595", fontVariantNumeric:"tabular-nums" }}>· {userCount} {userCount===1?"member":"members"}</span>
+                    </div>
+                    <div style={{ display:"flex", gap:6 }}>
+                      <button onClick={() => startEditRole(r)} style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", color:"#9098A8", fontSize:10, fontWeight:700, cursor:"pointer", padding:"5px 10px", borderRadius:7, fontFamily:"inherit", letterSpacing:1.2, textTransform:"uppercase" }}>Edit</button>
+                      {!r.is_builtin && (
+                        <button onClick={() => deleteRole(r)} style={{ background:"rgba(255,51,112,0.06)", border:"1px solid rgba(255,51,112,0.18)", color:"#FF3370", fontSize:10, fontWeight:700, cursor:"pointer", padding:"5px 10px", borderRadius:7, fontFamily:"inherit", letterSpacing:1.2, textTransform:"uppercase" }}>Delete</button>
+                      )}
+                    </div>
+                  </div>
+                  <div style={{ display:"flex", gap:5, flexWrap:"wrap" }}>
+                    {tabs.length === 0 ? <span style={{ fontSize:11, color:"#5E6376" }}>No tabs assigned</span> :
+                      ROLEABLE_TABS.filter(t => tabs.includes(t.key)).map(t => (
+                        <span key={t.key} style={{ fontSize:9.5, fontWeight:700, color:t.color, letterSpacing:1.2, textTransform:"uppercase", background:`${t.color}14`, padding:"3px 8px", borderRadius:5, border:`1px solid ${t.color}30` }}>{t.label}</span>
+                      ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* User list */}
         {loading ? (
           <div style={{ textAlign:"center", padding:60, color:"#666C7E", fontSize:13 }}>Loading reps…</div>
         ) : users.length === 0 ? (
           <div style={{ textAlign:"center", padding:60, color:"#666C7E", fontSize:13 }}>No users yet.</div>
         ) : (
           <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+            <div style={{ fontSize:9.5, fontWeight:800, color:"#06D6F0", letterSpacing:3, textTransform:"uppercase", marginBottom:8 }}>People · {users.length}</div>
             {users.map((u, i) => (
               <div key={u.id} style={{ background:"rgba(255,255,255,0.022)", border:"1px solid rgba(255,255,255,0.055)", borderRadius:16, padding:dk?"20px 24px":"16px 18px", display:"flex", alignItems:"center", gap:16, flexWrap:"wrap", animation:`fadeUp 0.4s ease ${0.05*i}s both`,  }}>
                 <div style={{ width:46, height:46, borderRadius:14, background:"linear-gradient(135deg,#CCFF00,#5C7A00)", display:"flex", alignItems:"center", justifyContent:"center", fontWeight:800, color:"#15171E", fontSize:18, flexShrink:0, boxShadow:"0 4px 14px rgba(204,255,0,0.35)" }}>
@@ -2629,7 +2746,14 @@ function AdminPanel({ profile, onBack, w, onSignOut }) {
                 <div style={{ flex:1, minWidth:140 }}>
                   <div style={{ fontSize:15, fontWeight:700, color:"#EEF2F8" }}>{u.name || "—"}</div>
                   <div style={{ display:"flex", gap:6, marginTop:4, flexWrap:"wrap" }}>
-                    <span style={{ display:"inline-block", fontSize:9, fontWeight:800, color: u.role === "admin" ? "#F59E0B" : "#06D6F0", letterSpacing:2, textTransform:"uppercase", background: u.role === "admin" ? "rgba(245,158,11,0.1)" : "rgba(6,214,240,0.1)", padding:"3px 9px", borderRadius:5, border:`1px solid ${u.role === "admin" ? "rgba(245,158,11,0.2)" : "rgba(6,214,240,0.2)"}` }}>{u.role}</span>
+                    {(() => {
+                      const isAdminRole = u.role === "admin";
+                      const c = isAdminRole ? "#F59E0B" : "#06D6F0";
+                      const label = roles.find(r => r.name === u.role)?.label ?? u.role ?? "—";
+                      return (
+                        <span style={{ display:"inline-block", fontSize:9, fontWeight:800, color:c, letterSpacing:2, textTransform:"uppercase", background:`${c}1A`, padding:"3px 9px", borderRadius:5, border:`1px solid ${c}33` }}>{label}</span>
+                      );
+                    })()}
                     {u.tier && TIER_BY_VALUE[u.tier] && (
                       <span style={{ display:"inline-block", fontSize:9, fontWeight:800, color: TIER_BY_VALUE[u.tier].color, letterSpacing:2, textTransform:"uppercase", background:`${TIER_BY_VALUE[u.tier].color}1A`, padding:"3px 9px", borderRadius:5, border:`1px solid ${TIER_BY_VALUE[u.tier].color}33` }}>
                         {TIER_BY_VALUE[u.tier].emoji} {TIER_BY_VALUE[u.tier].label} · {TIER_BY_VALUE[u.tier].short}
@@ -2657,9 +2781,11 @@ function AdminPanel({ profile, onBack, w, onSignOut }) {
                   ))}
                 </select>
                 {u.id !== profile.id && (
-                  <button onClick={() => toggleRole(u.id, u.role)} style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", color:"#7E8595", fontSize:10, fontWeight:700, cursor:"pointer", padding:"9px 16px", borderRadius:10, fontFamily:"inherit", letterSpacing:1.5, flexShrink:0, textTransform:"uppercase", transition:"all 0.2s" }}>
-                    {u.role === "admin" ? "Make Rep" : "Make Admin"}
-                  </button>
+                  <select value={u.role || "rep"} onChange={e => setUserRole(u.id, e.target.value)}
+                    style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", color:"#D6DAE2", fontSize:11, fontWeight:700, cursor:"pointer", padding:"9px 12px", borderRadius:10, fontFamily:"inherit", letterSpacing:0.5, flexShrink:0, outline:"none" }}>
+                    {roles.map(r => <option key={r.name} value={r.name}>{r.label}</option>)}
+                    {!roles.find(r => r.name === u.role) && u.role && <option value={u.role}>{u.role}</option>}
+                  </select>
                 )}
               </div>
             ))}
@@ -3012,6 +3138,7 @@ const LINK_ICONS = [
 export default function App() {
   const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
+  const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [completedModules, setCompletedModules] = useState(new Set());
   const [quizScores, setQuizScores] = useState({});
@@ -3038,12 +3165,14 @@ export default function App() {
   }, []);
 
   const loadUserData = async (userId) => {
-    const [profileRes, progressRes, scoresRes] = await Promise.all([
+    const [profileRes, progressRes, scoresRes, rolesRes] = await Promise.all([
       supabase.from("profiles").select("*").eq("id", userId).single(),
       supabase.from("module_progress").select("module_id").eq("user_id", userId),
       supabase.from("quiz_scores").select("quiz_id, score, total").eq("user_id", userId),
+      supabase.from("roles").select("*").order("is_builtin", { ascending: false }).order("label"),
     ]);
     setProfile(profileRes.data);
+    setRoles(rolesRes.data ?? []);
     setCompletedModules(new Set(progressRes.data?.map(r => r.module_id) ?? []));
     const best = {};
     for (const s of scoresRes.data ?? []) {
@@ -3087,7 +3216,7 @@ export default function App() {
     setChatW(clamped);
     try { localStorage.setItem("chatSidebarW", String(clamped)); } catch { /* ignore */ }
   };
-  const chatSidebarW = w >= 768 ? chatW : 0;
+  const rawChatSidebarW = w >= 768 ? chatW : 0;
 
   const saveName = async () => {
     const trimmed = nameEdit.trim();
@@ -3118,7 +3247,7 @@ export default function App() {
   ];
   const referenceItems = CATS.filter(x=>x.t==="REFERENCE");
   const quizItems = CATS.filter(x=>x.t==="QUIZ");
-  const TABS = [
+  const ALL_TABS = [
     { key:"dashboard",     label:"Dashboard",     short:"Home",     color:"#22C55E" },
     { key:"announcements", label:"Announcements", short:"News",     color:"#F59E0B" },
     { key:"leads",         label:"Leads",         short:"Leads",    color:"#06D6F0" },
@@ -3127,6 +3256,23 @@ export default function App() {
     { key:"training",      label:"Training",      short:"Train",    color:"#CCFF00" },
     { key:"reference",     label:"Reference",     short:"Ref",      color:"#06D6F0" },
   ];
+  // Tabs the current user can see. Admin always sees everything. If no
+  // role record exists yet (e.g. before the migration runs), default to
+  // showing all tabs so the portal stays accessible.
+  const currentRole = roles.find(r => r.name === profile?.role);
+  const allowedKeys = profile?.role === "admin"
+    ? ALL_TABS.map(t => t.key).concat("chat")
+    : (currentRole?.allowed_tabs ?? ALL_TABS.map(t => t.key).concat("chat"));
+  const TABS = ALL_TABS.filter(t => allowedKeys.includes(t.key));
+  const showChat = allowedKeys.includes("chat");
+  const chatSidebarW = showChat ? rawChatSidebarW : 0;
+
+  // If the active tab gets revoked by a role change, fall back to the first allowed one.
+  useEffect(() => {
+    if (!profile || TABS.length === 0) return;
+    if (!TABS.some(t => t.key === tab)) setTab(TABS[0].key);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile?.role, roles.length]);
 
   if (loading) return (
     <div style={{ ...baseStyle, display:"flex", alignItems:"center", justifyContent:"center" }}>
@@ -3154,8 +3300,8 @@ export default function App() {
     <div ref={ref} style={{ ...baseStyle, paddingLeft: chatSidebarW }}>
       <style>{GLOBAL_CSS}</style>
       <link href={FONT_LINK} rel="stylesheet" />
-      <AdminPanel profile={profile} onBack={() => setView(null)} w={w} onSignOut={signOut} />
-      <Chat session={session} profile={profile} w={w} width={chatSidebarW} onResize={persistChatW} minW={CHAT_MIN} maxW={CHAT_MAX} />
+      <AdminPanel profile={profile} roles={roles} setRoles={setRoles} onBack={() => setView(null)} w={w} onSignOut={signOut} />
+      {showChat && <Chat session={session} profile={profile} w={w} width={chatSidebarW} onResize={persistChatW} minW={CHAT_MIN} maxW={CHAT_MAX} />}
     </div>
   );
 
@@ -3164,7 +3310,7 @@ export default function App() {
       <style>{GLOBAL_CSS}</style>
       <link href={FONT_LINK} rel="stylesheet" />
       <Quiz quizKey={view} onBack={() => { setView(null); setTimeout(top, 50); }} w={w} onComplete={(sc, tot) => saveScore(view, sc, tot)} />
-      <Chat session={session} profile={profile} w={w} width={chatSidebarW} onResize={persistChatW} minW={CHAT_MIN} maxW={CHAT_MAX} />
+      {showChat && <Chat session={session} profile={profile} w={w} width={chatSidebarW} onResize={persistChatW} minW={CHAT_MIN} maxW={CHAT_MAX} />}
     </div>
   );
 
@@ -3173,7 +3319,7 @@ export default function App() {
       <style>{GLOBAL_CSS}</style>
       <link href={FONT_LINK} rel="stylesheet" />
       <Viewer ck={view} onBack={() => { setView(null); setTimeout(top, 50); }} w={w} onComplete={markComplete} />
-      <Chat session={session} profile={profile} w={w} width={chatSidebarW} onResize={persistChatW} minW={CHAT_MIN} maxW={CHAT_MAX} />
+      {showChat && <Chat session={session} profile={profile} w={w} width={chatSidebarW} onResize={persistChatW} minW={CHAT_MIN} maxW={CHAT_MAX} />}
     </div>
   );
 
@@ -3397,7 +3543,7 @@ export default function App() {
 
       </div>
 
-      <Chat session={session} profile={profile} w={w} width={chatSidebarW} onResize={persistChatW} minW={CHAT_MIN} maxW={CHAT_MAX} />
+      {showChat && <Chat session={session} profile={profile} w={w} width={chatSidebarW} onResize={persistChatW} minW={CHAT_MIN} maxW={CHAT_MAX} />}
     </div>
   );
 }
