@@ -566,18 +566,24 @@ function Login() {
   const onBlur  = (e, hasErr) => { e.target.style.borderColor = hasErr ? "#FF3370" : "rgba(255,255,255,0.07)"; e.target.style.boxShadow = "none"; };
 
   return (
-    <div className="dotgrid" style={{ minHeight:"100dvh", background:"#15171E", display:"flex", alignItems:"center", justifyContent:"center", padding:24, position:"relative", overflow:"hidden" }}>
-      <div style={{ position:"absolute", top:"20%", left:"50%", transform:"translate(-50%,-50%)", width:700, height:700, background:"radial-gradient(circle, rgba(204,255,0,0.08) 0%, transparent 65%)", pointerEvents:"none" }} />
-      <div style={{ position:"absolute", bottom:0, left:"50%", transform:"translateX(-50%)", width:900, height:280, background:"radial-gradient(ellipse, rgba(204,255,0,0.04) 0%, transparent 70%)", pointerEvents:"none" }} />
+    <div className="dotgrid" style={{ minHeight:"100dvh", background:"#0E0F14", display:"flex", alignItems:"center", justifyContent:"center", padding:24, position:"relative", overflow:"hidden" }}>
+      {/* Aurora background to match the rest of the portal */}
+      <div className="aurora-bg" aria-hidden="true">
+        <div className="aurora-blob aurora-1" />
+        <div className="aurora-blob aurora-2" />
+        <div className="aurora-blob aurora-3" />
+      </div>
+      <div style={{ position:"absolute", top:"20%", left:"50%", transform:"translate(-50%,-50%)", width:700, height:700, background:"radial-gradient(circle, rgba(204,255,0,0.10) 0%, transparent 65%)", pointerEvents:"none" }} />
+      <div style={{ position:"absolute", bottom:0, left:"50%", transform:"translateX(-50%)", width:900, height:280, background:"radial-gradient(ellipse, rgba(204,255,0,0.05) 0%, transparent 70%)", pointerEvents:"none" }} />
 
       <div style={{ width:"100%", maxWidth:420, animation:"fadeUp 0.7s cubic-bezier(0.4,0,0.2,1)", position:"relative", zIndex:1 }}>
         <div style={{ textAlign:"center", marginBottom:36 }}>
-          <div style={{ display:"flex", justifyContent:"center", margin:"0 auto 24px", filter:"drop-shadow(0 8px 36px rgba(204,255,0,0.45))" }}>
+          <div style={{ display:"flex", justifyContent:"center", margin:"0 auto 24px", filter:"drop-shadow(0 8px 36px rgba(204,255,0,0.5))" }}>
             <RedlineLogo height={56} />
           </div>
-          <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:40, letterSpacing:14, color:"#DC2626", lineHeight:1, textShadow:"0 0 50px rgba(220,38,38,0.3)" }}>REDLINE</div>
-          <div style={{ fontSize:11, fontWeight:700, color:"#4D5260", letterSpacing:6, textTransform:"uppercase", marginTop:7 }}>Portal</div>
-          <div style={{ width:56, height:1.5, background:"linear-gradient(90deg,transparent,#CCFF00,transparent)", margin:"14px auto 0" }} />
+          <div className="red-gradient-text" style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:40, letterSpacing:14, lineHeight:1, animation:"gradShift 6s ease-in-out infinite", filter:"drop-shadow(0 0 32px rgba(204,255,0,0.35))" }}>REDLINE</div>
+          <div style={{ fontSize:11, fontWeight:800, color:"#CCFF00", letterSpacing:6, textTransform:"uppercase", marginTop:9, opacity:0.85 }}>Rep Portal</div>
+          <div style={{ width:64, height:1.5, background:"linear-gradient(90deg,transparent,#CCFF00,transparent)", margin:"16px auto 0", boxShadow:"0 0 12px rgba(204,255,0,0.6)" }} />
         </div>
 
         <div style={{ background:"linear-gradient(145deg,rgba(16,18,24,0.99),rgba(11,12,17,0.99))", border:"1px solid rgba(255,255,255,0.07)", borderRadius:24, padding:"36px 32px 32px", boxShadow:"0 24px 80px rgba(0,0,0,0.65), 0 0 0 1px rgba(204,255,0,0.06)" }}>
@@ -3002,8 +3008,8 @@ export default function App() {
         <div style={{ display:"flex", justifyContent:"center", margin:"0 auto 20px", filter:"drop-shadow(0 6px 28px rgba(204,255,0,0.4))" }}>
           <RedlineLogo height={48} />
         </div>
-        <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:28, letterSpacing:12, color:"#DC2626" }}>REDLINE</div>
-        <div style={{ fontSize:10, color:"#444856", letterSpacing:3, textTransform:"uppercase", marginTop:8, fontWeight:700 }}>Loading…</div>
+        <div className="red-gradient-text" style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:28, letterSpacing:12, animation:"gradShift 6s ease-in-out infinite", filter:"drop-shadow(0 0 20px rgba(204,255,0,0.3))" }}>REDLINE</div>
+        <div style={{ fontSize:10, color:"#5E6376", letterSpacing:3, textTransform:"uppercase", marginTop:8, fontWeight:800 }}>Loading…</div>
       </div>
     </div>
   );
