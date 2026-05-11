@@ -251,15 +251,8 @@ const LINKS = [
 const GLOBAL_CSS = `
 @keyframes fadeUp { from { opacity:0; transform:translateY(20px) } to { opacity:1; transform:translateY(0) } }
 @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
-@keyframes glow { 0%,100% { box-shadow:0 0 30px rgba(204,255,0,0.18),0 0 60px rgba(204,255,0,0.08) } 50% { box-shadow:0 0 60px rgba(204,255,0,0.36),0 0 110px rgba(204,255,0,0.16) } }
 @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.04)} }
-@keyframes gradShift { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
-@keyframes borderSpin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
-@keyframes loginGlow { 0%,100%{opacity:.5} 50%{opacity:1} }
-@keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
-@keyframes auroraDrift { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(40px,-30px) scale(1.08)} 66%{transform:translate(-30px,30px) scale(0.95)} }
-@keyframes slideIn { from{opacity:0;transform:translateX(-12px)} to{opacity:1;transform:translateX(0)} }
-@keyframes popIn { from{opacity:0;transform:scale(0.92)} to{opacity:1;transform:scale(1)} }
+@keyframes popIn { from{opacity:0;transform:scale(0.96)} to{opacity:1;transform:scale(1)} }
 
 *{margin:0;padding:0;box-sizing:border-box}
 html,body,#root{min-height:100dvh;background:#0E0F14}
@@ -277,15 +270,6 @@ button{font-family:inherit}
   background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px);
   background-size: 32px 32px;
 }
-.aurora-bg {
-  position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden;
-}
-.aurora-blob {
-  position:absolute; border-radius:50%; filter:blur(80px); opacity:0.55; animation:auroraDrift 22s ease-in-out infinite;
-}
-.aurora-1 { width:520px; height:520px; top:-180px; left:-120px; background:radial-gradient(circle,rgba(204,255,0,0.18),transparent 65%); }
-.aurora-2 { width:620px; height:620px; top:30%; right:-200px; background:radial-gradient(circle,rgba(99,102,241,0.13),transparent 65%); animation-delay:-7s; }
-.aurora-3 { width:480px; height:480px; bottom:-160px; left:30%; background:radial-gradient(circle,rgba(245,158,11,0.10),transparent 65%); animation-delay:-14s; }
 
 /* Glass surface */
 .glass {
@@ -399,15 +383,6 @@ button{font-family:inherit}
 .btn-pill.amber:hover { background: linear-gradient(180deg, rgba(245,158,11,0.16), rgba(245,158,11,0.06)); border-color:rgba(245,158,11,0.36); color:#FBBF24 }
 .btn-pill.icon-only { padding:0; width:42px; gap:0 }
 .btn-pill svg { display:block }
-
-/* Gradient text */
-.red-gradient-text {
-  background: linear-gradient(135deg, #DDFF40 0%, #CCFF00 50%, #E5FF1A 100%);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
 .title-display {
   font-family:'Bebas Neue',sans-serif; letter-spacing:0.32em; line-height:1;
 }
@@ -561,23 +536,13 @@ function Login() {
 
   return (
     <div className="dotgrid" style={{ minHeight:"100dvh", background:"#0E0F14", display:"flex", alignItems:"center", justifyContent:"center", padding:24, position:"relative", overflow:"hidden" }}>
-      {/* Aurora background to match the rest of the portal */}
-      <div className="aurora-bg" aria-hidden="true">
-        <div className="aurora-blob aurora-1" />
-        <div className="aurora-blob aurora-2" />
-        <div className="aurora-blob aurora-3" />
-      </div>
-      <div style={{ position:"absolute", top:"20%", left:"50%", transform:"translate(-50%,-50%)", width:700, height:700, background:"radial-gradient(circle, rgba(204,255,0,0.10) 0%, transparent 65%)", pointerEvents:"none" }} />
-      <div style={{ position:"absolute", bottom:0, left:"50%", transform:"translateX(-50%)", width:900, height:280, background:"radial-gradient(ellipse, rgba(204,255,0,0.05) 0%, transparent 70%)", pointerEvents:"none" }} />
-
-      <div style={{ width:"100%", maxWidth:420, animation:"fadeUp 0.7s cubic-bezier(0.4,0,0.2,1)", position:"relative", zIndex:1 }}>
+      <div style={{ width:"100%", maxWidth:420, animation:"fadeUp 0.5s ease", position:"relative", zIndex:1 }}>
         <div style={{ textAlign:"center", marginBottom:36 }}>
-          <div style={{ display:"flex", justifyContent:"center", margin:"0 auto 24px", filter:"drop-shadow(0 8px 36px rgba(204,255,0,0.5))" }}>
-            <RedlineLogo height={56} />
+          <div style={{ display:"flex", justifyContent:"center", margin:"0 auto 20px" }}>
+            <RedlineLogo height={52} />
           </div>
-          <div className="red-gradient-text" style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:40, letterSpacing:14, lineHeight:1, animation:"gradShift 6s ease-in-out infinite", filter:"drop-shadow(0 0 32px rgba(204,255,0,0.35))" }}>REDLINE</div>
-          <div style={{ fontSize:11, fontWeight:800, color:"#CCFF00", letterSpacing:6, textTransform:"uppercase", marginTop:9, opacity:0.85 }}>Rep Portal</div>
-          <div style={{ width:64, height:1.5, background:"linear-gradient(90deg,transparent,#CCFF00,transparent)", margin:"16px auto 0", boxShadow:"0 0 12px rgba(204,255,0,0.6)" }} />
+          <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:38, letterSpacing:12, color:"#F2F4F8", lineHeight:1 }}>REDLINE</div>
+          <div style={{ fontSize:10.5, fontWeight:700, color:"#5E6376", letterSpacing:5, textTransform:"uppercase", marginTop:8 }}>Rep Portal</div>
         </div>
 
         <div style={{ background:"linear-gradient(145deg,rgba(16,18,24,0.99),rgba(11,12,17,0.99))", border:"1px solid rgba(255,255,255,0.07)", borderRadius:24, padding:"36px 32px 32px", boxShadow:"0 24px 80px rgba(0,0,0,0.65), 0 0 0 1px rgba(204,255,0,0.06)" }}>
@@ -845,7 +810,6 @@ function Announcements({ session, profile, w }) {
 
       {isAdmin && (
         <div className="dash-card" style={{ padding:dk?"20px 22px":"16px 18px" }}>
-          <div style={{ position:"absolute", top:0, left:0, right:0, height:2, background:"linear-gradient(90deg,transparent,#F59E0B80,transparent)", opacity:0.5 }} />
           {!composing ? (
             <button onClick={() => setComposing(true)}
               style={{ display:"flex", alignItems:"center", gap:12, width:"100%", background:"rgba(255,255,255,0.02)", border:"1px dashed rgba(255,255,255,0.1)", borderRadius:12, padding:"14px 16px", cursor:"pointer", fontFamily:"inherit", textAlign:"left", color:"#666C7E", fontSize:13, fontWeight:600, transition:"all 0.18s" }}
@@ -899,7 +863,6 @@ function Announcements({ session, profile, w }) {
           const accent = a.pinned ? "#F59E0B" : "#06D6F0";
           return (
             <div key={a.id} className="dash-card" style={{ padding:dk?"20px 22px":"16px 18px", animation:`fadeUp 0.35s ease ${0.04*i}s both`, borderColor: a.pinned ? "rgba(245,158,11,0.22)" : undefined }}>
-              <div style={{ position:"absolute", top:0, left:0, right:0, height:2, background:`linear-gradient(90deg,transparent,${accent}80,transparent)`, opacity:0.5 }} />
               <div style={{ display:"flex", alignItems:"flex-start", gap:14 }}>
                 <div style={{ width:38, height:38, borderRadius:11, background: a.pinned ? "linear-gradient(135deg,#F59E0B,#B45309)" : "linear-gradient(135deg,#06D6F0,#0891B2)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, boxShadow: a.pinned ? "0 4px 14px rgba(245,158,11,0.35)" : "0 4px 14px rgba(6,214,240,0.3)" }}>
                   {a.pinned ? (
@@ -1597,10 +1560,6 @@ function Chat({ session, profile, w, width, minW = 220, maxW = 520, onResize }) 
           boxShadow:"8px 0 40px rgba(0,0,0,0.45)",
           overflow:"hidden",
         }}>
-        <div style={{ position:"absolute", top:0, left:0, right:0, height:2, background:"linear-gradient(90deg,transparent,#CCFF00,transparent)", opacity:0.7, boxShadow:"0 0 14px rgba(204,255,0,0.5)" }} />
-        {/* Subtle chartreuse glow at the top of the sidebar */}
-        <div style={{ position:"absolute", top:-120, left:"50%", transform:"translateX(-50%)", width:"110%", height:280, background:"radial-gradient(ellipse at top, rgba(204,255,0,0.10), transparent 70%)", pointerEvents:"none" }} aria-hidden="true" />
-
         {/* Resize handle */}
         <div
           onMouseDown={startDrag}
@@ -1637,7 +1596,7 @@ function Chat({ session, profile, w, width, minW = 220, maxW = 520, onResize }) 
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#CCFF00" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
               </div>
               <div style={{ fontSize:14, fontWeight:700, color:"#D6DAE2", marginBottom:6 }}>No messages yet</div>
-              <div style={{ fontSize:12 }}>Say hi to the team — break the ice.</div>
+              <div style={{ fontSize:12 }}>Send the first one.</div>
             </div>
           ) : (
             <div style={{ display:"flex", flexDirection:"column", gap:2 }}>
@@ -1704,7 +1663,7 @@ function Chat({ session, profile, w, width, minW = 220, maxW = 520, onResize }) 
               <span className="typing-dots" aria-hidden="true">
                 <span /><span /><span />
               </span>
-              <span style={{ fontStyle:"italic" }}>{label}</span>
+              <span>{label}</span>
             </div>
           );
         })()}
@@ -1738,22 +1697,21 @@ function Chat({ session, profile, w, width, minW = 220, maxW = 520, onResize }) 
 
         @keyframes typingBounce { 0%,80%,100% { transform: translateY(0); opacity: 0.4 } 40% { transform: translateY(-3px); opacity: 1 } }
         .typing-dots { display:inline-flex; gap:3px; align-items:center }
-        .typing-dots span { width:4px; height:4px; border-radius:50%; background:#CCFF00; display:inline-block; animation: typingBounce 1.2s ease-in-out infinite; box-shadow: 0 0 6px rgba(204,255,0,0.6) }
+        .typing-dots span { width:4px; height:4px; border-radius:50%; background:#9098A8; display:inline-block; animation: typingBounce 1.2s ease-in-out infinite }
         .typing-dots span:nth-child(2) { animation-delay: 0.15s }
         .typing-dots span:nth-child(3) { animation-delay: 0.3s }
 
         .chat-resize-handle:hover .chat-resize-grip,
-        .chat-resize-handle:active .chat-resize-grip { background: #CCFF00 !important; height: 60px !important; box-shadow: 0 0 12px rgba(204,255,0,0.5); }
+        .chat-resize-handle:active .chat-resize-grip { background: rgba(255,255,255,0.18) !important; height: 56px !important; }
 
         .chat-input:focus {
-          border-color: rgba(204,255,0,0.55) !important;
-          background: rgba(255,255,255,0.06) !important;
-          box-shadow: 0 0 0 4px rgba(204,255,0,0.10);
+          border-color: rgba(255,255,255,0.18) !important;
+          background: rgba(255,255,255,0.055) !important;
         }
         .chat-input::placeholder { color: rgba(255,255,255,0.25); }
 
-        .chat-send:not(:disabled):hover { transform: translateY(-1px); box-shadow: 0 8px 22px rgba(204,255,0,0.4); }
-        .chat-send:not(:disabled):active { transform: translateY(0); }
+        .chat-send:not(:disabled):hover { filter: brightness(1.05); }
+        .chat-send:not(:disabled):active { filter: brightness(0.95); }
 
         .chat-scroll::-webkit-scrollbar { width: 5px; }
         .chat-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.07); border-radius: 6px; }
@@ -1907,7 +1865,6 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
   const Card = ({ title, accent, action, actionOnClick, children, fullWidth }) => (
     <div className="dash-card" onMouseMove={onCardMove}
       style={{ padding:dk?"22px 24px":"18px 20px", gridColumn: fullWidth && wd ? "1 / -1" : undefined }}>
-      <div style={{ position:"absolute", top:0, left:0, right:0, height:2, background:`linear-gradient(90deg,transparent,${accent}80,transparent)`, opacity:0.4 }} />
       <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:16, position:"relative" }}>
         <div style={{ fontSize:10, fontWeight:800, color:accent, letterSpacing:2.5, textTransform:"uppercase" }}>{title}</div>
         {action && (
@@ -1933,7 +1890,6 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
         style={{ padding:dk?"26px 28px":"20px 20px", gridColumn: wd ? "1 / -1" : undefined,
           background: tierObj ? `linear-gradient(135deg, rgba(14,15,20,0.97) 0%, ${tierObj.color}10 100%)` : undefined,
           borderColor: tierObj ? `${tierObj.color}22` : undefined }}>
-        {tierObj && <div style={{ position:"absolute", top:0, left:0, right:0, height:2, background:`linear-gradient(90deg,transparent,${tierObj.color}90,transparent)` }} />}
         <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:16 }}>
           {/* Left: tier name */}
           <div style={{ display:"flex", alignItems:"center", gap:dk?18:14 }}>
@@ -2360,7 +2316,7 @@ function Leaderboard({ session, profile, w }) {
       {/* Leaderboard list */}
       {ranked.length === 0 ? (
         <div style={{ textAlign:"center", padding:"60px 0", color:"#444856", fontSize:13 }}>
-          No sales logged {period === "week" ? "this week" : period === "month" ? "this month" : "yet"}. Be the first to log one!
+          No sales logged {period === "week" ? "this week" : period === "month" ? "this month" : "yet"}.
         </div>
       ) : (
         <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
@@ -3173,12 +3129,12 @@ export default function App() {
     <div style={{ ...baseStyle, display:"flex", alignItems:"center", justifyContent:"center" }}>
       <style>{GLOBAL_CSS}</style>
       <link href={FONT_LINK} rel="stylesheet" />
-      <div style={{ textAlign:"center", animation:"fadeUp 0.6s ease" }}>
-        <div style={{ display:"flex", justifyContent:"center", margin:"0 auto 20px", filter:"drop-shadow(0 6px 28px rgba(204,255,0,0.4))" }}>
-          <RedlineLogo height={48} />
+      <div style={{ textAlign:"center", animation:"fadeUp 0.4s ease" }}>
+        <div style={{ display:"flex", justifyContent:"center", margin:"0 auto 16px" }}>
+          <RedlineLogo height={44} />
         </div>
-        <div className="red-gradient-text" style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:28, letterSpacing:12, animation:"gradShift 6s ease-in-out infinite", filter:"drop-shadow(0 0 20px rgba(204,255,0,0.3))" }}>REDLINE</div>
-        <div style={{ fontSize:10, color:"#5E6376", letterSpacing:3, textTransform:"uppercase", marginTop:8, fontWeight:800 }}>Loading…</div>
+        <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:26, letterSpacing:10, color:"#F2F4F8" }}>REDLINE</div>
+        <div style={{ fontSize:10, color:"#5E6376", letterSpacing:3, textTransform:"uppercase", marginTop:8, fontWeight:700 }}>Loading…</div>
       </div>
     </div>
   );
@@ -3222,13 +3178,6 @@ export default function App() {
     <div ref={ref} className="dotgrid" style={{ ...baseStyle, position:"relative", paddingLeft: chatSidebarW }}>
       <style>{GLOBAL_CSS}</style>
       <link href={FONT_LINK} rel="stylesheet" />
-
-      {/* Aurora background */}
-      <div className="aurora-bg" aria-hidden="true">
-        <div className="aurora-blob aurora-1" />
-        <div className="aurora-blob aurora-2" />
-        <div className="aurora-blob aurora-3" />
-      </div>
 
       {/* Sticky header */}
       <div className="app-header">
