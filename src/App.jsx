@@ -1620,7 +1620,6 @@ function Chat({ session, profile, w, width, minW = 220, maxW = 520, onResize }) 
 
         {/* Header */}
         <div style={{ display:"flex", alignItems:"center", gap:10, padding:"18px 20px", borderBottom:"1px solid rgba(255,255,255,0.05)", flexShrink:0, position:"relative" }}>
-          <span className="chat-status-dot" aria-hidden="true" />
           <div style={{ fontSize:13.5, fontWeight:800, color:"#F2F4F8", letterSpacing:"-0.01em" }}>Team Chat</div>
         </div>
 
@@ -1717,7 +1716,7 @@ function Chat({ session, profile, w, width, minW = 220, maxW = 520, onResize }) 
               onChange={e => onBodyChange(e.target.value)}
               onBlur={() => { if (!body.trim()) broadcastStopTyping(); }}
               onKeyDown={onKeyDown}
-              placeholder="Message the team…"
+              placeholder="Chat"
               rows={1}
               className="chat-input"
               style={{ width:"100%", background:"rgba(255,255,255,0.045)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:14, color:"#F2F4F8", fontSize:13.5, fontWeight:500, padding:"12px 15px", fontFamily:"inherit", outline:"none", boxSizing:"border-box", resize:"none", lineHeight:1.5, maxHeight:140, transition:"border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease" }}
@@ -1744,17 +1743,6 @@ function Chat({ session, profile, w, width, minW = 220, maxW = 520, onResize }) 
 
         .chat-resize-handle:hover .chat-resize-grip,
         .chat-resize-handle:active .chat-resize-grip { background: #CCFF00 !important; height: 60px !important; box-shadow: 0 0 12px rgba(204,255,0,0.5); }
-
-        @keyframes chatStatusPulse {
-          0%,100% { box-shadow: 0 0 0 0 rgba(204,255,0,0.55), 0 0 8px rgba(204,255,0,0.55); }
-          70% { box-shadow: 0 0 0 6px rgba(204,255,0,0), 0 0 8px rgba(204,255,0,0.55); }
-        }
-        .chat-status-dot {
-          width: 8px; height: 8px; border-radius: 50%;
-          background: #CCFF00;
-          display: inline-block;
-          animation: chatStatusPulse 2.4s ease-in-out infinite;
-        }
 
         .chat-input:focus {
           border-color: rgba(204,255,0,0.55) !important;
