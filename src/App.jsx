@@ -875,7 +875,86 @@ function useW() {
 /* ═══════════════════════════════════════════
    LOGIN
    ═══════════════════════════════════════════ */
-function Login() {
+/* ═══════════════════════════════════════════
+   AUTH — LANDING / EMPLOYEE LOGIN / CLIENT LOGIN
+   ═══════════════════════════════════════════ */
+function LandingPage() {
+  const [mode, setMode] = useState(null); // null | 'employee' | 'client'
+  if (mode === 'employee') return <EmployeeLogin onBack={() => setMode(null)} />;
+  if (mode === 'client')   return <ClientLogin   onBack={() => setMode(null)} />;
+
+  return (
+    <div className="dotgrid" style={{ minHeight:"100dvh", background:"#0C0D12", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"32px 20px", position:"relative", overflow:"hidden" }}>
+      {/* Background blobs */}
+      <div style={{ position:"absolute", top:"15%", left:"30%", width:600, height:600, background:"radial-gradient(circle, rgba(204,255,0,0.06) 0%, transparent 65%)", pointerEvents:"none" }} />
+      <div style={{ position:"absolute", bottom:"10%", right:"20%", width:500, height:400, background:"radial-gradient(circle, rgba(6,214,240,0.05) 0%, transparent 65%)", pointerEvents:"none" }} />
+
+      {/* Logo */}
+      <div style={{ textAlign:"center", marginBottom:52, animation:"fadeUp 0.6s ease", position:"relative", zIndex:1 }}>
+        <div style={{ display:"flex", justifyContent:"center", marginBottom:18, filter:"drop-shadow(0 8px 40px rgba(204,255,0,0.5))" }}>
+          <RedlineLogo height={60} />
+        </div>
+        <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:48, letterSpacing:16, color:"#DC2626", lineHeight:1, textShadow:"0 0 60px rgba(220,38,38,0.25)" }}>REDLINE</div>
+        <div style={{ fontSize:10, fontWeight:700, color:"#3A3E4A", letterSpacing:6, textTransform:"uppercase", marginTop:8 }}>Web Services</div>
+        <div style={{ width:60, height:1.5, background:"linear-gradient(90deg,transparent,rgba(255,255,255,0.12),transparent)", margin:"18px auto 0" }} />
+        <div style={{ fontSize:13, fontWeight:500, color:"#5C6175", marginTop:16, letterSpacing:0.3 }}>Select your portal to continue</div>
+      </div>
+
+      {/* Portal cards */}
+      <div style={{ display:"flex", gap:16, width:"100%", maxWidth:720, animation:"fadeUp 0.7s ease 0.1s both", position:"relative", zIndex:1, flexWrap:"wrap" }}>
+        {/* Employee */}
+        <button onClick={() => setMode('employee')} style={{
+          flex:"1 1 280px", padding:"32px 28px", cursor:"pointer", textAlign:"left", fontFamily:"inherit",
+          background:"linear-gradient(160deg, rgba(204,255,0,0.07) 0%, rgba(14,15,20,0.97) 60%)",
+          border:"1.5px solid rgba(204,255,0,0.22)",
+          borderRadius:22,
+          boxShadow:"0 12px 48px rgba(0,0,0,0.5), inset 0 1px 0 rgba(204,255,0,0.08)",
+          transition:"transform 0.22s ease, border-color 0.2s, box-shadow 0.2s",
+        }}
+          onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.borderColor = "rgba(204,255,0,0.45)"; e.currentTarget.style.boxShadow = "0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(204,255,0,0.12), inset 0 1px 0 rgba(204,255,0,0.12)"; }}
+          onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.borderColor = "rgba(204,255,0,0.22)"; e.currentTarget.style.boxShadow = "0 12px 48px rgba(0,0,0,0.5), inset 0 1px 0 rgba(204,255,0,0.08)"; }}>
+          <div style={{ width:52, height:52, borderRadius:16, background:"rgba(204,255,0,0.12)", border:"1.5px solid rgba(204,255,0,0.28)", display:"flex", alignItems:"center", justifyContent:"center", marginBottom:20, boxShadow:"0 4px 18px rgba(204,255,0,0.18)" }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#CCFF00" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><path d="M15 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0-3-3.87"/></svg>
+          </div>
+          <div style={{ fontSize:9, fontWeight:800, color:"rgba(204,255,0,0.6)", letterSpacing:2.8, textTransform:"uppercase", marginBottom:8 }}>Team Access</div>
+          <div style={{ fontSize:22, fontWeight:800, color:"#F2F4F8", marginBottom:10, lineHeight:1.2 }}>Employee Portal</div>
+          <div style={{ fontSize:13, color:"#5C6175", fontWeight:500, lineHeight:1.6, marginBottom:22 }}>Rep dashboard, leads, leaderboard, scheduling, training, and team tools.</div>
+          <div style={{ display:"flex", alignItems:"center", gap:8, color:"#CCFF00", fontSize:12, fontWeight:700 }}>
+            Sign in as employee
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+        </button>
+
+        {/* Client */}
+        <button onClick={() => setMode('client')} style={{
+          flex:"1 1 280px", padding:"32px 28px", cursor:"pointer", textAlign:"left", fontFamily:"inherit",
+          background:"linear-gradient(160deg, rgba(6,214,240,0.07) 0%, rgba(14,15,20,0.97) 60%)",
+          border:"1.5px solid rgba(6,214,240,0.18)",
+          borderRadius:22,
+          boxShadow:"0 12px 48px rgba(0,0,0,0.5), inset 0 1px 0 rgba(6,214,240,0.06)",
+          transition:"transform 0.22s ease, border-color 0.2s, box-shadow 0.2s",
+        }}
+          onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.borderColor = "rgba(6,214,240,0.40)"; e.currentTarget.style.boxShadow = "0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(6,214,240,0.10), inset 0 1px 0 rgba(6,214,240,0.10)"; }}
+          onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.borderColor = "rgba(6,214,240,0.18)"; e.currentTarget.style.boxShadow = "0 12px 48px rgba(0,0,0,0.5), inset 0 1px 0 rgba(6,214,240,0.06)"; }}>
+          <div style={{ width:52, height:52, borderRadius:16, background:"rgba(6,214,240,0.10)", border:"1.5px solid rgba(6,214,240,0.25)", display:"flex", alignItems:"center", justifyContent:"center", marginBottom:20, boxShadow:"0 4px 18px rgba(6,214,240,0.15)" }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#06D6F0" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+          </div>
+          <div style={{ fontSize:9, fontWeight:800, color:"rgba(6,214,240,0.6)", letterSpacing:2.8, textTransform:"uppercase", marginBottom:8 }}>Client Access</div>
+          <div style={{ fontSize:22, fontWeight:800, color:"#F2F4F8", marginBottom:10, lineHeight:1.2 }}>Client Portal</div>
+          <div style={{ fontSize:13, color:"#5C6175", fontWeight:500, lineHeight:1.6, marginBottom:22 }}>Track your project, view deliverables, and stay in sync with your Redline team.</div>
+          <div style={{ display:"flex", alignItems:"center", gap:8, color:"#06D6F0", fontSize:12, fontWeight:700 }}>
+            Sign in as client
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+        </button>
+      </div>
+
+      <p style={{ color:"#252830", fontSize:9, marginTop:44, letterSpacing:2, textTransform:"uppercase", position:"relative", zIndex:1 }}>© 2026 Redline Web Services LLC</p>
+    </div>
+  );
+}
+
+function EmployeeLogin({ onBack }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [err, setErr] = useState(null);
@@ -885,8 +964,7 @@ function Login() {
     if (!email || !password) return;
     setLd(true); setErr(null);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) setErr("Invalid email or password.");
-    setLd(false);
+    if (error) { setErr("Invalid email or password."); setLd(false); }
   };
 
   const fieldStyle = (hasErr) => ({
@@ -896,22 +974,31 @@ function Login() {
     borderRadius:14, color:"#F2F4F8", fontSize:15, outline:"none",
     boxSizing:"border-box", fontFamily:"inherit", transition:"all 0.22s ease",
   });
-
   const onFocus = e => { e.target.style.borderColor = "rgba(204,255,0,0.6)"; e.target.style.boxShadow = "0 0 0 4px rgba(204,255,0,0.08)"; };
   const onBlur  = (e, hasErr) => { e.target.style.borderColor = hasErr ? "#DC2626" : "rgba(255,255,255,0.07)"; e.target.style.boxShadow = "none"; };
 
   return (
     <div className="dotgrid" style={{ minHeight:"100dvh", background:"#0E0F14", display:"flex", alignItems:"center", justifyContent:"center", padding:24, position:"relative", overflow:"hidden" }}>
+      <div style={{ position:"absolute", top:"20%", left:"50%", transform:"translate(-50%,-50%)", width:700, height:700, background:"radial-gradient(circle, rgba(204,255,0,0.08) 0%, transparent 65%)", pointerEvents:"none" }} />
+
       <div style={{ width:"100%", maxWidth:420, animation:"fadeUp 0.5s ease", position:"relative", zIndex:1 }}>
+        {/* Back */}
+        {onBack && (
+          <button onClick={onBack} style={{ display:"flex", alignItems:"center", gap:7, background:"none", border:"none", color:"#5C6175", cursor:"pointer", fontFamily:"inherit", fontSize:12, fontWeight:600, marginBottom:28, padding:0 }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+            Back
+          </button>
+        )}
         <div style={{ textAlign:"center", marginBottom:36 }}>
-          <div style={{ display:"flex", justifyContent:"center", margin:"0 auto 20px" }}>
+          <div style={{ display:"flex", justifyContent:"center", margin:"0 auto 20px", filter:"drop-shadow(0 8px 36px rgba(204,255,0,0.45))" }}>
             <RedlineLogo height={52} />
           </div>
           <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:38, letterSpacing:12, color:"#F2F4F8", lineHeight:1 }}>REDLINE</div>
-          <div style={{ fontSize:10.5, fontWeight:700, color:"#5E6376", letterSpacing:5, textTransform:"uppercase", marginTop:8 }}>Portal</div>
+          <div style={{ fontSize:10.5, fontWeight:700, color:"#5E6376", letterSpacing:5, textTransform:"uppercase", marginTop:8 }}>Employee Portal</div>
+          <div style={{ width:50, height:1.5, background:"linear-gradient(90deg,transparent,#CCFF00,transparent)", margin:"12px auto 0" }} />
         </div>
 
-        <div style={{ background:"linear-gradient(145deg,rgba(16,18,24,0.99),rgba(11,12,17,0.99))", border:"1px solid rgba(255,255,255,0.07)", borderRadius:24, padding:"36px 32px 32px", boxShadow:"0 24px 80px rgba(0,0,0,0.65), 0 0 0 1px rgba(204,255,0,0.06)" }}>
+        <div style={{ background:"linear-gradient(145deg,rgba(16,18,24,0.99),rgba(11,12,17,0.99))", border:"1px solid rgba(255,255,255,0.07)", borderRadius:24, padding:"32px 28px 28px", boxShadow:"0 24px 80px rgba(0,0,0,0.65), 0 0 0 1px rgba(204,255,0,0.06)" }}>
           <div style={{ marginBottom:16 }}>
             <label style={{ display:"block", fontSize:9.5, fontWeight:700, color:"#4D5260", letterSpacing:3, marginBottom:10, textTransform:"uppercase" }}>Email</label>
             <input type="email" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&go()} placeholder="you@redline.com" autoFocus style={fieldStyle(!!err)} onFocus={onFocus} onBlur={e=>onBlur(e,!!err)} />
@@ -930,7 +1017,73 @@ function Login() {
             {ld ? "Signing In…" : "Enter Portal"}
           </button>
         </div>
-        <p style={{ color:"#292C35", fontSize:9, marginTop:32, letterSpacing:2, textTransform:"uppercase", textAlign:"center" }}>© 2026 Redline Web Services LLC</p>
+      </div>
+    </div>
+  );
+}
+
+function ClientLogin({ onBack }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [err, setErr] = useState(null);
+  const [ld, setLd] = useState(false);
+
+  const go = async () => {
+    if (!email || !password) return;
+    setLd(true); setErr(null);
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) { setErr("Invalid email or password. Contact your Redline rep for access."); setLd(false); }
+  };
+
+  const fieldStyle = (hasErr) => ({
+    width:"100%", padding:"15px 20px",
+    background:"rgba(7,8,12,0.9)",
+    border:`1.5px solid ${hasErr ? "#FF3370" : "rgba(255,255,255,0.07)"}`,
+    borderRadius:14, color:"#F2F4F8", fontSize:15, outline:"none",
+    boxSizing:"border-box", fontFamily:"inherit", transition:"all 0.22s ease",
+  });
+  const CYAN = "#06D6F0";
+  const onFocus = e => { e.target.style.borderColor = `${CYAN}80`; e.target.style.boxShadow = `0 0 0 4px ${CYAN}12`; };
+  const onBlur  = (e, hasErr) => { e.target.style.borderColor = hasErr ? "#FF3370" : "rgba(255,255,255,0.07)"; e.target.style.boxShadow = "none"; };
+
+  return (
+    <div className="dotgrid" style={{ minHeight:"100dvh", background:"#0C0D12", display:"flex", alignItems:"center", justifyContent:"center", padding:24, position:"relative", overflow:"hidden" }}>
+      <div style={{ position:"absolute", top:"20%", left:"50%", transform:"translate(-50%,-50%)", width:700, height:700, background:`radial-gradient(circle, ${CYAN}0D 0%, transparent 65%)`, pointerEvents:"none" }} />
+
+      <div style={{ width:"100%", maxWidth:420, animation:"fadeUp 0.55s cubic-bezier(0.4,0,0.2,1)", position:"relative", zIndex:1 }}>
+        <button onClick={onBack} style={{ display:"flex", alignItems:"center", gap:7, background:"none", border:"none", color:"#5C6175", cursor:"pointer", fontFamily:"inherit", fontSize:12, fontWeight:600, marginBottom:28, padding:0 }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+          Back
+        </button>
+        <div style={{ textAlign:"center", marginBottom:32 }}>
+          <div style={{ display:"flex", justifyContent:"center", marginBottom:20, filter:`drop-shadow(0 8px 36px ${CYAN}60)` }}>
+            <RedlineLogo height={50} />
+          </div>
+          <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:36, letterSpacing:12, color:"#DC2626", lineHeight:1 }}>REDLINE</div>
+          <div style={{ fontSize:10, fontWeight:700, color:"#4D5260", letterSpacing:5, textTransform:"uppercase", marginTop:6 }}>Client Portal</div>
+          <div style={{ width:50, height:1.5, background:`linear-gradient(90deg,transparent,${CYAN},transparent)`, margin:"12px auto 0" }} />
+        </div>
+
+        <div style={{ background:"linear-gradient(145deg,rgba(16,18,24,0.99),rgba(11,12,17,0.99))", border:`1px solid ${CYAN}18`, borderRadius:24, padding:"32px 28px 28px", boxShadow:`0 24px 80px rgba(0,0,0,0.65), 0 0 0 1px ${CYAN}0A` }}>
+          <div style={{ marginBottom:16 }}>
+            <label style={{ display:"block", fontSize:9.5, fontWeight:700, color:"#4D5260", letterSpacing:3, marginBottom:10, textTransform:"uppercase" }}>Email</label>
+            <input type="email" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&go()} placeholder="your@email.com" autoFocus style={fieldStyle(!!err)} onFocus={onFocus} onBlur={e=>onBlur(e,!!err)} />
+          </div>
+          <div>
+            <label style={{ display:"block", fontSize:9.5, fontWeight:700, color:"#4D5260", letterSpacing:3, marginBottom:10, textTransform:"uppercase" }}>Password</label>
+            <input type="password" value={password} onChange={e=>setPassword(e.target.value)} onKeyDown={e=>e.key==="Enter"&&go()} placeholder="••••••••" style={fieldStyle(!!err)} onFocus={onFocus} onBlur={e=>onBlur(e,!!err)} />
+          </div>
+          {err && (
+            <div style={{ display:"flex", alignItems:"center", gap:7, marginTop:12 }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF3370" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <p style={{ color:"#FF3370", fontSize:12, fontWeight:600 }}>{err}</p>
+            </div>
+          )}
+          <button onClick={go} disabled={ld} style={{ width:"100%", padding:"16px", background: ld ? `${CYAN}33` : `linear-gradient(135deg,${CYAN},#0588A0)`, color: ld ? "#FFF" : "#0A1A1E", border:"none", borderRadius:14, fontSize:11, fontWeight:800, letterSpacing:4, cursor: ld ? "wait" : "pointer", marginTop:20, textTransform:"uppercase", boxShadow: ld ? "none" : `0 6px 28px ${CYAN}40`, transition:"all 0.25s ease", fontFamily:"inherit" }}>
+            {ld ? "Signing In…" : "Access My Project"}
+          </button>
+          <p style={{ fontSize:11, color:"#4A4E5C", textAlign:"center", marginTop:16, lineHeight:1.5 }}>Don't have access yet? Your Redline rep will set up your account.</p>
+        </div>
       </div>
     </div>
   );
@@ -4520,6 +4673,176 @@ const LINK_ICONS = [
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>,
 ];
 
+/* ═══════════════════════════════════════════
+   CLIENT PORTAL
+   ═══════════════════════════════════════════ */
+const CLIENT_PHASES = [
+  { key:"onboarding",   label:"Onboarding",   icon:"📋", desc:"Form & payment received" },
+  { key:"design",       label:"Design",        icon:"🎨", desc:"Mockups & brand direction" },
+  { key:"development",  label:"Development",   icon:"⚙️",  desc:"Building your site" },
+  { key:"review",       label:"Review",        icon:"🔍", desc:"Your feedback & revisions" },
+  { key:"live",         label:"Live",          icon:"🚀", desc:"Site launched" },
+];
+
+function ClientPortal({ session, profile, onSignOut }) {
+  const [project, setProject] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const w = useW();
+  const dk = w >= 768;
+  const CYAN = "#06D6F0";
+
+  useEffect(() => {
+    const load = async () => {
+      const { data } = await supabase
+        .from("client_projects")
+        .select("*")
+        .eq("client_id", session.user.id)
+        .single();
+      setProject(data ?? null);
+      setLoading(false);
+    };
+    load();
+  }, [session.user.id]);
+
+  const phaseIdx = CLIENT_PHASES.findIndex(p => p.key === project?.phase) ?? 0;
+  const safePhaseIdx = phaseIdx === -1 ? 0 : phaseIdx;
+  const clientName = profile?.name || "there";
+
+  return (
+    <div style={{ minHeight:"100dvh", background:"#0C0D12", color:"#FFF", position:"relative" }}>
+      <style>{GLOBAL_CSS}</style>
+      <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+      {/* Background */}
+      <div style={{ position:"fixed", inset:0, pointerEvents:"none", zIndex:0 }}>
+        <div style={{ position:"absolute", top:"10%", right:"15%", width:500, height:500, background:`radial-gradient(circle, ${CYAN}08 0%, transparent 65%)` }} />
+        <div style={{ position:"absolute", bottom:"20%", left:"10%", width:400, height:400, background:"radial-gradient(circle, rgba(204,255,0,0.04) 0%, transparent 65%)" }} />
+      </div>
+
+      {/* Header */}
+      <div style={{ position:"relative", zIndex:1, borderBottom:"1px solid rgba(255,255,255,0.06)", background:"rgba(12,13,18,0.92)", backdropFilter:"blur(20px)", padding: dk ? "18px 48px" : "14px 18px" }}>
+        <div style={{ maxWidth:1000, margin:"0 auto", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+          <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+            <RedlineLogo height={dk ? 28 : 24} />
+            <div>
+              <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize: dk ? 20 : 17, letterSpacing:8, color:"#DC2626", lineHeight:1 }}>REDLINE</div>
+              <div style={{ fontSize:8.5, fontWeight:700, color:CYAN, letterSpacing:3.5, textTransform:"uppercase", marginTop:2 }}>Client Portal</div>
+            </div>
+          </div>
+          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+            <div style={{ width:30, height:30, borderRadius:9, background:`${CYAN}22`, border:`1.5px solid ${CYAN}44`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:13, fontWeight:900, color:CYAN }}>
+              {clientName[0]?.toUpperCase()}
+            </div>
+            {dk && <span style={{ fontSize:12.5, fontWeight:600, color:"#9EA3B0" }}>{clientName}</span>}
+            <button onClick={onSignOut} style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.07)", borderRadius:9, padding:"7px 12px", cursor:"pointer", color:"#6E7483", fontFamily:"inherit", fontSize:11, fontWeight:600 }}>Sign Out</button>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ position:"relative", zIndex:1, maxWidth:1000, margin:"0 auto", padding: dk ? "36px 48px 60px" : "20px 18px 48px" }}>
+
+        {loading ? (
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"center", padding:80 }}>
+            <div style={{ width:36, height:36, borderRadius:"50%", border:`3px solid ${CYAN}22`, borderTopColor:CYAN, animation:"spin 0.8s linear infinite" }} />
+          </div>
+        ) : (
+          <>
+            {/* Welcome */}
+            <div style={{ marginBottom: dk ? 32 : 24, animation:"fadeUp 0.4s ease" }}>
+              <div style={{ fontSize: dk ? 28 : 22, fontWeight:800, color:"#F2F4F8", lineHeight:1.2 }}>
+                Welcome back, <span style={{ color:CYAN }}>{clientName}</span>
+              </div>
+              {project ? (
+                <div style={{ fontSize:13, color:"#5C6175", marginTop:6 }}>{project.business_name} · Project #{project.id?.slice(0,8)?.toUpperCase()}</div>
+              ) : (
+                <div style={{ fontSize:13, color:"#5C6175", marginTop:6 }}>Your project details are being set up. Check back soon.</div>
+              )}
+            </div>
+
+            {project ? (
+              <>
+                {/* Phase progress */}
+                <div style={{ background:"linear-gradient(160deg, rgba(6,214,240,0.05), rgba(14,15,20,0.95))", border:`1px solid ${CYAN}22`, borderRadius:18, padding: dk ? "28px 30px" : "20px 18px", marginBottom: dk ? 20 : 14, animation:"fadeUp 0.4s ease 0.05s both" }}>
+                  <div style={{ fontSize:9, fontWeight:800, color:`${CYAN}88`, letterSpacing:2.4, textTransform:"uppercase", marginBottom:20 }}>Project Status</div>
+                  {/* Phase steps */}
+                  <div style={{ display:"flex", alignItems:"flex-start", gap: dk ? 0 : 12, flexDirection: dk ? "row" : "column" }}>
+                    {CLIENT_PHASES.map((p, i) => {
+                      const done = i < safePhaseIdx;
+                      const active = i === safePhaseIdx;
+                      const upcoming = i > safePhaseIdx;
+                      return (
+                        <div key={p.key} style={{ flex: dk ? 1 : undefined, display:"flex", flexDirection: dk ? "column" : "row", alignItems: dk ? "center" : "center", gap: dk ? 0 : 12, position:"relative" }}>
+                          {/* Connector line */}
+                          {dk && i < CLIENT_PHASES.length - 1 && (
+                            <div style={{ position:"absolute", top:20, left:"calc(50% + 20px)", right:"calc(-50% + 20px)", height:2, background: done ? CYAN : "rgba(255,255,255,0.07)", transition:"background 0.4s", zIndex:0 }} />
+                          )}
+                          {/* Circle */}
+                          <div style={{
+                            width:40, height:40, borderRadius:"50%", flexShrink:0,
+                            background: done ? CYAN : active ? `${CYAN}22` : "rgba(255,255,255,0.04)",
+                            border: `2px solid ${done ? CYAN : active ? CYAN : "rgba(255,255,255,0.08)"}`,
+                            display:"flex", alignItems:"center", justifyContent:"center",
+                            fontSize: done ? 14 : 18,
+                            boxShadow: active ? `0 0 20px ${CYAN}50` : "none",
+                            position:"relative", zIndex:1,
+                            transition:"all 0.3s",
+                          }}>
+                            {done
+                              ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0A1A1E" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                              : <span style={{ fontSize:16 }}>{p.icon}</span>
+                            }
+                          </div>
+                          {/* Label */}
+                          <div style={{ textAlign: dk ? "center" : "left", marginTop: dk ? 10 : 0 }}>
+                            <div style={{ fontSize: dk ? 11 : 12, fontWeight:700, color: done ? CYAN : active ? "#F2F4F8" : "#4A4E5C", marginBottom:2 }}>{p.label}</div>
+                            {(active || !dk) && <div style={{ fontSize:10, color: active ? `${CYAN}99` : "#3A3E4A", fontWeight:500 }}>{p.desc}</div>}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Info grid */}
+                <div style={{ display:"grid", gridTemplateColumns: dk ? "1fr 1fr" : "1fr", gap: dk ? 16 : 12, marginBottom: dk ? 20 : 14 }}>
+                  {/* Package */}
+                  <div style={{ background:"linear-gradient(160deg,rgba(22,24,31,0.96),rgba(14,15,20,0.97))", border:"1px solid rgba(255,255,255,0.065)", borderRadius:16, padding: dk ? "20px 22px" : "16px 18px", animation:"fadeUp 0.4s ease 0.1s both" }}>
+                    <div style={{ fontSize:9, fontWeight:800, color:"#5C6175", letterSpacing:2.2, textTransform:"uppercase", marginBottom:12 }}>Package</div>
+                    <div style={{ fontSize: dk ? 20 : 18, fontWeight:800, color:"#F2F4F8" }}>{project.package_name || "Starter Build"}</div>
+                    {project.package_amount && <div style={{ fontSize:13, color:"#CCFF00", fontWeight:700, marginTop:4 }}>${Number(project.package_amount).toLocaleString()}</div>}
+                  </div>
+                  {/* Rep */}
+                  <div style={{ background:"linear-gradient(160deg,rgba(22,24,31,0.96),rgba(14,15,20,0.97))", border:"1px solid rgba(255,255,255,0.065)", borderRadius:16, padding: dk ? "20px 22px" : "16px 18px", animation:"fadeUp 0.4s ease 0.12s both" }}>
+                    <div style={{ fontSize:9, fontWeight:800, color:"#5C6175", letterSpacing:2.2, textTransform:"uppercase", marginBottom:12 }}>Your Rep</div>
+                    <div style={{ fontSize: dk ? 20 : 18, fontWeight:800, color:"#F2F4F8" }}>{project.rep_name || "Redline Team"}</div>
+                    {project.rep_email && <div style={{ fontSize:12, color:"#5C6175", marginTop:4 }}>{project.rep_email}</div>}
+                  </div>
+                </div>
+
+                {/* Notes from rep */}
+                {project.client_notes && (
+                  <div style={{ background:`linear-gradient(160deg,${CYAN}08,rgba(14,15,20,0.97))`, border:`1px solid ${CYAN}18`, borderRadius:16, padding: dk ? "20px 22px" : "16px 18px", animation:"fadeUp 0.4s ease 0.15s both" }}>
+                    <div style={{ fontSize:9, fontWeight:800, color:`${CYAN}88`, letterSpacing:2.2, textTransform:"uppercase", marginBottom:10 }}>Message from your rep</div>
+                    <div style={{ fontSize:13, color:"#C4C9D4", lineHeight:1.7, fontWeight:500 }}>{project.client_notes}</div>
+                  </div>
+                )}
+              </>
+            ) : (
+              /* No project yet */
+              <div style={{ textAlign:"center", padding: dk ? "60px 40px" : "40px 20px", background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.05)", borderRadius:18, animation:"fadeUp 0.4s ease 0.05s both" }}>
+                <div style={{ width:64, height:64, borderRadius:20, background:`${CYAN}12`, border:`1px solid ${CYAN}28`, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 20px", fontSize:28 }}>🚀</div>
+                <div style={{ fontSize:20, fontWeight:800, color:"#F2F4F8", marginBottom:10 }}>Project incoming</div>
+                <div style={{ fontSize:13, color:"#5C6175", lineHeight:1.6, maxWidth:400, margin:"0 auto" }}>Your Redline rep is finalizing your project setup. You'll see your project status and details here once everything is ready.</div>
+                <div style={{ fontSize:11, color:`${CYAN}88`, marginTop:20, fontWeight:600 }}>Questions? Reach out to your rep directly.</div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function AppInner() {
   const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
@@ -4753,8 +5076,13 @@ function AppInner() {
     <div style={baseStyle}>
       <style>{GLOBAL_CSS}</style>
       <link href={FONT_LINK} rel="stylesheet" />
-      <Login />
+      <LandingPage />
     </div>
+  );
+
+  // Client role → dedicated client portal
+  if (profile?.role === "client") return (
+    <ClientPortal session={session} profile={profile} onSignOut={signOut} />
   );
 
   if (view === "__admin" && profile?.role === "admin") return (

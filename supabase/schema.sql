@@ -595,3 +595,64 @@ begin
     alter publication supabase_realtime add table public.direct_messages;
   end if;
 end $$;
+
+
+-- ─── CLIENT ROLES & PROJECTS ────────────────────────────────
+-- Allow 'client' as a valid profile role
+alter table public.profiles drop constraint if exists profiles_role_check;
+alter table public.profiles add constraint profiles_role_check
+  check (role in ('rep', 'admin', 'client'));
+
+-- Client project records — one per client user
+create table if not exists public.client_projects (
+  id              uuid default gen_random_uuid() primary key,
+  client_id       uuid references auth.users(id) on delete cascade not null unique,
+  business_name   text,
+  package_name    text,
+  package_amount  numeric,
+  phase           text not null default 'onboarding'
+                  check (phase in ('onboarding','design','development','review','live')),
+  rep_name        text,
+  rep_email       text,
+  client_notes    text,
+  created_at      timestamptz default now(),
+  updated_at      timestamptz default now()
+);
+
+alter table public.client_projects enable row level security;
+
+-- Clients can only read their own project
+create policy "Clients read own project"
+  on public.client_projects for select
+  using (auth.uid() = client_id);
+
+-- Admins and reps can read/write all client projects
+create policy "Admins manage all projects"
+  on public.client_projects for all
+  using (public.is_admin());
+
+create policy "Reps read all client projects"
+  on public.client_projects for select
+  using (auth.role() = 'authenticated');
+
+create policy "Reps update client projects"
+  on public.client_projects for update
+  using (auth.role() = 'authenticated');
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'client_projects'
+  ) then
+    alter publication supabase_realtime add table public.client_projects;
+  end if;
+end $$;
+
+-- To create a client account:
+-- 1. Create the user in Supabase Auth (Dashboard → Authentication → Users → Add user)
+-- 2. Update their profile role:
+--    update public.profiles set role = 'client', name = 'Business Name' where id = '<user-uuid>';
+-- 3. Create their project record:
+--    insert into public.client_projects (client_id, business_name, package_name, package_amount, phase, rep_name, rep_email)
+--    values ('<user-uuid>', 'ACME Plumbing', 'Pro Build', 2497, 'onboarding', 'Your Name', 'you@redline.com');
