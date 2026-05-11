@@ -552,3 +552,46 @@ begin
     alter publication supabase_realtime add table public.outreach_events;
   end if;
 end $$;
+
+-- ─── DIRECT MESSAGES ────────────────────────────────────────
+-- One-on-one DMs between reps. Used by the People tab.
+create table if not exists public.direct_messages (
+  id         uuid default gen_random_uuid() primary key,
+  from_id    uuid references auth.users(id) on delete cascade not null,
+  to_id      uuid references auth.users(id) on delete cascade not null,
+  body       text not null check (char_length(body) <= 2000),
+  created_at timestamptz default now()
+);
+
+create index if not exists dm_thread_idx on public.direct_messages (
+  least(from_id::text, to_id::text),
+  greatest(from_id::text, to_id::text),
+  created_at
+);
+
+alter table public.direct_messages enable row level security;
+
+drop policy if exists "Users read own DMs" on public.direct_messages;
+create policy "Users read own DMs"
+  on public.direct_messages for select
+  using (auth.uid() = from_id or auth.uid() = to_id);
+
+drop policy if exists "Users send DMs as self" on public.direct_messages;
+create policy "Users send DMs as self"
+  on public.direct_messages for insert
+  with check (auth.uid() = from_id);
+
+drop policy if exists "Users delete own DMs" on public.direct_messages;
+create policy "Users delete own DMs"
+  on public.direct_messages for delete
+  using (auth.uid() = from_id);
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'direct_messages'
+  ) then
+    alter publication supabase_realtime add table public.direct_messages;
+  end if;
+end $$;

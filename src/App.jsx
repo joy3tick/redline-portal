@@ -724,7 +724,27 @@ button{font-family:inherit}
   transition:background 0.22s ease, box-shadow 0.22s ease, transform 0.22s cubic-bezier(0.34,1.56,0.64,1);
 }
 .bnav-btn.active .bnav-icon { transform:translateY(-2px) }
+
+/* DM bubbles */
+.dm-bubble-me {
+  background: linear-gradient(135deg, rgba(204,255,0,0.18), rgba(204,255,0,0.08));
+  border: 1px solid rgba(204,255,0,0.28);
+  color: #E8F4D4; align-self:flex-end; border-bottom-right-radius:4px;
+}
+.dm-bubble-them {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  color: #C4C9D4; align-self:flex-start; border-bottom-left-radius:4px;
+}
+.dm-bubble-me, .dm-bubble-them {
+  max-width:80%; padding:9px 13px; border-radius:16px;
+  font-size:13px; font-weight:500; line-height:1.5; word-break:break-word;
+  animation: fadeUp 0.18s ease;
+}
+.people-card { transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease; }
+.people-card:hover { border-color: rgba(167,139,250,0.35) !important; transform: translateY(-1px); }
 `;
+
 
 /* ═══════════════════════════════════════════
    RICH TEXT RENDERER
@@ -742,6 +762,7 @@ function TabIcon({ tabKey, active, size = 16, color }) {
     case "training":      return <svg {...p}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>;
     case "reference":     return <svg {...p}><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>;
     case "quizzes":       return <svg {...p}><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>;
+    case "people":        return <svg {...p}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
     default: return null;
   }
 }
@@ -1344,6 +1365,386 @@ function Scheduler({ session, profile, w }) {
         </div>
       </div>
 
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════
+   DIRECT MESSAGES — conversation thread
+   ═══════════════════════════════════════════ */
+const DM_SETUP_SQL = `-- Run this in your Supabase SQL Editor (once):
+create table if not exists public.direct_messages (
+  id uuid primary key default gen_random_uuid(),
+  from_id uuid not null references auth.users(id) on delete cascade,
+  to_id   uuid not null references auth.users(id) on delete cascade,
+  body    text not null check (char_length(body) <= 2000),
+  created_at timestamptz not null default now()
+);
+create index if not exists dm_thread_idx on public.direct_messages
+  (least(from_id::text,to_id::text), greatest(from_id::text,to_id::text), created_at);
+alter table public.direct_messages enable row level security;
+create policy "read own dms"   on public.direct_messages for select using (auth.uid()=from_id or auth.uid()=to_id);
+create policy "send dms"       on public.direct_messages for insert with check (auth.uid()=from_id);
+create policy "delete own dms" on public.direct_messages for delete using (auth.uid()=from_id);
+alter publication supabase_realtime add table public.direct_messages;`;
+
+function DMConversation({ session, profile, peer, w, onBack }) {
+  const [msgs, setMsgs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [body, setBody] = useState("");
+  const [sending, setSending] = useState(false);
+  const scrollRef = useRef(null);
+  const stickyRef = useRef(true);
+  const dk = w >= 768;
+  const myId = session.user.id;
+  const peerId = peer.id;
+
+  const load = async () => {
+    const { data } = await supabase
+      .from("direct_messages")
+      .select("id, from_id, to_id, body, created_at")
+      .or(`and(from_id.eq.${myId},to_id.eq.${peerId}),and(from_id.eq.${peerId},to_id.eq.${myId})`)
+      .order("created_at", { ascending: true })
+      .limit(300);
+    setMsgs(data ?? []);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    load();
+    const chName = `dm-${[myId, peerId].sort().join("-")}`;
+    const ch = supabase.channel(chName)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "direct_messages" }, ({ new: m }) => {
+        if ((m.from_id === myId && m.to_id === peerId) || (m.from_id === peerId && m.to_id === myId)) {
+          setMsgs(prev => prev.some(x => x.id === m.id) ? prev : [...prev, m]);
+        }
+      })
+      .on("postgres_changes", { event: "DELETE", schema: "public", table: "direct_messages" }, ({ old: m }) => {
+        setMsgs(prev => prev.filter(x => x.id !== m.id));
+      })
+      .subscribe();
+    return () => supabase.removeChannel(ch);
+  }, [peerId]);
+
+  useEffect(() => {
+    if (!loading && scrollRef.current && stickyRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [msgs, loading]);
+
+  const onScroll = () => {
+    const el = scrollRef.current; if (!el) return;
+    stickyRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+  };
+
+  const send = async () => {
+    const trimmed = body.trim();
+    if (!trimmed || sending) return;
+    setSending(true);
+    const { data, error } = await supabase
+      .from("direct_messages")
+      .insert({ from_id: myId, to_id: peerId, body: trimmed })
+      .select().single();
+    setSending(false);
+    if (!error && data) {
+      setBody("");
+      stickyRef.current = true;
+      setMsgs(prev => prev.some(m => m.id === data.id) ? prev : [...prev, data]);
+    }
+  };
+
+  const remove = async (id) => {
+    if (!confirm("Delete message?")) return;
+    await supabase.from("direct_messages").delete().eq("id", id);
+    setMsgs(prev => prev.filter(m => m.id !== id));
+  };
+
+  const fmtTime = (iso) => new Date(iso).toLocaleTimeString("en-US", { hour:"numeric", minute:"2-digit" });
+  const fmtDay = (iso) => {
+    const d = new Date(iso), today = new Date(); today.setHours(0,0,0,0);
+    const ds = new Date(d); ds.setHours(0,0,0,0);
+    const diff = Math.round((today - ds) / 86400000);
+    if (diff === 0) return "Today";
+    if (diff === 1) return "Yesterday";
+    return d.toLocaleDateString("en-US", { weekday:"long", month:"short", day:"numeric" });
+  };
+
+  const peerColor = (() => {
+    const COLORS = ["#06D6F0","#F59E0B","#A78BFA","#34D399","#F472B6","#60A5FA","#FB923C"];
+    let h = 0; for (let i = 0; i < (peerId||"").length; i++) h = (h*31 + peerId.charCodeAt(i)) & 0xFFFFFF;
+    return COLORS[h % COLORS.length];
+  })();
+
+  return (
+    <div style={{ display:"flex", flexDirection:"column", height:"calc(100dvh - 140px)", minHeight:360, animation:"fadeUp 0.25s ease" }}>
+
+      {/* Header */}
+      <div style={{ display:"flex", alignItems:"center", gap:12, padding:"0 0 14px", borderBottom:"1px solid rgba(255,255,255,0.06)", flexShrink:0 }}>
+        <button onClick={onBack} style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:9, padding:"7px 10px", cursor:"pointer", display:"flex", alignItems:"center", gap:6, color:"#9EA3B0", fontFamily:"inherit", fontSize:12, fontWeight:700 }}>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          {dk && "Back"}
+        </button>
+        <div style={{ width:36, height:36, borderRadius:11, background:`${peerColor}22`, border:`1.5px solid ${peerColor}55`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:15, fontWeight:900, color:peerColor, flexShrink:0 }}>
+          {peer.name?.[0]?.toUpperCase() ?? "R"}
+        </div>
+        <div style={{ flex:1, minWidth:0 }}>
+          <div style={{ fontSize:dk?15:13, fontWeight:700, color:"#F2F4F8" }}>{peer.name || "Rep"}</div>
+          <div style={{ fontSize:10, fontWeight:600, color:"#5C6175", letterSpacing:0.5 }}>{peer.role === "admin" ? "Admin" : "Rep"}</div>
+        </div>
+      </div>
+
+      {/* Messages */}
+      <div ref={scrollRef} onScroll={onScroll} style={{ flex:1, overflowY:"auto", padding:"16px 0", display:"flex", flexDirection:"column", gap:6 }}>
+        {loading ? (
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"center", height:"100%", color:"#5C6175", fontSize:12 }}>Loading…</div>
+        ) : msgs.length === 0 ? (
+          <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", height:"100%", gap:10 }}>
+            <div style={{ width:52, height:52, borderRadius:16, background:`${peerColor}15`, border:`1px solid ${peerColor}30`, display:"flex", alignItems:"center", justifyContent:"center" }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={peerColor} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <div style={{ fontSize:13, fontWeight:700, color:"#D6DAE2" }}>No messages yet</div>
+            <div style={{ fontSize:11, color:"#5C6175" }}>Start the conversation with {peer.name || "them"}</div>
+          </div>
+        ) : (() => {
+          const items = [];
+          let lastDay = null, lastFrom = null, lastTs = 0;
+          for (const m of msgs) {
+            const day = fmtDay(m.created_at);
+            if (day !== lastDay) {
+              items.push(
+                <div key={`d-${m.id}`} style={{ display:"flex", alignItems:"center", gap:10, margin:"10px 0 6px" }}>
+                  <div style={{ flex:1, height:1, background:"rgba(255,255,255,0.05)" }} />
+                  <span style={{ fontSize:9, fontWeight:800, color:"#4A4E5C", letterSpacing:1.8, textTransform:"uppercase" }}>{day}</span>
+                  <div style={{ flex:1, height:1, background:"rgba(255,255,255,0.05)" }} />
+                </div>
+              );
+              lastDay = day; lastFrom = null;
+            }
+            const isMe = m.from_id === myId;
+            const ts = new Date(m.created_at).getTime();
+            const continued = m.from_id === lastFrom && (ts - lastTs) < 3 * 60000;
+            lastFrom = m.from_id; lastTs = ts;
+            items.push(
+              <div key={m.id} style={{ display:"flex", flexDirection:"column", alignItems: isMe ? "flex-end" : "flex-start", gap:2, marginTop: continued ? 1 : 8 }}>
+                {!continued && (
+                  <span style={{ fontSize:9.5, fontWeight:600, color:"#4A4E5C", marginLeft: isMe ? 0 : 2, marginRight: isMe ? 2 : 0 }}>
+                    {isMe ? "You" : peer.name || "Rep"} · {fmtTime(m.created_at)}
+                  </span>
+                )}
+                <div style={{ display:"flex", alignItems:"flex-end", gap:6, flexDirection: isMe ? "row-reverse" : "row" }}>
+                  <div className={isMe ? "dm-bubble-me" : "dm-bubble-them"}>{m.body}</div>
+                  {isMe && (
+                    <button onClick={() => remove(m.id)} title="Delete" style={{ opacity:0, background:"none", border:"none", cursor:"pointer", color:"#FF3370", padding:2, fontSize:10, flexShrink:0, transition:"opacity 0.15s" }}
+                      onMouseEnter={e => e.currentTarget.style.opacity = "1"}
+                      onMouseLeave={e => e.currentTarget.style.opacity = "0"}>
+                      ×
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          }
+          return items;
+        })()}
+      </div>
+
+      {/* Input */}
+      <div style={{ borderTop:"1px solid rgba(255,255,255,0.06)", paddingTop:12, flexShrink:0 }}>
+        <div style={{ display:"flex", gap:8, alignItems:"flex-end" }}>
+          <textarea
+            value={body}
+            onChange={e => setBody(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
+            placeholder={`Message ${peer.name || "rep"}…`}
+            rows={1}
+            style={{ flex:1, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:12, color:"#F2F4F8", fontSize:13, fontWeight:500, padding:"11px 13px", fontFamily:"inherit", outline:"none", resize:"none", lineHeight:1.5, maxHeight:120, overflowY:"auto" }}
+            onInput={e => { e.target.style.height = "auto"; e.target.style.height = Math.min(e.target.scrollHeight, 120) + "px"; }}
+          />
+          <button onClick={send} disabled={!body.trim() || sending}
+            style={{ background: body.trim() ? "#CCFF00" : "rgba(255,255,255,0.06)", border:"none", borderRadius:12, padding:"11px 16px", cursor: body.trim() ? "pointer" : "default", color: body.trim() ? "#15171E" : "#4A4E5C", fontFamily:"inherit", fontWeight:800, fontSize:12, transition:"all 0.18s ease", flexShrink:0 }}>
+            {sending ? "…" : "Send"}
+          </button>
+        </div>
+        <div style={{ fontSize:9, color:"#3A3E4A", marginTop:6, textAlign:"right" }}>Enter to send · Shift+Enter for newline</div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════
+   PEOPLE TAB — user directory + DMs
+   ═══════════════════════════════════════════ */
+function People({ session, profile, w }) {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [dmReady, setDmReady] = useState(null); // null=checking, true=ok, false=needs setup
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [search, setSearch] = useState("");
+  const dk = w >= 768;
+  const myId = session.user.id;
+
+  useEffect(() => {
+    const init = async () => {
+      const [profRes, probe] = await Promise.all([
+        supabase.from("profiles").select("id, name, role").order("name"),
+        supabase.from("direct_messages").select("id").limit(1),
+      ]);
+      setUsers((profRes.data ?? []).filter(u => u.id !== myId));
+      const errMsg = probe.error?.message ?? "";
+      setDmReady(!probe.error || (!errMsg.includes("does not exist") && !errMsg.includes("relation")));
+      setLoading(false);
+    };
+    init();
+  }, []);
+
+  const userColor = (uid) => {
+    const COLORS = ["#06D6F0","#F59E0B","#A78BFA","#34D399","#F472B6","#60A5FA","#FB923C","#CCFF00"];
+    let h = 0; for (let i = 0; i < (uid||"").length; i++) h = (h*31 + uid.charCodeAt(i)) & 0xFFFFFF;
+    return COLORS[h % COLORS.length];
+  };
+
+  if (loading) return (
+    <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:80, gap:14 }}>
+      <div style={{ width:36, height:36, borderRadius:"50%", border:"3px solid rgba(167,139,250,0.2)", borderTopColor:"#A78BFA", animation:"spin 0.8s linear infinite" }} />
+      <span style={{ color:"#5C6175", fontSize:12, fontWeight:600, letterSpacing:1.2, textTransform:"uppercase" }}>Loading team…</span>
+    </div>
+  );
+
+  if (selectedUser && dmReady) {
+    return <DMConversation session={session} profile={profile} peer={selectedUser} w={w} onBack={() => setSelectedUser(null)} />;
+  }
+
+  const filtered = users.filter(u => (u.name || "Rep").toLowerCase().includes(search.toLowerCase()));
+  const admins = filtered.filter(u => u.role === "admin");
+  const reps = filtered.filter(u => u.role !== "admin");
+
+  return (
+    <div style={{ animation:"fadeUp 0.35s ease" }}>
+
+      {/* DB setup warning — only shows if table missing */}
+      {!dmReady && (
+        <div style={{ marginBottom:20, background:"rgba(245,158,11,0.05)", border:"1px solid rgba(245,158,11,0.20)", borderRadius:14, padding:dk?"18px 20px":"14px 15px" }}>
+          <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:12 }}>
+            <div style={{ width:28, height:28, borderRadius:8, background:"rgba(245,158,11,0.12)", border:"1px solid rgba(245,158,11,0.25)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2.5" strokeLinecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <div>
+              <div style={{ fontSize:12, fontWeight:800, color:"#F59E0B", letterSpacing:0.3 }}>DM table not set up yet</div>
+              <div style={{ fontSize:10.5, color:"#9EA3B0", marginTop:2 }}>Run this SQL once in your Supabase dashboard to enable messaging.</div>
+            </div>
+          </div>
+          <pre style={{ fontSize:10, color:"#9EA3B0", background:"rgba(0,0,0,0.35)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:10, padding:"12px 14px", overflowX:"auto", lineHeight:1.6, margin:0, fontFamily:"'JetBrains Mono',monospace", whiteSpace:"pre-wrap" }}>{DM_SETUP_SQL}</pre>
+          <div style={{ fontSize:10, color:"#5C6175", marginTop:10 }}>Go to <span style={{ color:"#A78BFA", fontWeight:700 }}>Supabase → SQL Editor</span>, paste and run. Then refresh the portal.</div>
+        </div>
+      )}
+
+      {/* Search */}
+      <div style={{ position:"relative", marginBottom:dk?18:13 }}>
+        <div style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", pointerEvents:"none" }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5C6175" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
+        <input
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Search by name…"
+          style={{ width:"100%", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:12, color:"#F2F4F8", fontSize:13, fontWeight:500, padding:"11px 13px 11px 38px", fontFamily:"inherit", outline:"none", boxSizing:"border-box", transition:"border-color 0.18s" }}
+          onFocus={e => e.target.style.borderColor = "rgba(167,139,250,0.35)"}
+          onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.08)"}
+        />
+      </div>
+
+      {/* Stats bar */}
+      <div style={{ display:"flex", gap:8, marginBottom:dk?20:15 }}>
+        {[
+          { label:"Total", value:users.length, color:"#A78BFA" },
+          { label:"Reps", value:users.filter(u=>u.role!=="admin").length, color:"#CCFF00" },
+          { label:"Admins", value:users.filter(u=>u.role==="admin").length, color:"#F59E0B" },
+        ].map(s => (
+          <div key={s.label} style={{ flex:1, background:`${s.color}0D`, border:`1px solid ${s.color}22`, borderRadius:12, padding:dk?"12px 14px":"10px 11px", textAlign:"center" }}>
+            <div style={{ fontSize:dk?24:20, fontWeight:900, color:s.color, lineHeight:1, letterSpacing:"-0.02em" }}>{s.value}</div>
+            <div style={{ fontSize:9, fontWeight:800, color:`${s.color}88`, letterSpacing:1.4, textTransform:"uppercase", marginTop:3 }}>{s.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Admin section */}
+      {admins.length > 0 && (
+        <div style={{ marginBottom:dk?20:16 }}>
+          <div style={{ fontSize:9, fontWeight:800, color:"#F59E0B88", letterSpacing:2.4, textTransform:"uppercase", marginBottom:8 }}>Leadership</div>
+          <div style={{ display:"grid", gridTemplateColumns:dk?"repeat(auto-fill, minmax(260px,1fr))":"1fr", gap:dk?8:7 }}>
+            {admins.map(u => <UserCard key={u.id} u={u} color={userColor(u.id)} dmReady={dmReady} onMessage={() => setSelectedUser(u)} />)}
+          </div>
+        </div>
+      )}
+
+      {/* Reps section */}
+      {reps.length > 0 && (
+        <div>
+          <div style={{ fontSize:9, fontWeight:800, color:"#A78BFA88", letterSpacing:2.4, textTransform:"uppercase", marginBottom:8 }}>Reps</div>
+          <div style={{ display:"grid", gridTemplateColumns:dk?"repeat(auto-fill, minmax(260px,1fr))":"1fr", gap:dk?8:7 }}>
+            {reps.map(u => <UserCard key={u.id} u={u} color={userColor(u.id)} dmReady={dmReady} onMessage={() => setSelectedUser(u)} />)}
+          </div>
+        </div>
+      )}
+
+      {filtered.length === 0 && (
+        <div style={{ textAlign:"center", padding:"60px 20px", color:"#4A4E5C" }}>
+          <div style={{ fontSize:32, marginBottom:10 }}>🔍</div>
+          <div style={{ fontSize:14, fontWeight:700, color:"#D6DAE2", marginBottom:6 }}>No results</div>
+          <div style={{ fontSize:12 }}>No one found matching "{search}"</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function UserCard({ u, color, dmReady, onMessage }) {
+  return (
+    <div className="people-card" style={{
+      display:"flex", alignItems:"center", gap:13,
+      background:"linear-gradient(135deg, rgba(22,24,31,0.95), rgba(14,15,20,0.97))",
+      border:"1px solid rgba(255,255,255,0.065)",
+      borderRadius:15, padding:"13px 14px",
+    }}>
+      {/* Avatar */}
+      <div style={{
+        width:44, height:44, borderRadius:13, flexShrink:0,
+        background:`${color}18`, border:`2px solid ${color}40`,
+        display:"flex", alignItems:"center", justifyContent:"center",
+        fontSize:18, fontWeight:900, color:color,
+        boxShadow:`0 4px 14px ${color}25`,
+      }}>
+        {(u.name || "R")[0].toUpperCase()}
+      </div>
+      {/* Info */}
+      <div style={{ flex:1, minWidth:0 }}>
+        <div style={{ fontSize:14, fontWeight:700, color:"#EEF2F8", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{u.name || "Rep"}</div>
+        <div style={{ display:"flex", alignItems:"center", gap:5, marginTop:3 }}>
+          <span style={{
+            fontSize:9, fontWeight:800, letterSpacing:1.2, textTransform:"uppercase",
+            color: u.role === "admin" ? "#F59E0B" : "#A78BFA",
+            background: u.role === "admin" ? "rgba(245,158,11,0.10)" : "rgba(167,139,250,0.10)",
+            border: `1px solid ${u.role === "admin" ? "rgba(245,158,11,0.22)" : "rgba(167,139,250,0.22)"}`,
+            padding:"2px 7px", borderRadius:20,
+          }}>{u.role === "admin" ? "Admin" : "Rep"}</span>
+        </div>
+      </div>
+      {/* DM button */}
+      <button onClick={onMessage} disabled={!dmReady} title={dmReady ? `Message ${u.name}` : "DMs not set up yet"}
+        style={{
+          background: dmReady ? "rgba(167,139,250,0.12)" : "rgba(255,255,255,0.04)",
+          border: `1px solid ${dmReady ? "rgba(167,139,250,0.28)" : "rgba(255,255,255,0.06)"}`,
+          borderRadius:10, padding:"8px 12px", cursor: dmReady ? "pointer" : "default",
+          display:"flex", alignItems:"center", gap:6, flexShrink:0,
+          color: dmReady ? "#A78BFA" : "#3A3E4A",
+          fontFamily:"inherit", fontSize:11, fontWeight:700,
+          transition:"all 0.18s ease",
+        }}
+        onMouseEnter={e => { if (dmReady) { e.currentTarget.style.background = "rgba(167,139,250,0.22)"; e.currentTarget.style.transform = "scale(1.04)"; } }}
+        onMouseLeave={e => { e.currentTarget.style.background = dmReady ? "rgba(167,139,250,0.12)" : "rgba(255,255,255,0.04)"; e.currentTarget.style.transform = "scale(1)"; }}>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        DM
+      </button>
     </div>
   );
 }
@@ -4742,7 +5143,7 @@ function AppInner() {
         )}
 
         {/* PEOPLE TAB */}
-        {tab === "people" && <PeopleTab session={session} profile={profile} w={w} />}
+        {tab === "people" && <People session={session} profile={profile} w={w} />}
 
         {/* REDLINE AI TAB */}
         {tab === "redline-ai" && (() => {
@@ -4992,53 +5393,6 @@ function AppInner() {
         </nav>
       )}
       {showChat && <Chat session={session} profile={profile} w={w} width={chatSidebarW} onResize={persistChatW} minW={CHAT_MIN} maxW={CHAT_MAX} />}
-    </div>
-  );
-}
-
-function PeopleTab({ session, profile, w }) {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const dk = w >= 768;
-
-  useEffect(() => {
-    supabase.from("profiles").select("id, name, role").order("name").then(({ data }) => {
-      setUsers(data ?? []);
-      setLoading(false);
-    });
-  }, []);
-
-  const palette = ["#CCFF00","#06D6F0","#F59E0B","#FFD700","#A78BFA","#22C55E","#FF7AB6","#FB7185"];
-  const colorFor = (uid) => {
-    let h = 0; for (let i = 0; i < uid.length; i++) h = (h * 31 + uid.charCodeAt(i)) >>> 0;
-    return palette[h % palette.length];
-  };
-
-  if (loading) return <div style={{ textAlign:"center", padding:60, color:"#7E8290", fontSize:13 }}>Loading…</div>;
-
-  return (
-    <div style={{ animation:"fadeUp 0.35s ease" }}>
-      <div style={{ fontSize:9.5, fontWeight:800, color:"#A78BFA", letterSpacing:3, textTransform:"uppercase", marginBottom:16 }}>Team · {users.length} Members</div>
-      <div style={{ display:"grid", gridTemplateColumns: dk ? "repeat(auto-fill, minmax(220px, 1fr))" : "1fr", gap:dk?10:8 }}>
-        {users.map(u => {
-          const isMe = u.id === session.user.id;
-          const col = colorFor(u.id);
-          const initials = (u.name || "?")[0].toUpperCase();
-          return (
-            <div key={u.id} style={{ display:"flex", alignItems:"center", gap:12, padding:"14px 16px", background: isMe ? "linear-gradient(135deg,rgba(167,139,250,0.08),rgba(167,139,250,0.02))" : "rgba(255,255,255,0.022)", border:`1px solid ${isMe ? "rgba(167,139,250,0.3)" : "rgba(255,255,255,0.06)"}`, borderRadius:14 }}>
-              <div style={{ width:38, height:38, borderRadius:11, background:`linear-gradient(135deg,${col}33,${col}11)`, border:`1px solid ${col}44`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:15, fontWeight:900, color:col, flexShrink:0 }}>
-                {initials}
-              </div>
-              <div style={{ flex:1, minWidth:0 }}>
-                <div style={{ fontSize:13, fontWeight:700, color:"#F2F4F8", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
-                  {u.name || "—"}{isMe && <span style={{ marginLeft:6, fontSize:9, fontWeight:800, color:"#A78BFA", letterSpacing:1.2, textTransform:"uppercase" }}>You</span>}
-                </div>
-                <div style={{ fontSize:10.5, fontWeight:600, color:"#5E6376", textTransform:"capitalize", marginTop:2 }}>{u.role || "rep"}</div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
     </div>
   );
 }
