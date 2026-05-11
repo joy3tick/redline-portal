@@ -1073,10 +1073,11 @@ function Leads({ session, profile, w }) {
     setLeads(prev => prev.filter(l => l.id !== id));
   };
 
-  const clearDead = async () => {
-    const targets = leads.filter(l => l.status === "dead" && (isAdmin || l.assigned_to === session.user.id));
+  const clearByStatus = async (status) => {
+    const targets = leads.filter(l => l.status === status && (isAdmin || l.assigned_to === session.user.id));
     if (targets.length === 0) return;
-    if (!confirm(`Delete ${targets.length} dead lead${targets.length === 1 ? "" : "s"}? This can't be undone.`)) return;
+    const label = STATUSES.find(s => s.v === status)?.label?.toLowerCase() ?? status;
+    if (!confirm(`Delete ${targets.length} ${label} lead${targets.length === 1 ? "" : "s"}? This can't be undone.`)) return;
     const ids = targets.map(t => t.id);
     const { error } = await supabase.from("leads").delete().in("id", ids);
     if (error) { alert(`Couldn't clear: ${error.message}`); return; }
@@ -1280,15 +1281,18 @@ function Leads({ session, profile, w }) {
             </button>
           ))}
         </div>
-        {statusFilter === "dead" && (counts.dead ?? 0) > 0 && (
-          <button onClick={clearDead}
-            style={{ background:"rgba(255,51,112,0.08)", border:"1px solid rgba(255,51,112,0.3)", color:"#FF3370", fontSize:10.5, fontWeight:800, letterSpacing:1.5, textTransform:"uppercase", padding:"7px 14px", borderRadius:8, cursor:"pointer", fontFamily:"inherit", transition:"all 0.18s", display:"flex", alignItems:"center", gap:8 }}
-            onMouseEnter={e => { e.currentTarget.style.background="rgba(255,51,112,0.16)"; e.currentTarget.style.borderColor="rgba(255,51,112,0.5)"; }}
-            onMouseLeave={e => { e.currentTarget.style.background="rgba(255,51,112,0.08)"; e.currentTarget.style.borderColor="rgba(255,51,112,0.3)"; }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
-            Clear all ({counts.dead})
-          </button>
-        )}
+        {(statusFilter === "dead" || statusFilter === "contacted") && (counts[statusFilter] ?? 0) > 0 && (() => {
+          const c = STATUSES.find(s => s.v === statusFilter)?.color ?? "#FF3370";
+          return (
+            <button onClick={() => clearByStatus(statusFilter)}
+              style={{ background:`${c}14`, border:`1px solid ${c}4D`, color:c, fontSize:10.5, fontWeight:800, letterSpacing:1.5, textTransform:"uppercase", padding:"7px 14px", borderRadius:8, cursor:"pointer", fontFamily:"inherit", transition:"all 0.18s", display:"flex", alignItems:"center", gap:8 }}
+              onMouseEnter={e => { e.currentTarget.style.background=`${c}28`; e.currentTarget.style.borderColor=`${c}80`; }}
+              onMouseLeave={e => { e.currentTarget.style.background=`${c}14`; e.currentTarget.style.borderColor=`${c}4D`; }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+              Clear all ({counts[statusFilter]})
+            </button>
+          );
+        })()}
       </div>
 
       {/* Leads list */}
