@@ -430,6 +430,9 @@ button{font-family:inherit}
 }
 .profile-pill:hover { border-color:rgba(204,255,0,0.25); background:linear-gradient(180deg, rgba(204,255,0,0.05), rgba(204,255,0,0.01)) }
 
+/* Schedule day cards */
+.sched-day:hover { transform:translateY(-2px); border-color:rgba(204,255,0,0.3) !important; box-shadow:0 14px 36px rgba(0,0,0,0.45), 0 0 0 1px rgba(204,255,0,0.10) !important }
+
 /* Bottom nav (mobile) */
 .bnav {
   position:fixed; bottom:0; left:0; right:0; z-index:50;
@@ -661,7 +664,11 @@ function Scheduler({ session, profile, w }) {
   const [entries, setEntries] = useState([]);
   const [repProfiles, setRepProfiles] = useState({});
   const [loading, setLoading] = useState(true);
+  const [weekIdx, setWeekIdx] = useState(0);
   const dk = w >= 768;
+  const wd = w >= 1100;
+  const MAX = 6;
+  const MIN = 2;
 
   const getMonday = (d) => {
     const date = new Date(d); date.setHours(0,0,0,0);
@@ -672,16 +679,17 @@ function Scheduler({ session, profile, w }) {
 
   const today = new Date(); today.setHours(0,0,0,0);
   const weekStart = getMonday(today);
-  const nextWeekEnd = new Date(weekStart); nextWeekEnd.setDate(nextWeekEnd.getDate() + 11); // Fri of next week
+  const rangeEnd = new Date(weekStart); rangeEnd.setDate(rangeEnd.getDate() + 11);
 
+  const visibleStart = new Date(weekStart); visibleStart.setDate(visibleStart.getDate() + weekIdx * 7);
   const days = [];
-  for (let i = 0; i < 10; i++) {
-    const d = new Date(weekStart); d.setDate(d.getDate() + Math.floor(i/5)*7 + (i%5));
+  for (let i = 0; i < 5; i++) {
+    const d = new Date(visibleStart); d.setDate(d.getDate() + i);
     days.push(d);
   }
 
   const ds = (d) => d.toISOString().split("T")[0];
-  const startStr = ds(weekStart), endStr = ds(nextWeekEnd);
+  const startStr = ds(weekStart), endStr = ds(rangeEnd);
 
   const load = async () => {
     const [schedRes, profRes] = await Promise.all([
@@ -711,7 +719,7 @@ function Scheduler({ session, profile, w }) {
       setEntries(prev => prev.filter(e => e.id !== mine.id));
     } else {
       const dayCount = entries.filter(e => e.date === dateStr).length;
-      if (dayCount >= 6) return;
+      if (dayCount >= MAX) return;
       const { data } = await supabase.from("schedule").insert({ user_id: session.user.id, date: dateStr }).select().single();
       if (data) setEntries(prev => [...prev, data]);
     }
@@ -722,73 +730,243 @@ function Scheduler({ session, profile, w }) {
   const byDate = {};
   for (const e of entries) { if (!byDate[e.date]) byDate[e.date] = []; byDate[e.date].push(e); }
 
-  if (loading) return <div style={{ textAlign:"center", padding:60, color:"#7E8290", fontSize:13 }}>Loading schedule...</div>;
+  // Stats for visible week
+  const myBookedInWeek = days.filter(d => byDate[ds(d)]?.some(e => e.user_id === session.user.id)).length;
+  const totalBookings = days.reduce((acc, d) => acc + (byDate[ds(d)] ?? []).length, 0);
+  const fullDays = days.filter(d => (byDate[ds(d)] ?? []).length >= MAX).length;
+  const metMin = myBookedInWeek >= MIN;
+
+  // For week tab subtitles
+  const weekRange = (idx) => {
+    const s = new Date(weekStart); s.setDate(s.getDate() + idx * 7);
+    const e = new Date(s); e.setDate(e.getDate() + 4);
+    return `${MONTHS[s.getMonth()]} ${s.getDate()} — ${MONTHS[e.getMonth()]} ${e.getDate()}`;
+  };
+  const weekMyCount = (idx) => {
+    const s = new Date(weekStart); s.setDate(s.getDate() + idx * 7);
+    let c = 0;
+    for (let i = 0; i < 5; i++) {
+      const d = new Date(s); d.setDate(d.getDate() + i);
+      if (byDate[ds(d)]?.some(e => e.user_id === session.user.id)) c++;
+    }
+    return c;
+  };
+
+  if (loading) return <div style={{ textAlign:"center", padding:60, color:"#7E8290", fontSize:13 }}>Loading schedule…</div>;
+
+  const stats = [
+    {
+      label: "My Bookings",
+      value: `${myBookedInWeek}`,
+      sub: metMin ? "Above minimum ✓" : `Need ${MIN - myBookedInWeek} more`,
+      color: metMin ? "#22C55E" : "#F59E0B",
+      detail: `of ${MIN} required`,
+    },
+    {
+      label: "Team Bookings",
+      value: totalBookings,
+      sub: `${(totalBookings/5).toFixed(1)} avg per day`,
+      color: "#CCFF00",
+      detail: `across ${days.length} days`,
+    },
+    {
+      label: "Full Days",
+      value: fullDays,
+      sub: fullDays > 0 ? "at capacity" : "all days open",
+      color: fullDays > 0 ? "#F59E0B" : "#10B981",
+      detail: `of ${days.length} days`,
+    },
+  ];
 
   return (
-    <div>
-      {/* Policy notice */}
-      <div style={{ display:"flex", alignItems:"flex-start", gap:14, padding:dk?"16px 20px":"14px 16px", background:"linear-gradient(135deg, rgba(255,51,112,0.08), rgba(245,158,11,0.06))", border:"1px solid rgba(255,51,112,0.25)", borderRadius:14, marginBottom:24, animation:"fadeUp 0.4s ease" }}>
-        <div style={{ width:38, height:38, borderRadius:11, background:"rgba(255,51,112,0.12)", border:"1px solid rgba(255,51,112,0.3)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#FF3370" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    <div style={{ animation:"fadeUp 0.35s ease" }}>
+
+      {/* Week selector */}
+      <div style={{ display:"flex", gap:6, marginBottom:dk?16:12, background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:13, padding:5 }}>
+        {[0,1].map(i => {
+          const active = weekIdx === i;
+          const mine = weekMyCount(i);
+          const ok = mine >= MIN;
+          return (
+            <button key={i} onClick={() => setWeekIdx(i)}
+              style={{
+                flex:1, padding:dk?"10px 14px":"9px 10px",
+                background: active ? "linear-gradient(180deg, rgba(204,255,0,0.10), rgba(204,255,0,0.04))" : "transparent",
+                border: active ? "1px solid rgba(204,255,0,0.28)" : "1px solid transparent",
+                borderRadius:9, cursor:"pointer", fontFamily:"inherit",
+                color: active ? "#F2F4F8" : "#7E8290",
+                transition:"all 0.2s", textAlign:"left",
+                display:"flex", alignItems:"center", justifyContent:"space-between", gap:8,
+              }}>
+              <div style={{ minWidth:0 }}>
+                <div style={{ fontSize:dk?12:11, fontWeight:800, letterSpacing:1.2, textTransform:"uppercase", color: active ? "#CCFF00" : "#7E8290" }}>
+                  {i === 0 ? "This Week" : "Next Week"}
+                </div>
+                <div style={{ fontSize:dk?10.5:9.5, fontWeight:600, color: active ? "#888D9C" : "#4A4E5C", marginTop:2 }}>
+                  {weekRange(i)}
+                </div>
+              </div>
+              <div style={{ display:"flex", alignItems:"center", gap:4, padding:"3px 8px", borderRadius:8, background: ok ? "rgba(34,197,94,0.10)" : "rgba(245,158,11,0.10)", border:`1px solid ${ok ? "rgba(34,197,94,0.22)" : "rgba(245,158,11,0.22)"}` }}>
+                <span style={{ fontSize:dk?11:10, fontWeight:800, color: ok ? "#22C55E" : "#F59E0B" }}>{mine}</span>
+                <span style={{ fontSize:8.5, fontWeight:700, color: ok ? "#22C55E99" : "#F59E0B99", letterSpacing:0.5 }}>/{MIN}</span>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Stats row */}
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:dk?10:6, marginBottom:dk?18:14 }}>
+        {stats.map(s => (
+          <div key={s.label} style={{ background:`linear-gradient(160deg, ${s.color}10, ${s.color}04)`, border:`1px solid ${s.color}22`, borderRadius:13, padding:dk?"13px 14px":"10px 11px", position:"relative", overflow:"hidden" }}>
+            <div style={{ fontSize:8.5, fontWeight:800, color:`${s.color}AA`, letterSpacing:1.8, textTransform:"uppercase" }}>{s.label}</div>
+            <div style={{ display:"flex", alignItems:"baseline", gap:5, marginTop:dk?6:4 }}>
+              <span style={{ fontSize:dk?28:22, fontWeight:900, color:s.color, lineHeight:1, letterSpacing:"-0.02em" }}>{s.value}</span>
+              <span style={{ fontSize:dk?10:9, fontWeight:700, color:"#5C6175", letterSpacing:0.3 }}>{s.detail}</span>
+            </div>
+            <div style={{ fontSize:dk?10.5:9.5, fontWeight:600, color:`${s.color}CC`, marginTop:dk?6:4 }}>{s.sub}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Day cards grid */}
+      <div style={{ display:"grid", gridTemplateColumns: dk ? "repeat(5,1fr)" : "1fr", gap:dk?10:9 }}>
+        {days.map((day, di) => {
+          const dateStr = ds(day);
+          const dayEntries = byDate[dateStr] ?? [];
+          const isPast = day < today;
+          const isToday = dateStr === ds(today);
+          const isMine = dayEntries.some(e => e.user_id === session.user.id);
+          const count = dayEntries.length;
+          const isFull = count >= MAX && !isMine;
+          const pct = (count / MAX) * 100;
+          const capColor = count >= MAX ? "#F59E0B" : count >= 4 ? "#FFD700" : count >= 1 ? "#22C55E" : "#3A3E4A";
+          const clickable = !isPast && !isFull;
+          const openSpots = MAX - count;
+
+          return (
+            <div key={dateStr} onClick={() => clickable && toggle(day)}
+              className={clickable ? "sched-day" : ""}
+              style={{
+                background: isMine
+                  ? "linear-gradient(160deg, rgba(204,255,0,0.07), rgba(204,255,0,0.015))"
+                  : "linear-gradient(160deg, rgba(22,24,31,0.92), rgba(14,15,20,0.94))",
+                border: `1.5px solid ${isMine ? "rgba(204,255,0,0.38)" : isToday ? "rgba(204,255,0,0.18)" : "rgba(255,255,255,0.06)"}`,
+                borderRadius: 16,
+                padding: dk ? "14px 13px 0" : "12px 12px 0",
+                cursor: clickable ? "pointer" : "default",
+                opacity: isPast ? 0.42 : 1,
+                transition: "transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease",
+                position: "relative",
+                boxShadow: isMine ? "0 8px 28px rgba(204,255,0,0.10)" : "0 4px 18px rgba(0,0,0,0.30)",
+                display:"flex", flexDirection:"column",
+              }}>
+
+              {/* Header */}
+              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:10 }}>
+                <div>
+                  <div style={{ fontSize:9.5, fontWeight:800, color: isToday ? "#CCFF00" : "#7E8290", letterSpacing:2.4 }}>
+                    {DAY_NAMES[di]}
+                  </div>
+                  <div style={{ display:"flex", alignItems:"baseline", gap:5, marginTop:3 }}>
+                    <span style={{ fontSize:dk?22:20, fontWeight:900, color:isPast?"#7E8290":"#F2F4F8", lineHeight:1, letterSpacing:"-0.02em" }}>{day.getDate()}</span>
+                    <span style={{ fontSize:11, fontWeight:600, color:"#5C6175" }}>{MONTHS[day.getMonth()]}</span>
+                  </div>
+                </div>
+                <div style={{ display:"flex", flexDirection:"column", alignItems:"flex-end", gap:4 }}>
+                  {isToday && <span style={{ fontSize:8.5, fontWeight:800, color:"#15171E", background:"#CCFF00", padding:"3px 7px", borderRadius:6, letterSpacing:1.2, textTransform:"uppercase" }}>Today</span>}
+                  {isMine && !isToday && <span style={{ fontSize:8.5, fontWeight:800, color:"#CCFF00", background:"rgba(204,255,0,0.10)", border:"1px solid rgba(204,255,0,0.28)", padding:"2px 6px", borderRadius:6, letterSpacing:1.2, textTransform:"uppercase" }}>You</span>}
+                  {isFull && !isMine && <span style={{ fontSize:8.5, fontWeight:800, color:"#F59E0B", background:"rgba(245,158,11,0.10)", border:"1px solid rgba(245,158,11,0.28)", padding:"2px 6px", borderRadius:6, letterSpacing:1.2, textTransform:"uppercase" }}>Full</span>}
+                </div>
+              </div>
+
+              {/* Capacity bar */}
+              <div style={{ marginBottom:11 }}>
+                <div style={{ height:5, borderRadius:3, background:"rgba(255,255,255,0.05)", overflow:"hidden" }}>
+                  <div style={{ height:"100%", width:`${pct}%`, background: capColor, transition:"width 0.45s ease", boxShadow:count>0?`0 0 8px ${capColor}80`:"none" }} />
+                </div>
+                <div style={{ display:"flex", justifyContent:"space-between", marginTop:5 }}>
+                  <span style={{ fontSize:9, fontWeight:800, letterSpacing:1, textTransform:"uppercase", color:capColor }}>{count}/{MAX} booked</span>
+                  <span style={{ fontSize:9, fontWeight:700, letterSpacing:0.8, textTransform:"uppercase", color: count >= MAX ? "#F59E0B" : count >= 4 ? "#FFD70099" : "#3A3E4A" }}>
+                    {count >= MAX ? "Full" : count >= 4 ? "Filling" : count === 0 ? "Empty" : "Open"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Reps */}
+              <div style={{ display:"flex", flexDirection:"column", gap:4, flex:1 }}>
+                {dayEntries.map(e => {
+                  const isMe = e.user_id === session.user.id;
+                  const name = repProfiles[e.user_id] || "Rep";
+                  return (
+                    <div key={e.id} style={{
+                      display:"flex", alignItems:"center", gap:7, padding:"5px 8px",
+                      background: isMe ? "rgba(204,255,0,0.12)" : "rgba(255,255,255,0.025)",
+                      border: `1px solid ${isMe ? "rgba(204,255,0,0.28)" : "rgba(255,255,255,0.05)"}`,
+                      borderRadius:8,
+                    }}>
+                      <div style={{
+                        width:20, height:20, borderRadius:6,
+                        background: isMe ? "linear-gradient(135deg,#CCFF00,#6E9100)" : "rgba(255,255,255,0.07)",
+                        display:"flex", alignItems:"center", justifyContent:"center",
+                        fontSize:9.5, fontWeight:900,
+                        color: isMe ? "#15171E" : "#A0A4B0",
+                        flexShrink:0,
+                        boxShadow: isMe ? "0 2px 6px rgba(204,255,0,0.35)" : "none",
+                      }}>
+                        {name[0]?.toUpperCase()}
+                      </div>
+                      <span style={{ fontSize:11, fontWeight:600, color: isMe ? "#F2F4F8" : "#C4C9D4", flex:1, minWidth:0, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                        {name}
+                      </span>
+                    </div>
+                  );
+                })}
+                {openSpots > 0 && (
+                  <div style={{
+                    padding:"5px 8px", border:"1px dashed rgba(255,255,255,0.08)",
+                    borderRadius:8, textAlign:"center",
+                    fontSize:9.5, fontWeight:700, color:"#4A4E5C",
+                    letterSpacing:1, textTransform:"uppercase",
+                  }}>
+                    {openSpots} {openSpots === 1 ? "spot" : "spots"} open
+                  </div>
+                )}
+              </div>
+
+              {/* CTA footer */}
+              <div style={{
+                marginTop:10, marginLeft:-13, marginRight:-13,
+                padding:"9px 12px",
+                borderTop:"1px solid rgba(255,255,255,0.05)",
+                textAlign:"center",
+                background: isMine ? "rgba(204,255,0,0.04)" : "transparent",
+              }}>
+                {isPast ? (
+                  <span style={{ fontSize:9.5, color:"#3A3E4A", fontWeight:700, letterSpacing:1.2, textTransform:"uppercase" }}>Past</span>
+                ) : isMine ? (
+                  <span style={{ fontSize:9.5, color:"#FF3370", fontWeight:800, letterSpacing:1.2, textTransform:"uppercase" }}>Tap to cancel</span>
+                ) : isFull ? (
+                  <span style={{ fontSize:9.5, color:"#F59E0B", fontWeight:700, letterSpacing:1.2, textTransform:"uppercase" }}>Day is full</span>
+                ) : (
+                  <span style={{ fontSize:9.5, color:"#CCFF00", fontWeight:800, letterSpacing:1.2, textTransform:"uppercase" }}>+ Book this day</span>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Policy notice — compact, at bottom */}
+      <div style={{ display:"flex", alignItems:"center", gap:11, padding:dk?"11px 15px":"10px 12px", background:"rgba(255,51,112,0.05)", border:"1px solid rgba(255,51,112,0.15)", borderRadius:11, marginTop:dk?18:14 }}>
+        <div style={{ width:26, height:26, borderRadius:8, background:"rgba(255,51,112,0.12)", border:"1px solid rgba(255,51,112,0.25)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#FF3370" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         </div>
-        <div style={{ flex:1, minWidth:0 }}>
-          <div style={{ fontSize:9.5, fontWeight:800, color:"#FF3370", letterSpacing:2.5, textTransform:"uppercase", marginBottom:4 }}>Mandatory Policy</div>
-          <div style={{ fontSize:dk?13.5:12.5, fontWeight:700, color:"#F2F4F8", lineHeight:1.45, marginBottom:4 }}>
-            2-day minimum office attendance per week
-          </div>
-          <div style={{ fontSize:dk?12.5:11.5, color:"#C4C8D4", lineHeight:1.55, fontWeight:500 }}>
-            Every rep must book at least <span style={{ color:"#FF3370", fontWeight:700 }}>2 days</span> in the office each week. Failure to meet this minimum is grounds for <span style={{ color:"#FF3370", fontWeight:700 }}>termination</span>. No exceptions.
-          </div>
+        <div style={{ fontSize:dk?11.5:10.5, color:"#C4C8D4", fontWeight:500, lineHeight:1.45 }}>
+          <span style={{ color:"#FF3370", fontWeight:800, letterSpacing:0.3 }}>Policy:</span> Reps must book a minimum of <span style={{ color:"#F2F4F8", fontWeight:700 }}>{MIN} days</span> per week. Missing this minimum is grounds for <span style={{ color:"#FF3370", fontWeight:700 }}>termination</span>.
         </div>
       </div>
 
-      {[0,1].map(week => (
-        <div key={week} style={{ marginBottom:32, animation:"fadeUp 0.4s ease" }}>
-          <div style={{ display:"flex", alignItems:"center", gap:12, paddingBottom:14 }}>
-            <div style={{ fontSize:10, fontWeight:700, color: week===0?"#CCFF00":"#F59E0B", letterSpacing:3, textTransform:"uppercase" }}>{week===0?"This Week":"Next Week"}</div>
-            <div style={{ flex:1, height:1, background:"#1F2229" }} />
-          </div>
-          <div style={{ display:"grid", gridTemplateColumns:dk?"repeat(5,1fr)":"repeat(2,1fr)", gap:10 }}>
-            {days.slice(week*5, week*5+5).map((day, di) => {
-              const dateStr = ds(day);
-              const dayEntries = byDate[dateStr] ?? [];
-              const isPast = day < today;
-              const isToday = dateStr === ds(today);
-              const isMine = dayEntries.some(e => e.user_id === session.user.id);
-              const isFull = dayEntries.length >= 6 && !isMine;
-              return (
-                <div key={dateStr} onClick={() => !isPast && !isFull && toggle(day)}
-                  className={isPast || isFull ? "" : "card-hover"}
-                  style={{ background: isMine?"#CCFF0008":"#23262E", border:"1px solid "+(isMine?"#CCFF0030":isToday?"#404450":"#2D3038"), borderRadius:16, padding:"16px 14px", cursor:isPast||isFull?"default":"pointer", opacity:isPast?0.35:1, transition:"all 0.2s", minHeight:140, position:"relative" }}>
-                  {isToday && !isFull && <div style={{ position:"absolute", top:10, right:12, fontSize:8, fontWeight:700, color:"#CCFF00", letterSpacing:2, textTransform:"uppercase" }}>Today</div>}
-                  {isFull && <div style={{ position:"absolute", top:10, right:12, fontSize:8, fontWeight:700, color:"#F59E0B", letterSpacing:2, textTransform:"uppercase" }}>Full</div>}
-                  <div style={{ fontSize:9, fontWeight:700, color:isToday?"#CCFF00":"#7E8290", letterSpacing:2, marginBottom:4 }}>{DAY_NAMES[di]}</div>
-                  <div style={{ fontSize:22, fontWeight:800, color:isToday?"#FFF":"#8A8E98", marginBottom:4, lineHeight:1 }}>
-                    {day.getDate()} <span style={{ fontSize:12, fontWeight:500, color:"#7E8290" }}>{MONTHS[day.getMonth()]}</span>
-                  </div>
-                  <div style={{ fontSize:9, color:"#5C6175", marginBottom:12, letterSpacing:1, display:"flex", justifyContent:"space-between" }}>
-                    <span>9:00 AM – 5:00 PM</span>
-                    <span style={{ color: dayEntries.length >= 6 ? "#F59E0B" : "#5C6175" }}>{dayEntries.length}/6</span>
-                  </div>
-                  <div style={{ display:"flex", flexDirection:"column", gap:5 }}>
-                    {dayEntries.map(e => (
-                      <div key={e.id} style={{ fontSize:11, fontWeight:600, color:e.user_id===session.user.id?"#CCFF00":"#D6DAE2", background:e.user_id===session.user.id?"#CCFF0012":"#2B2E37", border:"1px solid "+(e.user_id===session.user.id?"#CCFF0025":"#3D414B"), borderRadius:6, padding:"4px 8px" }}>
-                        {repProfiles[e.user_id] || "Rep"}
-                      </div>
-                    ))}
-                    {dayEntries.length === 0 && !isPast && (
-                      <div style={{ fontSize:10, color:"#5C6175" }}>+ Add yourself</div>
-                    )}
-                    {isFull && !isMine && (
-                      <div style={{ fontSize:10, color:"#F59E0B88" }}>Day is full</div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      ))}
     </div>
   );
 }
