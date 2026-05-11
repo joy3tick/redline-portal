@@ -1160,10 +1160,29 @@ function Leads({ session, profile, w }) {
   return (
     <div style={{ animation:"fadeUp 0.35s ease", display:"flex", flexDirection:"column", gap:14 }}>
 
+      {/* Pipeline overview */}
+      {!loading && totalForFilter > 0 && (
+        <div className="dash-card" style={{ padding:dk?"16px 22px":"14px 16px" }}>
+          <div style={{ display:"flex", alignItems:"baseline", justifyContent:"space-between", flexWrap:"wrap", gap:14 }}>
+            <div>
+              <div style={{ fontSize:9.5, fontWeight:800, color:"#5E6376", letterSpacing:2.5, textTransform:"uppercase" }}>Pipeline</div>
+              <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?38:32, lineHeight:1, color:"#F2F4F8", letterSpacing:0.5, marginTop:4, fontVariantNumeric:"tabular-nums" }}>{totalForFilter}<span style={{ fontSize:dk?14:12, color:"#5E6376", marginLeft:8, letterSpacing:1.5, fontFamily:"'Inter',sans-serif", fontWeight:600 }}>leads</span></div>
+            </div>
+            <div style={{ display:"flex", gap:dk?20:14, flexWrap:"wrap" }}>
+              {STATUSES.filter(s => (counts[s.v] ?? 0) > 0).map(s => (
+                <div key={s.v}>
+                  <div style={{ fontSize:9, fontWeight:800, color:s.color, letterSpacing:1.8, textTransform:"uppercase" }}>{s.label}</div>
+                  <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?22:20, lineHeight:1, color:"#F2F4F8", marginTop:3, fontVariantNumeric:"tabular-nums" }}>{counts[s.v] ?? 0}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Admin upload card */}
       {isAdmin && (
         <div className="dash-card" style={{ padding:dk?"20px 22px":"16px 18px" }}>
-          <div style={{ position:"absolute", top:0, left:0, right:0, height:2, background:"linear-gradient(90deg,transparent,#F59E0B80,transparent)", opacity:0.5 }} />
           <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:14, flexWrap:"wrap", gap:10 }}>
             <div style={{ fontSize:10, fontWeight:800, color:"#F59E0B", letterSpacing:2.5, textTransform:"uppercase" }}>Assign Leads · CSV Upload</div>
           </div>
@@ -1251,13 +1270,14 @@ function Leads({ session, profile, w }) {
       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", gap:10, flexWrap:"wrap" }}>
         <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
           <button onClick={() => setStatusFilter("all")}
-            style={{ background: statusFilter === "all" ? "rgba(204,255,0,0.1)" : "rgba(255,255,255,0.04)", border:`1px solid ${statusFilter === "all" ? "rgba(204,255,0,0.25)" : "rgba(255,255,255,0.07)"}`, color: statusFilter === "all" ? "#CCFF00" : "#9098A8", fontSize:10.5, fontWeight:800, letterSpacing:1.5, textTransform:"uppercase", padding:"7px 12px", borderRadius:8, cursor:"pointer", fontFamily:"inherit", transition:"all 0.18s", display:"flex", alignItems:"center", gap:8 }}>
-            All <span style={{ background:"rgba(255,255,255,0.06)", padding:"1px 6px", borderRadius:4, fontSize:10 }}>{totalForFilter}</span>
+            style={{ background: statusFilter === "all" ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.02)", border:`1px solid ${statusFilter === "all" ? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.06)"}`, color: statusFilter === "all" ? "#F2F4F8" : "#7E8595", fontSize:11, fontWeight:700, letterSpacing:1.2, textTransform:"uppercase", padding:"8px 14px", borderRadius:10, cursor:"pointer", fontFamily:"inherit", transition:"all 0.18s", display:"flex", alignItems:"center", gap:8 }}>
+            All <span style={{ fontVariantNumeric:"tabular-nums", color: statusFilter === "all" ? "#A8AEBA" : "#5E6376", fontSize:11 }}>{totalForFilter}</span>
           </button>
           {STATUSES.map(s => (
             <button key={s.v} onClick={() => setStatusFilter(s.v)}
-              style={{ background: statusFilter === s.v ? `${s.color}14` : "rgba(255,255,255,0.04)", border:`1px solid ${statusFilter === s.v ? `${s.color}40` : "rgba(255,255,255,0.07)"}`, color: statusFilter === s.v ? s.color : "#9098A8", fontSize:10.5, fontWeight:800, letterSpacing:1.5, textTransform:"uppercase", padding:"7px 12px", borderRadius:8, cursor:"pointer", fontFamily:"inherit", transition:"all 0.18s", display:"flex", alignItems:"center", gap:8 }}>
-              {s.label} <span style={{ background:"rgba(255,255,255,0.06)", padding:"1px 6px", borderRadius:4, fontSize:10 }}>{counts[s.v] ?? 0}</span>
+              style={{ background: statusFilter === s.v ? `${s.color}14` : "rgba(255,255,255,0.02)", border:`1px solid ${statusFilter === s.v ? `${s.color}40` : "rgba(255,255,255,0.06)"}`, color: statusFilter === s.v ? s.color : "#7E8595", fontSize:11, fontWeight:700, letterSpacing:1.2, textTransform:"uppercase", padding:"8px 14px", borderRadius:10, cursor:"pointer", fontFamily:"inherit", transition:"all 0.18s", display:"flex", alignItems:"center", gap:8 }}>
+              <span style={{ width:6, height:6, borderRadius:"50%", background:s.color, opacity: statusFilter === s.v ? 1 : 0.5 }} />
+              {s.label} <span style={{ fontVariantNumeric:"tabular-nums", color: statusFilter === s.v ? s.color : "#5E6376", fontSize:11 }}>{counts[s.v] ?? 0}</span>
             </button>
           ))}
         </div>
@@ -1290,25 +1310,23 @@ function Leads({ session, profile, w }) {
             const isExpanded = expandedId === l.id;
             const data = l.data || {};
             return (
-              <div key={l.id} className="dash-card" style={{ padding:dk?"14px 18px":"12px 14px", animation:`fadeUp 0.3s ease ${0.03*i}s both` }}>
+              <div key={l.id} className="dash-card" style={{ padding:0, animation:`fadeUp 0.3s ease ${0.03*i}s both`, overflow:"hidden", position:"relative" }}>
+                <div style={{ position:"absolute", left:0, top:0, bottom:0, width:3, background:s.color, opacity:isExpanded?1:0.7 }} />
                 <div onClick={() => { setExpandedId(isExpanded ? null : l.id); setDraftNote(l.note || ""); }}
-                  style={{ display:"flex", alignItems:"center", gap:14, cursor:"pointer" }}>
-                  <div style={{ width:38, height:38, borderRadius:10, background:`${s.color}14`, border:`1px solid ${s.color}30`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={s.color} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
-                  </div>
+                  style={{ display:"flex", alignItems:"center", gap:dk?16:12, cursor:"pointer", padding:dk?"16px 20px 16px 22px":"14px 14px 14px 18px" }}>
                   <div style={{ flex:1, minWidth:0 }}>
-                    <div style={{ fontSize:13.5, fontWeight:700, color:"#EEF2F8", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{primaryLine(data)}</div>
-                    {secondaryLine(data) && <div style={{ fontSize:11.5, color:"#666C7E", marginTop:3, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{secondaryLine(data)}</div>}
+                    <div style={{ fontSize:dk?14.5:13.5, fontWeight:700, color:"#EEF2F8", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", letterSpacing:"-0.005em" }}>{primaryLine(data)}</div>
+                    {secondaryLine(data) && <div style={{ fontSize:11.5, color:"#666C7E", marginTop:4, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{secondaryLine(data)}</div>}
                   </div>
                   <span style={{ fontSize:9, fontWeight:800, color:s.color, background:`${s.color}14`, border:`1px solid ${s.color}30`, padding:"4px 9px", borderRadius:5, letterSpacing:1.5, textTransform:"uppercase", flexShrink:0 }}>{s.label}</span>
                   {isAdmin && (
-                    <span style={{ fontSize:10.5, fontWeight:700, color:"#9098A8", flexShrink:0, paddingLeft:4 }}>→ {repById[l.assigned_to] || "Rep"}</span>
+                    <span style={{ fontSize:10.5, fontWeight:700, color:"#9098A8", flexShrink:0 }}>→ {repById[l.assigned_to] || "Rep"}</span>
                   )}
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5E6376" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0, transform: isExpanded ? "rotate(90deg)" : "none", transition:"transform 0.18s" }}><polyline points="9 18 15 12 9 6"/></svg>
                 </div>
 
                 {isExpanded && (
-                  <div style={{ marginTop:14, paddingTop:14, borderTop:"1px solid rgba(255,255,255,0.05)", display:"flex", flexDirection:"column", gap:12, animation:"fadeUp 0.2s ease" }}>
+                  <div style={{ padding:dk?"16px 20px 18px 22px":"14px 14px 16px 18px", borderTop:"1px solid rgba(255,255,255,0.06)", display:"flex", flexDirection:"column", gap:14, animation:"fadeUp 0.2s ease" }}>
                     {/* All CSV fields */}
                     <div style={{ display:"grid", gridTemplateColumns:dk?"repeat(auto-fill, minmax(200px, 1fr))":"1fr", gap:10 }}>
                       {Object.entries(data).map(([k, v]) => (
