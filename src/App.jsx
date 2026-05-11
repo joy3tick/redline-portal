@@ -542,7 +542,7 @@ function Login() {
             <RedlineLogo height={52} />
           </div>
           <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:38, letterSpacing:12, color:"#F2F4F8", lineHeight:1 }}>REDLINE</div>
-          <div style={{ fontSize:10.5, fontWeight:700, color:"#5E6376", letterSpacing:5, textTransform:"uppercase", marginTop:8 }}>Rep Portal</div>
+          <div style={{ fontSize:10.5, fontWeight:700, color:"#5E6376", letterSpacing:5, textTransform:"uppercase", marginTop:8 }}>Portal</div>
         </div>
 
         <div style={{ background:"linear-gradient(145deg,rgba(16,18,24,0.99),rgba(11,12,17,0.99))", border:"1px solid rgba(255,255,255,0.07)", borderRadius:24, padding:"36px 32px 32px", boxShadow:"0 24px 80px rgba(0,0,0,0.65), 0 0 0 1px rgba(204,255,0,0.06)" }}>
@@ -3353,7 +3353,7 @@ export default function App() {
                 <RedlineLogo height={dk?32:26} />
                 <div>
                   <div className="title-display" style={{ fontSize:dk?24:19, color:"#F2F4F8" }}>REDLINE</div>
-                  <div style={{ fontSize:9, fontWeight:800, color:"#CCFF00", letterSpacing:3.5, textTransform:"uppercase", marginTop:3 }}>Rep Portal</div>
+                  <div style={{ fontSize:9, fontWeight:800, color:"#CCFF00", letterSpacing:3.5, textTransform:"uppercase", marginTop:3 }}>Portal</div>
                 </div>
               </div>
 

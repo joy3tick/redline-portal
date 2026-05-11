@@ -1,5 +1,5 @@
 -- ============================================================
--- Redline Rep Portal — Supabase Database Schema
+-- Redline Portal — Supabase Database Schema
 -- Run this in the Supabase SQL Editor for your project.
 -- ============================================================
 
