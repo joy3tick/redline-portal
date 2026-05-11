@@ -314,3 +314,38 @@ begin
     alter publication supabase_realtime add table public.leads;
   end if;
 end $$;
+
+-- ─── CUSTOM ROLES ────────────────────────────────────────────
+-- Admin can create custom roles (Sales Manager, Marketing Specialist, etc.)
+-- with their own per-tab visibility. The built-in 'admin' and 'rep' roles
+-- are seeded and cannot be deleted. profiles.role references roles.name
+-- by convention (no FK constraint so admin can rename / migrate freely).
+create table if not exists public.roles (
+  name         text primary key,
+  label        text not null,
+  allowed_tabs text[] not null default '{}'::text[],
+  is_builtin   boolean not null default false,
+  created_at   timestamptz default now()
+);
+
+alter table public.roles enable row level security;
+
+create policy "Authenticated read roles"
+  on public.roles for select
+  using (auth.role() = 'authenticated');
+
+create policy "Admins manage roles"
+  on public.roles for all
+  using (public.is_admin());
+
+-- Seed built-in roles with full access
+insert into public.roles (name, label, allowed_tabs, is_builtin)
+values
+  ('admin', 'Admin',     array['dashboard','announcements','chat','leads','leaderboard','scheduling','training','reference'], true),
+  ('rep',   'Sales Rep', array['dashboard','announcements','chat','leads','leaderboard','scheduling','training','reference'], true)
+on conflict (name) do nothing;
+
+-- Loosen profiles.role so admin-created roles can be assigned to users.
+-- Built-in 'admin' is still the only role that grants admin powers (the
+-- is_admin() function checks role = 'admin' literally).
+alter table public.profiles drop constraint if exists profiles_role_check;
