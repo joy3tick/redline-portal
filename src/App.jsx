@@ -1002,7 +1002,9 @@ function Leads({ session, profile, w }) {
 
   const onFile = async (file) => {
     if (!file) return;
-    const text = await file.text();
+    let text = await file.text();
+    // Strip UTF-8 BOM that Excel and Google Sheets often prepend; otherwise the first header key starts with ﻿ and lookups miss.
+    if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
     const rows = parseCSV(text);
     if (rows.length < 2) {
       alert("CSV needs a header row and at least one data row.");
@@ -1371,9 +1373,6 @@ function Chat({ session, profile, w, width, minW = 220, maxW = 520, onResize }) 
   const [body, setBody] = useState("");
   const [sending, setSending] = useState(false);
   const [typing, setTyping] = useState({}); // { uid: { name, t: epoch } }
-  const [unread, setUnread] = useState(0);
-  const openRef = useRef(open);
-  useEffect(() => { openRef.current = open; if (open) setUnread(0); }, [open]);
   const scrollRef = useRef(null);
   const stickyRef = useRef(true);
   const channelRef = useRef(null);
@@ -1404,10 +1403,6 @@ function Chat({ session, profile, w, width, minW = 220, maxW = 520, onResize }) 
           if (!prev[payload.new.user_id]) return prev;
           const next = { ...prev }; delete next[payload.new.user_id]; return next;
         });
-        // Bump unread badge if widget is closed and the message isn't ours
-        if (!openRef.current && payload.new.user_id !== session.user.id) {
-          setUnread(u => u + 1);
-        }
       })
       .on("postgres_changes", { event: "DELETE", schema: "public", table: "messages" }, (payload) => {
         setMsgs(prev => prev.filter(m => m.id !== payload.old.id));
@@ -2145,17 +2140,24 @@ function Leaderboard({ session, profile, w }) {
       description: bonusForm.description.trim() || null,
     };
     if (editingBonus) {
-      await supabase.from("monthly_bonuses").update(payload).eq("id", editingBonus.id);
+      const { error } = await supabase
+        .from("monthly_bonuses")
+        .update(payload)
+        .eq("id", editingBonus.id);
+      if (error) { alert(`Couldn't save bonus: ${error.message}`); return; }
     } else {
       // Replace any prior active bonus with the new one.
-      await supabase.from("monthly_bonuses").delete().not("id", "is", null);
-      await supabase.from("monthly_bonuses").insert(payload);
+      const delRes = await supabase.from("monthly_bonuses").delete().not("id", "is", null);
+      if (delRes.error) { alert(`Couldn't clear old bonus: ${delRes.error.message}`); return; }
+      const insRes = await supabase.from("monthly_bonuses").insert(payload);
+      if (insRes.error) { alert(`Couldn't add bonus: ${insRes.error.message}`); return; }
     }
     resetBonusForm();
   };
 
   const deleteBonus = async (id) => {
-    await supabase.from("monthly_bonuses").delete().eq("id", id);
+    const { error } = await supabase.from("monthly_bonuses").delete().eq("id", id);
+    if (error) { alert(`Couldn't delete bonus: ${error.message}`); }
   };
 
   const addSale = async () => {
@@ -2369,8 +2371,12 @@ function Leaderboard({ session, profile, w }) {
                   <div style={{ fontSize:10, color:"#5E6376", flexShrink:0 }}>{new Date(s.sale_date).toLocaleDateString("en-US",{month:"short",day:"numeric"})}</div>
                   {isOwn && (
                     <button onClick={async () => {
-                      await supabase.from("sales").delete().eq("id", s.id);
                       setSales(prev => prev.filter(x => x.id !== s.id));
+                      const { error } = await supabase.from("sales").delete().eq("id", s.id);
+                      if (error) {
+                        alert(`Couldn't delete sale: ${error.message}`);
+                        setSales(prev => prev.some(x => x.id === s.id) ? prev : [s, ...prev].sort((a,b) => new Date(b.created_at) - new Date(a.created_at)));
+                      }
                     }} style={{ background:"none", border:"none", color:"#5E6376", fontSize:16, cursor:"pointer", padding:"0 2px", lineHeight:1, flexShrink:0, transition:"color 0.15s" }}
                       onMouseEnter={e => e.target.style.color="#FF3370"}
                       onMouseLeave={e => e.target.style.color="#5E6376"}>
@@ -2952,8 +2958,17 @@ export default function App() {
   const saveName = async () => {
     const trimmed = nameEdit.trim();
     if (!trimmed) return;
-    await supabase.from("profiles").update({ name: trimmed }).eq("id", session.user.id);
-    setProfile(prev => ({ ...prev, name: trimmed }));
+    const { data, error } = await supabase
+      .from("profiles")
+      .update({ name: trimmed })
+      .eq("id", session.user.id)
+      .select()
+      .single();
+    if (error || !data) {
+      alert(`Couldn't save name: ${error?.message ?? "no row returned"}`);
+      return;
+    }
+    setProfile(prev => ({ ...prev, name: data.name }));
     setShowNameEdit(false);
   };
 
