@@ -1572,13 +1572,16 @@ function Chat({ session, profile, w, width, minW = 220, maxW = 520, onResize }) 
           position:"fixed", left:0, top:0, bottom:0, zIndex:40,
           width:sidebarW,
           display:"flex", flexDirection:"column",
-          background:"linear-gradient(180deg, rgba(14,15,20,0.96), rgba(11,12,16,0.96))",
-          backdropFilter:"blur(22px) saturate(140%)",
-          WebkitBackdropFilter:"blur(22px) saturate(140%)",
+          background:"linear-gradient(180deg, rgba(18,20,26,0.97), rgba(11,12,16,0.97))",
+          backdropFilter:"blur(24px) saturate(140%)",
+          WebkitBackdropFilter:"blur(24px) saturate(140%)",
           borderRight:"1px solid rgba(255,255,255,0.06)",
-          boxShadow:"6px 0 30px rgba(0,0,0,0.35)",
+          boxShadow:"8px 0 40px rgba(0,0,0,0.45)",
+          overflow:"hidden",
         }}>
-        <div style={{ position:"absolute", top:0, left:0, right:0, height:2, background:"linear-gradient(90deg,transparent,#CCFF0080,transparent)", opacity:0.5 }} />
+        <div style={{ position:"absolute", top:0, left:0, right:0, height:2, background:"linear-gradient(90deg,transparent,#CCFF00,transparent)", opacity:0.7, boxShadow:"0 0 14px rgba(204,255,0,0.5)" }} />
+        {/* Subtle chartreuse glow at the top of the sidebar */}
+        <div style={{ position:"absolute", top:-120, left:"50%", transform:"translateX(-50%)", width:"110%", height:280, background:"radial-gradient(ellipse at top, rgba(204,255,0,0.10), transparent 70%)", pointerEvents:"none" }} aria-hidden="true" />
 
         {/* Resize handle */}
         <div
@@ -1599,12 +1602,16 @@ function Chat({ session, profile, w, width, minW = 220, maxW = 520, onResize }) 
         </div>
 
         {/* Header */}
-        <div style={{ display:"flex", alignItems:"center", padding:"16px 18px", borderBottom:"1px solid rgba(255,255,255,0.05)", flexShrink:0 }}>
-          <div style={{ fontSize:13, fontWeight:800, color:"#F2F4F8", letterSpacing:"-0.01em" }}>Team Chat</div>
+        <div style={{ display:"flex", alignItems:"center", gap:10, padding:"18px 20px", borderBottom:"1px solid rgba(255,255,255,0.05)", flexShrink:0, position:"relative" }}>
+          <span className="chat-status-dot" aria-hidden="true" />
+          <div style={{ fontSize:13.5, fontWeight:800, color:"#F2F4F8", letterSpacing:"-0.01em" }}>Team Chat</div>
         </div>
 
         {/* Messages */}
-        <div ref={scrollRef} onScroll={onScroll} style={{ flex:1, overflowY:"auto", padding:dk?"16px 22px":"14px 16px" }}>
+        <div style={{ flex:1, position:"relative", minHeight:0 }}>
+          {/* Top fade — softens the line where messages disappear under the header */}
+          <div aria-hidden="true" style={{ position:"absolute", top:0, left:0, right:0, height:24, background:"linear-gradient(180deg, rgba(11,12,16,0.85), transparent)", pointerEvents:"none", zIndex:1 }} />
+          <div ref={scrollRef} onScroll={onScroll} className="chat-scroll" style={{ position:"absolute", inset:0, overflowY:"auto", padding:dk?"16px 22px":"14px 16px" }}>
           {loading ? (
             <div style={{ textAlign:"center", padding:60, color:"#666C7E", fontSize:13 }}>Loading…</div>
           ) : msgs.length === 0 ? (
@@ -1619,10 +1626,10 @@ function Chat({ session, profile, w, width, minW = 220, maxW = 520, onResize }) 
             <div style={{ display:"flex", flexDirection:"column", gap:2 }}>
               {grouped.map(g => {
                 if (g.kind === "day") return (
-                  <div key={g.id} style={{ display:"flex", alignItems:"center", gap:12, margin:"16px 0 10px" }}>
-                    <div style={{ flex:1, height:1, background:"rgba(255,255,255,0.05)" }} />
-                    <div style={{ fontSize:9.5, fontWeight:800, color:"#666C7E", letterSpacing:2, textTransform:"uppercase" }}>{g.label}</div>
-                    <div style={{ flex:1, height:1, background:"rgba(255,255,255,0.05)" }} />
+                  <div key={g.id} style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:12, margin:"22px 0 12px" }}>
+                    <div style={{ flex:1, height:1, background:"linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent)" }} />
+                    <div style={{ fontSize:9, fontWeight:800, color:"#7E8595", letterSpacing:2, textTransform:"uppercase", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.06)", padding:"4px 10px", borderRadius:999, whiteSpace:"nowrap" }}>{g.label}</div>
+                    <div style={{ flex:1, height:1, background:"linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent)" }} />
                   </div>
                 );
                 const isMe = g.user_id === session.user.id;
@@ -1631,24 +1638,24 @@ function Chat({ session, profile, w, width, minW = 220, maxW = 520, onResize }) 
                 const isAdminMsg = r?.role === "admin";
                 const c = colorFor(g.user_id);
                 return (
-                  <div key={g.id} style={{ display:"flex", flexDirection: isMe ? "row-reverse" : "row", gap:10, marginTop:g.continued?2:8, alignItems:"flex-end" }}>
-                    <div style={{ width:30, height:30, flexShrink:0, visibility: g.continued ? "hidden" : "visible" }}>
-                      <div style={{ width:30, height:30, borderRadius:9, background: isMe ? "linear-gradient(135deg,#CCFF00,#88AB00)" : `linear-gradient(135deg,${c},${c}99)`, display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Inter',sans-serif", fontSize:12, fontWeight:900, color:"#15171E", boxShadow: isMe ? "0 2px 10px rgba(204,255,0,0.35)" : `0 2px 8px ${c}55` }}>
+                  <div key={g.id} style={{ display:"flex", flexDirection: isMe ? "row-reverse" : "row", gap:10, marginTop:g.continued?2:10, alignItems:"flex-end" }}>
+                    <div style={{ width:32, height:32, flexShrink:0, visibility: g.continued ? "hidden" : "visible" }}>
+                      <div style={{ width:32, height:32, borderRadius:10, background: isMe ? "linear-gradient(135deg,#CCFF00,#88AB00)" : `linear-gradient(135deg,${c},${c}88)`, display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Inter',sans-serif", fontSize:12.5, fontWeight:900, color:"#15171E", boxShadow: isMe ? "0 4px 14px rgba(204,255,0,0.32), inset 0 1px 0 rgba(255,255,255,0.4)" : `0 3px 10px ${c}40, inset 0 1px 0 rgba(255,255,255,0.3)` }}>
                         {name[0]?.toUpperCase()}
                       </div>
                     </div>
-                    <div style={{ maxWidth:"min(72%, 560px)", display:"flex", flexDirection:"column", alignItems: isMe ? "flex-end" : "flex-start" }}>
+                    <div style={{ maxWidth:"min(74%, 560px)", display:"flex", flexDirection:"column", alignItems: isMe ? "flex-end" : "flex-start" }}>
                       {!g.continued && (
-                        <div style={{ display:"flex", gap:8, alignItems:"baseline", padding: isMe ? "0 4px 4px 0" : "0 0 4px 4px", flexDirection: isMe ? "row-reverse" : "row" }}>
-                          <span style={{ fontSize:11, fontWeight:700, color: isMe ? "#CCFF00" : "#D6DAE2" }}>{isMe ? "You" : name}</span>
+                        <div style={{ display:"flex", gap:8, alignItems:"baseline", padding: isMe ? "0 4px 5px 0" : "0 0 5px 4px", flexDirection: isMe ? "row-reverse" : "row" }}>
+                          <span style={{ fontSize:11, fontWeight:700, color: isMe ? "#CCFF00" : "#D6DAE2", letterSpacing:"-0.005em" }}>{isMe ? "You" : name}</span>
                           {isAdminMsg && !isMe && <span style={{ fontSize:8, fontWeight:800, color:"#F59E0B", background:"rgba(245,158,11,0.12)", border:"1px solid rgba(245,158,11,0.25)", padding:"1.5px 6px", borderRadius:4, letterSpacing:1.5, textTransform:"uppercase" }}>Admin</span>}
                           <span style={{ fontSize:9.5, color:"#5E6376" }}>{fmtTime(g.created_at)}</span>
                         </div>
                       )}
-                      <div className="chat-bubble" style={{ position:"relative", padding:"9px 13px", background: isMe ? "linear-gradient(135deg,rgba(204,255,0,0.14),rgba(204,255,0,0.06))" : "rgba(255,255,255,0.04)", border:`1px solid ${isMe ? "rgba(204,255,0,0.25)" : "rgba(255,255,255,0.07)"}`, borderRadius: g.continued
-                        ? (isMe ? "16px 6px 16px 16px" : "6px 16px 16px 16px")
-                        : (isMe ? "16px 4px 16px 16px" : "4px 16px 16px 16px"),
-                        color:"#EEF2F8", fontSize:13.5, lineHeight:1.5, fontWeight:500, whiteSpace:"pre-wrap", wordBreak:"break-word" }}>
+                      <div className="chat-bubble" style={{ position:"relative", padding:"10px 14px", background: isMe ? "linear-gradient(135deg,rgba(204,255,0,0.18),rgba(204,255,0,0.07))" : "linear-gradient(180deg,rgba(255,255,255,0.055),rgba(255,255,255,0.035))", border:`1px solid ${isMe ? "rgba(204,255,0,0.3)" : "rgba(255,255,255,0.08)"}`, borderRadius: g.continued
+                        ? (isMe ? "18px 6px 18px 18px" : "6px 18px 18px 18px")
+                        : (isMe ? "18px 4px 18px 18px" : "4px 18px 18px 18px"),
+                        color:"#EEF2F8", fontSize:13.5, lineHeight:1.5, fontWeight:500, whiteSpace:"pre-wrap", wordBreak:"break-word", boxShadow: isMe ? "0 2px 12px rgba(204,255,0,0.08)" : "0 2px 10px rgba(0,0,0,0.25)", transition:"border-color 0.18s ease, background 0.18s ease" }}>
                         {g.body}
                         {(isMe || isAdmin) && (
                           <button onClick={() => remove(g.id)} title="Delete message" className="msg-del"
@@ -1663,6 +1670,7 @@ function Chat({ session, profile, w, width, minW = 220, maxW = 520, onResize }) 
               })}
             </div>
           )}
+          </div>
         </div>
 
         {/* Typing indicator */}
@@ -1675,44 +1683,75 @@ function Chat({ session, profile, w, width, minW = 220, maxW = 520, onResize }) 
               ? `${others[0]} and ${others[1]} are typing`
               : `${others.length} people are typing`;
           return (
-            <div style={{ display:"flex", alignItems:"center", gap:10, padding:dk?"6px 22px 0":"4px 16px 0", flexShrink:0, color:"#9098A8", fontSize:11.5, fontWeight:600, height:22 }}>
+            <div style={{ display:"flex", alignItems:"center", gap:10, padding:dk?"8px 22px 0":"6px 16px 0", flexShrink:0, color:"#A0A4B0", fontSize:11.5, fontWeight:600, height:22, animation:"fadeIn 0.2s ease" }}>
               <span className="typing-dots" aria-hidden="true">
                 <span /><span /><span />
               </span>
-              <span>{label}</span>
+              <span style={{ fontStyle:"italic" }}>{label}</span>
             </div>
           );
         })()}
 
         {/* Composer */}
-        <div style={{ display:"flex", gap:10, padding:dk?"10px 18px 14px":"8px 14px 12px", borderTop:"1px solid rgba(255,255,255,0.05)", background:"rgba(255,255,255,0.015)", flexShrink:0 }}>
-          <textarea
-            value={body}
-            onChange={e => onBodyChange(e.target.value)}
-            onBlur={() => { if (!body.trim()) broadcastStopTyping(); }}
-            onKeyDown={onKeyDown}
-            placeholder="Message the team…"
-            rows={1}
-            style={{ flex:1, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:12, color:"#F2F4F8", fontSize:13.5, fontWeight:500, padding:"11px 14px", fontFamily:"inherit", outline:"none", boxSizing:"border-box", resize:"none", lineHeight:1.5, maxHeight:140 }}
-          />
-          <button onClick={send} disabled={sending || !body.trim()} className="btn-primary"
-            style={{ padding:"0 18px", fontSize:11, opacity: sending || !body.trim() ? 0.45 : 1, cursor: sending || !body.trim() ? "default" : "pointer", display:"flex", alignItems:"center", gap:8, flexShrink:0 }}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-            {sending ? "Sending" : "Send"}
+        <div style={{ display:"flex", gap:10, padding:dk?"12px 18px 16px":"10px 14px 14px", borderTop:"1px solid rgba(255,255,255,0.05)", background:"linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.025))", flexShrink:0, alignItems:"flex-end" }}>
+          <div className="chat-input-wrap" style={{ flex:1, position:"relative" }}>
+            <textarea
+              value={body}
+              onChange={e => onBodyChange(e.target.value)}
+              onBlur={() => { if (!body.trim()) broadcastStopTyping(); }}
+              onKeyDown={onKeyDown}
+              placeholder="Message the team…"
+              rows={1}
+              className="chat-input"
+              style={{ width:"100%", background:"rgba(255,255,255,0.045)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:14, color:"#F2F4F8", fontSize:13.5, fontWeight:500, padding:"12px 15px", fontFamily:"inherit", outline:"none", boxSizing:"border-box", resize:"none", lineHeight:1.5, maxHeight:140, transition:"border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease" }}
+            />
+          </div>
+          <button onClick={send} disabled={sending || !body.trim()} className="btn-primary chat-send"
+            aria-label="Send message"
+            style={{ width:42, height:42, padding:0, borderRadius:14, opacity: sending || !body.trim() ? 0.45 : 1, cursor: sending || !body.trim() ? "default" : "pointer", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
           </button>
         </div>
       </aside>
 
       <style>{`
+        .chat-bubble:hover { border-color: rgba(255,255,255,0.14) !important; }
         .chat-bubble:hover .msg-del { opacity: 1 !important; pointer-events: auto !important; }
         .msg-del:hover { color: #FF3370 !important; border-color: rgba(255,51,112,0.4) !important; }
+
         @keyframes typingBounce { 0%,80%,100% { transform: translateY(0); opacity: 0.4 } 40% { transform: translateY(-3px); opacity: 1 } }
         .typing-dots { display:inline-flex; gap:3px; align-items:center }
-        .typing-dots span { width:4px; height:4px; border-radius:50%; background:#CCFF00; display:inline-block; animation: typingBounce 1.2s ease-in-out infinite }
+        .typing-dots span { width:4px; height:4px; border-radius:50%; background:#CCFF00; display:inline-block; animation: typingBounce 1.2s ease-in-out infinite; box-shadow: 0 0 6px rgba(204,255,0,0.6) }
         .typing-dots span:nth-child(2) { animation-delay: 0.15s }
         .typing-dots span:nth-child(3) { animation-delay: 0.3s }
+
         .chat-resize-handle:hover .chat-resize-grip,
         .chat-resize-handle:active .chat-resize-grip { background: #CCFF00 !important; height: 60px !important; box-shadow: 0 0 12px rgba(204,255,0,0.5); }
+
+        @keyframes chatStatusPulse {
+          0%,100% { box-shadow: 0 0 0 0 rgba(204,255,0,0.55), 0 0 8px rgba(204,255,0,0.55); }
+          70% { box-shadow: 0 0 0 6px rgba(204,255,0,0), 0 0 8px rgba(204,255,0,0.55); }
+        }
+        .chat-status-dot {
+          width: 8px; height: 8px; border-radius: 50%;
+          background: #CCFF00;
+          display: inline-block;
+          animation: chatStatusPulse 2.4s ease-in-out infinite;
+        }
+
+        .chat-input:focus {
+          border-color: rgba(204,255,0,0.55) !important;
+          background: rgba(255,255,255,0.06) !important;
+          box-shadow: 0 0 0 4px rgba(204,255,0,0.10);
+        }
+        .chat-input::placeholder { color: rgba(255,255,255,0.25); }
+
+        .chat-send:not(:disabled):hover { transform: translateY(-1px); box-shadow: 0 8px 22px rgba(204,255,0,0.4); }
+        .chat-send:not(:disabled):active { transform: translateY(0); }
+
+        .chat-scroll::-webkit-scrollbar { width: 5px; }
+        .chat-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.07); border-radius: 6px; }
+        .chat-scroll::-webkit-scrollbar-thumb:hover { background: rgba(204,255,0,0.35); }
       `}</style>
     </>
   );
