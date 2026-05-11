@@ -684,7 +684,21 @@ button{font-family:inherit}
 .profile-pill:hover { border-color:rgba(204,255,0,0.25); background:linear-gradient(180deg, rgba(204,255,0,0.05), rgba(204,255,0,0.01)) }
 
 /* Schedule day cards */
-.sched-day:hover { transform:translateY(-2px); border-color:rgba(204,255,0,0.3) !important; box-shadow:0 14px 36px rgba(0,0,0,0.45), 0 0 0 1px rgba(204,255,0,0.10) !important }
+.sched-day {
+  cursor:pointer;
+  transition:transform 0.22s cubic-bezier(0.34,1.56,0.64,1), border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.sched-day:hover {
+  transform:translateY(-3px) scale(1.012);
+  border-color:rgba(204,255,0,0.42) !important;
+  box-shadow:0 18px 44px rgba(0,0,0,0.55), 0 0 0 1px rgba(204,255,0,0.14) !important;
+}
+.sched-day:active { transform:translateY(-1px) scale(1.005) }
+/* Week tab buttons */
+.sched-week-btn {
+  transition:background 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s;
+}
+.sched-week-btn:hover { box-shadow:0 2px 12px rgba(204,255,0,0.08) }
 
 /* Bottom nav (mobile) */
 .bnav {
@@ -1004,29 +1018,44 @@ function Scheduler({ session, profile, w }) {
     return c;
   };
 
-  if (loading) return <div style={{ textAlign:"center", padding:60, color:"#7E8290", fontSize:13 }}>Loading schedule…</div>;
+  // Hash a user_id to one of several rep accent colors for variety
+  const repColor = (uid) => {
+    const COLORS = ["#06D6F0","#F59E0B","#A78BFA","#34D399","#F472B6","#60A5FA","#FB923C"];
+    let h = 0; for (let i = 0; i < (uid||"").length; i++) h = (h * 31 + uid.charCodeAt(i)) & 0xFFFFFF;
+    return COLORS[h % COLORS.length];
+  };
+
+  if (loading) return (
+    <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:80, gap:14 }}>
+      <div style={{ width:40, height:40, borderRadius:"50%", border:"3px solid rgba(204,255,0,0.2)", borderTopColor:"#CCFF00", animation:"spin 0.8s linear infinite" }} />
+      <span style={{ color:"#5C6175", fontSize:12, fontWeight:600, letterSpacing:1.2, textTransform:"uppercase" }}>Loading schedule…</span>
+    </div>
+  );
 
   const stats = [
     {
-      label: "My Bookings",
-      value: `${myBookedInWeek}`,
-      sub: metMin ? "Above minimum ✓" : `Need ${MIN - myBookedInWeek} more`,
+      label: "My Days",
+      value: myBookedInWeek,
+      sub: metMin ? "Minimum met" : `${MIN - myBookedInWeek} more needed`,
+      ok: metMin,
       color: metMin ? "#22C55E" : "#F59E0B",
-      detail: `of ${MIN} required`,
+      icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
     },
     {
-      label: "Team Bookings",
+      label: "Team Slots",
       value: totalBookings,
-      sub: `${(totalBookings/5).toFixed(1)} avg per day`,
+      sub: `${(totalBookings/5).toFixed(1)} avg/day`,
+      ok: true,
       color: "#CCFF00",
-      detail: `across ${days.length} days`,
+      icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
     },
     {
       label: "Full Days",
       value: fullDays,
-      sub: fullDays > 0 ? "at capacity" : "all days open",
+      sub: fullDays > 0 ? "At capacity" : "All days open",
+      ok: fullDays === 0,
       color: fullDays > 0 ? "#F59E0B" : "#10B981",
-      detail: `of ${days.length} days`,
+      icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
     },
   ];
 
@@ -1034,33 +1063,53 @@ function Scheduler({ session, profile, w }) {
     <div style={{ animation:"fadeUp 0.35s ease" }}>
 
       {/* Week selector */}
-      <div style={{ display:"flex", gap:6, marginBottom:dk?16:12, background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:13, padding:5 }}>
+      <div style={{ display:"flex", gap:6, marginBottom:dk?18:13, background:"rgba(255,255,255,0.018)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:14, padding:5 }}>
         {[0,1].map(i => {
           const active = weekIdx === i;
           const mine = weekMyCount(i);
           const ok = mine >= MIN;
           return (
             <button key={i} onClick={() => setWeekIdx(i)}
+              className="sched-week-btn"
               style={{
-                flex:1, padding:dk?"10px 14px":"9px 10px",
-                background: active ? "linear-gradient(180deg, rgba(204,255,0,0.10), rgba(204,255,0,0.04))" : "transparent",
-                border: active ? "1px solid rgba(204,255,0,0.28)" : "1px solid transparent",
-                borderRadius:9, cursor:"pointer", fontFamily:"inherit",
-                color: active ? "#F2F4F8" : "#7E8290",
-                transition:"all 0.2s", textAlign:"left",
+                flex:1, padding:dk?"11px 16px":"10px 12px",
+                background: active
+                  ? "linear-gradient(160deg, rgba(204,255,0,0.11) 0%, rgba(204,255,0,0.04) 100%)"
+                  : "transparent",
+                border: `1px solid ${active ? "rgba(204,255,0,0.30)" : "transparent"}`,
+                borderRadius:10, cursor:"pointer", fontFamily:"inherit",
                 display:"flex", alignItems:"center", justifyContent:"space-between", gap:8,
+                boxShadow: active ? "inset 0 1px 0 rgba(204,255,0,0.08)" : "none",
               }}>
-              <div style={{ minWidth:0 }}>
-                <div style={{ fontSize:dk?12:11, fontWeight:800, letterSpacing:1.2, textTransform:"uppercase", color: active ? "#CCFF00" : "#7E8290" }}>
-                  {i === 0 ? "This Week" : "Next Week"}
+              <div style={{ display:"flex", alignItems:"center", gap:dk?9:7, minWidth:0 }}>
+                <div style={{
+                  width:32, height:32, borderRadius:9, flexShrink:0,
+                  background: active ? "rgba(204,255,0,0.12)" : "rgba(255,255,255,0.04)",
+                  border: `1px solid ${active ? "rgba(204,255,0,0.22)" : "rgba(255,255,255,0.06)"}`,
+                  display:"flex", alignItems:"center", justifyContent:"center",
+                  color: active ? "#CCFF00" : "#4A4E5C",
+                }}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                  </svg>
                 </div>
-                <div style={{ fontSize:dk?10.5:9.5, fontWeight:600, color: active ? "#888D9C" : "#4A4E5C", marginTop:2 }}>
-                  {weekRange(i)}
+                <div style={{ minWidth:0 }}>
+                  <div style={{ fontSize:dk?11.5:10.5, fontWeight:800, letterSpacing:0.8, textTransform:"uppercase", color: active ? "#CCFF00" : "#5C6175" }}>
+                    {i === 0 ? "This Week" : "Next Week"}
+                  </div>
+                  <div style={{ fontSize:dk?10:9, fontWeight:600, color: active ? "#6E7483" : "#3A3E4A", marginTop:2 }}>
+                    {weekRange(i)}
+                  </div>
                 </div>
               </div>
-              <div style={{ display:"flex", alignItems:"center", gap:4, padding:"3px 8px", borderRadius:8, background: ok ? "rgba(34,197,94,0.10)" : "rgba(245,158,11,0.10)", border:`1px solid ${ok ? "rgba(34,197,94,0.22)" : "rgba(245,158,11,0.22)"}` }}>
-                <span style={{ fontSize:dk?11:10, fontWeight:800, color: ok ? "#22C55E" : "#F59E0B" }}>{mine}</span>
-                <span style={{ fontSize:8.5, fontWeight:700, color: ok ? "#22C55E99" : "#F59E0B99", letterSpacing:0.5 }}>/{MIN}</span>
+              <div style={{
+                display:"flex", alignItems:"center", gap:3, padding:"4px 9px 4px 8px",
+                borderRadius:20, flexShrink:0,
+                background: ok ? "rgba(34,197,94,0.12)" : "rgba(245,158,11,0.12)",
+                border:`1px solid ${ok ? "rgba(34,197,94,0.25)" : "rgba(245,158,11,0.25)"}`,
+              }}>
+                <span style={{ fontSize:dk?13:12, fontWeight:900, lineHeight:1, color: ok ? "#22C55E" : "#F59E0B" }}>{mine}</span>
+                <span style={{ fontSize:8, fontWeight:700, color: ok ? "#22C55E88" : "#F59E0B88", letterSpacing:0.3 }}>/{MIN}</span>
               </div>
             </button>
           );
@@ -1068,21 +1117,28 @@ function Scheduler({ session, profile, w }) {
       </div>
 
       {/* Stats row */}
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:dk?10:6, marginBottom:dk?18:14 }}>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:dk?10:7, marginBottom:dk?20:15 }}>
         {stats.map(s => (
-          <div key={s.label} style={{ background:`linear-gradient(160deg, ${s.color}10, ${s.color}04)`, border:`1px solid ${s.color}22`, borderRadius:13, padding:dk?"13px 14px":"10px 11px", position:"relative", overflow:"hidden" }}>
-            <div style={{ fontSize:8.5, fontWeight:800, color:`${s.color}AA`, letterSpacing:1.8, textTransform:"uppercase" }}>{s.label}</div>
-            <div style={{ display:"flex", alignItems:"baseline", gap:5, marginTop:dk?6:4 }}>
-              <span style={{ fontSize:dk?28:22, fontWeight:900, color:s.color, lineHeight:1, letterSpacing:"-0.02em" }}>{s.value}</span>
-              <span style={{ fontSize:dk?10:9, fontWeight:700, color:"#5C6175", letterSpacing:0.3 }}>{s.detail}</span>
+          <div key={s.label} style={{
+            background:`linear-gradient(150deg, ${s.color}12 0%, ${s.color}03 100%)`,
+            border:`1px solid ${s.color}28`,
+            borderRadius:14, padding:dk?"14px 15px":"11px 12px",
+            position:"relative", overflow:"hidden",
+          }}>
+            {/* decorative circle */}
+            <div style={{ position:"absolute", top:-18, right:-18, width:60, height:60, borderRadius:"50%", background:`${s.color}0A`, pointerEvents:"none" }} />
+            <div style={{ display:"flex", alignItems:"center", gap:7, marginBottom:dk?8:5 }}>
+              <div style={{ color:`${s.color}CC`, display:"flex" }}>{s.icon}</div>
+              <div style={{ fontSize:9, fontWeight:800, color:`${s.color}88`, letterSpacing:1.6, textTransform:"uppercase" }}>{s.label}</div>
             </div>
-            <div style={{ fontSize:dk?10.5:9.5, fontWeight:600, color:`${s.color}CC`, marginTop:dk?6:4 }}>{s.sub}</div>
+            <div style={{ fontSize:dk?32:26, fontWeight:900, color:s.color, lineHeight:1, letterSpacing:"-0.03em" }}>{s.value}</div>
+            <div style={{ fontSize:dk?10.5:9.5, fontWeight:600, color:`${s.color}BB`, marginTop:dk?5:3, lineHeight:1.3 }}>{s.sub}</div>
           </div>
         ))}
       </div>
 
       {/* Day cards grid */}
-      <div style={{ display:"grid", gridTemplateColumns: dk ? "repeat(5,1fr)" : "1fr", gap:dk?10:9 }}>
+      <div style={{ display:"grid", gridTemplateColumns: dk ? "repeat(5,1fr)" : "repeat(2,1fr)", gap:dk?10:8 }}>
         {days.map((day, di) => {
           const dateStr = ds(day);
           const dayEntries = byDate[dateStr] ?? [];
@@ -1095,6 +1151,11 @@ function Scheduler({ session, profile, w }) {
           const isFull = count >= dayMax && !isMine;
           const pct = (count / dayMax) * 100;
           const capColor = count >= dayMax ? "#F59E0B" : count >= 4 ? "#FFD700" : count >= 1 ? "#22C55E" : "#3A3E4A";
+          const capGradient = count >= dayMax
+            ? "linear-gradient(90deg,#F59E0B,#FF3370)"
+            : count >= 4
+              ? "linear-gradient(90deg,#22C55E,#FFD700)"
+              : "linear-gradient(90deg,#22C55E,#06D6F0)";
           const clickable = !isPast && !isFull;
           const openSpots = dayMax - count;
 
@@ -1103,111 +1164,163 @@ function Scheduler({ session, profile, w }) {
               className={clickable ? "sched-day" : ""}
               style={{
                 background: isMine
-                  ? "linear-gradient(160deg, rgba(204,255,0,0.07), rgba(204,255,0,0.015))"
+                  ? "linear-gradient(160deg, rgba(204,255,0,0.08) 0%, rgba(16,18,24,0.96) 60%)"
                   : override
                   ? "linear-gradient(160deg, rgba(245,158,11,0.06), rgba(14,15,20,0.94))"
-                  : "linear-gradient(160deg, rgba(22,24,31,0.92), rgba(14,15,20,0.94))",
-                border: `1.5px solid ${isMine ? "rgba(204,255,0,0.38)" : override ? "rgba(245,158,11,0.35)" : isToday ? "rgba(204,255,0,0.18)" : "rgba(255,255,255,0.06)"}`,
+                  : "linear-gradient(160deg, rgba(22,24,31,0.95) 0%, rgba(12,14,19,0.97) 100%)",
+                border: `1.5px solid ${isMine ? "rgba(204,255,0,0.40)" : override ? "rgba(245,158,11,0.35)" : isToday ? "rgba(204,255,0,0.20)" : "rgba(255,255,255,0.065)"}`,
                 borderRadius: 16,
-                padding: dk ? "14px 13px 0" : "12px 12px 0",
+                padding: dk ? "14px 13px 0" : "11px 11px 0",
                 cursor: clickable ? "pointer" : "default",
-                opacity: isPast ? 0.42 : 1,
-                transition: "transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease",
+                opacity: isPast ? 0.38 : 1,
                 position: "relative",
-                boxShadow: isMine ? "0 8px 28px rgba(204,255,0,0.10)" : "0 4px 18px rgba(0,0,0,0.30)",
+                boxShadow: isMine
+                  ? "0 8px 32px rgba(204,255,0,0.12), inset 0 1px 0 rgba(204,255,0,0.10)"
+                  : isToday
+                    ? "0 6px 24px rgba(204,255,0,0.06), inset 0 1px 0 rgba(255,255,255,0.04)"
+                    : "0 4px 20px rgba(0,0,0,0.32), inset 0 1px 0 rgba(255,255,255,0.025)",
                 display:"flex", flexDirection:"column",
+                // Left accent bar
+                borderLeft: `2.5px solid ${isMine ? "#CCFF00" : isToday ? "rgba(204,255,0,0.40)" : "rgba(255,255,255,0.06)"}`,
               }}>
 
               {/* Header */}
-              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:10 }}>
+              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:dk?11:9 }}>
                 <div>
-                  <div style={{ fontSize:9.5, fontWeight:800, color: isToday ? "#CCFF00" : "#7E8290", letterSpacing:2.4 }}>
+                  <div style={{ fontSize:9, fontWeight:800, color: isToday ? "#CCFF00" : "#4A4E5C", letterSpacing:2.6, textTransform:"uppercase" }}>
                     {DAY_NAMES[di]}
                   </div>
-                  <div style={{ display:"flex", alignItems:"baseline", gap:5, marginTop:3 }}>
-                    <span style={{ fontSize:dk?22:20, fontWeight:900, color:isPast?"#7E8290":"#F2F4F8", lineHeight:1, letterSpacing:"-0.02em" }}>{day.getDate()}</span>
-                    <span style={{ fontSize:11, fontWeight:600, color:"#5C6175" }}>{MONTHS[day.getMonth()]}</span>
+                  <div style={{ display:"flex", alignItems:"baseline", gap:4, marginTop:2 }}>
+                    <span style={{
+                      fontSize:dk?26:22, fontWeight:900,
+                      lineHeight:1, letterSpacing:"-0.03em",
+                      background: isMine
+                        ? "linear-gradient(135deg,#CCFF00,#A8E000)"
+                        : isPast ? "none" : "linear-gradient(135deg,#F2F4F8,#9EA3B0)",
+                      WebkitBackgroundClip: (isMine || !isPast) ? "text" : undefined,
+                      WebkitTextFillColor: (isMine || !isPast) ? "transparent" : undefined,
+                      color: isPast ? "#5C6175" : undefined,
+                    }}>{day.getDate()}</span>
+                    <span style={{ fontSize:dk?11:10, fontWeight:600, color:"#4A4E5C" }}>{MONTHS[day.getMonth()]}</span>
                   </div>
                 </div>
-                <div style={{ display:"flex", flexDirection:"column", alignItems:"flex-end", gap:4 }}>
-                  {isToday && <span style={{ fontSize:8.5, fontWeight:800, color:"#15171E", background:"#CCFF00", padding:"3px 7px", borderRadius:6, letterSpacing:1.2, textTransform:"uppercase" }}>Today</span>}
-                  {override && <span style={{ fontSize:8.5, fontWeight:800, color:"#F59E0B", background:"rgba(245,158,11,0.12)", border:"1px solid rgba(245,158,11,0.35)", padding:"2px 6px", borderRadius:6, letterSpacing:1.0, textTransform:"uppercase" }}>{override.label || "Half Day"}</span>}
+                <div style={{ display:"flex", flexDirection:"column", alignItems:"flex-end", gap:3 }}>
+                  {isToday && (
+                    <span style={{ fontSize:8, fontWeight:900, color:"#15171E", background:"#CCFF00", padding:"3px 7px", borderRadius:20, letterSpacing:1.4, textTransform:"uppercase", boxShadow:"0 2px 8px rgba(204,255,0,0.40)" }}>TODAY</span>
+                  )}
+                  {override && <span style={{ fontSize:8, fontWeight:900, color:"#F59E0B", background:"rgba(245,158,11,0.12)", border:"1px solid rgba(245,158,11,0.30)", padding:"2px 7px", borderRadius:20, letterSpacing:1.4, textTransform:"uppercase" }}>{override.label || "Half Day"}</span>}
                   {override?.hours && <span style={{ fontSize:8, fontWeight:700, color:"#F59E0BAA", letterSpacing:0.5 }}>{override.hours}</span>}
-                  {isMine && !isToday && <span style={{ fontSize:8.5, fontWeight:800, color:"#CCFF00", background:"rgba(204,255,0,0.10)", border:"1px solid rgba(204,255,0,0.28)", padding:"2px 6px", borderRadius:6, letterSpacing:1.2, textTransform:"uppercase" }}>You</span>}
-                  {isFull && !isMine && <span style={{ fontSize:8.5, fontWeight:800, color:"#F59E0B", background:"rgba(245,158,11,0.10)", border:"1px solid rgba(245,158,11,0.28)", padding:"2px 6px", borderRadius:6, letterSpacing:1.2, textTransform:"uppercase" }}>Full</span>}
+                  {isMine && !isToday && (
+                    <span style={{ fontSize:8, fontWeight:900, color:"#CCFF00", background:"rgba(204,255,0,0.12)", border:"1px solid rgba(204,255,0,0.30)", padding:"2px 7px", borderRadius:20, letterSpacing:1.4, textTransform:"uppercase" }}>YOU</span>
+                  )}
+                  {isFull && !isMine && (
+                    <span style={{ fontSize:8, fontWeight:900, color:"#F59E0B", background:"rgba(245,158,11,0.12)", border:"1px solid rgba(245,158,11,0.30)", padding:"2px 7px", borderRadius:20, letterSpacing:1.4, textTransform:"uppercase" }}>FULL</span>
+                  )}
                 </div>
               </div>
 
               {/* Capacity bar */}
-              <div style={{ marginBottom:11 }}>
-                <div style={{ height:5, borderRadius:3, background:"rgba(255,255,255,0.05)", overflow:"hidden" }}>
-                  <div style={{ height:"100%", width:`${pct}%`, background: capColor, transition:"width 0.45s ease", boxShadow:count>0?`0 0 8px ${capColor}80`:"none" }} />
+              <div style={{ marginBottom:dk?12:10 }}>
+                <div style={{ height:6, borderRadius:4, background:"rgba(255,255,255,0.04)", overflow:"hidden", position:"relative" }}>
+                  <div style={{
+                    height:"100%", width:`${pct}%`,
+                    background: count > 0 ? capGradient : "transparent",
+                    transition:"width 0.5s cubic-bezier(0.4,0,0.2,1)",
+                    boxShadow: count > 0 ? `0 0 10px ${capColor}70` : "none",
+                    borderRadius:4,
+                  }} />
                 </div>
-                <div style={{ display:"flex", justifyContent:"space-between", marginTop:5 }}>
-                  <span style={{ fontSize:9, fontWeight:800, letterSpacing:1, textTransform:"uppercase", color:capColor }}>{count}/{dayMax} booked</span>
-                  <span style={{ fontSize:9, fontWeight:700, letterSpacing:0.8, textTransform:"uppercase", color: count >= dayMax ? "#F59E0B" : count >= 4 ? "#FFD70099" : "#3A3E4A" }}>
+                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginTop:5 }}>
+                  <span style={{ fontSize:8.5, fontWeight:800, letterSpacing:0.8, color:capColor }}>
+                    {count}/{dayMax}
+                  </span>
+                  <span style={{
+                    fontSize:8, fontWeight:700, letterSpacing:1.2, textTransform:"uppercase",
+                    color: count >= dayMax ? "#F59E0B" : count >= 4 ? "#FFD700" : count === 0 ? "#3A3E4A" : "#22C55E66",
+                  }}>
                     {count >= dayMax ? "Full" : count >= 4 ? "Filling" : count === 0 ? "Empty" : "Open"}
                   </span>
                 </div>
               </div>
 
-              {/* Reps */}
-              <div style={{ display:"flex", flexDirection:"column", gap:4, flex:1 }}>
+              {/* Reps + open slots */}
+              <div style={{ display:"flex", flexDirection:"column", gap:dk?5:4, flex:1 }}>
                 {dayEntries.map(e => {
                   const isMe = e.user_id === session.user.id;
                   const name = repProfiles[e.user_id] || "Rep";
+                  const rc = isMe ? "#CCFF00" : repColor(e.user_id);
                   return (
                     <div key={e.id} style={{
                       display:"flex", alignItems:"center", gap:7, padding:"5px 8px",
-                      background: isMe ? "rgba(204,255,0,0.12)" : "rgba(255,255,255,0.025)",
-                      border: `1px solid ${isMe ? "rgba(204,255,0,0.28)" : "rgba(255,255,255,0.05)"}`,
-                      borderRadius:8,
+                      background: isMe ? "rgba(204,255,0,0.09)" : "rgba(255,255,255,0.022)",
+                      border: `1px solid ${isMe ? "rgba(204,255,0,0.24)" : "rgba(255,255,255,0.045)"}`,
+                      borderRadius:9,
                     }}>
                       <div style={{
-                        width:20, height:20, borderRadius:6,
-                        background: isMe ? "linear-gradient(135deg,#CCFF00,#6E9100)" : "rgba(255,255,255,0.07)",
+                        width:22, height:22, borderRadius:7, flexShrink:0,
+                        background: isMe ? "linear-gradient(135deg,#CCFF00,#7DB800)" : `${rc}22`,
+                        border: `1.5px solid ${isMe ? "rgba(204,255,0,0.50)" : `${rc}55`}`,
                         display:"flex", alignItems:"center", justifyContent:"center",
-                        fontSize:9.5, fontWeight:900,
-                        color: isMe ? "#15171E" : "#A0A4B0",
-                        flexShrink:0,
-                        boxShadow: isMe ? "0 2px 6px rgba(204,255,0,0.35)" : "none",
+                        fontSize:10, fontWeight:900,
+                        color: isMe ? "#15171E" : rc,
+                        boxShadow: isMe ? "0 2px 8px rgba(204,255,0,0.30)" : `0 2px 6px ${rc}25`,
                       }}>
                         {name[0]?.toUpperCase()}
                       </div>
-                      <span style={{ fontSize:11, fontWeight:600, color: isMe ? "#F2F4F8" : "#C4C9D4", flex:1, minWidth:0, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
-                        {name}
+                      <span style={{
+                        fontSize:dk?11:10.5, fontWeight: isMe ? 700 : 500,
+                        color: isMe ? "#E8F4D4" : "#9EA3B0",
+                        flex:1, minWidth:0, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap",
+                      }}>
+                        {isMe ? "You" : name}
                       </span>
+                      {isMe && (
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#CCFF0066" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      )}
                     </div>
                   );
                 })}
-                {openSpots > 0 && (
-                  <div style={{
-                    padding:"5px 8px", border:"1px dashed rgba(255,255,255,0.08)",
-                    borderRadius:8, textAlign:"center",
-                    fontSize:9.5, fontWeight:700, color:"#4A4E5C",
-                    letterSpacing:1, textTransform:"uppercase",
+                {/* Open slot placeholders */}
+                {!isPast && openSpots > 0 && Array.from({ length: Math.min(openSpots, 3) }).map((_, si) => (
+                  <div key={`open-${si}`} style={{
+                    padding:"5px 8px", border:"1px dashed rgba(255,255,255,0.06)",
+                    borderRadius:9, display:"flex", alignItems:"center", gap:7,
                   }}>
-                    {openSpots} {openSpots === 1 ? "spot" : "spots"} open
+                    <div style={{ width:22, height:22, borderRadius:7, border:"1.5px dashed rgba(255,255,255,0.10)", flexShrink:0, display:"flex", alignItems:"center", justifyContent:"center" }}>
+                      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    </div>
+                    <span style={{ fontSize:9.5, fontWeight:500, color:"rgba(255,255,255,0.14)", fontStyle:"italic" }}>
+                      {si === 0 && openSpots > 3 ? `${openSpots} spots open` : "Open slot"}
+                    </span>
                   </div>
-                )}
+                ))}
               </div>
 
               {/* CTA footer */}
               <div style={{
-                marginTop:10, marginLeft:-13, marginRight:-13,
-                padding:"9px 12px",
-                borderTop:"1px solid rgba(255,255,255,0.05)",
+                marginTop:dk?11:9,
+                marginLeft: dk ? -13 : -11,
+                marginRight: dk ? -13 : -11,
+                padding:"9px 13px",
+                borderTop:`1px solid ${isMine ? "rgba(204,255,0,0.10)" : "rgba(255,255,255,0.04)"}`,
                 textAlign:"center",
-                background: isMine ? "rgba(204,255,0,0.04)" : "transparent",
+                background: isMine ? "rgba(204,255,0,0.035)" : isPast ? "transparent" : "rgba(255,255,255,0.008)",
+                borderRadius:"0 0 14px 14px",
               }}>
                 {isPast ? (
-                  <span style={{ fontSize:9.5, color:"#3A3E4A", fontWeight:700, letterSpacing:1.2, textTransform:"uppercase" }}>Past</span>
+                  <span style={{ fontSize:9, color:"#2E3240", fontWeight:700, letterSpacing:1.4, textTransform:"uppercase" }}>Past</span>
                 ) : isMine ? (
-                  <span style={{ fontSize:9.5, color:"#FF3370", fontWeight:800, letterSpacing:1.2, textTransform:"uppercase" }}>Tap to cancel</span>
+                  <span style={{ fontSize:9, color:"#FF3370", fontWeight:800, letterSpacing:1.4, textTransform:"uppercase", display:"flex", alignItems:"center", justifyContent:"center", gap:5 }}>
+                    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    Cancel
+                  </span>
                 ) : isFull ? (
-                  <span style={{ fontSize:9.5, color:"#F59E0B", fontWeight:700, letterSpacing:1.2, textTransform:"uppercase" }}>Day is full</span>
+                  <span style={{ fontSize:9, color:"#F59E0B", fontWeight:700, letterSpacing:1.4, textTransform:"uppercase" }}>Day full</span>
                 ) : (
-                  <span style={{ fontSize:9.5, color:"#CCFF00", fontWeight:800, letterSpacing:1.2, textTransform:"uppercase" }}>+ Book this day</span>
+                  <span style={{ fontSize:9, color:"#CCFF00", fontWeight:800, letterSpacing:1.4, textTransform:"uppercase", display:"flex", alignItems:"center", justifyContent:"center", gap:5 }}>
+                    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Book
+                  </span>
                 )}
               </div>
             </div>
@@ -1215,13 +1328,19 @@ function Scheduler({ session, profile, w }) {
         })}
       </div>
 
-      {/* Policy notice — compact, at bottom */}
-      <div style={{ display:"flex", alignItems:"center", gap:11, padding:dk?"11px 15px":"10px 12px", background:"rgba(255,51,112,0.05)", border:"1px solid rgba(255,51,112,0.15)", borderRadius:11, marginTop:dk?18:14 }}>
-        <div style={{ width:26, height:26, borderRadius:8, background:"rgba(255,51,112,0.12)", border:"1px solid rgba(255,51,112,0.25)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+      {/* Policy notice */}
+      <div style={{
+        display:"flex", alignItems:"center", gap:11,
+        padding:dk?"12px 16px":"10px 13px",
+        background:"rgba(255,51,112,0.04)",
+        border:"1px solid rgba(255,51,112,0.14)",
+        borderRadius:12, marginTop:dk?20:15,
+      }}>
+        <div style={{ width:28, height:28, borderRadius:9, background:"rgba(255,51,112,0.10)", border:"1px solid rgba(255,51,112,0.22)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#FF3370" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         </div>
-        <div style={{ fontSize:dk?11.5:10.5, color:"#C4C8D4", fontWeight:500, lineHeight:1.45 }}>
-          <span style={{ color:"#FF3370", fontWeight:800, letterSpacing:0.3 }}>Policy:</span> Reps must book a minimum of <span style={{ color:"#F2F4F8", fontWeight:700 }}>{MIN} days</span> per week. Missing this minimum is grounds for <span style={{ color:"#FF3370", fontWeight:700 }}>termination</span>.
+        <div style={{ fontSize:dk?11:10, color:"#9EA3B0", fontWeight:500, lineHeight:1.5 }}>
+          <span style={{ color:"#FF3370", fontWeight:800 }}>Policy:</span> Minimum <span style={{ color:"#F2F4F8", fontWeight:700 }}>{MIN} days</span> per week required. Failure may result in <span style={{ color:"#FF3370", fontWeight:700 }}>termination</span>.
         </div>
       </div>
 
