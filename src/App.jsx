@@ -712,15 +712,15 @@ button{font-family:inherit}
 }
 .bnav-btn {
   flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
-  gap:4px; padding:2px 0; min-width:0;
+  gap:3px; padding:2px 0; min-width:0;
   background:none; border:none; cursor:pointer;
-  font-family:inherit; font-size:10px; font-weight:500; letter-spacing:0px;
+  font-family:inherit; font-size:9px; font-weight:500; letter-spacing:0px;
   color:#6E7483; transition:color 0.18s ease;
 }
 .bnav-btn.active { font-weight:700 }
 .bnav-icon {
   display:flex; align-items:center; justify-content:center;
-  width:52px; height:34px; border-radius:17px;
+  width:40px; height:28px; border-radius:14px;
   transition:background 0.22s ease, box-shadow 0.22s ease, transform 0.22s cubic-bezier(0.34,1.56,0.64,1);
 }
 .bnav-btn.active .bnav-icon { transform:translateY(-2px) }
@@ -4941,10 +4941,7 @@ function AppInner() {
                     <button key={t.key} onClick={() => setTab(t.key)}
                       className={"tab-pill" + (active ? " active" : "")}
                       style={{ '--tc': t.color }}>
-                      <span style={{ display:"flex", alignItems:"center", gap:7 }}>
-                        <TabIcon tabKey={t.key} active={active} size={15} color={active ? t.color : "currentColor"} />
-                        {t.label}
-                      </span>
+                      {t.label}
                     </button>
                   );
                 })}
@@ -5384,7 +5381,7 @@ function AppInner() {
                   background: active ? `${t.color}22` : "transparent",
                   boxShadow: active ? `0 2px 14px ${t.color}50` : "none",
                 }}>
-                  <TabIcon tabKey={t.key} active={active} size={22} color={active ? t.color : "#6E7483"} />
+                  <TabIcon tabKey={t.key} active={active} size={18} color={active ? t.color : "#6E7483"} />
                 </span>
                 <span style={{ fontSize:10, lineHeight:1 }}>{t.short}</span>
               </button>
