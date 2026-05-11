@@ -357,11 +357,11 @@ button{font-family:inherit}
 /* Tab pills */
 .tab-pill {
   position:relative; background:none; border:none; cursor:pointer;
-  font-family:inherit; font-weight:700; letter-spacing:1.8px; text-transform:uppercase;
-  color:#5E6376; transition: color 0.22s ease;
+  font-family:inherit; font-weight:700; letter-spacing:1.1px; text-transform:uppercase;
+  color:#8B91A0; transition: color 0.22s ease;
   border-radius:10px;
 }
-.tab-pill:hover { color:#A0A4B0 }
+.tab-pill:hover { color:#D6DAE2 }
 .tab-pill.active { color:#15171E }
 .tab-pill .tab-bg {
   position:absolute; inset:0; border-radius:10px; opacity:0;
@@ -435,23 +435,24 @@ button{font-family:inherit}
   backdrop-filter:blur(28px); -webkit-backdrop-filter:blur(28px);
   border-top:1px solid rgba(255,255,255,0.09);
   display:flex;
-  padding-bottom:env(safe-area-inset-bottom,0px);
+  padding:4px 2px;
+  padding-bottom:calc(4px + env(safe-area-inset-bottom,0px));
 }
 .bnav-btn {
   flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
-  gap:4px; padding:10px 4px 8px;
+  gap:3px; padding:4px 0 4px; min-width:0;
   background:none; border:none; cursor:pointer;
-  font-family:inherit; font-size:8px; font-weight:800; letter-spacing:1.2px;
-  text-transform:uppercase; color:#3A3E4A;
-  transition:color 0.2s ease; position:relative;
+  font-family:inherit; font-size:9.5px; font-weight:700; letter-spacing:0.4px;
+  text-transform:uppercase; color:#7A7F8E;
+  transition:color 0.18s ease; position:relative;
 }
-.bnav-btn::before {
-  content:""; position:absolute; top:0; left:50%; transform:translateX(-50%) scaleX(0);
-  width:28px; height:2.5px; border-radius:0 0 3px 3px;
-  background:currentColor; transition:transform 0.22s cubic-bezier(0.34,1.56,0.64,1);
-  box-shadow:0 0 10px currentColor;
+.bnav-icon {
+  display:flex; align-items:center; justify-content:center;
+  width:44px; height:30px; border-radius:14px;
+  transition:background 0.22s ease, transform 0.22s ease;
 }
-.bnav-btn.active::before { transform:translateX(-50%) scaleX(1) }
+.bnav-btn.active { font-weight:800 }
+.bnav-btn.active .bnav-icon { transform:translateY(-1px) }
 `;
 
 /* ═══════════════════════════════════════════
@@ -3007,13 +3008,13 @@ export default function App() {
   const referenceItems = CATS.filter(x=>x.t==="REFERENCE");
   const quizItems = CATS.filter(x=>x.t==="QUIZ");
   const TABS = [
-    { key:"dashboard",     label:"Dashboard",     short:"Home",     color:"#22C55E" },
-    { key:"announcements", label:"Announcements", short:"News",     color:"#F59E0B" },
-    { key:"leads",         label:"Leads",         short:"Leads",    color:"#06D6F0" },
-    { key:"leaderboard",   label:"Leaderboard",   short:"Board",    color:"#FFD700" },
-    { key:"scheduling",    label:"Scheduling",    short:"Schedule", color:"#F59E0B" },
-    { key:"training",      label:"Training",      short:"Train",    color:"#CCFF00" },
-    { key:"reference",     label:"Reference",     short:"Ref",      color:"#06D6F0" },
+    { key:"dashboard",     label:"Dashboard",     short:"Home",  color:"#22C55E" },
+    { key:"announcements", label:"Announcements", short:"News",  color:"#F59E0B" },
+    { key:"leads",         label:"Leads",         short:"Leads", color:"#06D6F0" },
+    { key:"leaderboard",   label:"Leaderboard",   short:"Top",   color:"#FFD700" },
+    { key:"scheduling",    label:"Scheduling",    short:"Cal",   color:"#F59E0B" },
+    { key:"training",      label:"Training",      short:"Learn", color:"#CCFF00" },
+    { key:"reference",     label:"Reference",     short:"Docs",  color:"#06D6F0" },
   ];
 
   if (loading) return (
@@ -3141,14 +3142,14 @@ export default function App() {
 
             {/* Tab Nav — desktop only */}
             {dk && (
-              <div style={{ display:"flex", gap:3, paddingBottom:10, marginBottom:-1, animation:"fadeUp 0.5s ease 0.1s both" }}>
+              <div style={{ display:"flex", gap:2, paddingBottom:10, marginBottom:-1, animation:"fadeUp 0.5s ease 0.1s both", overflowX:"auto", scrollbarWidth:"none", msOverflowStyle:"none" }}>
                 {TABS.map(t => (
                   <button key={t.key} onClick={() => setTab(t.key)}
                     className={"tab-pill" + (tab===t.key ? " active" : "")}
-                    style={{ fontSize:10, padding:"9px 15px", whiteSpace:"nowrap", flexShrink:0 }}>
+                    style={{ fontSize:11, padding:"10px 14px", whiteSpace:"nowrap", flexShrink:0 }}>
                     <span className="tab-bg" />
-                    <span style={{ display:"flex", alignItems:"center", gap:6 }}>
-                      <TabIcon tabKey={t.key} active={tab===t.key} size={13} />
+                    <span style={{ display:"flex", alignItems:"center", gap:7 }}>
+                      <TabIcon tabKey={t.key} active={tab===t.key} size={15} />
                       {t.label}
                     </span>
                   </button>
@@ -3302,14 +3303,19 @@ export default function App() {
       {/* Bottom nav — mobile only */}
       {!dk && (
         <nav className="bnav">
-          {TABS.map(t => (
-            <button key={t.key} onClick={() => setTab(t.key)}
-              className={"bnav-btn" + (tab===t.key ? " active" : "")}
-              style={{ color: tab===t.key ? t.color : undefined }}>
-              <TabIcon tabKey={t.key} active={tab===t.key} size={22} color={tab===t.key ? t.color : "#3A3E4A"} />
-              {t.short}
-            </button>
-          ))}
+          {TABS.map(t => {
+            const active = tab === t.key;
+            return (
+              <button key={t.key} onClick={() => setTab(t.key)}
+                className={"bnav-btn" + (active ? " active" : "")}
+                style={{ color: active ? t.color : "#8B91A0" }}>
+                <span className="bnav-icon" style={{ background: active ? `${t.color}26` : "transparent", boxShadow: active ? `0 0 12px ${t.color}40` : "none" }}>
+                  <TabIcon tabKey={t.key} active={active} size={20} color={active ? t.color : "#8B91A0"} />
+                </span>
+                {t.short}
+              </button>
+            );
+          })}
         </nav>
       )}
       <Chat session={session} profile={profile} w={w} width={chatSidebarW} onResize={persistChatW} minW={CHAT_MIN} maxW={CHAT_MAX} />
