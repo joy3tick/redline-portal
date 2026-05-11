@@ -2711,7 +2711,7 @@ function Viewer({ ck, onBack, w, onComplete }) {
 
         {/* Sections */}
         <div style={{ paddingBottom:90 }}>
-          {c.s.map((s, i) => {
+          {ck === "comp-plan" ? <CompPlanView dk={dk} /> : c.s.map((s, i) => {
             const open = oi === i;
             return (
               <div key={i} style={{ marginBottom:5, animation:`fadeUp 0.4s ease ${0.04*i}s both` }}>
@@ -2745,6 +2745,144 @@ function Viewer({ ck, onBack, w, onComplete }) {
             );
           })}
         </div>
+      </div>
+    </div>
+  );
+}
+
+const COMP_TIERS = [
+  { name:"DIAMOND",  num:5, tag:"Top 1%",      rev:"$40K+ collected / mo",  pay:"Salary + 38–40% commission",  monthlyMin:"$20,000+",  monthlyMax:null,           yearly:"$240K – $420K+ / yr",  grad:"linear-gradient(135deg,#A78BFA 0%,#06D6F0 100%)", border:"rgba(167,139,250,0.45)", glow:"rgba(167,139,250,0.35)", text:"#0E0F14", featured:true },
+  { name:"PLATINUM", num:4, tag:"Elite",       rev:"$25K – $40K / mo",      pay:"$20/hr + 36% commission",     monthlyMin:"$12,460",   monthlyMax:"$17,860",      yearly:"$150K – $214K / yr",   grad:"linear-gradient(135deg,#E2E8F0 0%,#64748B 100%)", border:"rgba(226,232,240,0.35)", glow:"rgba(148,163,184,0.25)", text:"#0E0F14", featured:false },
+  { name:"GOLD",     num:3, tag:"Performer",   rev:"$12K – $25K / mo",      pay:"$15/hr + 33% commission",     monthlyMin:"$6,560",    monthlyMax:"$10,850",      yearly:"$79K – $130K / yr",    grad:"linear-gradient(135deg,#FFD700 0%,#D97706 100%)", border:"rgba(255,215,0,0.45)",   glow:"rgba(255,215,0,0.3)",    text:"#0E0F14", featured:false },
+  { name:"SILVER",   num:2, tag:"Building",    rev:"$5K – $12K / mo",       pay:"33% commission",              monthlyMin:"$1,650",    monthlyMax:"$3,960",       yearly:"$20K – $48K / yr",     grad:"linear-gradient(135deg,#CBD5E1 0%,#64748B 100%)", border:"rgba(203,213,225,0.3)",  glow:"rgba(203,213,225,0.2)",  text:"#0E0F14", featured:false },
+  { name:"BRONZE",   num:1, tag:"Starting",    rev:"$1.5K – $5K / mo",      pay:"30% commission",              monthlyMin:"$450",      monthlyMax:"$1,500",       yearly:"$5K – $18K / yr",      grad:"linear-gradient(135deg,#F97316 0%,#7C2D12 100%)", border:"rgba(249,115,22,0.35)",  glow:"rgba(249,115,22,0.2)",   text:"#FFF6EE", featured:false },
+  { name:"TRIAL",    num:0, tag:"First month", rev:"Onboarding period",     pay:"25% commission",              monthlyMin:"Variable",  monthlyMax:null,           yearly:"Placed into tier at month-end", grad:"linear-gradient(135deg,#475569 0%,#1E293B 100%)", border:"rgba(148,163,184,0.18)", glow:"rgba(71,85,105,0.15)",   text:"#F1F5F9", featured:false },
+];
+
+const COMP_RULES = [
+  "Bracket placement is based on collected revenue (cash in bank), not signed contracts.",
+  "Hourly tiers (Gold and above) are paid in arrears — qualify in month X, hourly starts month X+1.",
+  "Reps are reassessed monthly. 2 consecutive months below the current bracket triggers demotion.",
+  "3 consecutive months in Bronze = parted ways.",
+  "Maintain / Optimize MRR attach: one-time bonus equal to 1× the monthly fee at signing.",
+  "Maintain MRR counts toward bracket placement only the signing month.",
+  "Hourly assumes 40 hrs / wk (~173 hrs / mo).",
+];
+
+function CompStat({ label, value, accent, dk }) {
+  return (
+    <div style={{ background:"rgba(255,255,255,0.025)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:12, padding:dk?"10px 14px":"9px 12px", minWidth:dk?120:"auto" }}>
+      <div style={{ fontSize:9, fontWeight:800, color:accent, letterSpacing:1.8, textTransform:"uppercase" }}>{label}</div>
+      <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?24:22, color:"#F2F4F8", letterSpacing:1, lineHeight:1.1, marginTop:3, fontVariantNumeric:"tabular-nums" }}>{value}</div>
+    </div>
+  );
+}
+
+function CompMetric({ label, value, dk }) {
+  return (
+    <div>
+      <div style={{ fontSize:9, fontWeight:800, color:"#5E6376", letterSpacing:1.8, textTransform:"uppercase" }}>{label}</div>
+      <div style={{ fontSize:dk?13.5:12.5, color:"#D6DAE2", fontWeight:600, marginTop:4, lineHeight:1.35 }}>{value}</div>
+    </div>
+  );
+}
+
+function CompPlanView({ dk }) {
+  return (
+    <div style={{ animation:"fadeUp 0.4s ease" }}>
+      <div style={{
+        position:"relative", overflow:"hidden",
+        background:"linear-gradient(135deg,rgba(167,139,250,0.14),rgba(6,214,240,0.10) 60%,rgba(14,16,22,0.0))",
+        border:"1px solid rgba(167,139,250,0.28)", borderRadius:20,
+        padding:dk?"30px 32px":"24px 22px", marginBottom:22,
+        boxShadow:"0 12px 44px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)"
+      }}>
+        <div style={{ position:"absolute", inset:0, background:"radial-gradient(640px circle at 90% -20%,rgba(167,139,250,0.18),transparent 55%)", pointerEvents:"none" }} />
+        <div style={{ position:"relative" }}>
+          <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:14 }}>
+            <div style={{ width:24, height:3, background:"linear-gradient(90deg,#A78BFA,transparent)", borderRadius:4 }} />
+            <div style={{ fontSize:9.5, fontWeight:800, color:"#A78BFA", letterSpacing:3, textTransform:"uppercase" }}>Earning Potential</div>
+          </div>
+          <div style={{ display:"flex", flexDirection:dk?"row":"column", alignItems:dk?"flex-end":"flex-start", gap:dk?28:18, flexWrap:"wrap" }}>
+            <div>
+              <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?68:54, lineHeight:1, color:"#F2F4F8", letterSpacing:1, fontVariantNumeric:"tabular-nums" }}>$240K+</div>
+              <div style={{ fontSize:12, color:"#A8AEBA", marginTop:6, fontWeight:500 }}>Year 1 projection for top performers</div>
+            </div>
+            <div style={{ display:"flex", gap:dk?14:10, flexWrap:"wrap" }}>
+              <CompStat label="Top monthly take-home" value="$20K+" accent="#A78BFA" dk={dk} />
+              <CompStat label="Top commission rate" value="40%" accent="#06D6F0" dk={dk} />
+              <CompStat label="Tiers" value="5" accent="#FFD700" dk={dk} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ display:"flex", alignItems:"center", gap:12, padding:"12px 0 16px" }}>
+        <div style={{ fontSize:9.5, fontWeight:800, color:"#06D6F0", letterSpacing:3.5, textTransform:"uppercase" }}>Tier Ladder</div>
+        <div style={{ flex:1, height:1, background:"linear-gradient(90deg,rgba(255,255,255,0.05),transparent)" }} />
+      </div>
+
+      <div style={{ display:"grid", gap:14 }}>
+        {COMP_TIERS.map((t, i) => (
+          <div key={t.name} style={{
+            position:"relative", overflow:"hidden",
+            background:"linear-gradient(135deg,rgba(18,20,26,0.96),rgba(11,12,17,0.98))",
+            border:`1px solid ${t.featured ? t.border : "rgba(255,255,255,0.055)"}`,
+            borderRadius:18,
+            padding:dk?"24px 26px":"20px 18px",
+            boxShadow: t.featured
+              ? `0 14px 42px rgba(0,0,0,0.5), 0 0 0 1px ${t.border}, 0 0 60px ${t.glow}`
+              : "0 6px 22px rgba(0,0,0,0.35)",
+            animation:`fadeUp 0.4s ease ${0.05*i}s both`,
+          }}>
+            <div style={{ position:"absolute", top:0, right:0, width:dk?180:120, height:"100%", background:t.grad, opacity:t.featured?0.18:0.10, pointerEvents:"none", maskImage:"linear-gradient(270deg,#000,transparent)", WebkitMaskImage:"linear-gradient(270deg,#000,transparent)" }} />
+            <div style={{ position:"relative", display:"flex", flexDirection:dk?"row":"column", alignItems:dk?"center":"flex-start", gap:dk?22:16 }}>
+              <div style={{ display:"flex", alignItems:"center", gap:14, flexShrink:0, minWidth:dk?170:"auto" }}>
+                <div style={{
+                  width:dk?58:50, height:dk?58:50, borderRadius:14,
+                  background:t.grad, color:t.text,
+                  display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column",
+                  flexShrink:0,
+                  boxShadow:`0 8px 24px ${t.glow}, inset 0 1px 0 rgba(255,255,255,0.35)`,
+                }}>
+                  <div style={{ fontSize:9, fontWeight:800, letterSpacing:1.4, opacity:0.7 }}>TIER</div>
+                  <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:22, lineHeight:1, letterSpacing:1 }}>{t.num || "—"}</div>
+                </div>
+                <div>
+                  <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?26:22, color:"#F2F4F8", letterSpacing:2.5, lineHeight:1 }}>{t.name}</div>
+                  <div style={{ fontSize:10.5, color:"#7E8595", letterSpacing:1.8, textTransform:"uppercase", fontWeight:700, marginTop:5 }}>{t.tag}</div>
+                </div>
+              </div>
+              <div style={{ flex:1, display:"grid", gridTemplateColumns:"1fr 1fr", gap:dk?14:10, width:"100%" }}>
+                <CompMetric label="Revenue" value={t.rev} dk={dk} />
+                <CompMetric label="Pay" value={t.pay} dk={dk} />
+              </div>
+              <div style={{ flexShrink:0, textAlign:dk?"right":"left", minWidth:dk?180:"auto", borderTop:dk?"none":"1px solid rgba(255,255,255,0.05)", paddingTop:dk?0:14, width:dk?"auto":"100%" }}>
+                <div style={{ fontSize:9.5, fontWeight:800, color:t.featured?"#A78BFA":"#06D6F0", letterSpacing:2, textTransform:"uppercase" }}>Take-Home</div>
+                <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?38:32, lineHeight:1.05, color:"#F2F4F8", letterSpacing:0.5, marginTop:4, fontVariantNumeric:"tabular-nums" }}>
+                  {t.monthlyMin}
+                  {t.monthlyMax ? <span style={{ fontSize:dk?20:18, color:"#7E8595" }}>{" – " + t.monthlyMax}</span> : null}
+                  {!t.monthlyMax && t.monthlyMin !== "Variable" ? <span style={{ fontSize:dk?20:18, color:"#7E8595" }}> /mo</span> : null}
+                </div>
+                <div style={{ fontSize:11.5, color:"#7E8595", marginTop:6, fontWeight:500 }}>{t.yearly}</div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ display:"flex", alignItems:"center", gap:12, padding:"36px 0 16px" }}>
+        <div style={{ fontSize:9.5, fontWeight:800, color:"#F59E0B", letterSpacing:3.5, textTransform:"uppercase" }}>Rules & Mechanics</div>
+        <div style={{ flex:1, height:1, background:"linear-gradient(90deg,rgba(255,255,255,0.05),transparent)" }} />
+      </div>
+
+      <div style={{ background:"linear-gradient(180deg,rgba(14,16,22,0.95),rgba(11,12,17,0.95))", border:"1px solid rgba(255,255,255,0.055)", borderRadius:18, padding:dk?"24px 26px":"20px 18px" }}>
+        {COMP_RULES.map((r, i) => (
+          <div key={i} style={{ display:"flex", gap:14, padding:"12px 0", borderTop: i===0 ? "none" : "1px solid rgba(255,255,255,0.04)" }}>
+            <div style={{ width:24, height:24, borderRadius:7, background:"rgba(245,158,11,0.12)", border:"1px solid rgba(245,158,11,0.25)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, fontSize:11, fontWeight:800, color:"#F59E0B", fontVariantNumeric:"tabular-nums" }}>{i+1}</div>
+            <div style={{ fontSize:dk?13.5:13, color:"#B9BEC8", lineHeight:1.55, fontWeight:500, paddingTop:2 }}>{r}</div>
+          </div>
+        ))}
       </div>
     </div>
   );
