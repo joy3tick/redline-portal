@@ -432,10 +432,10 @@ button{font-family:inherit}
 /* ═══════════════════════════════════════════
    RICH TEXT RENDERER
    ═══════════════════════════════════════════ */
-function RedlineLogo({ height = 28, color = "#33EE3A", style }) {
+function RedlineLogo({ height = 28, color = "#3EE83A", style }) {
   return (
     <svg height={height} viewBox="0 0 100 60" fill={color} style={{ flexShrink: 0, ...style }}>
-      <path d="M 96 6 L 64 30 L 86 36 L 46 36 Q 24 36 4 52 Q 48 8 96 6 Z" />
+      <path d="M 97 4 L 60 30 L 87 36 L 48 36 Q 24 38 3 52 Q 50 5 97 4 Z" />
     </svg>
   );
 }
