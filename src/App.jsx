@@ -289,62 +289,56 @@ button{font-family:inherit}
 
 /* Glass surface */
 .glass {
-  background: linear-gradient(180deg, rgba(24,26,33,0.85), rgba(18,20,26,0.78));
-  backdrop-filter: blur(18px) saturate(140%);
-  -webkit-backdrop-filter: blur(18px) saturate(140%);
-  border: 1px solid rgba(255,255,255,0.07);
+  background: rgba(20,22,28,0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.06);
 }
 .glass-soft {
-  background: linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0.012));
+  background: rgba(255,255,255,0.02);
   border: 1px solid rgba(255,255,255,0.06);
 }
 
 /* Sticky header chrome */
 .app-header {
   position:sticky; top:0; z-index:30;
-  background: linear-gradient(180deg, rgba(14,15,20,0.92), rgba(14,15,20,0.72));
-  backdrop-filter: blur(22px) saturate(140%);
-  -webkit-backdrop-filter: blur(22px) saturate(140%);
+  background: rgba(14,15,20,0.85);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
   border-bottom: 1px solid rgba(255,255,255,0.05);
 }
 
-/* Cards */
-.card-hover { transition: transform 0.32s cubic-bezier(0.4,0,0.2,1), box-shadow 0.32s ease, border-color 0.32s ease, background 0.32s ease }
-.card-hover:hover { transform:translateY(-4px); border-color:rgba(204,255,0,0.28) !important; box-shadow:0 22px 56px rgba(0,0,0,0.55), 0 0 0 1px rgba(204,255,0,0.12), 0 0 40px rgba(204,255,0,0.08) !important }
+/* Cards — flat, minimal */
+.card-hover { transition: background 0.18s ease, border-color 0.18s ease }
+.card-hover:hover { background:rgba(255,255,255,0.028) !important; border-color:rgba(255,255,255,0.12) !important }
 
-/* Dashboard cards */
 .dash-card {
   position:relative;
-  background: linear-gradient(160deg, rgba(22,24,31,0.92), rgba(14,15,20,0.94));
+  background: rgba(255,255,255,0.022);
   border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 20px;
-  box-shadow: 0 8px 28px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04);
-  transition: transform 0.32s cubic-bezier(0.4,0,0.2,1), border-color 0.32s ease, box-shadow 0.32s ease;
+  border-radius: 14px;
+  transition: background 0.18s ease, border-color 0.18s ease;
   overflow:hidden;
 }
-.dash-card::before {
-  content:""; position:absolute; inset:0; pointer-events:none; opacity:0; transition:opacity 0.32s ease;
-  background: radial-gradient(600px circle at var(--mx,50%) var(--my,0%), rgba(204,255,0,0.08), transparent 40%);
-}
-.dash-card:hover { transform:translateY(-3px); border-color:rgba(255,255,255,0.12); box-shadow:0 18px 48px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06); }
-.dash-card:hover::before { opacity:1; }
+.dash-card::before { content:none; }
+.dash-card:hover { background:rgba(255,255,255,0.032); border-color:rgba(255,255,255,0.10); }
 
 /* Accordion */
-.acc-btn { transition: background 0.22s ease }
-.acc-btn:hover { background:rgba(255,255,255,0.04) !important }
+.acc-btn { transition: background 0.18s ease }
+.acc-btn:hover { background:rgba(255,255,255,0.03) !important }
 
 /* Nav back */
-.back-btn { transition: all 0.2s }
-.back-btn:hover { opacity:0.75; transform:translateX(-3px) }
+.back-btn { transition: opacity 0.18s, transform 0.18s }
+.back-btn:hover { opacity:0.75; transform:translateX(-2px) }
 
 /* Video card */
-.vid-card { transition: all 0.3s ease }
-.vid-card:hover { border-color:rgba(204,255,0,0.7) !important; box-shadow:0 0 36px rgba(204,255,0,0.18) !important }
+.vid-card { transition: background 0.18s ease, border-color 0.18s ease }
+.vid-card:hover { background:rgba(255,255,255,0.03) !important; border-color:rgba(204,255,0,0.35) !important }
 .play-pulse { animation: pulse 2.5s ease-in-out infinite }
 
 /* Stat cards */
-.stat-card { transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease }
-.stat-card:hover { transform:translateY(-2px); box-shadow:0 10px 30px rgba(0,0,0,0.4) !important }
+.stat-card { transition: background 0.18s ease, border-color 0.18s ease }
+.stat-card:hover { background:rgba(255,255,255,0.03) !important; border-color:rgba(255,255,255,0.12) !important }
 
 /* Tabular numerals for any displayed numeric data */
 .num-display, .stat-card, .dash-card { font-variant-numeric: tabular-nums }
@@ -2624,7 +2618,7 @@ function AdminPanel({ profile, onBack, w, onSignOut }) {
         ) : (
           <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
             {users.map((u, i) => (
-              <div key={u.id} style={{ background:"linear-gradient(135deg,rgba(16,18,24,0.98),rgba(11,12,16,0.98))", border:"1px solid rgba(255,255,255,0.055)", borderRadius:16, padding:dk?"20px 24px":"16px 18px", display:"flex", alignItems:"center", gap:16, flexWrap:"wrap", animation:`fadeUp 0.4s ease ${0.05*i}s both`, boxShadow:"0 4px 20px rgba(0,0,0,0.3)" }}>
+              <div key={u.id} style={{ background:"rgba(255,255,255,0.022)", border:"1px solid rgba(255,255,255,0.055)", borderRadius:16, padding:dk?"20px 24px":"16px 18px", display:"flex", alignItems:"center", gap:16, flexWrap:"wrap", animation:`fadeUp 0.4s ease ${0.05*i}s both`,  }}>
                 <div style={{ width:46, height:46, borderRadius:14, background:"linear-gradient(135deg,#CCFF00,#5C7A00)", display:"flex", alignItems:"center", justifyContent:"center", fontWeight:800, color:"#15171E", fontSize:18, flexShrink:0, boxShadow:"0 4px 14px rgba(204,255,0,0.35)" }}>
                   {u.name?.[0]?.toUpperCase() ?? "?"}
                 </div>
@@ -2724,9 +2718,9 @@ function Viewer({ ck, onBack, w, onComplete }) {
                 <button className="acc-btn" onClick={() => setOi(open ? null : i)}
                   style={{
                     width:"100%", textAlign:"left",
-                    background: open ? "linear-gradient(135deg,rgba(18,20,26,0.99),rgba(14,16,22,0.99))" : "rgba(10,11,15,0.8)",
-                    border: `1px solid ${open ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.04)"}`,
-                    borderRadius: open ? "16px 16px 0 0" : 16,
+                    background: open ? "rgba(255,255,255,0.03)" : "rgba(255,255,255,0.018)",
+                    border: `1px solid ${open ? "rgba(255,255,255,0.10)" : "rgba(255,255,255,0.06)"}`,
+                    borderRadius: open ? "12px 12px 0 0" : 12,
                     padding: dk ? "20px 24px" : "17px 20px",
                     cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"space-between",
                     fontFamily:"inherit", minHeight:58
@@ -2738,11 +2732,10 @@ function Viewer({ ck, onBack, w, onComplete }) {
                 </button>
                 {open && (
                   <div style={{
-                    background:"linear-gradient(180deg,rgba(12,13,18,0.98) 0%,rgba(9,10,14,0.98) 100%)",
-                    border:"1px solid rgba(255,255,255,0.06)", borderTop:"none",
-                    borderRadius:"0 0 16px 16px", padding:dk?"28px 26px 30px":"22px 20px 26px",
+                    background:"rgba(255,255,255,0.012)",
+                    border:"1px solid rgba(255,255,255,0.10)", borderTop:"none",
+                    borderRadius:"0 0 12px 12px", padding:dk?"28px 26px 30px":"22px 20px 26px",
                     animation:"fadeIn 0.25s ease",
-                    boxShadow:"inset 0 4px 24px rgba(0,0,0,0.3)"
                   }}>
                     <RichText text={s.b} />
                   </div>
@@ -2798,12 +2791,10 @@ function CompPlanView({ dk }) {
     <div style={{ animation:"fadeUp 0.4s ease" }}>
       <div style={{
         position:"relative", overflow:"hidden",
-        background:"linear-gradient(135deg,rgba(167,139,250,0.14),rgba(6,214,240,0.10) 60%,rgba(14,16,22,0.0))",
-        border:"1px solid rgba(167,139,250,0.28)", borderRadius:20,
+        background:"rgba(167,139,250,0.05)",
+        border:"1px solid rgba(167,139,250,0.18)", borderRadius:14,
         padding:dk?"30px 32px":"24px 22px", marginBottom:22,
-        boxShadow:"0 12px 44px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)"
       }}>
-        <div style={{ position:"absolute", inset:0, background:"radial-gradient(640px circle at 90% -20%,rgba(167,139,250,0.18),transparent 55%)", pointerEvents:"none" }} />
         <div style={{ position:"relative" }}>
           <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:14 }}>
             <div style={{ width:24, height:3, background:"linear-gradient(90deg,#A78BFA,transparent)", borderRadius:4 }} />
@@ -2832,24 +2823,19 @@ function CompPlanView({ dk }) {
         {COMP_TIERS.map((t, i) => (
           <div key={t.name} style={{
             position:"relative", overflow:"hidden",
-            background:"linear-gradient(135deg,rgba(18,20,26,0.96),rgba(11,12,17,0.98))",
-            border:`1px solid ${t.featured ? t.border : "rgba(255,255,255,0.055)"}`,
-            borderRadius:18,
+            background:"rgba(255,255,255,0.022)",
+            border:`1px solid ${t.featured ? t.border : "rgba(255,255,255,0.06)"}`,
+            borderRadius:14,
             padding:dk?"24px 26px":"20px 18px",
-            boxShadow: t.featured
-              ? `0 14px 42px rgba(0,0,0,0.5), 0 0 0 1px ${t.border}, 0 0 60px ${t.glow}`
-              : "0 6px 22px rgba(0,0,0,0.35)",
             animation:`fadeUp 0.4s ease ${0.05*i}s both`,
           }}>
-            <div style={{ position:"absolute", top:0, right:0, width:dk?180:120, height:"100%", background:t.grad, opacity:t.featured?0.18:0.10, pointerEvents:"none", maskImage:"linear-gradient(270deg,#000,transparent)", WebkitMaskImage:"linear-gradient(270deg,#000,transparent)" }} />
             <div style={{ position:"relative", display:"flex", flexDirection:dk?"row":"column", alignItems:dk?"center":"flex-start", gap:dk?22:16 }}>
               <div style={{ display:"flex", alignItems:"center", gap:14, flexShrink:0, minWidth:dk?170:"auto" }}>
                 <div style={{
-                  width:dk?58:50, height:dk?58:50, borderRadius:14,
+                  width:dk?54:48, height:dk?54:48, borderRadius:12,
                   background:t.grad, color:t.text,
                   display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column",
                   flexShrink:0,
-                  boxShadow:`0 8px 24px ${t.glow}, inset 0 1px 0 rgba(255,255,255,0.35)`,
                 }}>
                   <div style={{ fontSize:9, fontWeight:800, letterSpacing:1.4, opacity:0.7 }}>TIER</div>
                   <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:22, lineHeight:1, letterSpacing:1 }}>{t.num || "—"}</div>
@@ -2882,7 +2868,7 @@ function CompPlanView({ dk }) {
         <div style={{ flex:1, height:1, background:"linear-gradient(90deg,rgba(255,255,255,0.05),transparent)" }} />
       </div>
 
-      <div style={{ background:"linear-gradient(180deg,rgba(14,16,22,0.95),rgba(11,12,17,0.95))", border:"1px solid rgba(255,255,255,0.055)", borderRadius:18, padding:dk?"24px 26px":"20px 18px" }}>
+      <div style={{ background:"rgba(255,255,255,0.022)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:14, padding:dk?"24px 26px":"20px 18px" }}>
         {COMP_RULES.map((r, i) => (
           <div key={i} style={{ display:"flex", gap:14, padding:"12px 0", borderTop: i===0 ? "none" : "1px solid rgba(255,255,255,0.04)" }}>
             <div style={{ width:24, height:24, borderRadius:7, background:"rgba(245,158,11,0.12)", border:"1px solid rgba(245,158,11,0.25)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, fontSize:11, fontWeight:800, color:"#F59E0B", fontVariantNumeric:"tabular-nums" }}>{i+1}</div>
@@ -2962,7 +2948,7 @@ function Quiz({ quizKey, onBack, w, onComplete }) {
           </div>
         ) : (
           <div style={{ paddingBottom:90, animation:"fadeUp 0.3s ease" }}>
-            <div style={{ background:"linear-gradient(135deg,rgba(18,20,26,0.98),rgba(12,14,18,0.98))", border:"1px solid rgba(255,255,255,0.07)", borderRadius:18, padding:dk?"28px":"22px 18px", marginBottom:20, boxShadow:"0 8px 32px rgba(0,0,0,0.4)" }}>
+            <div style={{ background:"rgba(255,255,255,0.022)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:14, padding:dk?"28px":"22px 18px", marginBottom:20 }}>
               <h3 style={{ fontSize:dk?18:16, fontWeight:700, color:"#F2F4F8", margin:0, lineHeight:1.5 }}>{cur.q}</h3>
             </div>
             <div style={{ display:"flex", flexDirection:"column", gap:9 }}>
@@ -3002,16 +2988,16 @@ function Quiz({ quizKey, onBack, w, onComplete }) {
 
 /* Icon gradient per category */
 const IC_GRAD = {
-  MODULE:    "linear-gradient(135deg,#CCFF00,#5C7A00)",
-  BOOTCAMP:  "linear-gradient(135deg,#F59E0B,#92400E)",
-  REFERENCE: "linear-gradient(135deg,#06D6F0,#0588A0)",
-  QUIZ:      "linear-gradient(135deg,#10B981,#065F46)",
+  MODULE:    "rgba(204,255,0,0.10)",
+  BOOTCAMP:  "rgba(245,158,11,0.10)",
+  REFERENCE: "rgba(6,214,240,0.10)",
+  QUIZ:      "rgba(16,185,129,0.10)",
 };
 const IC_SHADOW = {
-  MODULE:    "0 4px 16px rgba(204,255,0,0.35)",
-  BOOTCAMP:  "0 4px 16px rgba(245,158,11,0.35)",
-  REFERENCE: "0 4px 16px rgba(6,214,240,0.35)",
-  QUIZ:      "0 4px 16px rgba(16,185,129,0.35)",
+  MODULE:    "inset 0 0 0 1px rgba(204,255,0,0.22)",
+  BOOTCAMP:  "inset 0 0 0 1px rgba(245,158,11,0.22)",
+  REFERENCE: "inset 0 0 0 1px rgba(6,214,240,0.22)",
+  QUIZ:      "inset 0 0 0 1px rgba(16,185,129,0.22)",
 };
 const LINK_ICONS = [
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>,
@@ -3328,7 +3314,7 @@ export default function App() {
                     const done = completedModules.has(x.k);
                     return (
                       <div key={x.id} className="card-hover" onClick={() => { setView(x.k); setTimeout(top, 50); }}
-                        style={{ background:"linear-gradient(135deg,rgba(16,18,24,0.98),rgba(11,12,16,0.98))", border:`1px solid ${done ? "rgba(34,197,94,0.15)" : "rgba(255,255,255,0.055)"}`, borderRadius:16, padding:dk?"20px 18px":"17px 15px", cursor:"pointer", animation:`fadeUp 0.38s ease ${0.04*(gi*4+i)}s both`, boxShadow:"0 4px 20px rgba(0,0,0,0.3)" }}>
+                        style={{ background:"rgba(255,255,255,0.022)", border:`1px solid ${done ? "rgba(34,197,94,0.15)" : "rgba(255,255,255,0.055)"}`, borderRadius:16, padding:dk?"20px 18px":"17px 15px", cursor:"pointer", animation:`fadeUp 0.38s ease ${0.04*(gi*4+i)}s both`,  }}>
                         <div style={{ display:"flex", alignItems:"center", gap:14 }}>
                           <div style={{ width:50, height:50, borderRadius:14, background:IC_GRAD[x.t], display:"flex", alignItems:"center", justifyContent:"center", fontSize:22, flexShrink:0, boxShadow:IC_SHADOW[x.t] }}>{x.ic}</div>
                           <div style={{ flex:1, minWidth:0 }}>
@@ -3355,7 +3341,7 @@ export default function App() {
                 const qs = quizScores[x.k];
                 return (
                   <div key={x.id} className="card-hover" onClick={() => { setView(x.k); setTimeout(top, 50); }}
-                    style={{ background:"linear-gradient(135deg,rgba(16,18,24,0.98),rgba(11,12,16,0.98))", border:`1px solid ${qs ? "rgba(16,185,129,0.15)" : "rgba(255,255,255,0.055)"}`, borderRadius:16, padding:dk?"20px 18px":"17px 15px", cursor:"pointer", animation:`fadeUp 0.38s ease ${0.05*i}s both`, boxShadow:"0 4px 20px rgba(0,0,0,0.3)" }}>
+                    style={{ background:"rgba(255,255,255,0.022)", border:`1px solid ${qs ? "rgba(16,185,129,0.15)" : "rgba(255,255,255,0.055)"}`, borderRadius:16, padding:dk?"20px 18px":"17px 15px", cursor:"pointer", animation:`fadeUp 0.38s ease ${0.05*i}s both`,  }}>
                     <div style={{ display:"flex", alignItems:"center", gap:14 }}>
                       <div style={{ width:50, height:50, borderRadius:14, background:IC_GRAD.QUIZ, display:"flex", alignItems:"center", justifyContent:"center", fontSize:22, flexShrink:0, boxShadow:IC_SHADOW.QUIZ }}>{x.ic}</div>
                       <div style={{ flex:1, minWidth:0 }}>
@@ -3383,7 +3369,7 @@ export default function App() {
         {tab === "reference" && (
           <div style={{ animation:"fadeUp 0.35s ease" }}>
             <a href="https://www.redlinewebservices.net/" target="_blank" rel="noreferrer" className="card-hover"
-              style={{ display:"flex", alignItems:"center", gap:14, background:"linear-gradient(135deg,rgba(16,18,24,0.98),rgba(11,12,17,0.98))", border:"1px solid rgba(255,255,255,0.055)", borderRadius:16, padding:dk?"18px":"15px 14px", textDecoration:"none", marginBottom:10, boxShadow:"0 4px 20px rgba(0,0,0,0.3)" }}>
+              style={{ display:"flex", alignItems:"center", gap:14, background:"rgba(255,255,255,0.022)", border:"1px solid rgba(255,255,255,0.055)", borderRadius:16, padding:dk?"18px":"15px 14px", textDecoration:"none", marginBottom:10,  }}>
               <div style={{ width:46, height:46, borderRadius:13, background:"linear-gradient(135deg,#06D6F0,#0588A0)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, fontSize:22, boxShadow:"0 4px 16px rgba(6,214,240,0.35)" }}>🌐</div>
               <div style={{ flex:1, minWidth:0 }}>
                 <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF2F8", margin:"0 0 2px" }}>Redline Homepage</h3>
@@ -3394,7 +3380,7 @@ export default function App() {
             <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr 1fr":dk?"1fr 1fr":"1fr", gap:dk?10:8 }}>
               {referenceItems.map((x, i) => (
                 <div key={x.id} className="card-hover" onClick={() => { setView(x.k); setTimeout(top, 50); }}
-                  style={{ background:"linear-gradient(135deg,rgba(16,18,24,0.98),rgba(11,12,16,0.98))", border:"1px solid rgba(255,255,255,0.055)", borderRadius:16, padding:dk?"20px 18px":"17px 15px", cursor:"pointer", animation:`fadeUp 0.38s ease ${0.05*i}s both`, boxShadow:"0 4px 20px rgba(0,0,0,0.3)" }}>
+                  style={{ background:"rgba(255,255,255,0.022)", border:"1px solid rgba(255,255,255,0.055)", borderRadius:16, padding:dk?"20px 18px":"17px 15px", cursor:"pointer", animation:`fadeUp 0.38s ease ${0.05*i}s both`,  }}>
                   <div style={{ display:"flex", alignItems:"center", gap:14 }}>
                     <div style={{ width:50, height:50, borderRadius:14, background:IC_GRAD.REFERENCE, display:"flex", alignItems:"center", justifyContent:"center", fontSize:22, flexShrink:0, boxShadow:IC_SHADOW.REFERENCE }}>{x.ic}</div>
                     <div style={{ flex:1, minWidth:0 }}>
