@@ -47,15 +47,43 @@ create policy "Admins read all profiles"
   on public.profiles for select
   using (public.is_admin());
 
+-- Helpers used by the "Own profile update" with-check below.
+-- Both are SECURITY DEFINER + STABLE so they see the snapshot taken at
+-- statement start (the pre-update row), letting us lock role / tier.
+create or replace function public.my_role()
+returns text language sql security definer stable as $$
+  select role from public.profiles where id = auth.uid();
+$$;
+
+create or replace function public.my_tier()
+returns text language sql security definer stable as $$
+  select tier from public.profiles where id = auth.uid();
+$$;
+
+-- Re-create with a WITH CHECK clause that pins role + tier so a rep
+-- can't promote themselves to admin or hand themselves a sales tier
+-- via a direct supabase.from("profiles").update(...) call.
+drop policy if exists "Own profile update" on public.profiles;
 create policy "Own profile update"
   on public.profiles for update
-  using (auth.uid() = id);
+  using (auth.uid() = id)
+  with check (
+    auth.uid() = id
+    and role = public.my_role()
+    and tier is not distinct from public.my_tier()
+  );
 
+drop policy if exists "Admins update any profile" on public.profiles;
 create policy "Admins update any profile"
   on public.profiles for update
-  using (public.is_admin());
+  using (public.is_admin())
+  with check (public.is_admin());
 
 -- Auto-create a profile row whenever a new user signs up.
+-- IMPORTANT: role is hardcoded to 'rep'. Never trust signup metadata for
+-- privilege assignment — anyone with the public anon key can hit the
+-- /auth/v1/signup endpoint with arbitrary metadata. Admin promotion is
+-- explicit and goes through the admin panel (RLS-gated).
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
@@ -66,7 +94,7 @@ begin
   values (
     new.id,
     coalesce(new.raw_user_meta_data->>'name', split_part(new.email, '@', 1)),
-    coalesce(new.raw_user_meta_data->>'role', 'rep')
+    'rep'
   );
   return new;
 end;
@@ -296,13 +324,19 @@ create policy "Admins read all leads"
   on public.leads for select
   using (public.is_admin());
 
+-- Pin assigned_to / assigned_by via WITH CHECK so a rep can't steal
+-- a teammate's lead by re-pointing the row at themselves or anyone else.
+drop policy if exists "Reps update own leads" on public.leads;
 create policy "Reps update own leads"
   on public.leads for update
-  using (auth.uid() = assigned_to);
+  using (auth.uid() = assigned_to)
+  with check (auth.uid() = assigned_to);
 
+drop policy if exists "Admins manage leads" on public.leads;
 create policy "Admins manage leads"
   on public.leads for all
-  using (public.is_admin());
+  using (public.is_admin())
+  with check (public.is_admin());
 
 -- Live updates for the leads inbox
 do $$

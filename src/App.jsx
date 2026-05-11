@@ -1095,27 +1095,39 @@ function Leads({ session, profile, w }) {
   };
 
   // Render a CSV value: if it looks like a URL/email/phone, make it clickable.
+  // All link branches validate via the URL parser so a malicious CSV row
+  // can't smuggle a javascript:/data:/file: href through to the browser.
   const renderValue = (v) => {
     const s = (v ?? "").toString().trim();
     if (!s) return <span style={{ color:"#3A3D47" }}>—</span>;
     const linkStyle = { color:"#CCFF00", textDecoration:"none", borderBottom:"1px dotted rgba(204,255,0,0.4)" };
-    // Explicit URL
+    const safeHttpUrl = (raw) => {
+      try {
+        const u = new URL(raw);
+        return (u.protocol === "http:" || u.protocol === "https:") ? u.href : null;
+      } catch { return null; }
+    };
+    // Explicit URL (must parse cleanly + be http/https)
     if (/^https?:\/\//i.test(s)) {
-      return <a href={s} target="_blank" rel="noreferrer" style={linkStyle}>{s}</a>;
+      const href = safeHttpUrl(s);
+      if (href) return <a href={href} target="_blank" rel="noreferrer" style={linkStyle}>{s}</a>;
+      return s;
     }
-    // www.something or bare domain like business.com / example.co.uk
+    // Bare domain / www.something — we control the scheme by prepending https://
     if (/^(www\.)?[a-z0-9-]+(\.[a-z0-9-]+)+(\/\S*)?$/i.test(s) && /\.[a-z]{2,}/i.test(s)) {
-      const href = /^www\./i.test(s) ? `https://${s}` : (s.includes(".") ? `https://${s}` : s);
-      return <a href={href} target="_blank" rel="noreferrer" style={linkStyle}>{s}</a>;
+      const href = safeHttpUrl(`https://${s}`);
+      if (href) return <a href={href} target="_blank" rel="noreferrer" style={linkStyle}>{s}</a>;
+      return s;
     }
-    // Email
-    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s)) {
-      return <a href={`mailto:${s}`} style={linkStyle}>{s}</a>;
+    // Email — strict shape, mailto: is safe because mail clients ignore scripts
+    if (/^[^\s@<>"']+@[^\s@<>"']+\.[^\s@<>"']+$/.test(s)) {
+      return <a href={`mailto:${encodeURIComponent(s)}`} style={linkStyle}>{s}</a>;
     }
-    // Phone — mostly digits with separators, ≥7 digits
+    // Phone — strip to digits + leading plus, then tel:
     const digits = s.replace(/\D/g, "");
     if (digits.length >= 7 && digits.length <= 15 && /^\+?[\d\s().+-]+$/.test(s)) {
-      return <a href={`tel:${s.replace(/[^\d+]/g, "")}`} style={linkStyle}>{s}</a>;
+      const cleaned = s.replace(/[^\d+]/g, "");
+      return <a href={`tel:${cleaned}`} style={linkStyle}>{s}</a>;
     }
     return s;
   };
