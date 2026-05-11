@@ -35,14 +35,17 @@ as $$
   );
 $$;
 
+drop policy if exists "Own profile read" on public.profiles;
 create policy "Own profile read"
   on public.profiles for select
   using (auth.uid() = id);
 
+drop policy if exists "Authenticated users read all profiles" on public.profiles;
 create policy "Authenticated users read all profiles"
   on public.profiles for select
   using (auth.role() = 'authenticated');
 
+drop policy if exists "Admins read all profiles" on public.profiles;
 create policy "Admins read all profiles"
   on public.profiles for select
   using (public.is_admin());
@@ -118,10 +121,12 @@ create table if not exists public.module_progress (
 
 alter table public.module_progress enable row level security;
 
+drop policy if exists "Own progress all" on public.module_progress;
 create policy "Own progress all"
   on public.module_progress for all
   using (auth.uid() = user_id);
 
+drop policy if exists "Admins read all progress" on public.module_progress;
 create policy "Admins read all progress"
   on public.module_progress for select
   using (public.is_admin());
@@ -140,10 +145,12 @@ create table if not exists public.quiz_scores (
 
 alter table public.quiz_scores enable row level security;
 
+drop policy if exists "Own scores all" on public.quiz_scores;
 create policy "Own scores all"
   on public.quiz_scores for all
   using (auth.uid() = user_id);
 
+drop policy if exists "Admins read all scores" on public.quiz_scores;
 create policy "Admins read all scores"
   on public.quiz_scores for select
   using (public.is_admin());
@@ -177,10 +184,12 @@ alter table public.monthly_bonuses alter column label drop not null;
 
 alter table public.monthly_bonuses enable row level security;
 
+drop policy if exists "Authenticated users read bonuses" on public.monthly_bonuses;
 create policy "Authenticated users read bonuses"
   on public.monthly_bonuses for select
   using (auth.role() = 'authenticated');
 
+drop policy if exists "Admins manage bonuses" on public.monthly_bonuses;
 create policy "Admins manage bonuses"
   on public.monthly_bonuses for all
   using (public.is_admin());
@@ -199,10 +208,12 @@ create table if not exists public.sales (
 
 alter table public.sales enable row level security;
 
+drop policy if exists "Authenticated users read all sales" on public.sales;
 create policy "Authenticated users read all sales"
   on public.sales for select
   using (auth.role() = 'authenticated');
 
+drop policy if exists "Users manage own sales" on public.sales;
 create policy "Users manage own sales"
   on public.sales for all
   using (auth.uid() = user_id);
@@ -219,10 +230,12 @@ create table if not exists public.schedule (
 
 alter table public.schedule enable row level security;
 
+drop policy if exists "Authenticated users read schedule" on public.schedule;
 create policy "Authenticated users read schedule"
   on public.schedule for select
   using (auth.role() = 'authenticated');
 
+drop policy if exists "Users manage own schedule" on public.schedule;
 create policy "Users manage own schedule"
   on public.schedule for all
   using (auth.uid() = user_id);
@@ -240,10 +253,12 @@ create table if not exists public.announcements (
 
 alter table public.announcements enable row level security;
 
+drop policy if exists "Authenticated users read announcements" on public.announcements;
 create policy "Authenticated users read announcements"
   on public.announcements for select
   using (auth.role() = 'authenticated');
 
+drop policy if exists "Admins manage announcements" on public.announcements;
 create policy "Admins manage announcements"
   on public.announcements for all
   using (public.is_admin());
@@ -262,18 +277,22 @@ create index if not exists messages_created_at_idx
 
 alter table public.messages enable row level security;
 
+drop policy if exists "Authenticated users read messages" on public.messages;
 create policy "Authenticated users read messages"
   on public.messages for select
   using (auth.role() = 'authenticated');
 
+drop policy if exists "Users insert own messages" on public.messages;
 create policy "Users insert own messages"
   on public.messages for insert
   with check (auth.uid() = user_id);
 
+drop policy if exists "Users delete own messages" on public.messages;
 create policy "Users delete own messages"
   on public.messages for delete
   using (auth.uid() = user_id);
 
+drop policy if exists "Admins delete any message" on public.messages;
 create policy "Admins delete any message"
   on public.messages for delete
   using (public.is_admin());
@@ -316,10 +335,12 @@ alter table public.leads add constraint leads_status_check
 
 alter table public.leads enable row level security;
 
+drop policy if exists "Reps read own leads" on public.leads;
 create policy "Reps read own leads"
   on public.leads for select
   using (auth.uid() = assigned_to);
 
+drop policy if exists "Admins read all leads" on public.leads;
 create policy "Admins read all leads"
   on public.leads for select
   using (public.is_admin());
@@ -364,10 +385,12 @@ create table if not exists public.roles (
 
 alter table public.roles enable row level security;
 
+drop policy if exists "Authenticated read roles" on public.roles;
 create policy "Authenticated read roles"
   on public.roles for select
   using (auth.role() = 'authenticated');
 
+drop policy if exists "Admins manage roles" on public.roles;
 create policy "Admins manage roles"
   on public.roles for all
   using (public.is_admin());
