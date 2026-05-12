@@ -1197,7 +1197,10 @@ function Leads({ session, profile, w }) {
       supabase.from("profiles").select("id, name, role").order("name"),
     ]);
     setLeads(leadsRes.data ?? []);
-    const repList = (profRes.data ?? []).filter(p => p.role === "rep");
+    // Assignable list = every rep + the current admin (so admin can hand
+    // leads to themselves to work). Other admins are intentionally left out.
+    const all = profRes.data ?? [];
+    const repList = all.filter(p => p.role === "rep" || p.id === session.user.id);
     setReps(repList);
     if (!assignTo && repList.length) setAssignTo(repList[0].id);
     setLoading(false);
@@ -1499,7 +1502,7 @@ function Leads({ session, profile, w }) {
                   <select value={assignTo} onChange={e => setAssignTo(e.target.value)}
                     style={{ width:"100%", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:10, color:"#F2F4F8", fontSize:13, fontWeight:600, padding:"10px 12px", fontFamily:"inherit", outline:"none", cursor:"pointer" }}>
                     {reps.length === 0 && <option>No reps available</option>}
-                    {reps.map(r => <option key={r.id} value={r.id}>{r.name || "Rep"}</option>)}
+                    {reps.map(r => <option key={r.id} value={r.id}>{(r.name || "Rep") + (r.id === session.user.id ? " (you)" : "")}</option>)}
                   </select>
                 </div>
                 <button onClick={upload} disabled={uploading || !assignTo || !parsed.rows.length} className="btn-primary"
