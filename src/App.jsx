@@ -1,5 +1,39 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "./lib/supabase";
+
+/* ═══════════════════════════════════════════
+   DESIGN TOKENS — single source of truth
+   Hero = chartreuse only. Red = urgent only.
+   ═══════════════════════════════════════════ */
+const TOKENS = {
+  bg:        "#0E0F14",
+  surface:   "#15171E",
+  surface2:  "rgba(255,255,255,0.03)",
+  border:    "rgba(255,255,255,0.07)",
+  borderStrong:"rgba(255,255,255,0.14)",
+  text:      "#F2F4F8",
+  textMuted: "#9098A8",
+  textDim:   "#5E6376",
+  textFaint: "#3D414B",
+  // Hero — the ONLY accent for positive / active / energetic states
+  hero:      "#CCFF00",
+  heroDark:  "#88AB00",
+  heroSoft:  "rgba(204,255,0,0.10)",
+  heroBorder:"rgba(204,255,0,0.30)",
+  // Brand red — reserved for urgent / negative / overdue / dead
+  danger:    "#DC2626",
+  dangerSoft:"rgba(220,38,38,0.10)",
+  dangerBorder:"rgba(220,38,38,0.30)",
+  // Funnel status colors (lead pipeline only — do not reuse as UI accents)
+  funnel: { new:"#06D6F0", contacted:"#F59E0B", quoted:"#A78BFA", booked:"#14B8A6", closed:"#22C55E", dead:"#DC2626" },
+  // Top performer accent — gold (used sparingly for #1 / Final Exam)
+  gold:      "#FFD700",
+  // Type system
+  fontDisplay: "'Bebas Neue', sans-serif",
+  fontBody:    "'Plus Jakarta Sans', 'Inter', system-ui, sans-serif",
+  fontMono:    "'IBM Plex Mono', 'JetBrains Mono', ui-monospace, monospace",
+};
+
 const C = {
   "m1": { t: "Module 1 — Onboarding & Culture", st: "Who Redline is, how we operate, what we will not be.", s: [
     { h: "🏢  1.1 — WELCOME TO REDLINE", b: "We build websites for contractors. That's it. We don't do logos, we don't do paid ads, we don't do social media management. We build conversion-focused websites for home service operators and we keep them running.\n\nFounder Alex Rogul came from finance, not design. He saw $500K+ contractors running businesses on websites that looked like Craigslist ads — losing jobs every day to faster competitors. Redline exists to close that gap.\n\n🎯  THE ONE FILTER\nEvery Redline site passes through one filter: Does it convert, rank, and drive booked jobs? If not, it doesn't ship." },
@@ -462,53 +496,79 @@ button{font-family:inherit}
 .tab-pill {
   position:relative; background:none; border:none; cursor:pointer;
   font-family:inherit; font-weight:700; letter-spacing:1.8px; text-transform:uppercase;
-  color:#5E6376; transition: color 0.22s ease;
+  color: rgba(242,244,248,0.65); transition: color 0.18s ease;
   border-radius:10px;
 }
-.tab-pill:hover { color:#A0A4B0 }
+.tab-pill::after {
+  content:""; position:absolute; left:14%; right:14%; bottom:-1px; height:2px;
+  background:#CCFF00; border-radius:2px; opacity:0; transition: opacity 0.18s ease;
+}
+.tab-pill:not(.active):hover { color:#F2F4F8 }
+.tab-pill:not(.active):hover::after { opacity:0.5 }
 .tab-pill.active { color:#15171E }
 .tab-pill .tab-bg {
   position:absolute; inset:0; border-radius:10px; opacity:0;
-  background:linear-gradient(135deg,#CCFF00,#A8D900);
-  box-shadow: 0 4px 16px rgba(204,255,0,0.35), inset 0 1px 0 rgba(255,255,255,0.4);
-  transition: opacity 0.28s ease;
+  background:#CCFF00;
+  transition: opacity 0.22s ease;
   z-index:0;
 }
 .tab-pill.active .tab-bg { opacity:1 }
 .tab-pill > span { position:relative; z-index:1 }
 
-/* Buttons */
+/* Buttons — three variants only */
+/* Primary: chartreuse fill, charcoal text — main CTAs */
 .btn-primary {
-  background:linear-gradient(135deg,#CCFF00,#A8D900);
+  background:#CCFF00;
   color:#15171E; font-weight:800; letter-spacing:1.2px; text-transform:uppercase;
   border:none; border-radius:10px; cursor:pointer;
-  box-shadow:0 6px 20px rgba(204,255,0,0.32), inset 0 1px 0 rgba(255,255,255,0.4);
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  transition: filter 0.16s ease, background 0.16s ease;
 }
-.btn-primary:hover { transform:translateY(-1px); box-shadow:0 10px 28px rgba(204,255,0,0.45), inset 0 1px 0 rgba(255,255,255,0.5) }
-.btn-primary:active { transform:translateY(0) }
+.btn-primary:hover { filter: brightness(1.06) }
+.btn-primary:active { filter: brightness(0.94) }
+.btn-primary:disabled { cursor:default; filter:none }
 
+/* Secondary: charcoal fill, chartreuse border + text — less critical actions */
+.btn-secondary {
+  background:transparent; border:1px solid #CCFF00; color:#CCFF00;
+  font-weight:800; letter-spacing:1.2px; text-transform:uppercase;
+  border-radius:10px; cursor:pointer; transition: all 0.16s ease;
+}
+.btn-secondary:hover { background:rgba(204,255,0,0.08) }
+.btn-secondary:active { background:rgba(204,255,0,0.14) }
+
+/* Tertiary (ghost): muted text, chartreuse on hover — utility / nav */
 .btn-ghost {
-  background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);
+  background:transparent; border:1px solid transparent;
   color:#9098A8; font-weight:700; letter-spacing:1.5px; text-transform:uppercase;
-  border-radius:10px; cursor:pointer; transition: all 0.18s ease;
+  border-radius:10px; cursor:pointer; transition: all 0.16s ease;
 }
-.btn-ghost:hover { background:rgba(255,255,255,0.07); color:#D6DAE2; border-color:rgba(255,255,255,0.14) }
+.btn-ghost:hover { color:#CCFF00; background:rgba(204,255,0,0.06); border-color:rgba(204,255,0,0.20) }
 
-/* Header pill buttons — Admin / Sign Out / Profile */
+/* Type utilities */
+.mono { font-family: 'IBM Plex Mono', 'JetBrains Mono', ui-monospace, monospace; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.display { font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.08em; line-height: 1; }
+.eyebrow { font-size: 9px; font-weight: 800; letter-spacing: 2.4px; text-transform: uppercase; color: #9098A8; }
+
+/* Header pill buttons — Admin / Sign Out / Profile (all tertiary) */
 .btn-pill {
   display:inline-flex; align-items:center; justify-content:center; gap:7px;
   height:42px; padding:0 14px; font-size:11px; font-weight:700;
   letter-spacing:1.4px; text-transform:uppercase; border-radius:12px;
-  cursor:pointer; transition: all 0.18s ease; font-family:inherit;
-  background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
-  border: 1px solid rgba(255,255,255,0.08); color:#9098A8;
+  cursor:pointer; transition: all 0.16s ease; font-family:inherit;
+  background: transparent; border: 1px solid transparent; color:#9098A8;
 }
-.btn-pill:hover { background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03)); color:#D6DAE2; border-color:rgba(255,255,255,0.16) }
-.btn-pill.amber { color:#F59E0B; background: linear-gradient(180deg, rgba(245,158,11,0.10), rgba(245,158,11,0.04)); border-color:rgba(245,158,11,0.22) }
-.btn-pill.amber:hover { background: linear-gradient(180deg, rgba(245,158,11,0.16), rgba(245,158,11,0.06)); border-color:rgba(245,158,11,0.36); color:#FBBF24 }
+.btn-pill:hover { background: rgba(204,255,0,0.06); border-color: rgba(204,255,0,0.22); color:#CCFF00 }
+.btn-pill.amber, .btn-pill.amber:hover { /* legacy class — collapsed to tertiary so no orange admin outlier */ }
 .btn-pill.icon-only { padding:0; width:42px; gap:0 }
 .btn-pill svg { display:block }
+
+/* Live header status tiles */
+.hdr-stat { display:flex; flex-direction:column; align-items:flex-start; gap:2px; padding:0 18px; border-left:1px solid rgba(255,255,255,0.06) }
+.hdr-stat:first-child { border-left:none; padding-left:0 }
+.hdr-stat-val { font-family:'IBM Plex Mono', ui-monospace, monospace; font-variant-numeric: tabular-nums; font-weight:600; font-size:22px; color:#F2F4F8; line-height:1; letter-spacing:-0.02em }
+.hdr-stat-val.hero { color:#CCFF00 }
+.hdr-stat-val.danger { color:#DC2626 }
+.hdr-stat-label { font-size:9px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#5E6376 }
 .title-display {
   font-family:'Bebas Neue',sans-serif; letter-spacing:0.32em; line-height:1;
 }
@@ -652,13 +712,13 @@ function Login() {
   const fieldStyle = (hasErr) => ({
     width:"100%", padding:"15px 20px",
     background:"rgba(7,8,12,0.9)",
-    border: `1.5px solid ${hasErr ? "#FF3370" : "rgba(255,255,255,0.07)"}`,
+    border: `1.5px solid ${hasErr ? "#DC2626" : "rgba(255,255,255,0.07)"}`,
     borderRadius:14, color:"#F2F4F8", fontSize:15, outline:"none",
     boxSizing:"border-box", fontFamily:"inherit", transition:"all 0.22s ease",
   });
 
   const onFocus = e => { e.target.style.borderColor = "rgba(204,255,0,0.6)"; e.target.style.boxShadow = "0 0 0 4px rgba(204,255,0,0.08)"; };
-  const onBlur  = (e, hasErr) => { e.target.style.borderColor = hasErr ? "#FF3370" : "rgba(255,255,255,0.07)"; e.target.style.boxShadow = "none"; };
+  const onBlur  = (e, hasErr) => { e.target.style.borderColor = hasErr ? "#DC2626" : "rgba(255,255,255,0.07)"; e.target.style.boxShadow = "none"; };
 
   return (
     <div className="dotgrid" style={{ minHeight:"100dvh", background:"#0E0F14", display:"flex", alignItems:"center", justifyContent:"center", padding:24, position:"relative", overflow:"hidden" }}>
@@ -682,8 +742,8 @@ function Login() {
           </div>
           {err && (
             <div style={{ display:"flex", alignItems:"center", gap:7, marginTop:12 }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF3370" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              <p style={{ color:"#FF3370", fontSize:12, fontWeight:600 }}>{err}</p>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <p style={{ color:"#DC2626", fontSize:12, fontWeight:600 }}>{err}</p>
             </div>
           )}
           <button onClick={go} disabled={ld} style={{ width:"100%", padding:"16px", background: ld ? "#3E5200" : "linear-gradient(135deg,#CCFF00,#6E9100)", color: ld ? "#FFF" : "#15171E", border:"none", borderRadius:14, fontSize:11, fontWeight:800, letterSpacing:4, cursor: ld ? "wait" : "pointer", marginTop:20, textTransform:"uppercase", boxShadow: ld ? "none" : "0 6px 28px rgba(204,255,0,0.3)", transition:"all 0.25s ease", fontFamily:"inherit" }}>
@@ -774,17 +834,17 @@ function Scheduler({ session, profile, w }) {
   return (
     <div>
       {/* Policy notice */}
-      <div style={{ display:"flex", alignItems:"flex-start", gap:14, padding:dk?"16px 20px":"14px 16px", background:"linear-gradient(135deg, rgba(255,51,112,0.08), rgba(245,158,11,0.06))", border:"1px solid rgba(255,51,112,0.25)", borderRadius:14, marginBottom:24, animation:"fadeUp 0.4s ease" }}>
-        <div style={{ width:38, height:38, borderRadius:11, background:"rgba(255,51,112,0.12)", border:"1px solid rgba(255,51,112,0.3)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#FF3370" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <div style={{ display:"flex", alignItems:"flex-start", gap:14, padding:dk?"16px 20px":"14px 16px", background:"linear-gradient(135deg, rgba(220,38,38,0.08), rgba(245,158,11,0.06))", border:"1px solid rgba(220,38,38,0.25)", borderRadius:14, marginBottom:24, animation:"fadeUp 0.4s ease" }}>
+        <div style={{ width:38, height:38, borderRadius:11, background:"rgba(220,38,38,0.12)", border:"1px solid rgba(220,38,38,0.3)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         </div>
         <div style={{ flex:1, minWidth:0 }}>
-          <div style={{ fontSize:9.5, fontWeight:800, color:"#FF3370", letterSpacing:2.5, textTransform:"uppercase", marginBottom:4 }}>Mandatory Policy</div>
+          <div style={{ fontSize:9.5, fontWeight:800, color:"#DC2626", letterSpacing:2.5, textTransform:"uppercase", marginBottom:4 }}>Mandatory Policy</div>
           <div style={{ fontSize:dk?13.5:12.5, fontWeight:700, color:"#F2F4F8", lineHeight:1.45, marginBottom:4 }}>
             2-day minimum office attendance per week
           </div>
           <div style={{ fontSize:dk?12.5:11.5, color:"#C4C8D4", lineHeight:1.55, fontWeight:500 }}>
-            Every rep must book at least <span style={{ color:"#FF3370", fontWeight:700 }}>2 days</span> in the office each week. Failure to meet this minimum is grounds for <span style={{ color:"#FF3370", fontWeight:700 }}>termination</span>. No exceptions.
+            Every rep must book at least <span style={{ color:"#DC2626", fontWeight:700 }}>2 days</span> in the office each week. Failure to meet this minimum is grounds for <span style={{ color:"#DC2626", fontWeight:700 }}>termination</span>. No exceptions.
           </div>
         </div>
       </div>
@@ -1014,7 +1074,7 @@ function Announcements({ session, profile, w }) {
                     </button>
                     <button onClick={() => remove(a.id)} title="Delete"
                       style={{ width:30, height:30, borderRadius:8, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", color:"#666C7E", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", padding:0, transition:"all 0.18s" }}
-                      onMouseEnter={e => { e.currentTarget.style.color="#FF3370"; e.currentTarget.style.borderColor="rgba(255,51,112,0.3)"; }}
+                      onMouseEnter={e => { e.currentTarget.style.color="#DC2626"; e.currentTarget.style.borderColor="rgba(220,38,38,0.3)"; }}
                       onMouseLeave={e => { e.currentTarget.style.color="#666C7E"; e.currentTarget.style.borderColor="rgba(255,255,255,0.08)"; }}>
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
                     </button>
@@ -1178,7 +1238,7 @@ function Leads({ session, profile, w }) {
     { v: "contacted", label: "Contacted", color: "#F59E0B" },
     { v: "booked",    label: "Booked",    color: "#14B8A6" },
     { v: "closed",    label: "Closed",    color: "#22C55E" },
-    { v: "dead",      label: "Dead",      color: "#FF3370" },
+    { v: "dead",      label: "Dead",      color: "#DC2626" },
   ];
   const statusByV = Object.fromEntries(STATUSES.map(s => [s.v, s]));
 
@@ -1383,7 +1443,7 @@ function Leads({ session, profile, w }) {
           ))}
         </div>
         {(statusFilter === "dead" || statusFilter === "contacted") && (counts[statusFilter] ?? 0) > 0 && (() => {
-          const c = STATUSES.find(s => s.v === statusFilter)?.color ?? "#FF3370";
+          const c = STATUSES.find(s => s.v === statusFilter)?.color ?? "#DC2626";
           return (
             <button onClick={() => clearByStatus(statusFilter)}
               style={{ background:`${c}14`, border:`1px solid ${c}4D`, color:c, fontSize:10.5, fontWeight:800, letterSpacing:1.5, textTransform:"uppercase", padding:"7px 14px", borderRadius:8, cursor:"pointer", fontFamily:"inherit", transition:"all 0.18s", display:"flex", alignItems:"center", gap:8 }}
@@ -1471,7 +1531,7 @@ function Leads({ session, profile, w }) {
                         </div>
                         <div style={{ display:"flex", gap:6 }}>
                           {isAdmin && (
-                            <button onClick={() => removeLead(l.id)} className="btn-ghost" style={{ fontSize:10, padding:"7px 12px", color:"#FF3370", borderColor:"rgba(255,51,112,0.25)", background:"rgba(255,51,112,0.05)" }}>Delete</button>
+                            <button onClick={() => removeLead(l.id)} className="btn-ghost" style={{ fontSize:10, padding:"7px 12px", color:"#DC2626", borderColor:"rgba(220,38,38,0.25)", background:"rgba(220,38,38,0.05)" }}>Delete</button>
                           )}
                           <button onClick={() => saveNote(l.id)} className="btn-primary" style={{ fontSize:10, padding:"7px 14px" }}>Save note</button>
                         </div>
@@ -1721,7 +1781,7 @@ function Chat({ session, profile, w, width, minW = 220, maxW = 520, onResize }) 
 
         {/* Header */}
         <div style={{ display:"flex", alignItems:"center", gap:10, padding:"18px 20px", borderBottom:"1px solid rgba(255,255,255,0.05)", flexShrink:0, position:"relative" }}>
-          <div style={{ fontSize:13.5, fontWeight:800, color:"#F2F4F8", letterSpacing:"-0.01em" }}>Team Chat</div>
+          <div className="display" style={{ fontSize:18, color:"#F2F4F8", letterSpacing:"0.08em" }}>TEAM CHAT</div>
         </div>
 
         {/* Messages */}
@@ -1834,7 +1894,7 @@ function Chat({ session, profile, w, width, minW = 220, maxW = 520, onResize }) 
       <style>{`
         .chat-bubble:hover { border-color: rgba(255,255,255,0.14) !important; }
         .chat-bubble:hover .msg-del { opacity: 1 !important; pointer-events: auto !important; }
-        .msg-del:hover { color: #FF3370 !important; border-color: rgba(255,51,112,0.4) !important; }
+        .msg-del:hover { color: #DC2626 !important; border-color: rgba(220,38,38,0.4) !important; }
 
         @keyframes typingBounce { 0%,80%,100% { transform: translateY(0); opacity: 0.4 } 40% { transform: translateY(-3px); opacity: 1 } }
         .typing-dots { display:inline-flex; gap:3px; align-items:center }
@@ -1869,6 +1929,7 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
   const [loading, setLoading] = useState(true);
   const dk = w >= 768;
   const wd = w >= 1100;
+  const isAdmin = profile?.role === "admin";
 
   const today = new Date(); today.setHours(0,0,0,0);
   const todayStr = today.toISOString().split("T")[0];
@@ -2007,16 +2068,14 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
     );
   };
 
-  const Card = ({ title, accent, action, actionOnClick, children, fullWidth }) => (
+  const Card = ({ title, action, actionOnClick, children, fullWidth }) => (
     <div className="dash-card" onMouseMove={onCardMove}
       style={{ padding:dk?"22px 24px":"18px 20px", gridColumn: fullWidth && wd ? "1 / -1" : undefined }}>
-      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:16, position:"relative" }}>
-        <div style={{ fontSize:10, fontWeight:800, color:accent, letterSpacing:2.5, textTransform:"uppercase" }}>{title}</div>
+      <div style={{ display:"flex", alignItems:"baseline", justifyContent:"space-between", marginBottom:16, position:"relative", gap:12 }}>
+        <div className="display" style={{ fontSize:dk?18:16, color:"#F2F4F8", letterSpacing:"0.07em" }}>{title}</div>
         {action && (
-          <button onClick={actionOnClick}
-            style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.06)", color:"#9098A8", fontSize:9.5, fontWeight:700, letterSpacing:1.5, cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", padding:"6px 10px", borderRadius:8, transition:"all 0.18s" }}
-            onMouseEnter={e => { e.currentTarget.style.color="#F2F4F8"; e.currentTarget.style.background="rgba(204,255,0,0.08)"; e.currentTarget.style.borderColor="rgba(204,255,0,0.25)"; }}
-            onMouseLeave={e => { e.currentTarget.style.color="#9098A8"; e.currentTarget.style.background="rgba(255,255,255,0.04)"; e.currentTarget.style.borderColor="rgba(255,255,255,0.06)"; }}>
+          <button onClick={actionOnClick} className="btn-ghost"
+            style={{ fontSize:9.5, padding:"5px 9px", borderRadius:7, height:"auto" }}>
             {action} →
           </button>
         )}
@@ -2032,38 +2091,37 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
 
       {/* Tier Card — full width */}
       <div className="dash-card" onMouseMove={onCardMove}
-        style={{ padding:dk?"26px 28px":"20px 20px", gridColumn: wd ? "1 / -1" : undefined,
-          background: tierObj ? `linear-gradient(135deg, rgba(14,15,20,0.97) 0%, ${tierObj.color}10 100%)` : undefined,
-          borderColor: tierObj ? `${tierObj.color}22` : undefined }}>
-        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:16 }}>
-          {/* Left: tier name */}
-          <div style={{ display:"flex", alignItems:"center", gap:dk?18:14 }}>
-            <div style={{ width:dk?62:52, height:dk?62:52, borderRadius:16, background: tierObj ? `radial-gradient(circle at 35% 35%, ${tierObj.color}30, ${tierObj.color}08)` : "rgba(255,255,255,0.04)", border:`2px solid ${tierObj ? tierObj.color+"55" : "rgba(255,255,255,0.08)"}`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, boxShadow: tierObj ? `0 0 28px ${TIER_GLOW[tierObj.v]}` : undefined, fontSize:dk?26:22, lineHeight:1 }}>
-              {tierObj ? tierObj.emoji : "?"}
-            </div>
-            <div>
-              <div style={{ fontSize:9, fontWeight:800, color:"#5E6376", letterSpacing:2.5, textTransform:"uppercase", marginBottom:4 }}>Current Tier</div>
-              <div style={{ fontSize:dk?30:24, fontWeight:900, color: tierObj ? tierObj.color : "#5E6376", letterSpacing:"-0.03em", lineHeight:1, textShadow: tierObj ? `0 0 24px ${TIER_GLOW[tierObj.v]}` : undefined }}>
-                {tierObj ? tierObj.label.toUpperCase() : "—"}
-              </div>
-              {!tierObj && <div style={{ fontSize:11, color:"#444856", marginTop:4 }}>No tier assigned yet</div>}
-            </div>
-          </div>
-          {/* Right: tier progression */}
-          <div style={{ display:"flex", gap:dk?6:4, alignItems:"center" }}>
-            {TIERS.map((t, i) => {
-              const active = t.v === profile?.tier;
-              const passed = tierIdx >= 0 && i < tierIdx;
-              return (
-                <div key={t.v} style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:4 }}>
-                  <div style={{ width:dk?34:26, height:dk?34:26, borderRadius:9, background: active ? `radial-gradient(circle, ${t.color}30, ${t.color}10)` : passed ? `${t.color}15` : "rgba(255,255,255,0.03)", border:`1.5px solid ${active ? t.color : passed ? t.color+"50" : "rgba(255,255,255,0.07)"}`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:dk?13:11, transition:"all 0.2s", boxShadow: active ? `0 0 14px ${TIER_GLOW[t.v]}` : undefined }}>
-                    {active ? <span style={{ fontSize:dk?15:13 }}>{t.emoji}</span> : passed ? <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={t.color} strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> : <div style={{ width:5, height:5, borderRadius:"50%", background:"rgba(255,255,255,0.12)" }} />}
-                  </div>
-                  {dk && <div style={{ fontSize:7.5, fontWeight:800, color: active ? t.color : passed ? t.color+"80" : "#5E6376", letterSpacing:1, textTransform:"uppercase" }}>{t.label}</div>}
+        style={{ padding:dk?"22px 26px":"18px 18px", gridColumn: wd ? "1 / -1" : undefined }}>
+        <div style={{ fontSize:9, fontWeight:800, color:"#5E6376", letterSpacing:2.4, textTransform:"uppercase", marginBottom:14 }}>Current Tier</div>
+        <div style={{ display:"flex", alignItems:"center", gap:dk?12:6, position:"relative" }}>
+          {/* Connector line that runs behind the badges */}
+          <div aria-hidden="true" style={{ position:"absolute", left:0, right:0, top:dk?22:18, height:1, background:"linear-gradient(90deg, rgba(255,255,255,0.04), rgba(255,255,255,0.08), rgba(255,255,255,0.04))", zIndex:0 }} />
+          {TIERS.map((t, i) => {
+            const active = t.v === profile?.tier;
+            const passed = tierIdx >= 0 && i < tierIdx;
+            const hero = "#CCFF00";
+            return (
+              <div key={t.v} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:8, position:"relative", zIndex:1 }}>
+                <div style={{
+                  width:dk?46:34, height:dk?46:34, borderRadius:dk?13:10,
+                  background: active ? "rgba(204,255,0,0.10)" : passed ? "rgba(204,255,0,0.04)" : "rgba(255,255,255,0.025)",
+                  border: `1.5px solid ${active ? hero : passed ? "rgba(204,255,0,0.30)" : "rgba(255,255,255,0.07)"}`,
+                  display:"flex", alignItems:"center", justifyContent:"center",
+                  boxShadow: active ? `0 0 28px rgba(204,255,0,0.32), 0 0 0 4px rgba(204,255,0,0.06)` : "none",
+                  transition:"all 0.22s ease",
+                }}>
+                  {active ? (
+                    <span style={{ fontSize:dk?18:14, lineHeight:1 }}>{t.emoji}</span>
+                  ) : passed ? (
+                    <svg width={dk?14:11} height={dk?14:11} viewBox="0 0 24 24" fill="none" stroke="#CCFF00" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  ) : (
+                    <div style={{ width:5, height:5, borderRadius:"50%", background:"rgba(255,255,255,0.18)" }} />
+                  )}
                 </div>
-              );
-            })}
-          </div>
+                <div className="display" style={{ fontSize:dk?13:11, color: active ? "#F2F4F8" : passed ? "#A0A4B0" : "#5E6376", letterSpacing:"0.06em" }}>{t.label}</div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -2071,14 +2129,17 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
       <Card title="Your Week" accent="#CCFF00">
         <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:8 }}>
           {[
-            { v: myRankWeek >= 0 ? `#${myRankWeek + 1}` : "—", l: "Rank", c: "#FFD700" },
-            { v: myWeek.count, l: "Sales", c: "#CCFF00" },
-            { v: `${trainingPct}%`, l: "Training", c: "#22C55E" },
-            { v: `${doneQuizzes}/${totalQuizzes}`, l: "Quizzes", c: "#10B981" },
+            { v: myRankWeek >= 0 ? myRankWeek + 1 : "—", unit: myRankWeek >= 0 ? "rank" : null, l: "Rank",     hero: false },
+            { v: myWeek.count,                                unit: null,                                  l: "Sales",    hero: myWeek.count > 0 },
+            { v: trainingPct,                                 unit: "%",                                   l: "Training", hero: trainingPct === 100 },
+            { v: doneQuizzes,                                 unit: `/${totalQuizzes}`,                    l: "Quizzes",  hero: doneQuizzes === totalQuizzes && totalQuizzes > 0 },
           ].map(s => (
-            <div key={s.l} style={{ background:`${s.c}10`, border:`1px solid ${s.c}20`, borderRadius:10, padding:"12px 8px", textAlign:"center" }}>
-              <div style={{ fontSize:dk?24:19, fontWeight:900, color:s.c, lineHeight:1, letterSpacing:"-0.02em" }}>{s.v}</div>
-              <div style={{ fontSize:8.5, color:`${s.c}70`, textTransform:"uppercase", letterSpacing:1.5, fontWeight:700, marginTop:5 }}>{s.l}</div>
+            <div key={s.l} style={{ background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:10, padding:"12px 8px", textAlign:"center" }}>
+              <div style={{ display:"flex", alignItems:"baseline", justifyContent:"center", gap:3 }}>
+                <span className="mono" style={{ fontSize:dk?24:20, fontWeight:600, color: s.hero ? "#CCFF00" : "#F2F4F8", lineHeight:1 }}>{s.v}</span>
+                {s.unit && <span className="mono" style={{ fontSize:dk?13:11, fontWeight:500, color: s.hero ? "rgba(204,255,0,0.55)" : "#5E6376", lineHeight:1 }}>{s.unit}</span>}
+              </div>
+              <div style={{ fontSize:8.5, color:"#5E6376", textTransform:"uppercase", letterSpacing:1.6, fontWeight:700, marginTop:6 }}>{s.l}</div>
             </div>
           ))}
         </div>
@@ -2086,7 +2147,7 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
           <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:10 }}>
             <div style={{ fontSize:9, fontWeight:800, color:"#666C7E", letterSpacing:1.8, textTransform:"uppercase" }}>Daily Activity</div>
             {myWeek.total > 0 && (
-              <div style={{ fontSize:11, fontWeight:700, color:"#22C55E" }}>${myWeek.total.toLocaleString()}</div>
+              <div className="mono" style={{ fontSize:12, fontWeight:600, color:"#CCFF00" }}>${myWeek.total.toLocaleString()}</div>
             )}
           </div>
           <BarChart data={myDaily} accent="#CCFF00" highlight={todayIdx} height={dk?56:48} />
@@ -2094,12 +2155,12 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
       </Card>
 
       {/* Top Performers */}
-      <Card title="This Week" accent="#FFD700" action="Leaderboard" actionOnClick={() => onGoTab("leaderboard")}>
+      <Card title="This Week" action="Leaderboard" actionOnClick={() => onGoTab("leaderboard")}>
         {rankedWeek.length === 0 ? (
-          <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:8, padding:"16px 0", color:"#2E3140" }}>
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
-            <span style={{ fontSize:11, color:"#5E6376" }}>No sales yet this week</span>
-          </div>
+          <button onClick={() => onGoTab("leaderboard")}
+            style={{ display:"block", width:"100%", padding:"10px 0", background:"transparent", border:"none", color:"#CCFF00", fontSize:13, fontWeight:700, letterSpacing:0.3, cursor:"pointer", fontFamily:"inherit", textAlign:"left" }}>
+            Be first on the board →
+          </button>
         ) : (
           <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
             {rankedWeek.slice(0, 3).map((rep, i) => {
@@ -2146,7 +2207,7 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
                 <div style={{ width:36, height:36, borderRadius:10, background:"rgba(34,197,94,0.12)", display:"flex", alignItems:"center", justifyContent:"center" }}>
                   <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                 </div>
-                <div style={{ fontSize:13, fontWeight:700, color:"#22C55E" }}>All modules complete</div>
+                <div style={{ fontSize:13, fontWeight:700, color:"#CCFF00" }}>All modules complete</div>
               </div>
             )}
           </div>
@@ -2154,12 +2215,12 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
       </Card>
 
       {/* Today on the Floor */}
-      <Card title="On the Floor Today" accent="#F59E0B" action="Schedule" actionOnClick={() => onGoTab("scheduling")}>
+      <Card title="On the Floor Today" action="Schedule" actionOnClick={() => onGoTab("scheduling")}>
         {todaysReps.length === 0 ? (
-          <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:8, padding:"16px 0", color:"#2E3140" }}>
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            <span style={{ fontSize:11, color:"#5E6376" }}>Nobody in today</span>
-          </div>
+          <button onClick={() => onGoTab("scheduling")}
+            style={{ display:"block", width:"100%", padding:"10px 0", background:"transparent", border:"none", color:"#CCFF00", fontSize:13, fontWeight:700, letterSpacing:0.3, cursor:"pointer", fontFamily:"inherit", textAlign:"left" }}>
+            {isAdmin ? "Get reps on the floor →" : "Book yourself in →"}
+          </button>
         ) : (
           <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
             {todaysReps.map((name, i) => {
@@ -2178,33 +2239,34 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
       </Card>
 
       {/* Team Pulse */}
-      <Card title="Team Pulse · This Week" accent="#06D6F0">
+      <Card title="Team Pulse · This Week">
         <div style={{ display:"flex", alignItems:"baseline", justifyContent:"space-between", marginBottom:12 }}>
           <div>
-            <div style={{ fontSize:dk?28:24, fontWeight:900, color:"#F2F4F8", lineHeight:1, letterSpacing:"-0.03em" }}>
-              {teamWeekCount} <span style={{ fontSize:13, color:"#666C7E", fontWeight:700 }}>{teamWeekCount === 1 ? "sale" : "sales"}</span>
+            <div style={{ display:"flex", alignItems:"baseline", gap:6 }}>
+              <span className="mono" style={{ fontSize:dk?28:24, fontWeight:600, color:"#F2F4F8", lineHeight:1 }}>{teamWeekCount}</span>
+              <span style={{ fontSize:13, color:"#5E6376", fontWeight:700 }}>{teamWeekCount === 1 ? "sale" : "sales"}</span>
             </div>
             {teamWeekTotal > 0 && (
-              <div style={{ fontSize:12, color:"#22C55E", fontWeight:700, marginTop:5 }}>
-                ${teamWeekTotal.toLocaleString()} <span style={{ color:"#666C7E", fontWeight:600 }}>team revenue</span>
+              <div className="mono" style={{ fontSize:12, color:"#CCFF00", fontWeight:600, marginTop:6 }}>
+                ${teamWeekTotal.toLocaleString()} <span style={{ color:"#5E6376", fontWeight:600, fontFamily:"inherit" }}>team revenue</span>
               </div>
             )}
           </div>
           <div style={{ textAlign:"right" }}>
-            <div style={{ fontSize:18, fontWeight:900, color:"#06D6F0", lineHeight:1 }}>{rankedWeek.length}</div>
-            <div style={{ fontSize:8.5, color:"#06D6F099", textTransform:"uppercase", letterSpacing:1.5, fontWeight:800, marginTop:4 }}>Active reps</div>
+            <div className="mono" style={{ fontSize:18, fontWeight:600, color:"#F2F4F8", lineHeight:1 }}>{rankedWeek.length}</div>
+            <div style={{ fontSize:8.5, color:"#5E6376", textTransform:"uppercase", letterSpacing:1.5, fontWeight:800, marginTop:4 }}>Active reps</div>
           </div>
         </div>
-        <BarChart data={teamDaily} accent="#06D6F0" highlight={todayIdx} height={dk?72:60} />
+        <BarChart data={teamDaily} accent="#CCFF00" highlight={todayIdx} height={dk?72:60} />
       </Card>
 
       {/* Recent Sales */}
-      <Card title="Recent Sales" accent="#22C55E" action="All Sales" actionOnClick={() => onGoTab("leaderboard")}>
+      <Card title="Recent Sales" action="All Sales" actionOnClick={() => onGoTab("leaderboard")}>
         {recentSales.length === 0 ? (
-          <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:8, padding:"16px 0", color:"#2E3140" }}>
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-            <span style={{ fontSize:11, color:"#5E6376" }}>No sales logged yet</span>
-          </div>
+          <button onClick={() => onGoTab("leaderboard")}
+            style={{ display:"block", width:"100%", padding:"10px 0", background:"transparent", border:"none", color:"#CCFF00", fontSize:13, fontWeight:700, letterSpacing:0.3, cursor:"pointer", fontFamily:"inherit", textAlign:"left" }}>
+            Log your first sale →
+          </button>
         ) : (
           <div style={{ display:"flex", flexDirection:"column", gap:5 }}>
             {recentSales.map(s => (
@@ -2215,7 +2277,7 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
                 <div style={{ flex:1, minWidth:0, fontSize:12, color:"#C4C9D4", fontWeight:600, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
                   {repProfiles[s.user_id] || "Rep"}
                 </div>
-                {s.amount > 0 && <div style={{ fontSize:13, fontWeight:800, color:"#22C55E", flexShrink:0 }}>${Number(s.amount).toLocaleString()}</div>}
+                {s.amount > 0 && <div className="mono" style={{ fontSize:13, fontWeight:600, color:"#CCFF00", flexShrink:0 }}>${Number(s.amount).toLocaleString()}</div>}
               </div>
             ))}
           </div>
@@ -2511,8 +2573,8 @@ function Leaderboard({ session, profile, w }) {
                     {s.note && <span style={{ fontSize:11, color:"#444856" }}> — {s.note}</span>}
                   </div>
                   <div style={{ display:"flex", flexDirection:"column", alignItems:"flex-end", gap:2, flexShrink:0 }}>
-                    {s.amount > 0 && <div style={{ fontSize:13, fontWeight:700, color:"#22C55E" }}>${Number(s.amount).toLocaleString()}</div>}
-                    {s.retainer > 0 && <div style={{ fontSize:10, fontWeight:600, color:"#06D6F0" }}>+${Number(s.retainer).toLocaleString()}/mo</div>}
+                    {s.amount > 0 && <div className="mono" style={{ fontSize:13, fontWeight:600, color:"#CCFF00" }}>${Number(s.amount).toLocaleString()}</div>}
+                    {s.retainer > 0 && <div className="mono" style={{ fontSize:10, fontWeight:600, color:"#9098A8" }}>+${Number(s.retainer).toLocaleString()}/mo</div>}
                   </div>
                   <div style={{ fontSize:10, color:"#5E6376", flexShrink:0 }}>{new Date(s.sale_date).toLocaleDateString("en-US",{month:"short",day:"numeric"})}</div>
                   {isOwn && (
@@ -2524,7 +2586,7 @@ function Leaderboard({ session, profile, w }) {
                         setSales(prev => prev.some(x => x.id === s.id) ? prev : [s, ...prev].sort((a,b) => new Date(b.created_at) - new Date(a.created_at)));
                       }
                     }} style={{ background:"none", border:"none", color:"#5E6376", fontSize:16, cursor:"pointer", padding:"0 2px", lineHeight:1, flexShrink:0, transition:"color 0.15s" }}
-                      onMouseEnter={e => e.target.style.color="#FF3370"}
+                      onMouseEnter={e => e.target.style.color="#DC2626"}
                       onMouseLeave={e => e.target.style.color="#5E6376"}>
                       ×
                     </button>
@@ -2638,7 +2700,7 @@ function Leaderboard({ session, profile, w }) {
                         style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:6, color:"#9CA3AF", fontSize:10, fontWeight:700, padding:"6px 14px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", letterSpacing:1 }}>Edit</button>
                       <button onClick={() => deleteBonus(b.id)}
                         style={{ background:"none", border:"none", color:"#5E6376", fontSize:10, fontWeight:700, padding:"6px 10px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", letterSpacing:1, transition:"color 0.15s" }}
-                        onMouseEnter={e=>e.target.style.color="#FF3370"} onMouseLeave={e=>e.target.style.color="#5E6376"}>End Bonus</button>
+                        onMouseEnter={e=>e.target.style.color="#DC2626"} onMouseLeave={e=>e.target.style.color="#5E6376"}>End Bonus</button>
                     </div>
                   )}
                 </div>
@@ -2863,7 +2925,7 @@ function AdminPanel({ profile, roles, setRoles, onBack, w, onSignOut }) {
                     <div style={{ display:"flex", gap:6 }}>
                       <button onClick={() => startEditRole(r)} style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", color:"#9098A8", fontSize:10, fontWeight:700, cursor:"pointer", padding:"5px 10px", borderRadius:7, fontFamily:"inherit", letterSpacing:1.2, textTransform:"uppercase" }}>Edit</button>
                       {!r.is_builtin && (
-                        <button onClick={() => deleteRole(r)} style={{ background:"rgba(255,51,112,0.06)", border:"1px solid rgba(255,51,112,0.18)", color:"#FF3370", fontSize:10, fontWeight:700, cursor:"pointer", padding:"5px 10px", borderRadius:7, fontFamily:"inherit", letterSpacing:1.2, textTransform:"uppercase" }}>Delete</button>
+                        <button onClick={() => deleteRole(r)} style={{ background:"rgba(220,38,38,0.06)", border:"1px solid rgba(220,38,38,0.18)", color:"#DC2626", fontSize:10, fontWeight:700, cursor:"pointer", padding:"5px 10px", borderRadius:7, fontFamily:"inherit", letterSpacing:1.2, textTransform:"uppercase" }}>Delete</button>
                       )}
                     </div>
                   </div>
@@ -2914,7 +2976,7 @@ function AdminPanel({ profile, roles, setRoles, onBack, w, onSignOut }) {
                   {[
                     [u.modulesCompleted, "Completed", "#22C55E"],
                     [u.quizzesAttempted, "Quizzes", "#10B981"],
-                    ...(u.quizzesAttempted > 0 ? [[Math.round(u.avgScore)+"%", "Avg Score", u.avgScore>=90?"#22C55E":u.avgScore>=70?"#F59E0B":"#FF3370"]] : []),
+                    ...(u.quizzesAttempted > 0 ? [[Math.round(u.avgScore)+"%", "Avg Score", u.avgScore>=90?"#22C55E":u.avgScore>=70?"#F59E0B":"#DC2626"]] : []),
                   ].map(([val, lab, col]) => (
                     <div key={lab} style={{ textAlign:"center" }}>
                       <div style={{ fontSize:20, fontWeight:900, color:col, lineHeight:1, letterSpacing:"-0.02em" }}>{val}</div>
@@ -3183,7 +3245,7 @@ function Quiz({ quizKey, onBack, w, onComplete }) {
   const nxt = () => { if (ci + 1 >= tot) { setDone(true); if (onComplete) onComplete(score, tot); return; } setCi(ci + 1); setSel(null); setLocked(false); };
   const retry = () => { setCi(0); setSel(null); setLocked(false); setScore(0); setDone(false); };
   const grade = score / tot;
-  const gc = grade >= 0.9 ? "#22C55E" : grade >= 0.7 ? "#F59E0B" : "#FF3370";
+  const gc = grade >= 0.9 ? "#22C55E" : grade >= 0.7 ? "#F59E0B" : "#DC2626";
   const gl = grade >= 0.9 ? "Excellent — you're ready to close" : grade >= 0.7 ? "Good — review weaker areas" : "Needs work — re-study the modules";
   return (
     <div ref={ref}>
@@ -3240,14 +3302,14 @@ function Quiz({ quizKey, onBack, w, onComplete }) {
                 const isSel = sel === idx, isCor = idx === cur.a, showG = locked && isCor, showR = locked && isSel && !isCor;
                 let bg = "rgba(12,14,18,0.9)", bd = "rgba(255,255,255,0.05)", tc = "#8892A0";
                 if (showG) { bg = "rgba(34,197,94,0.08)"; bd = "rgba(34,197,94,0.35)"; tc = "#22C55E"; }
-                if (showR) { bg = "rgba(255,51,112,0.08)"; bd = "rgba(255,51,112,0.35)"; tc = "#FF3370"; }
+                if (showR) { bg = "rgba(220,38,38,0.08)"; bd = "rgba(220,38,38,0.35)"; tc = "#DC2626"; }
                 if (!locked && isSel) { bg = "rgba(255,255,255,0.04)"; bd = "rgba(204,255,0,0.5)"; tc = "#F2F4F8"; }
                 if (!locked && !isSel) { tc = "#8892A0"; }
                 return (
                   <button key={idx} className="quiz-opt" onClick={() => pick(idx)} disabled={locked}
-                    style={{ width:"100%", textAlign:"left", padding:"15px 18px", background:bg, border:`1.5px solid ${bd}`, borderRadius:14, cursor: locked ? "default" : "pointer", display:"flex", alignItems:"center", gap:14, fontFamily:"inherit", fontSize:14, color:tc, fontWeight: isSel || showG ? 600 : 400, boxShadow: showG ? "0 0 20px rgba(34,197,94,0.1)" : showR ? "0 0 20px rgba(255,51,112,0.08)" : "none" }}>
-                    <div style={{ width:34, height:34, borderRadius:10, display:"flex", alignItems:"center", justifyContent:"center", fontSize:12, fontWeight:800, flexShrink:0, background: showG ? "rgba(34,197,94,0.15)" : showR ? "rgba(255,51,112,0.15)" : "rgba(255,255,255,0.04)", color: showG ? "#22C55E" : showR ? "#FF3370" : "#666C7E", border:`1px solid ${showG ? "rgba(34,197,94,0.25)" : showR ? "rgba(255,51,112,0.25)" : "rgba(255,255,255,0.06)"}` }}>
-                      {showG ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> : showR ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF3370" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> : String.fromCharCode(65 + idx)}
+                    style={{ width:"100%", textAlign:"left", padding:"15px 18px", background:bg, border:`1.5px solid ${bd}`, borderRadius:14, cursor: locked ? "default" : "pointer", display:"flex", alignItems:"center", gap:14, fontFamily:"inherit", fontSize:14, color:tc, fontWeight: isSel || showG ? 600 : 400, boxShadow: showG ? "0 0 20px rgba(34,197,94,0.1)" : showR ? "0 0 20px rgba(220,38,38,0.08)" : "none" }}>
+                    <div style={{ width:34, height:34, borderRadius:10, display:"flex", alignItems:"center", justifyContent:"center", fontSize:12, fontWeight:800, flexShrink:0, background: showG ? "rgba(34,197,94,0.15)" : showR ? "rgba(220,38,38,0.15)" : "rgba(255,255,255,0.04)", color: showG ? "#22C55E" : showR ? "#DC2626" : "#666C7E", border:`1px solid ${showG ? "rgba(34,197,94,0.25)" : showR ? "rgba(220,38,38,0.25)" : "rgba(255,255,255,0.06)"}` }}>
+                      {showG ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> : showR ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> : String.fromCharCode(65 + idx)}
                     </div>
                     <span style={{ flex:1 }}>{opt}</span>
                   </button>
@@ -3393,7 +3455,7 @@ export default function App() {
 
   const signOut = async () => { await supabase.auth.signOut(); setView(null); };
 
-  const FONT_LINK = "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap";
+  const FONT_LINK = "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap";
   const baseStyle = { minHeight:"100dvh", background:"#0E0F14", color:"#FFF" };
 
   const bc = { MODULE:"#CCFF00", BOOTCAMP:"#F59E0B", REFERENCE:"#06D6F0", QUIZ:"#10B981", FINAL:"#FFD700" };
@@ -3432,6 +3494,32 @@ export default function App() {
   const TABS = ALL_TABS.filter(t => allowedKeys.includes(t.key));
   const showChat = allowedKeys.includes("chat");
   const chatSidebarW = showChat ? rawChatSidebarW : 0;
+
+  // Live header stats — small batched fetch on session ready, refreshed on realtime events.
+  const [hdrStats, setHdrStats] = useState({ active: 0, today: 0, pipe: 0 });
+  useEffect(() => {
+    if (!session) return;
+    const todayStr = new Date().toISOString().split("T")[0];
+    const loadStats = async () => {
+      const [activeRes, todayRes, pipeRes] = await Promise.all([
+        supabase.from("schedule").select("user_id", { count: "exact", head: true }).eq("date", todayStr),
+        supabase.from("sales").select("id", { count: "exact", head: true }).eq("sale_date", todayStr),
+        supabase.from("leads").select("id", { count: "exact", head: true }).not("status", "in", "(closed,dead)"),
+      ]);
+      setHdrStats({
+        active: activeRes.count ?? 0,
+        today:  todayRes.count ?? 0,
+        pipe:   pipeRes.count ?? 0,
+      });
+    };
+    loadStats();
+    const ch = supabase.channel("hdr-stats")
+      .on("postgres_changes", { event: "*", schema: "public", table: "sales" }, loadStats)
+      .on("postgres_changes", { event: "*", schema: "public", table: "schedule" }, loadStats)
+      .on("postgres_changes", { event: "*", schema: "public", table: "leads" }, loadStats)
+      .subscribe();
+    return () => supabase.removeChannel(ch);
+  }, [session]);
 
   // If the active tab gets revoked by a role change, fall back to the first allowed one.
   useEffect(() => {
@@ -3506,22 +3594,40 @@ export default function App() {
         <div style={{ padding:wd?"22px 56px 0":dk?"18px 36px 0":"14px 20px 0" }}>
           <div style={{ maxWidth:1300, margin:"0 auto" }}>
 
-            {/* Top row: logo + actions */}
-            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:dk?18:14, animation:"fadeUp 0.5s ease" }}>
+            {/* Top row: logo + live stats + actions */}
+            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:dk?18:14, gap:dk?24:12, animation:"fadeUp 0.5s ease" }}>
 
-              {/* Logo */}
-              <div style={{ display:"flex", alignItems:"center", gap:dk?14:10 }}>
-                <RedlineLogo height={dk?32:26} />
+              {/* Logo + wordmark — left-anchored, tight */}
+              <div style={{ display:"flex", alignItems:"center", gap:dk?12:8, flexShrink:0 }}>
+                <RedlineLogo height={dk?40:32} />
                 <div>
-                  <div className="title-display" style={{ fontSize:dk?24:19, color:"#F2F4F8" }}>REDLINE</div>
-                  <div style={{ fontSize:9, fontWeight:800, color:"#CCFF00", letterSpacing:3.5, textTransform:"uppercase", marginTop:3 }}>Portal</div>
+                  <div className="display" style={{ fontSize:dk?34:24, color:"#F2F4F8", letterSpacing:dk?"0.06em":"0.05em" }}>REDLINE</div>
+                  <div className="eyebrow" style={{ color:"#5E6376", marginTop:dk?4:2 }}>Portal</div>
                 </div>
               </div>
+
+              {/* Live stats — center, hidden on mobile to keep header tight */}
+              {wd && (
+                <div style={{ display:"flex", alignItems:"center", flex:"0 1 auto", marginLeft:"auto", marginRight:24 }}>
+                  <div className="hdr-stat">
+                    <span className="hdr-stat-val hero">{hdrStats.active}</span>
+                    <span className="hdr-stat-label">Active today</span>
+                  </div>
+                  <div className="hdr-stat">
+                    <span className="hdr-stat-val">{hdrStats.today}</span>
+                    <span className="hdr-stat-label">Sales today</span>
+                  </div>
+                  <div className="hdr-stat">
+                    <span className="hdr-stat-val">{hdrStats.pipe}</span>
+                    <span className="hdr-stat-label">In pipe</span>
+                  </div>
+                </div>
+              )}
 
               {/* Right actions */}
               <div style={{ display:"flex", alignItems:"center", gap:dk?8:6, animation:"fadeUp 0.5s ease 0.06s both" }}>
                 {profile?.role === "admin" && (
-                  <button onClick={() => setView("__admin")} className={`btn-pill amber${dk?"":" icon-only"}`} aria-label="Admin">
+                  <button onClick={() => setView("__admin")} className={`btn-pill${dk?"":" icon-only"}`} aria-label="Admin">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                     {dk && "Admin"}
                   </button>
@@ -3773,10 +3879,11 @@ export default function App() {
 }
 
 function SectionLabel({ color, label, delay = 0 }) {
+  // Section headers are typographic, not chromatic — they outrank stat labels via size+weight.
   return (
-    <div style={{ display:"flex", alignItems:"center", gap:12, padding:"28px 0 13px", animation:`fadeUp 0.5s ease ${delay}s both` }}>
-      <div style={{ fontSize:9.5, fontWeight:800, color:color, letterSpacing:3.5, textTransform:"uppercase" }}>{label}</div>
-      <div style={{ flex:1, height:1, background:"linear-gradient(90deg,rgba(255,255,255,0.05),transparent)" }} />
+    <div style={{ display:"flex", alignItems:"center", gap:14, padding:"30px 0 14px", animation:`fadeUp 0.5s ease ${delay}s both` }}>
+      <div className="display" style={{ fontSize:22, color:"#F2F4F8", letterSpacing:"0.08em" }}>{label}</div>
+      <div style={{ flex:1, height:1, background:"linear-gradient(90deg,rgba(255,255,255,0.06),transparent)" }} />
     </div>
   );
 }
