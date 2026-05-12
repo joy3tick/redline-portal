@@ -398,9 +398,16 @@ create policy "Admins manage roles"
 -- Seed built-in roles with full access
 insert into public.roles (name, label, allowed_tabs, is_builtin)
 values
-  ('admin', 'Admin',     array['dashboard','announcements','chat','leads','leaderboard','scheduling','training','reference'], true),
-  ('rep',   'Sales Rep', array['dashboard','announcements','chat','leads','leaderboard','scheduling','training','reference'], true)
+  ('admin', 'Admin',     array['dashboard','announcements','chat','leads','leaderboard','scheduling','training','reference','redline-ai'], true),
+  ('rep',   'Sales Rep', array['dashboard','announcements','chat','leads','leaderboard','scheduling','training','reference','redline-ai'], true)
 on conflict (name) do nothing;
+
+-- Existing deployments: backfill 'redline-ai' onto built-in roles so the new
+-- tab shows up after a schema re-run. Only adds the key if it's missing.
+update public.roles
+   set allowed_tabs = array_append(allowed_tabs, 'redline-ai')
+ where is_builtin = true
+   and not ('redline-ai' = any(allowed_tabs));
 
 -- Loosen profiles.role so admin-created roles can be assigned to users.
 -- Built-in 'admin' is still the only role that grants admin powers (the

@@ -154,6 +154,81 @@ const C = {
     { h: "📱  THE NEXT-DAY TEXT", b: "Send the morning after the close to pre-empt buyer's remorse:\n\n'Hey [name], excited to get this rolling. Anything come up overnight you want to flag before kickoff?'\n\nKeep it conversational. Don't sell. Just stay top of mind." },
     { h: "📋  THE INTAKE FORM PACKET", b: "Sent ~24 hours after payment. The intake collects:\n\n→ Business legal name + DBA\n→ Service area (cities, ZIP codes)\n→ Services offered (top 5 priorities)\n→ Logo / brand assets (if any)\n→ Photos of work (5–15, more is better)\n→ Reviews / testimonials to feature\n→ Phone number for call tracking\n→ Email for form submissions\n→ Hours of operation\n→ Anything not to include\n\n15 minutes to fill out. We chase if not returned within 48 hours." },
   ]},
+
+  // ─── REDLINE AI — DEV SECTION ────────────────────────────────
+  "dev-00": { t: "00 · Start Here: What is Redline AI", st: "The operating system for home service contractors.", demo: "https://redline-ai-demo.vercel.app/", s: [
+    { h: "THE ONE-LINER", b: "Redline AI is a vertical, AI-native SaaS platform built exclusively for home service contractors — HVAC, roofing, solar, plumbing, electrical. One login replaces the fragmented stack the average contractor is duct-taping together (ServiceTitan + Mailchimp + Squarespace + a scheduling tool + a review tool, etc.)." },
+    { h: "WHO IT'S FOR", b: "Time-poor, revenue-focused SMB owners running $250K – $50M home service businesses. Solo operators up through PE-backed regional roll-ups. They are not tech buyers — they are operators who pick up the phone in a truck." },
+    { h: "WHY IT EXISTS", b: "Contractors are terrified of AI. Not because they don't want it — because nobody has built it for them in a way that feels simple and safe. Redline AI is the answer: an AI operator they can talk to like a person, that runs the entire business underneath." },
+    { h: "THE STRATEGIC ROLE", b: "Redline Web Services (the agency) is the launchpad — it funds the build, supplies domain expertise, and seeds the early customer base. Redline AI is the destination. Sell the agency on a 2–3 year horizon. Exit Redline AI on a 6–7 year horizon. Target ~$240M ARR by year 9." },
+    { h: "THE MOAT", b: "Domain expertise + customer trust earned through the agency. We don't pitch contractors as Silicon Valley outsiders — we pitch them as the team that already built their website. That's a wedge no generic AI tool can replicate." },
+  ]},
+  "dev-01": { t: "01 · Product Architecture: Two-Mode System", st: "Two modes, one platform. This is the differentiator.", s: [
+    { h: "THE CORE IDEA", b: "Every other contractor SaaS is dashboard-only. Redline AI has a dashboard PLUS an agentic AI operator layer on top. Users toggle between them." },
+    { h: "MAXIMIZED MODE — THE AI OPERATOR", b: "→ Full-screen chat experience, clean UX like Claude or ChatGPT\n→ Connected to every system in the platform (CRM, scheduling, invoicing, payments, marketing, BI)\n→ User talks to it. It executes — pulls metrics, books jobs, sends invoices, fires campaigns, generates estimates\n→ Agentic capabilities: takes multi-step actions on behalf of the user, with confirmation gates on high-impact actions (sending money, deleting records, sending mass comms)\n→ Primary UX for owners and power users — they should be able to run the whole business from this screen" },
+    { h: "MINIMIZED MODE — THE COMMAND CENTER", b: "→ Traditional dashboard with individual screens for each module\n→ Pipeline view, schedule grid, invoice table, customer profiles, BI charts\n→ Primary UX for office staff and technicians who work specific records visually\n→ Same platform, same data, different surface" },
+    { h: "THE TOGGLE", b: "A persistent button (top nav or sidebar — top nav preferred) flips between modes. Both modes share the same underlying state, so a change made in chat reflects in the dashboard instantly and vice versa." },
+    { h: "WHY THIS WINS", b: "ServiceTitan, Jobber, Housecall Pro are command-center-only. They make contractors learn software. Redline AI makes the software learn the contractor. Owners live in chat. Their team lives in the command center. Same product." },
+  ]},
+  "dev-02": { t: "02 · The 14 Modules", st: "Full functional spec. Build all of this for V1.", s: [
+    { h: "CORE OPERATIONS — 5 MODULES", b: "→ Lead Management & Pipeline Tracking — capture leads from web forms / calls / referrals, stage-based pipeline (Connected → Qualified → Quoted → Won/Lost), assignment, scoring, source attribution\n→ Appointment Scheduling & Dispatch — calendar grid, tech assignment, route view, drag-to-reschedule, customer-facing booking link\n→ Invoicing & Estimates — line-item builder, templates, AI-generated estimates pulled from intake form data, send via SMS/email, in-app payment link\n→ CRM — customer profiles, full job history, file/photo attachments, notes, communication log, custom fields\n→ Embedded Payments — Stripe Connect (or equivalent), card-on-file, ACH, payment plans, financing handoff" },
+    { h: "INTELLIGENCE LAYER — 3 MODULES", b: "→ AI Umbrella Chat — the maximized mode product. Agentic chat connected to every module. Handles queries, executes actions, generates content.\n→ Business Intelligence Dashboard — revenue, close rate, LTV, cost per lead, AR aging, tech utilization. Filterable, exportable.\n→ Call Intelligence — call recording, transcription, AI summary, action item extraction, sentiment flagging on lost-deal calls" },
+    { h: "DISTRIBUTION & GROWTH — 6 MODULES", b: "→ Marketing Automation — email + SMS sequences, seasonal campaign templates, segmentation, drip flows tied to pipeline stage\n→ Workflow Automation — trigger/condition/action builder (Zapier-style, contractor-native)\n→ Team Management — roles, permissions, commission tracking, payroll export\n→ Mobile App — iOS + Android, full feature parity for techs in the field\n→ Customer Portal — self-service booking, invoice view + pay, job history, document downloads. V2 if time-constrained.\n→ Site/App Builder — contractor builds their own marketing site and customer-facing portal pages via AI prompts. This is the long-term wedge that cannibalizes the agency." },
+    { h: "V1 SUPPORTING FEATURES", b: "Review request automation (Google, Yelp), AI job cost estimator, QuickBooks/Xero sync, reporting + exportable analytics, reputation monitoring, seasonal campaign templates, referral program engine." },
+    { h: "EXPLICITLY V2 OR LATER", b: "Churn prediction scoring, subcontractor/payroll management, competitor benchmarking, financing integration deep cuts." },
+  ]},
+  "dev-03": { t: "03 · Pricing Tiers & Feature Gating", st: "Five locked tiers. Do not modify without founder approval.", s: [
+    { h: "LITE — $79/MO", b: "Target: solo operators + small shops\nUsers: up to 2\nPayments processing: 2.9% + 30¢\n\nFeatures: AI umbrella chat (scheduling, invoicing, CRM, payments scope only), lead management, appointment scheduling & dispatch, invoicing & estimates, customer CRM, embedded payments, review request automation, mobile app." },
+    { h: "CORE — $179/MO", b: "Target: small teams, 2–5 techs\nUsers: up to 5 — $49/user after\nPayments processing: 2.6% + 30¢\n\nFeatures: everything in Lite, plus — AI umbrella chat expands to marketing + automations, team management (roles & permissions), marketing automation (email + SMS sequences), basic workflow automation (triggers & rules), exportable analytics, QuickBooks + Xero sync, seasonal campaign templates." },
+    { h: "PRO — $479/MO", b: "Target: growing operators, 5–15 techs\nUsers: up to 15 — $59/user after\nPayments processing: 2.5% + 30¢\n\nFeatures: everything in Core, plus — AI umbrella chat full agentic capabilities, business intelligence dashboard, AI job cost estimator, reputation monitoring & insights, customer portal (self-service booking + invoices), referral program engine, full software & CRM integrations, advanced workflow automation." },
+    { h: "SCALE — $879/MO", b: "Target: regional operators, $3M+ revenue\nUsers: up to 30 — $79/user after\nPayments processing: near interchange\n\nFeatures: everything in Pro, plus — call intelligence, multi-location support, advanced BI (cohort + LTV models), custom workflows, priority support, dedicated onboarding." },
+    { h: "PEAK — CUSTOM", b: "Target: multi-brand operators + PE-backed roll-ups\nUsers: unlimited\nPayments processing: custom\n\nFeatures: white-glove, custom integrations, SSO, dedicated CSM, custom SLAs." },
+    { h: "GATING RULES", b: "→ AI umbrella chat depth scales by tier — Lite has read-only/operational chat, Pro+ is fully agentic\n→ Per-seat overage pricing applies above the tier user cap\n→ Processing rate is the second revenue stream — at high GMV it eventually exceeds SaaS revenue (the moat)" },
+  ]},
+  "dev-04": { t: "04 · Embedded Payments Architecture", st: "Shopify-style. The second revenue stream. This is the moat.", s: [
+    { h: "THE MODEL", b: "→ Customer pays contractor through Redline AI\n→ Redline takes a processing margin on top of the underlying card/ACH cost\n→ Lower SaaS tiers subsidize themselves with higher processing margin\n→ Higher SaaS tiers pay flat SaaS with near-zero processing\n→ At GMV scale, payments revenue exceeds SaaS revenue. Same dynamic as Toast, Shopify, Square" },
+    { h: "MONEY FLOW", b: "Customer → Card network / ACH rail → Redline platform account → Split: (a) processor cost (Stripe/Adyen) (b) Redline take (c) Contractor payout." },
+    { h: "RAIL DECISION — STILL OPEN", b: "→ Stripe Connect — fastest to build, well-documented, mature SDK. Default unless we find a reason not to.\n→ Adyen — better economics at scale, harder integration, requires negotiation\n→ Build-on-Stripe-then-migrate is a viable path\n\nValidate before locking: minimum monthly volume Adyen will negotiate at, real take-rate spread between the two, integration effort delta." },
+    { h: "TECHNICAL REQUIREMENTS", b: "→ PCI compliance handled by processor (do NOT touch raw card data)\n→ Card-on-file tokenization\n→ ACH (NACHA-compliant) for larger invoices\n→ Payment plans / financing handoff (Affirm, Wisetack)\n→ Refund + chargeback flows\n→ Reconciliation reporting that ties to QuickBooks/Xero export" },
+    { h: "KEY METRIC TO ANSWER", b: "At what monthly GMV does embedded payments revenue exceed SaaS revenue per customer? You need to be able to answer this for every tier." },
+  ]},
+  "dev-05": { t: "05 · Recommended Tech Stack", st: "The default. Push back with reasons if you disagree.", s: [
+    { h: "FRONTEND", b: "→ Next.js (App Router) — SSR for marketing pages, server actions for in-app\n→ React 18+\n→ Tailwind CSS + shadcn/ui for component primitives\n→ Framer Motion for in-app animations\n→ TanStack Query for data fetching\n→ Zustand or React Context for client-side state" },
+    { h: "BACKEND", b: "→ Node.js / TypeScript (or Python if the dev team is stronger there)\n→ PostgreSQL (primary)\n→ Redis (cache, queues, rate limiting)\n→ Supabase as the default starting point for auth + DB + storage + realtime (gives us ~6 months of runway before we'd need to break it out)\n→ Prisma ORM" },
+    { h: "AI LAYER", b: "→ Anthropic Claude API as primary LLM (we have deep familiarity, strong tool use, agentic capability)\n→ OpenAI as fallback / specialty model\n→ Vector DB: pgvector (Postgres extension) — avoid adding Pinecone until justified\n→ LangGraph or built-in agent loops for multi-step actions\n→ Function/tool calling for module actions (book appointment, send invoice, etc.)" },
+    { h: "INFRASTRUCTURE", b: "→ Vercel for frontend hosting\n→ Railway or Fly.io for backend services (Supabase covers most early needs)\n→ Cloudflare for CDN + DDoS\n→ GitHub Actions for CI/CD\n→ Sentry for error tracking\n→ PostHog for product analytics" },
+    { h: "THIRD-PARTY", b: "→ Stripe Connect for payments\n→ Twilio for SMS + voice\n→ Resend or Postmark for transactional email\n→ Google Maps API for geocoding + routing\n→ QuickBooks API + Xero API for accounting sync" },
+    { h: "MOBILE", b: "React Native (Expo) — share business logic with web. Native modules only where forced." },
+  ]},
+  "dev-06": { t: "06 · Build Order: Module Dependency Rings", st: "Don't build out of order. Rework is the killer.", s: [
+    { h: "CORE RING — BUILD FIRST", b: "→ Lead Management\n→ Scheduling & Dispatch\n→ Invoicing & Estimates\n→ CRM\n→ Embedded Payments\n\nThese are the data foundation. Everything else reads from them. You cannot ship Pro features before Core works." },
+    { h: "INTELLIGENCE RING — BUILT ON CORE", b: "→ AI Umbrella Chat (depends on every Core module being queryable)\n→ Business Intelligence Dashboard\n→ Call Intelligence\n\nThe chat is the headline feature, but it's worthless without Core data to operate on. Resist the urge to build it first." },
+    { h: "DISTRIBUTION RING — BUILT ON CORE + INTELLIGENCE", b: "→ Marketing Automation\n→ Workflow Automation\n→ Team Management\n→ Mobile App\n→ Customer Portal\n→ Site/App Builder\n\nThe outermost ring. These are the features that turn the platform from \"useful tool\" into \"the entire stack.\"" },
+    { h: "V1 SHIPPING ORDER", b: "1. Auth + multi-tenant data model\n2. CRM + Lead Management (one bundle — they share the customer object)\n3. Scheduling\n4. Invoicing + Estimates\n5. Embedded Payments (Stripe Connect)\n6. AI Umbrella Chat — basic operational mode\n7. Mobile App — feature parity for the above\n8. Marketing Automation\n9. Team Management\n10. BI Dashboard\n11. AI Chat — full agentic\n12. Workflow Automation\n13. Review Automation + Reputation\n14. Site/App Builder (V1 lite — full version V2)" },
+  ]},
+  "dev-07": { t: "07 · Competitive Landscape", st: "Know the incumbents cold. They are slow. We are not.", s: [
+    { h: "SERVICETITAN", b: "→ Market leader, enterprise-focused, $200–$400/user/month\n→ Bloated, slow, requires consultants to implement\n→ Hated by contractors but tolerated because of feature breadth\n→ Our angle: simpler, AI-native, 10x faster onboarding, fraction of the price" },
+    { h: "JOBBER", b: "→ Strong mid-market product, $80–$280/month\n→ Clean UI, but no real AI, no embedded payments depth, no agentic capability\n→ Our angle: AI operator layer, embedded payments take-rate, vertical depth" },
+    { h: "HOUSECALL PRO", b: "→ Solo + small team focus, $65–$280/month\n→ Similar feature set to Jobber, slightly different design philosophy\n→ Same vulnerability — no AI operator, no two-mode UX" },
+    { h: "WORKIZ, FIELDPULSE, SERVICEFUSION, BUILDERTREND", b: "Long tail of mid-market players. None have an AI operator. None have two-mode UX. None will move fast enough." },
+    { h: "OUR POSITIONING IN ONE LINE", b: "\"Every other platform gives you dashboards and menus. Redline AI gives you one window. Talk to it like a person. It runs your business.\"" },
+    { h: "THE REPLACEMENT MATH", b: "Contractor currently pays: $150 ServiceTitan + $30 Mailchimp + $16 Squarespace + $50 review tool + $25 scheduling = ~$271/mo across 5 disconnected tools. Redline Core at $179/mo replaces all of it. Even Pro at $479/mo is a value pitch." },
+  ]},
+  "dev-08": { t: "08 · Brand & Design System", st: "Match the demo. Voltage accent. Dark UI. No exceptions.", s: [
+    { h: "COLOR", b: "→ Background: #0D0D0D (true dark, not gray)\n→ Surface: #1A1A1A\n→ Border: #2A2A2A\n→ Text primary: #F5F5F5\n→ Text muted: #888888\n→ Accent (VOLTAGE): the amber/gold currently locked on the Redline AI early access page — use the exact hex from production. Do NOT use pure red #DC2626 (that's the agency brand, not the AI brand)\n→ Success: #22C55E\n→ Warning: #F59E0B\n→ Danger: #EF4444" },
+    { h: "TYPOGRAPHY", b: "→ Headings: Bebas Neue (uppercase, condensed)\n→ Body: Plus Jakarta Sans\n→ Mono / data: IBM Plex Mono" },
+    { h: "LAYOUT PRINCIPLES", b: "→ Generous spacing — never crowded\n→ Sticky blur headers\n→ Card-based information architecture\n→ Floating action / mode-toggle button on mobile\n→ Persistent navigation on desktop" },
+    { h: "MOTION", b: "→ Subtle. No bounce. No spring. Linear or ease-out only.\n→ Smooth scroll\n→ Staggered fade-ins on load\n→ Mode toggle (max ↔ min) should be a smooth crossfade, ~300ms" },
+    { h: "BRAND NAME", b: "→ \"Redline AI\" — capital R, lowercase rest, \"AI\" uppercase\n→ Never \"REDLINE AI\" except inside the logo wordmark\n→ Never \"redline ai\"" },
+  ]},
+  "dev-09": { t: "09 · Resources, Links & Access", st: "Bookmark these.", s: [
+    { h: "LIVE PRODUCT SURFACES", b: "→ Demo (current Manus prototype): https://redline-ai-demo.vercel.app/\n→ Early access / waitlist page: https://redlinewebservices.net/ai\n→ Main agency site: https://redlinewebservices.net" },
+    { h: "REPOS", b: "→ Sales portal (this one): https://github.com/joy3tick/redline-portal\n→ Redline AI: TBD — will be created when build starts" },
+    { h: "COMMUNICATION", b: "→ Slack workspace: Redline (channels: #redline-ai, #engineering, #design, #product)\n→ All-hands updates: info@redlinewebservices.net" },
+    { h: "DOCS TO READ", b: "→ Pricing tier matrix (Card 03 of this section)\n→ Module spec (Card 02 of this section)\n→ Anthropic Claude API docs: https://docs.claude.com\n→ Stripe Connect docs: https://stripe.com/docs/connect\n→ Supabase docs: https://supabase.com/docs" },
+    { h: "WHO TO ASK", b: "→ Product vision / pricing / strategy → Alex (founder)\n→ Sales context / customer pain points → Ritvik + sales team\n→ Design system → Alex (until design hire)\n→ Engineering decisions → tech lead (TBD)" },
+    { h: "FIRST WEEK CHECKLIST", b: "1. Open the demo. Play with it for 30 minutes.\n2. Read every card in this DEV section in order.\n3. Slack message in #redline-ai with three questions or pushbacks. Silence on day one is a red flag.\n4. Pick a Core ring module. Sketch a data model. Share for review." },
+  ]},
 };
 
 const CATS = [
@@ -174,6 +249,16 @@ const CATS = [
   { id: "d3", t: "REFERENCE", n: "REFERENCE", sub: "Call Script & Objections", d: "Scripts and objection playbook", ic: "📞", k: "call-script" },
   { id: "d4", t: "REFERENCE", n: "REFERENCE", sub: "Compensation Plan", d: "Full commission breakdown", ic: "💰", k: "comp-plan" },
   { id: "d5", t: "REFERENCE", n: "REFERENCE", sub: "Onboarding Email Template", d: "Welcome email + intake form", ic: "📧", k: "onboard-email" },
+  { id: "dv0", t: "DEV", n: "00", sub: "Start Here: What is Redline AI", d: "Vision, audience, and the strategic moat",   ic: "▣", k: "dev-00" },
+  { id: "dv1", t: "DEV", n: "01", sub: "Product Architecture",            d: "Two-mode system: AI operator + dashboard",  ic: "▣", k: "dev-01" },
+  { id: "dv2", t: "DEV", n: "02", sub: "The 14 Modules",                  d: "Full functional spec for V1",                ic: "▣", k: "dev-02" },
+  { id: "dv3", t: "DEV", n: "03", sub: "Pricing Tiers & Feature Gating",  d: "Five tiers. Locked.",                        ic: "▣", k: "dev-03" },
+  { id: "dv4", t: "DEV", n: "04", sub: "Embedded Payments Architecture",  d: "The second revenue stream",                  ic: "▣", k: "dev-04" },
+  { id: "dv5", t: "DEV", n: "05", sub: "Recommended Tech Stack",          d: "Defaults. Push back with reasons.",          ic: "▣", k: "dev-05" },
+  { id: "dv6", t: "DEV", n: "06", sub: "Build Order: Dependency Rings",   d: "Core → Intelligence → Distribution",         ic: "▣", k: "dev-06" },
+  { id: "dv7", t: "DEV", n: "07", sub: "Competitive Landscape",           d: "ServiceTitan, Jobber, Housecall Pro",        ic: "▣", k: "dev-07" },
+  { id: "dv8", t: "DEV", n: "08", sub: "Brand & Design System",           d: "Colors, type, motion, voice",                ic: "▣", k: "dev-08" },
+  { id: "dv9", t: "DEV", n: "09", sub: "Resources, Links & Access",       d: "Demo, repos, docs, contacts",                ic: "▣", k: "dev-09" },
   { id: "qz1",  t: "QUIZ", n: "QUIZ 1",  sub: "Onboarding & Culture",             d: "Module 1 — 100% to pass",  ic: "🧪", k: "q-m1" },
   { id: "qz2",  t: "QUIZ", n: "QUIZ 2",  sub: "The Contractor Mind",              d: "Module 2 — 100% to pass",  ic: "🧪", k: "q-m2" },
   { id: "qz3",  t: "QUIZ", n: "QUIZ 3",  sub: "Two Pillars: Product Mastery",     d: "Module 3 — 100% to pass",  ic: "🧪", k: "q-m3" },
@@ -2671,6 +2756,7 @@ const ROLEABLE_TABS = [
   { key:"scheduling",    label:"Scheduling",    color:"#F59E0B" },
   { key:"training",      label:"Training",      color:"#CCFF00" },
   { key:"reference",     label:"Reference",     color:"#06D6F0" },
+  { key:"redline-ai",    label:"Redline AI",    color:"#F59E0B" },
 ];
 
 function AdminPanel({ profile, roles, setRoles, onBack, w, onSignOut }) {
@@ -2958,8 +3044,9 @@ function Viewer({ ck, onBack, w, onComplete }) {
   const ref = useRef(null);
   const c = C[ck];
   const dk = w >= 768;
-  const accent = ck.includes("bc") ? "#F59E0B" : ck.includes("call") || ck.includes("comp") || ck.includes("onboard") ? "#06D6F0" : "#CCFF00";
-  const accentBg = ck.includes("bc") ? "rgba(245,158,11,0.08)" : ck.includes("call") || ck.includes("comp") || ck.includes("onboard") ? "rgba(6,214,240,0.08)" : "rgba(204,255,0,0.08)";
+  const isDev = ck.startsWith("dev-");
+  const accent = isDev ? "#F59E0B" : ck.includes("bc") ? "#F59E0B" : ck.includes("call") || ck.includes("comp") || ck.includes("onboard") ? "#06D6F0" : "#CCFF00";
+  const accentBg = isDev ? "rgba(245,158,11,0.08)" : ck.includes("bc") ? "rgba(245,158,11,0.08)" : ck.includes("call") || ck.includes("comp") || ck.includes("onboard") ? "rgba(6,214,240,0.08)" : "rgba(204,255,0,0.08)";
 
   useEffect(() => {
     ref.current?.scrollIntoView({ behavior:"smooth" });
@@ -2985,11 +3072,19 @@ function Viewer({ ck, onBack, w, onComplete }) {
           <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:18 }}>
             <div style={{ width:32, height:4, background:`linear-gradient(90deg,${accent},transparent)`, borderRadius:4 }} />
             <div style={{ fontSize:9.5, fontWeight:800, color:accent, letterSpacing:3.5, textTransform:"uppercase" }}>
-              {ck.includes("m") && !ck.includes("bc") ? "Training Module" : ck.includes("bc") ? "Bootcamp" : ck.includes("q-") ? "Quiz" : "Reference"}
+              {isDev ? "Redline AI · Dev" : ck.includes("m") && !ck.includes("bc") ? "Training Module" : ck.includes("bc") ? "Bootcamp" : ck.includes("q-") ? "Quiz" : "Reference"}
             </div>
           </div>
           <h2 style={{ fontSize:dk?32:24, fontWeight:800, color:"#F2F4F8", margin:"0 0 10px", letterSpacing:"-0.03em", lineHeight:1.15 }}>{c.t}</h2>
           <p style={{ fontSize:14, color:"#7E8595", margin:0, lineHeight:1.6, fontWeight:500 }}>{c.st}</p>
+          {c.demo && (
+            <a href={c.demo} target="_blank" rel="noreferrer"
+              style={{ display:"inline-flex", alignItems:"center", gap:10, marginTop:18, padding:"12px 18px", background:"rgba(245,158,11,0.10)", border:"1px solid rgba(245,158,11,0.35)", borderRadius:12, color:"#F59E0B", textDecoration:"none", fontSize:12, fontWeight:800, letterSpacing:1.5, textTransform:"uppercase" }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Open the live demo
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          )}
         </div>
 
 
@@ -3277,6 +3372,7 @@ const IC_GRAD = {
   REFERENCE: "rgba(6,214,240,0.10)",
   QUIZ:      "rgba(16,185,129,0.10)",
   FINAL:     "rgba(255,215,0,0.10)",
+  DEV:       "rgba(245,158,11,0.12)",
 };
 const IC_SHADOW = {
   MODULE:    "inset 0 0 0 1px rgba(204,255,0,0.22)",
@@ -3284,6 +3380,7 @@ const IC_SHADOW = {
   REFERENCE: "inset 0 0 0 1px rgba(6,214,240,0.22)",
   QUIZ:      "inset 0 0 0 1px rgba(16,185,129,0.22)",
   FINAL:     "inset 0 0 0 1px rgba(255,215,0,0.35)",
+  DEV:       "inset 0 0 0 1px rgba(245,158,11,0.30)",
 };
 const LINK_ICONS = [
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>,
@@ -3402,6 +3499,7 @@ export default function App() {
     { label:"BOOTCAMPS", color:"#F59E0B", items:CATS.filter(x=>x.t==="BOOTCAMP") },
   ];
   const referenceItems = CATS.filter(x=>x.t==="REFERENCE");
+  const devItems = CATS.filter(x=>x.t==="DEV");
   const quizItems = CATS.filter(x=>x.t==="QUIZ");
   const finalItem = CATS.find(x=>x.t==="FINAL");
 
@@ -3421,6 +3519,7 @@ export default function App() {
     { key:"scheduling",    label:"Scheduling",    short:"Schedule", color:"#F59E0B" },
     { key:"training",      label:"Training",      short:"Train",    color:"#CCFF00" },
     { key:"reference",     label:"Reference",     short:"Ref",      color:"#06D6F0" },
+    { key:"redline-ai",    label:"Redline AI",    short:"AI",       color:"#F59E0B" },
   ];
   // Tabs the current user can see. Admin always sees everything. If no
   // role record exists yet (e.g. before the migration runs), default to
@@ -3752,6 +3851,46 @@ export default function App() {
                     <div style={{ width:50, height:50, borderRadius:14, background:IC_GRAD.REFERENCE, display:"flex", alignItems:"center", justifyContent:"center", fontSize:22, flexShrink:0, boxShadow:IC_SHADOW.REFERENCE }}>{x.ic}</div>
                     <div style={{ flex:1, minWidth:0 }}>
                       <div style={{ fontSize:9, fontWeight:800, color:"#06D6F0", letterSpacing:2.5, marginBottom:4, textTransform:"uppercase" }}>REFERENCE</div>
+                      <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF2F8", margin:"0 0 3px", lineHeight:1.3 }}>{x.sub}</h3>
+                      <p style={{ fontSize:11.5, color:"#666C7E", margin:0, lineHeight:1.4, fontWeight:500 }}>{x.d}</p>
+                    </div>
+                    <div style={{ width:32, height:32, borderRadius:10, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.06)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#666C7E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* REDLINE AI TAB */}
+        {tab === "redline-ai" && (
+          <div style={{ animation:"fadeUp 0.35s ease" }}>
+            <div style={{
+              position:"relative", overflow:"hidden",
+              background:"rgba(245,158,11,0.06)",
+              border:"1px solid rgba(245,158,11,0.22)", borderRadius:14,
+              padding:dk?"22px 24px":"18px 18px", marginBottom:16,
+            }}>
+              <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:10 }}>
+                <div style={{ width:24, height:3, background:"linear-gradient(90deg,#F59E0B,transparent)", borderRadius:4 }} />
+                <div style={{ fontSize:9.5, fontWeight:800, color:"#F59E0B", letterSpacing:3, textTransform:"uppercase" }}>Engineering · Dev Section</div>
+              </div>
+              <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?38:30, lineHeight:1.1, color:"#F2F4F8", letterSpacing:1, marginBottom:6 }}>The Operating System for Contractors</div>
+              <p style={{ fontSize:13.5, color:"#A8AEBA", margin:0, lineHeight:1.6, fontWeight:500 }}>
+                Spec, architecture, design system, and resources for the Redline AI build. Read in order. Start with Card 00 →{" "}
+                <a href="https://redline-ai-demo.vercel.app/" target="_blank" rel="noreferrer" style={{ color:"#F59E0B", fontWeight:700, textDecoration:"none", borderBottom:"1px dotted rgba(245,158,11,0.4)" }}>live demo</a>.
+              </p>
+            </div>
+            <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr 1fr":dk?"1fr 1fr":"1fr", gap:dk?10:8 }}>
+              {devItems.map((x, i) => (
+                <div key={x.id} className="card-hover" onClick={() => { setView(x.k); setTimeout(top, 50); }}
+                  style={{ background:"rgba(255,255,255,0.022)", border:"1px solid rgba(245,158,11,0.10)", borderRadius:16, padding:dk?"20px 18px":"17px 15px", cursor:"pointer", animation:`fadeUp 0.38s ease ${0.05*i}s both` }}>
+                  <div style={{ display:"flex", alignItems:"center", gap:14 }}>
+                    <div style={{ width:50, height:50, borderRadius:14, background:IC_GRAD.DEV, display:"flex", alignItems:"center", justifyContent:"center", fontSize:13, fontWeight:800, color:"#F59E0B", letterSpacing:0.5, flexShrink:0, fontVariantNumeric:"tabular-nums", boxShadow:IC_SHADOW.DEV }}>{x.n}</div>
+                    <div style={{ flex:1, minWidth:0 }}>
+                      <div style={{ fontSize:9, fontWeight:800, color:"#F59E0B", letterSpacing:2.5, marginBottom:4, textTransform:"uppercase" }}>Redline AI</div>
                       <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF2F8", margin:"0 0 3px", lineHeight:1.3 }}>{x.sub}</h3>
                       <p style={{ fontSize:11.5, color:"#666C7E", margin:0, lineHeight:1.4, fontWeight:500 }}>{x.d}</p>
                     </div>
