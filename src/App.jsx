@@ -1450,7 +1450,7 @@ function Leads({ session, profile, w }) {
     return null;
   };
 
-  // Generate a 2–3 line discovery-call opener personalized from the lead's CSV row.
+  // Generate a personalized discovery-call opener from the lead's CSV row.
   // Computed at render time — no DB write — so it applies to every existing and future lead for free.
   // The rep name is the one the lead is ASSIGNED to (not necessarily the viewer), so when an admin
   // pulls up a rep's lead the script is still in that rep's voice.
@@ -1460,7 +1460,6 @@ function Leads({ session, profile, w }) {
     const ownerRaw = pickField(d, "owner", "owner name", "first name", "contact", "contact name", "decision maker");
     const firstName = ownerRaw ? ownerRaw.split(/[\s,]+/)[0] : null;
     const niche = pickField(d, "niche", "vertical", "industry", "category", "type", "trade");
-    const city = pickField(d, "city", "location", "town", "area", "market");
     const websiteRaw = pickField(d, "website", "site", "url", "domain", "site url");
     const website = websiteRaw ? websiteRaw.replace(/^https?:\/\//i, "").replace(/\/.*$/, "") : null;
 
@@ -1469,25 +1468,29 @@ function Leads({ session, profile, w }) {
       ? repById[lead.assigned_to]
       : (profile?.name || "your Redline rep");
 
-    // Opening line — confident, drops "this is" for natural phone cadence.
-    const opener = firstName
-      ? `Hey ${firstName}, ${repName} with Redline`
-      : (business ? `Hey — ${repName} with Redline, calling for ${business}` : `Hey, ${repName} with Redline`);
+    // 1. Open — genuine, direct, Boston + contractor specialization always present
+    const greeting = firstName ? `Hey ${firstName}` : "Hey there";
+    const open = `${greeting}, this is ${repName} with Redline — we run a small web agency out of Boston that specializes specifically in websites for contractors.`;
 
-    const nicheClause = niche ? `${niche.toLowerCase()} contractors` : "home service contractors";
-    const whereClause = city ? ` in ${city}` : "";
-    const positioning = `we build conversion-focused websites for ${nicheClause}${whereClause}`;
+    // 2. Why I'm calling — sincere, not salesy. Names the business + site if we have them.
+    let reachOut;
+    if (business && website) {
+      reachOut = `I came across ${business} and took a quick look at ${website} — wanted to be straight with you and just reach out directly.`;
+    } else if (business) {
+      reachOut = `I came across ${business} and wanted to be straight with you and just reach out directly.`;
+    } else if (website) {
+      reachOut = `I came across ${website} and wanted to be straight with you and just reach out directly.`;
+    } else {
+      reachOut = `I came across your ${niche ? niche.toLowerCase() + " " : ""}business and wanted to be straight with you and just reach out directly.`;
+    }
 
-    // Middle line — specific, grounds it in real research, frames value.
-    const targetLabel = business ? business : (website || "your site");
-    const middle = website
-      ? `I had a look at ${website} this morning, and there's one specific thing on the homepage that's almost certainly costing you booked jobs every week.`
-      : `I pulled up ${targetLabel} this morning, and there's one specific thing that's almost certainly costing you booked jobs every week.`;
+    // 3. The ask — 5 minutes, walkthrough, free fully-built site, low friction
+    const ask = `Got 5 minutes later this week to hop on a quick call? I'd walk you through exactly what working with us looks like, and I'll have a fully built website ready for you to look over — completely free, no commitment, just so you can see what we'd actually do for you.`;
 
-    // Closer — gives a reason to listen, not just asking permission.
-    const closer = `Got 60 seconds for me to walk you through it?`;
+    // 4. Out — gives them permission to say no, removes pressure
+    const out = `If it's not a fit or not the right time, no worries at all — I'll take you off our list and you won't hear from me again.`;
 
-    return `${opener} — ${positioning}. ${middle} ${closer}`;
+    return `${open}\n\n${reachOut}\n\n${ask}\n\n${out}`;
   };
 
   // Render a CSV value: if it looks like a URL/email/phone, make it clickable.
