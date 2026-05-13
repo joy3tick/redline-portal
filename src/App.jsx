@@ -1181,6 +1181,9 @@ function Leads({ session, profile, w }) {
   const [statusFilter, setStatusFilter] = useState("all");
   const [expandedId, setExpandedId] = useState(null);
   const [draftNote, setDraftNote] = useState("");
+  // Selection (admin bulk actions)
+  const [selected, setSelected] = useState(() => new Set());
+  const [bulkBusy, setBulkBusy] = useState(false);
   // Admin upload state
   const [uploading, setUploading] = useState(false);
   const [parsed, setParsed] = useState(null); // { headers, rows, fileName }
@@ -1305,6 +1308,70 @@ function Leads({ session, profile, w }) {
     const { error } = await supabase.from("leads").delete().eq("id", id);
     if (error) { alert(`Couldn't delete: ${error.message}`); return; }
     setLeads(prev => prev.filter(l => l.id !== id));
+  };
+
+  // Admin: reassign a single lead to a different rep.
+  const reassignOne = async (id, newRepId) => {
+    if (!newRepId) return;
+    const { data, error } = await supabase
+      .from("leads")
+      .update({ assigned_to: newRepId, assigned_by: session.user.id })
+      .eq("id", id)
+      .select()
+      .single();
+    if (error || !data) { alert(`Couldn't reassign: ${error?.message ?? "no row returned"}`); return; }
+    setLeads(prev => prev.map(l => l.id === id ? { ...l, assigned_to: data.assigned_to, assigned_by: data.assigned_by } : l));
+  };
+
+  // ── Selection helpers ─────────────────────────────────────────
+  const toggleSelect = (id, e) => {
+    if (e) e.stopPropagation();
+    setSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+  const clearSelection = () => setSelected(new Set());
+
+  // ── Bulk actions ──────────────────────────────────────────────
+  const bulkReassign = async (newRepId) => {
+    if (!newRepId || selected.size === 0 || bulkBusy) return;
+    const repName = (reps.find(r => r.id === newRepId) || {}).name || "the selected rep";
+    if (!confirm(`Reassign ${selected.size} lead${selected.size === 1 ? "" : "s"} to ${repName}?`)) return;
+    setBulkBusy(true);
+    const ids = Array.from(selected);
+    const { error } = await supabase
+      .from("leads")
+      .update({ assigned_to: newRepId, assigned_by: session.user.id })
+      .in("id", ids);
+    setBulkBusy(false);
+    if (error) { alert(`Couldn't reassign: ${error.message}`); return; }
+    setLeads(prev => prev.map(l => ids.includes(l.id) ? { ...l, assigned_to: newRepId, assigned_by: session.user.id } : l));
+    clearSelection();
+  };
+
+  const bulkSetStatus = async (status) => {
+    if (!status || selected.size === 0 || bulkBusy) return;
+    setBulkBusy(true);
+    const ids = Array.from(selected);
+    const { error } = await supabase.from("leads").update({ status }).in("id", ids);
+    setBulkBusy(false);
+    if (error) { alert(`Couldn't update: ${error.message}`); return; }
+    setLeads(prev => prev.map(l => ids.includes(l.id) ? { ...l, status } : l));
+    clearSelection();
+  };
+
+  const bulkDelete = async () => {
+    if (selected.size === 0 || bulkBusy) return;
+    if (!confirm(`Delete ${selected.size} lead${selected.size === 1 ? "" : "s"}? This can't be undone.`)) return;
+    setBulkBusy(true);
+    const ids = Array.from(selected);
+    const { error } = await supabase.from("leads").delete().in("id", ids);
+    setBulkBusy(false);
+    if (error) { alert(`Couldn't delete: ${error.message}`); return; }
+    setLeads(prev => prev.filter(l => !ids.includes(l.id)));
+    clearSelection();
   };
 
   const clearByStatus = async (status) => {
@@ -1514,7 +1581,35 @@ function Leads({ session, profile, w }) {
 
       {/* Status filter row */}
       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", gap:10, flexWrap:"wrap" }}>
-        <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
+        <div style={{ display:"flex", gap:6, flexWrap:"wrap", alignItems:"center" }}>
+          {isAdmin && visible.length > 0 && (() => {
+            const allSelected = visible.length > 0 && visible.every(l => selected.has(l.id));
+            return (
+              <button
+                onClick={() => {
+                  setSelected(prev => {
+                    const next = new Set(prev);
+                    if (allSelected) visible.forEach(l => next.delete(l.id));
+                    else visible.forEach(l => next.add(l.id));
+                    return next;
+                  });
+                }}
+                title={allSelected ? "Deselect all visible" : "Select all visible"}
+                style={{
+                  display:"flex", alignItems:"center", justifyContent:"center", gap:6,
+                  background: allSelected ? "rgba(204,255,0,0.10)" : "rgba(255,255,255,0.02)",
+                  border:`1px solid ${allSelected ? "rgba(204,255,0,0.35)" : "rgba(255,255,255,0.08)"}`,
+                  color: allSelected ? "#CCFF00" : "#9098A8",
+                  fontSize:11, fontWeight:700, letterSpacing:1.2, textTransform:"uppercase",
+                  padding:"8px 12px", borderRadius:10, cursor:"pointer", fontFamily:"inherit", transition:"all 0.16s",
+                }}>
+                <span style={{ width:14, height:14, borderRadius:3, border:`1.5px solid ${allSelected ? "#CCFF00" : "rgba(255,255,255,0.25)"}`, background: allSelected ? "#CCFF00" : "transparent", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                  {allSelected && <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#15171E" strokeWidth="3.6" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
+                </span>
+                {allSelected ? "Clear" : "Select all"}
+              </button>
+            );
+          })()}
           <button onClick={() => setStatusFilter("all")}
             style={{ background: statusFilter === "all" ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.02)", border:`1px solid ${statusFilter === "all" ? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.06)"}`, color: statusFilter === "all" ? "#F2F4F8" : "#7E8595", fontSize:11, fontWeight:700, letterSpacing:1.2, textTransform:"uppercase", padding:"8px 14px", borderRadius:10, cursor:"pointer", fontFamily:"inherit", transition:"all 0.18s", display:"flex", alignItems:"center", gap:8 }}>
             All <span style={{ fontVariantNumeric:"tabular-nums", color: statusFilter === "all" ? "#A8AEBA" : "#5E6376", fontSize:11 }}>{totalForFilter}</span>
@@ -1559,10 +1654,27 @@ function Leads({ session, profile, w }) {
             const isExpanded = expandedId === l.id;
             const data = l.data || {};
             return (
-              <div key={l.id} className="dash-card" style={{ padding:0, animation:`fadeUp 0.3s ease ${0.03*i}s both`, overflow:"hidden", position:"relative" }}>
+              <div key={l.id} className="dash-card" style={{ padding:0, animation:`fadeUp 0.3s ease ${0.03*i}s both`, overflow:"hidden", position:"relative", borderColor: selected.has(l.id) ? "rgba(204,255,0,0.35)" : undefined }}>
                 <div style={{ position:"absolute", left:0, top:0, bottom:0, width:3, background:s.color, opacity:isExpanded?1:0.7 }} />
                 <div onClick={() => { setExpandedId(isExpanded ? null : l.id); setDraftNote(l.note || ""); }}
                   style={{ display:"flex", alignItems:"center", gap:dk?16:12, cursor:"pointer", padding:dk?"16px 20px 16px 22px":"14px 14px 14px 18px" }}>
+                  {isAdmin && (
+                    <button
+                      type="button"
+                      onClick={(e) => toggleSelect(l.id, e)}
+                      aria-label={selected.has(l.id) ? "Deselect lead" : "Select lead"}
+                      style={{
+                        width:20, height:20, flexShrink:0, padding:0, cursor:"pointer",
+                        background: selected.has(l.id) ? "#CCFF00" : "transparent",
+                        border:`1.5px solid ${selected.has(l.id) ? "#CCFF00" : "rgba(255,255,255,0.18)"}`,
+                        borderRadius:5, display:"flex", alignItems:"center", justifyContent:"center",
+                        transition:"all 0.12s ease",
+                      }}>
+                      {selected.has(l.id) && (
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#15171E" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      )}
+                    </button>
+                  )}
                   <div style={{ flex:1, minWidth:0 }}>
                     <div style={{ fontSize:dk?14.5:13.5, fontWeight:700, color:"#EEF2F8", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", letterSpacing:"-0.005em" }}>{primaryLine(data)}</div>
                     {secondaryLine(data) && <div style={{ fontSize:11.5, color:"#666C7E", marginTop:4, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{secondaryLine(data)}</div>}
@@ -1599,6 +1711,20 @@ function Leads({ session, profile, w }) {
                       </div>
                     </div>
 
+                    {/* Reassign (admin only) */}
+                    {isAdmin && (
+                      <div>
+                        <div style={{ fontSize:9, fontWeight:800, color:"#5E6376", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Assigned to</div>
+                        <select
+                          value={l.assigned_to}
+                          onChange={e => { if (e.target.value !== l.assigned_to) reassignOne(l.id, e.target.value); }}
+                          style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:8, color:"#F2F4F8", fontSize:12.5, fontWeight:600, padding:"9px 12px", fontFamily:"inherit", outline:"none", cursor:"pointer", minWidth:200 }}>
+                          {reps.length === 0 && <option>No reps available</option>}
+                          {reps.map(r => <option key={r.id} value={r.id}>{r.name || "Rep"}</option>)}
+                        </select>
+                      </div>
+                    )}
+
                     {/* Note */}
                     <div>
                       <div style={{ fontSize:9, fontWeight:800, color:"#5E6376", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Note</div>
@@ -1627,6 +1753,62 @@ function Leads({ session, profile, w }) {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Floating bulk action bar (admin only) */}
+      {isAdmin && selected.size > 0 && (
+        <div role="region" aria-label="Bulk lead actions"
+          style={{
+            position:"fixed", left:"50%", transform:"translateX(-50%)",
+            bottom: dk ? 24 : 16, zIndex:80,
+            display:"flex", alignItems:"center", flexWrap:"wrap", gap:dk?10:6,
+            padding: dk ? "10px 14px" : "8px 10px",
+            background:"#15171E",
+            border:"1px solid rgba(204,255,0,0.30)",
+            borderRadius:14,
+            boxShadow:"0 18px 50px rgba(0,0,0,0.55), 0 0 0 1px rgba(0,0,0,0.4)",
+            maxWidth:"calc(100vw - 24px)",
+          }}>
+          <div style={{ display:"flex", alignItems:"center", gap:8, paddingRight:8, borderRight:"1px solid rgba(255,255,255,0.08)" }}>
+            <span className="mono" style={{ fontSize:14, fontWeight:600, color:"#CCFF00" }}>{selected.size}</span>
+            <span style={{ fontSize:11, fontWeight:700, color:"#9098A8", letterSpacing:1.2, textTransform:"uppercase" }}>selected</span>
+          </div>
+
+          {/* Reassign */}
+          <select
+            value=""
+            onChange={e => { if (e.target.value) { bulkReassign(e.target.value); e.target.value = ""; } }}
+            disabled={bulkBusy || reps.length === 0}
+            style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.10)", color:"#F2F4F8", fontSize:12, fontWeight:600, padding:"7px 10px", borderRadius:8, fontFamily:"inherit", cursor: bulkBusy ? "wait" : "pointer", outline:"none" }}>
+            <option value="">Reassign to…</option>
+            {reps.map(r => <option key={r.id} value={r.id}>{r.name || "Rep"}</option>)}
+          </select>
+
+          {/* Move to status */}
+          <select
+            value=""
+            onChange={e => { if (e.target.value) { bulkSetStatus(e.target.value); e.target.value = ""; } }}
+            disabled={bulkBusy}
+            style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.10)", color:"#F2F4F8", fontSize:12, fontWeight:600, padding:"7px 10px", borderRadius:8, fontFamily:"inherit", cursor: bulkBusy ? "wait" : "pointer", outline:"none" }}>
+            <option value="">Move to…</option>
+            {STATUSES.map(opt => <option key={opt.v} value={opt.v}>{opt.label}</option>)}
+          </select>
+
+          {/* Delete */}
+          <button onClick={bulkDelete} disabled={bulkBusy}
+            style={{ background:"rgba(220,38,38,0.10)", border:"1px solid rgba(220,38,38,0.32)", color:"#DC2626", fontSize:11, fontWeight:800, letterSpacing:1.2, textTransform:"uppercase", padding:"7px 12px", borderRadius:8, cursor: bulkBusy ? "wait" : "pointer", fontFamily:"inherit", display:"flex", alignItems:"center", gap:6 }}
+            onMouseEnter={e => { if (!bulkBusy) { e.currentTarget.style.background = "rgba(220,38,38,0.18)"; e.currentTarget.style.borderColor = "rgba(220,38,38,0.55)"; } }}
+            onMouseLeave={e => { e.currentTarget.style.background = "rgba(220,38,38,0.10)"; e.currentTarget.style.borderColor = "rgba(220,38,38,0.32)"; }}>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+            Delete
+          </button>
+
+          {/* Clear */}
+          <button onClick={clearSelection} disabled={bulkBusy}
+            style={{ background:"transparent", border:"1px solid rgba(255,255,255,0.10)", color:"#9098A8", fontSize:11, fontWeight:700, letterSpacing:1.2, textTransform:"uppercase", padding:"7px 12px", borderRadius:8, cursor: bulkBusy ? "wait" : "pointer", fontFamily:"inherit" }}>
+            Cancel
+          </button>
         </div>
       )}
     </div>
