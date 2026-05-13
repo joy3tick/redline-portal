@@ -30,8 +30,8 @@ const TOKENS = {
   gold:      "#FFD700",
   // Type system
   fontDisplay: "'Bebas Neue', sans-serif",
-  fontBody:    "'Plus Jakarta Sans', 'Inter', system-ui, sans-serif",
-  fontMono:    "'IBM Plex Mono', 'JetBrains Mono', ui-monospace, monospace",
+  fontBody:    "'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif",
+  fontMono:    "'Geist Mono', ui-monospace, 'SFMono-Regular', monospace",
 };
 
 const C = {
@@ -501,7 +501,7 @@ const GLOBAL_CSS = `
 
 *{margin:0;padding:0;box-sizing:border-box}
 html,body,#root{min-height:100dvh;background:#0E0F14}
-body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden;font-family:'Inter',system-ui,sans-serif;letter-spacing:-0.011em;font-feature-settings:"kern","liga","calt","ss01","cv11"}
+body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden;font-family:'Geist',system-ui,sans-serif;letter-spacing:-0.014em;font-feature-settings:"kern","liga","calt","ss03","cv01","cv11"}
 ::selection{background:rgba(204,255,0,0.32);color:#15171E}
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -630,7 +630,7 @@ button{font-family:inherit}
 .btn-ghost:hover { color:#CCFF00; background:rgba(204,255,0,0.06); border-color:rgba(204,255,0,0.20) }
 
 /* Type utilities */
-.mono { font-family: 'IBM Plex Mono', 'JetBrains Mono', ui-monospace, monospace; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.mono { font-family: 'Geist Mono', ui-monospace, 'SFMono-Regular', monospace; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
 .display { font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.08em; line-height: 1; }
 .eyebrow { font-size: 9px; font-weight: 800; letter-spacing: 2.4px; text-transform: uppercase; color: #9098A8; }
 
@@ -650,7 +650,7 @@ button{font-family:inherit}
 /* Live header status tiles */
 .hdr-stat { display:flex; flex-direction:column; align-items:flex-start; gap:2px; padding:0 18px; border-left:1px solid rgba(255,255,255,0.06) }
 .hdr-stat:first-child { border-left:none; padding-left:0 }
-.hdr-stat-val { font-family:'IBM Plex Mono', ui-monospace, monospace; font-variant-numeric: tabular-nums; font-weight:600; font-size:22px; color:#F2F4F8; line-height:1; letter-spacing:-0.02em }
+.hdr-stat-val { font-family:'Geist Mono', ui-monospace, monospace; font-variant-numeric: tabular-nums; font-weight:600; font-size:22px; color:#F2F4F8; line-height:1; letter-spacing:-0.02em }
 .hdr-stat-val.hero { color:#CCFF00 }
 .hdr-stat-val.danger { color:#DC2626 }
 .hdr-stat-label { font-size:9px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#5E6376 }
@@ -1200,7 +1200,10 @@ function Leads({ session, profile, w }) {
       supabase.from("profiles").select("id, name, role").order("name"),
     ]);
     setLeads(leadsRes.data ?? []);
-    const repList = (profRes.data ?? []).filter(p => p.role === "rep");
+    // Assignable list = every rep + the current admin (so admin can hand
+    // leads to themselves to work). Other admins are intentionally left out.
+    const all = profRes.data ?? [];
+    const repList = all.filter(p => p.role === "rep" || p.id === session.user.id);
     setReps(repList);
     if (!assignTo && repList.length) setAssignTo(repList[0].id);
     setLoading(false);
@@ -1479,7 +1482,7 @@ function Leads({ session, profile, w }) {
           <div style={{ display:"flex", alignItems:"baseline", justifyContent:"space-between", flexWrap:"wrap", gap:14 }}>
             <div>
               <div style={{ fontSize:9.5, fontWeight:800, color:"#5E6376", letterSpacing:2.5, textTransform:"uppercase" }}>Pipeline</div>
-              <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?38:32, lineHeight:1, color:"#F2F4F8", letterSpacing:0.5, marginTop:4, fontVariantNumeric:"tabular-nums" }}>{totalForFilter}<span style={{ fontSize:dk?14:12, color:"#5E6376", marginLeft:8, letterSpacing:1.5, fontFamily:"'Inter',sans-serif", fontWeight:600 }}>leads</span></div>
+              <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?38:32, lineHeight:1, color:"#F2F4F8", letterSpacing:0.5, marginTop:4, fontVariantNumeric:"tabular-nums" }}>{totalForFilter}<span style={{ fontSize:dk?14:12, color:"#5E6376", marginLeft:8, letterSpacing:1.5, fontFamily:"'Geist',sans-serif", fontWeight:600 }}>leads</span></div>
             </div>
             <div style={{ display:"flex", gap:dk?20:14, flexWrap:"wrap" }}>
               {STATUSES.filter(s => (counts[s.v] ?? 0) > 0).map(s => (
@@ -1566,7 +1569,7 @@ function Leads({ session, profile, w }) {
                   <select value={assignTo} onChange={e => setAssignTo(e.target.value)}
                     style={{ width:"100%", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:10, color:"#F2F4F8", fontSize:13, fontWeight:600, padding:"10px 12px", fontFamily:"inherit", outline:"none", cursor:"pointer" }}>
                     {reps.length === 0 && <option>No reps available</option>}
-                    {reps.map(r => <option key={r.id} value={r.id}>{r.name || "Rep"}</option>)}
+                    {reps.map(r => <option key={r.id} value={r.id}>{(r.name || "Rep") + (r.id === session.user.id ? " (you)" : "")}</option>)}
                   </select>
                 </div>
                 <button onClick={upload} disabled={uploading || !assignTo || !parsed.rows.length} className="btn-primary"
@@ -2084,7 +2087,7 @@ function Chat({ session, profile, w, width, minW = 220, maxW = 520, onResize }) 
                 return (
                   <div key={g.id} style={{ display:"flex", flexDirection: isMe ? "row-reverse" : "row", gap:10, marginTop:g.continued?2:10, alignItems:"flex-end" }}>
                     <div style={{ width:32, height:32, flexShrink:0, visibility: g.continued ? "hidden" : "visible" }}>
-                      <div style={{ width:32, height:32, borderRadius:10, background: isMe ? "linear-gradient(135deg,#CCFF00,#88AB00)" : `linear-gradient(135deg,${c},${c}88)`, display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Inter',sans-serif", fontSize:12.5, fontWeight:900, color:"#15171E", boxShadow: isMe ? "0 4px 14px rgba(204,255,0,0.32), inset 0 1px 0 rgba(255,255,255,0.4)" : `0 3px 10px ${c}40, inset 0 1px 0 rgba(255,255,255,0.3)` }}>
+                      <div style={{ width:32, height:32, borderRadius:10, background: isMe ? "linear-gradient(135deg,#CCFF00,#88AB00)" : `linear-gradient(135deg,${c},${c}88)`, display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Geist',sans-serif", fontSize:12.5, fontWeight:900, color:"#15171E", boxShadow: isMe ? "0 4px 14px rgba(204,255,0,0.32), inset 0 1px 0 rgba(255,255,255,0.4)" : `0 3px 10px ${c}40, inset 0 1px 0 rgba(255,255,255,0.3)` }}>
                         {name[0]?.toUpperCase()}
                       </div>
                     </div>
@@ -2803,7 +2806,7 @@ function Leaderboard({ session, profile, w }) {
                 <div style={{ fontSize: isTop ? 22 : 14, fontWeight:800, color:"#444856", minWidth:32, textAlign:"center", lineHeight:1 }}>
                   {medal ?? `#${i+1}`}
                 </div>
-                <div style={{ width:36, height:36, borderRadius:9, background: isMe ? "linear-gradient(135deg,#CCFF00,#6E9100)" : "linear-gradient(135deg,#2A2D38,#1E2028)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Inter',sans-serif", fontSize:14, fontWeight:800, color: isMe ? "#15171E" : "#888D9C", flexShrink:0, boxShadow: isMe ? "0 2px 10px rgba(204,255,0,0.3)" : "none" }}>
+                <div style={{ width:36, height:36, borderRadius:9, background: isMe ? "linear-gradient(135deg,#CCFF00,#6E9100)" : "linear-gradient(135deg,#2A2D38,#1E2028)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Geist',sans-serif", fontSize:14, fontWeight:800, color: isMe ? "#15171E" : "#888D9C", flexShrink:0, boxShadow: isMe ? "0 2px 10px rgba(204,255,0,0.3)" : "none" }}>
                   {rep.name[0]?.toUpperCase()}
                 </div>
                 <div style={{ flex:1, minWidth:0 }}>
@@ -3734,7 +3737,7 @@ export default function App() {
 
   const signOut = async () => { await supabase.auth.signOut(); setView(null); };
 
-  const FONT_LINK = "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap";
+  const FONT_LINK = "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Geist:wght@400..900&family=Geist+Mono:wght@400..700&display=swap";
   const baseStyle = { minHeight:"100dvh", background:"#0E0F14", color:"#FFF" };
 
   const bc = { MODULE:"#CCFF00", BOOTCAMP:"#F59E0B", REFERENCE:"#06D6F0", QUIZ:"#10B981", FINAL:"#FFD700" };
@@ -3918,7 +3921,7 @@ export default function App() {
                 <div style={{ position:"relative", display:"flex", alignItems:"center", gap:0 }}>
                   <div className="profile-pill"
                     onClick={() => { setShowNameEdit(v => !v); setNameEdit(profile?.name ?? ""); }}>
-                    <div style={{ width:30, height:30, borderRadius:9, background:"linear-gradient(135deg,#CCFF00,#88AB00)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Inter',sans-serif", fontSize:13, fontWeight:900, color:"#15171E", flexShrink:0, boxShadow:"0 2px 10px rgba(204,255,0,0.4), inset 0 1px 0 rgba(255,255,255,0.4)" }}>
+                    <div style={{ width:30, height:30, borderRadius:9, background:"linear-gradient(135deg,#CCFF00,#88AB00)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Geist',sans-serif", fontSize:13, fontWeight:900, color:"#15171E", flexShrink:0, boxShadow:"0 2px 10px rgba(204,255,0,0.4), inset 0 1px 0 rgba(255,255,255,0.4)" }}>
                       {profile?.name?.[0]?.toUpperCase() ?? "R"}
                     </div>
                     {dk && <span style={{ fontSize:12.5, fontWeight:600, color:"#D6DAE2", letterSpacing:0.2 }}>{profile?.name ?? "Rep"}</span>}
