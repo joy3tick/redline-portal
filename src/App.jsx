@@ -1435,6 +1435,48 @@ function Leads({ session, profile, w }) {
     return [phone, email, city, niche].filter(Boolean).join(" · ");
   };
 
+  // Pull a CSV field by trying any of the candidate header names (case-insensitive).
+  const pickField = (d, ...keys) => {
+    if (!d) return null;
+    const map = {};
+    for (const k of Object.keys(d)) map[k.toLowerCase().trim()] = d[k];
+    for (const k of keys) {
+      const v = map[k.toLowerCase()];
+      if (v != null) {
+        const s = v.toString().trim();
+        if (s) return s;
+      }
+    }
+    return null;
+  };
+
+  // Generate a 2–3 line discovery-call opener personalized from the lead's CSV row.
+  // Computed at render time — no DB write — so it applies to every existing and future lead for free.
+  const bookingScript = (lead) => {
+    const d = lead?.data || {};
+    const business = pickField(d, "business name", "business", "company", "company name", "name");
+    const ownerRaw = pickField(d, "owner", "owner name", "first name", "contact", "contact name", "decision maker");
+    const firstName = ownerRaw ? ownerRaw.split(/[\s,]+/)[0] : null;
+    const niche = pickField(d, "niche", "vertical", "industry", "category", "type", "trade");
+    const city = pickField(d, "city", "location", "town", "area", "market");
+    const websiteRaw = pickField(d, "website", "site", "url", "domain", "site url");
+    const website = websiteRaw ? websiteRaw.replace(/^https?:\/\//i, "").replace(/\/.*$/, "") : null;
+    const repName = profile?.name || "[Rep]";
+
+    const greeting = firstName ? `Hey ${firstName}` : (business ? `Hey — calling for ${business}` : "Hey there");
+    const nicheClause = niche ? `${niche.toLowerCase()} contractors` : "home service contractors";
+    const whereClause = city ? ` running ${city}` : "";
+    const siteClause = website
+      ? `Took a quick look at ${website} — flagging one thing that's costing you booked jobs.`
+      : `Had a quick look at your setup — flagging one thing that's costing you booked jobs.`;
+
+    return [
+      `${greeting}, this is ${repName} with Redline — we build sites for ${nicheClause}${whereClause}.`,
+      siteClause,
+      `Got 60 seconds for the real reason I'm calling?`,
+    ].join(" ");
+  };
+
   // Render a CSV value: if it looks like a URL/email/phone, make it clickable.
   // All link branches validate via the URL parser so a malicious CSV row
   // can't smuggle a javascript:/data:/file: href through to the browser.
@@ -1691,6 +1733,39 @@ function Leads({ session, profile, w }) {
 
                 {isExpanded && (
                   <div style={{ padding:dk?"16px 20px 18px 22px":"14px 14px 16px 18px", borderTop:"1px solid rgba(255,255,255,0.06)", display:"flex", flexDirection:"column", gap:14, animation:"fadeUp 0.2s ease" }}>
+                    {/* Booking-call opener — pre-filled from CSV data */}
+                    {(() => {
+                      const script = bookingScript(l);
+                      return (
+                        <div style={{ position:"relative", padding:dk?"14px 16px 14px 16px":"12px 12px", background:"rgba(204,255,0,0.05)", border:"1px solid rgba(204,255,0,0.22)", borderRadius:10 }}>
+                          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:8 }}>
+                            <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#CCFF00" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                              <div style={{ fontSize:9, fontWeight:800, color:"#CCFF00", letterSpacing:1.6, textTransform:"uppercase" }}>Booking-call opener</div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                try {
+                                  if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(script);
+                                  else {
+                                    const ta = document.createElement("textarea");
+                                    ta.value = script; document.body.appendChild(ta); ta.select();
+                                    document.execCommand("copy"); document.body.removeChild(ta);
+                                  }
+                                } catch { /* ignore */ }
+                              }}
+                              title="Copy script"
+                              style={{ background:"rgba(204,255,0,0.10)", border:"1px solid rgba(204,255,0,0.30)", color:"#CCFF00", fontSize:9.5, fontWeight:800, letterSpacing:1.4, textTransform:"uppercase", padding:"5px 10px", borderRadius:6, cursor:"pointer", fontFamily:"inherit", display:"flex", alignItems:"center", gap:5 }}>
+                              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                              Copy
+                            </button>
+                          </div>
+                          <p style={{ fontSize:dk?13.5:12.5, color:"#EEF2F8", lineHeight:1.55, fontWeight:500, margin:0, whiteSpace:"pre-wrap" }}>{script}</p>
+                        </div>
+                      );
+                    })()}
+
                     {/* All CSV fields */}
                     <div style={{ display:"grid", gridTemplateColumns:dk?"repeat(auto-fill, minmax(200px, 1fr))":"1fr", gap:10 }}>
                       {Object.entries(data).map(([k, v]) => (
