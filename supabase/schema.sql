@@ -1,5 +1,5 @@
 -- ============================================================
--- Redline Rep Portal — Supabase Database Schema
+-- Redline Portal — Supabase Database Schema
 -- Run this in the Supabase SQL Editor for your project.
 -- ============================================================
 
@@ -35,27 +35,58 @@ as $$
   );
 $$;
 
+drop policy if exists "Own profile read" on public.profiles;
 create policy "Own profile read"
   on public.profiles for select
   using (auth.uid() = id);
 
+drop policy if exists "Authenticated users read all profiles" on public.profiles;
 create policy "Authenticated users read all profiles"
   on public.profiles for select
   using (auth.role() = 'authenticated');
 
+drop policy if exists "Admins read all profiles" on public.profiles;
 create policy "Admins read all profiles"
   on public.profiles for select
   using (public.is_admin());
 
+-- Helpers used by the "Own profile update" with-check below.
+-- Both are SECURITY DEFINER + STABLE so they see the snapshot taken at
+-- statement start (the pre-update row), letting us lock role / tier.
+create or replace function public.my_role()
+returns text language sql security definer stable as $$
+  select role from public.profiles where id = auth.uid();
+$$;
+
+create or replace function public.my_tier()
+returns text language sql security definer stable as $$
+  select tier from public.profiles where id = auth.uid();
+$$;
+
+-- Re-create with a WITH CHECK clause that pins role + tier so a rep
+-- can't promote themselves to admin or hand themselves a sales tier
+-- via a direct supabase.from("profiles").update(...) call.
+drop policy if exists "Own profile update" on public.profiles;
 create policy "Own profile update"
   on public.profiles for update
-  using (auth.uid() = id);
+  using (auth.uid() = id)
+  with check (
+    auth.uid() = id
+    and role = public.my_role()
+    and tier is not distinct from public.my_tier()
+  );
 
+drop policy if exists "Admins update any profile" on public.profiles;
 create policy "Admins update any profile"
   on public.profiles for update
-  using (public.is_admin());
+  using (public.is_admin())
+  with check (public.is_admin());
 
 -- Auto-create a profile row whenever a new user signs up.
+-- IMPORTANT: role is hardcoded to 'rep'. Never trust signup metadata for
+-- privilege assignment — anyone with the public anon key can hit the
+-- /auth/v1/signup endpoint with arbitrary metadata. Admin promotion is
+-- explicit and goes through the admin panel (RLS-gated).
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
@@ -66,7 +97,7 @@ begin
   values (
     new.id,
     coalesce(new.raw_user_meta_data->>'name', split_part(new.email, '@', 1)),
-    coalesce(new.raw_user_meta_data->>'role', 'rep')
+    'rep'
   );
   return new;
 end;
@@ -90,10 +121,12 @@ create table if not exists public.module_progress (
 
 alter table public.module_progress enable row level security;
 
+drop policy if exists "Own progress all" on public.module_progress;
 create policy "Own progress all"
   on public.module_progress for all
   using (auth.uid() = user_id);
 
+drop policy if exists "Admins read all progress" on public.module_progress;
 create policy "Admins read all progress"
   on public.module_progress for select
   using (public.is_admin());
@@ -112,10 +145,12 @@ create table if not exists public.quiz_scores (
 
 alter table public.quiz_scores enable row level security;
 
+drop policy if exists "Own scores all" on public.quiz_scores;
 create policy "Own scores all"
   on public.quiz_scores for all
   using (auth.uid() = user_id);
 
+drop policy if exists "Admins read all scores" on public.quiz_scores;
 create policy "Admins read all scores"
   on public.quiz_scores for select
   using (public.is_admin());
@@ -149,10 +184,12 @@ alter table public.monthly_bonuses alter column label drop not null;
 
 alter table public.monthly_bonuses enable row level security;
 
+drop policy if exists "Authenticated users read bonuses" on public.monthly_bonuses;
 create policy "Authenticated users read bonuses"
   on public.monthly_bonuses for select
   using (auth.role() = 'authenticated');
 
+drop policy if exists "Admins manage bonuses" on public.monthly_bonuses;
 create policy "Admins manage bonuses"
   on public.monthly_bonuses for all
   using (public.is_admin());
@@ -171,10 +208,12 @@ create table if not exists public.sales (
 
 alter table public.sales enable row level security;
 
+drop policy if exists "Authenticated users read all sales" on public.sales;
 create policy "Authenticated users read all sales"
   on public.sales for select
   using (auth.role() = 'authenticated');
 
+drop policy if exists "Users manage own sales" on public.sales;
 create policy "Users manage own sales"
   on public.sales for all
   using (auth.uid() = user_id);
@@ -191,10 +230,12 @@ create table if not exists public.schedule (
 
 alter table public.schedule enable row level security;
 
+drop policy if exists "Authenticated users read schedule" on public.schedule;
 create policy "Authenticated users read schedule"
   on public.schedule for select
   using (auth.role() = 'authenticated');
 
+drop policy if exists "Users manage own schedule" on public.schedule;
 create policy "Users manage own schedule"
   on public.schedule for all
   using (auth.uid() = user_id);
@@ -212,10 +253,12 @@ create table if not exists public.announcements (
 
 alter table public.announcements enable row level security;
 
+drop policy if exists "Authenticated users read announcements" on public.announcements;
 create policy "Authenticated users read announcements"
   on public.announcements for select
   using (auth.role() = 'authenticated');
 
+drop policy if exists "Admins manage announcements" on public.announcements;
 create policy "Admins manage announcements"
   on public.announcements for all
   using (public.is_admin());
@@ -234,18 +277,22 @@ create index if not exists messages_created_at_idx
 
 alter table public.messages enable row level security;
 
+drop policy if exists "Authenticated users read messages" on public.messages;
 create policy "Authenticated users read messages"
   on public.messages for select
   using (auth.role() = 'authenticated');
 
+drop policy if exists "Users insert own messages" on public.messages;
 create policy "Users insert own messages"
   on public.messages for insert
   with check (auth.uid() = user_id);
 
+drop policy if exists "Users delete own messages" on public.messages;
 create policy "Users delete own messages"
   on public.messages for delete
   using (auth.uid() = user_id);
 
+drop policy if exists "Admins delete any message" on public.messages;
 create policy "Admins delete any message"
   on public.messages for delete
   using (public.is_admin());
@@ -273,35 +320,44 @@ create table if not exists public.leads (
   assigned_to  uuid references auth.users(id) on delete cascade not null,
   assigned_by  uuid references auth.users(id) on delete set null,
   data         jsonb not null default '{}'::jsonb,
-  status       text not null default 'new' check (status in ('new','contacted','quoted','booked','closed','dead')),
+  status       text not null default 'new' check (status in ('new','contacted','booked','closed','dead')),
   note         text,
   created_at   timestamptz default now()
 );
 
 create index if not exists leads_assigned_to_idx on public.leads (assigned_to, created_at desc);
 
--- For existing deployments — allow the new 'booked' status
+-- For existing deployments — migrate any legacy 'quoted' rows then re-tighten the constraint
+update public.leads set status = 'contacted' where status = 'quoted';
 alter table public.leads drop constraint if exists leads_status_check;
 alter table public.leads add constraint leads_status_check
-  check (status in ('new','contacted','quoted','booked','closed','dead'));
+  check (status in ('new','contacted','booked','closed','dead'));
 
 alter table public.leads enable row level security;
 
+drop policy if exists "Reps read own leads" on public.leads;
 create policy "Reps read own leads"
   on public.leads for select
   using (auth.uid() = assigned_to);
 
+drop policy if exists "Admins read all leads" on public.leads;
 create policy "Admins read all leads"
   on public.leads for select
   using (public.is_admin());
 
+-- Pin assigned_to / assigned_by via WITH CHECK so a rep can't steal
+-- a teammate's lead by re-pointing the row at themselves or anyone else.
+drop policy if exists "Reps update own leads" on public.leads;
 create policy "Reps update own leads"
   on public.leads for update
-  using (auth.uid() = assigned_to);
+  using (auth.uid() = assigned_to)
+  with check (auth.uid() = assigned_to);
 
+drop policy if exists "Admins manage leads" on public.leads;
 create policy "Admins manage leads"
   on public.leads for all
-  using (public.is_admin());
+  using (public.is_admin())
+  with check (public.is_admin());
 
 -- Live updates for the leads inbox
 do $$
@@ -313,3 +369,47 @@ begin
     alter publication supabase_realtime add table public.leads;
   end if;
 end $$;
+
+-- ─── CUSTOM ROLES ────────────────────────────────────────────
+-- Admin can create custom roles (Sales Manager, Marketing Specialist, etc.)
+-- with their own per-tab visibility. The built-in 'admin' and 'rep' roles
+-- are seeded and cannot be deleted. profiles.role references roles.name
+-- by convention (no FK constraint so admin can rename / migrate freely).
+create table if not exists public.roles (
+  name         text primary key,
+  label        text not null,
+  allowed_tabs text[] not null default '{}'::text[],
+  is_builtin   boolean not null default false,
+  created_at   timestamptz default now()
+);
+
+alter table public.roles enable row level security;
+
+drop policy if exists "Authenticated read roles" on public.roles;
+create policy "Authenticated read roles"
+  on public.roles for select
+  using (auth.role() = 'authenticated');
+
+drop policy if exists "Admins manage roles" on public.roles;
+create policy "Admins manage roles"
+  on public.roles for all
+  using (public.is_admin());
+
+-- Seed built-in roles with full access
+insert into public.roles (name, label, allowed_tabs, is_builtin)
+values
+  ('admin', 'Admin',     array['dashboard','announcements','chat','leads','leaderboard','scheduling','training','reference','redline-ai'], true),
+  ('rep',   'Sales Rep', array['dashboard','announcements','chat','leads','leaderboard','scheduling','training','reference','redline-ai'], true)
+on conflict (name) do nothing;
+
+-- Existing deployments: backfill 'redline-ai' onto built-in roles so the new
+-- tab shows up after a schema re-run. Only adds the key if it's missing.
+update public.roles
+   set allowed_tabs = array_append(allowed_tabs, 'redline-ai')
+ where is_builtin = true
+   and not ('redline-ai' = any(allowed_tabs));
+
+-- Loosen profiles.role so admin-created roles can be assigned to users.
+-- Built-in 'admin' is still the only role that grants admin powers (the
+-- is_admin() function checks role = 'admin' literally).
+alter table public.profiles drop constraint if exists profiles_role_check;
