@@ -1181,6 +1181,9 @@ function Leads({ session, profile, w }) {
   const [statusFilter, setStatusFilter] = useState("all");
   const [expandedId, setExpandedId] = useState(null);
   const [draftNote, setDraftNote] = useState("");
+  // Selection (admin bulk actions)
+  const [selected, setSelected] = useState(() => new Set());
+  const [bulkBusy, setBulkBusy] = useState(false);
   // Admin upload state
   const [uploading, setUploading] = useState(false);
   const [parsed, setParsed] = useState(null); // { headers, rows, fileName }
@@ -1308,6 +1311,70 @@ function Leads({ session, profile, w }) {
     const { error } = await supabase.from("leads").delete().eq("id", id);
     if (error) { alert(`Couldn't delete: ${error.message}`); return; }
     setLeads(prev => prev.filter(l => l.id !== id));
+  };
+
+  // Admin: reassign a single lead to a different rep.
+  const reassignOne = async (id, newRepId) => {
+    if (!newRepId) return;
+    const { data, error } = await supabase
+      .from("leads")
+      .update({ assigned_to: newRepId, assigned_by: session.user.id })
+      .eq("id", id)
+      .select()
+      .single();
+    if (error || !data) { alert(`Couldn't reassign: ${error?.message ?? "no row returned"}`); return; }
+    setLeads(prev => prev.map(l => l.id === id ? { ...l, assigned_to: data.assigned_to, assigned_by: data.assigned_by } : l));
+  };
+
+  // ── Selection helpers ─────────────────────────────────────────
+  const toggleSelect = (id, e) => {
+    if (e) e.stopPropagation();
+    setSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+  const clearSelection = () => setSelected(new Set());
+
+  // ── Bulk actions ──────────────────────────────────────────────
+  const bulkReassign = async (newRepId) => {
+    if (!newRepId || selected.size === 0 || bulkBusy) return;
+    const repName = (reps.find(r => r.id === newRepId) || {}).name || "the selected rep";
+    if (!confirm(`Reassign ${selected.size} lead${selected.size === 1 ? "" : "s"} to ${repName}?`)) return;
+    setBulkBusy(true);
+    const ids = Array.from(selected);
+    const { error } = await supabase
+      .from("leads")
+      .update({ assigned_to: newRepId, assigned_by: session.user.id })
+      .in("id", ids);
+    setBulkBusy(false);
+    if (error) { alert(`Couldn't reassign: ${error.message}`); return; }
+    setLeads(prev => prev.map(l => ids.includes(l.id) ? { ...l, assigned_to: newRepId, assigned_by: session.user.id } : l));
+    clearSelection();
+  };
+
+  const bulkSetStatus = async (status) => {
+    if (!status || selected.size === 0 || bulkBusy) return;
+    setBulkBusy(true);
+    const ids = Array.from(selected);
+    const { error } = await supabase.from("leads").update({ status }).in("id", ids);
+    setBulkBusy(false);
+    if (error) { alert(`Couldn't update: ${error.message}`); return; }
+    setLeads(prev => prev.map(l => ids.includes(l.id) ? { ...l, status } : l));
+    clearSelection();
+  };
+
+  const bulkDelete = async () => {
+    if (selected.size === 0 || bulkBusy) return;
+    if (!confirm(`Delete ${selected.size} lead${selected.size === 1 ? "" : "s"}? This can't be undone.`)) return;
+    setBulkBusy(true);
+    const ids = Array.from(selected);
+    const { error } = await supabase.from("leads").delete().in("id", ids);
+    setBulkBusy(false);
+    if (error) { alert(`Couldn't delete: ${error.message}`); return; }
+    setLeads(prev => prev.filter(l => !ids.includes(l.id)));
+    clearSelection();
   };
 
   const clearByStatus = async (status) => {
@@ -1517,7 +1584,35 @@ function Leads({ session, profile, w }) {
 
       {/* Status filter row */}
       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", gap:10, flexWrap:"wrap" }}>
-        <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
+        <div style={{ display:"flex", gap:6, flexWrap:"wrap", alignItems:"center" }}>
+          {isAdmin && visible.length > 0 && (() => {
+            const allSelected = visible.length > 0 && visible.every(l => selected.has(l.id));
+            return (
+              <button
+                onClick={() => {
+                  setSelected(prev => {
+                    const next = new Set(prev);
+                    if (allSelected) visible.forEach(l => next.delete(l.id));
+                    else visible.forEach(l => next.add(l.id));
+                    return next;
+                  });
+                }}
+                title={allSelected ? "Deselect all visible" : "Select all visible"}
+                style={{
+                  display:"flex", alignItems:"center", justifyContent:"center", gap:6,
+                  background: allSelected ? "rgba(204,255,0,0.10)" : "rgba(255,255,255,0.02)",
+                  border:`1px solid ${allSelected ? "rgba(204,255,0,0.35)" : "rgba(255,255,255,0.08)"}`,
+                  color: allSelected ? "#CCFF00" : "#9098A8",
+                  fontSize:11, fontWeight:700, letterSpacing:1.2, textTransform:"uppercase",
+                  padding:"8px 12px", borderRadius:10, cursor:"pointer", fontFamily:"inherit", transition:"all 0.16s",
+                }}>
+                <span style={{ width:14, height:14, borderRadius:3, border:`1.5px solid ${allSelected ? "#CCFF00" : "rgba(255,255,255,0.25)"}`, background: allSelected ? "#CCFF00" : "transparent", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                  {allSelected && <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#15171E" strokeWidth="3.6" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
+                </span>
+                {allSelected ? "Clear" : "Select all"}
+              </button>
+            );
+          })()}
           <button onClick={() => setStatusFilter("all")}
             style={{ background: statusFilter === "all" ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.02)", border:`1px solid ${statusFilter === "all" ? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.06)"}`, color: statusFilter === "all" ? "#F2F4F8" : "#7E8595", fontSize:11, fontWeight:700, letterSpacing:1.2, textTransform:"uppercase", padding:"8px 14px", borderRadius:10, cursor:"pointer", fontFamily:"inherit", transition:"all 0.18s", display:"flex", alignItems:"center", gap:8 }}>
             All <span style={{ fontVariantNumeric:"tabular-nums", color: statusFilter === "all" ? "#A8AEBA" : "#5E6376", fontSize:11 }}>{totalForFilter}</span>
@@ -1562,10 +1657,27 @@ function Leads({ session, profile, w }) {
             const isExpanded = expandedId === l.id;
             const data = l.data || {};
             return (
-              <div key={l.id} className="dash-card" style={{ padding:0, animation:`fadeUp 0.3s ease ${0.03*i}s both`, overflow:"hidden", position:"relative" }}>
+              <div key={l.id} className="dash-card" style={{ padding:0, animation:`fadeUp 0.3s ease ${0.03*i}s both`, overflow:"hidden", position:"relative", borderColor: selected.has(l.id) ? "rgba(204,255,0,0.35)" : undefined }}>
                 <div style={{ position:"absolute", left:0, top:0, bottom:0, width:3, background:s.color, opacity:isExpanded?1:0.7 }} />
                 <div onClick={() => { setExpandedId(isExpanded ? null : l.id); setDraftNote(l.note || ""); }}
                   style={{ display:"flex", alignItems:"center", gap:dk?16:12, cursor:"pointer", padding:dk?"16px 20px 16px 22px":"14px 14px 14px 18px" }}>
+                  {isAdmin && (
+                    <button
+                      type="button"
+                      onClick={(e) => toggleSelect(l.id, e)}
+                      aria-label={selected.has(l.id) ? "Deselect lead" : "Select lead"}
+                      style={{
+                        width:20, height:20, flexShrink:0, padding:0, cursor:"pointer",
+                        background: selected.has(l.id) ? "#CCFF00" : "transparent",
+                        border:`1.5px solid ${selected.has(l.id) ? "#CCFF00" : "rgba(255,255,255,0.18)"}`,
+                        borderRadius:5, display:"flex", alignItems:"center", justifyContent:"center",
+                        transition:"all 0.12s ease",
+                      }}>
+                      {selected.has(l.id) && (
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#15171E" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      )}
+                    </button>
+                  )}
                   <div style={{ flex:1, minWidth:0 }}>
                     <div style={{ fontSize:dk?14.5:13.5, fontWeight:700, color:"#EEF2F8", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", letterSpacing:"-0.005em" }}>{primaryLine(data)}</div>
                     {secondaryLine(data) && <div style={{ fontSize:11.5, color:"#666C7E", marginTop:4, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{secondaryLine(data)}</div>}
@@ -1602,6 +1714,20 @@ function Leads({ session, profile, w }) {
                       </div>
                     </div>
 
+                    {/* Reassign (admin only) */}
+                    {isAdmin && (
+                      <div>
+                        <div style={{ fontSize:9, fontWeight:800, color:"#5E6376", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Assigned to</div>
+                        <select
+                          value={l.assigned_to}
+                          onChange={e => { if (e.target.value !== l.assigned_to) reassignOne(l.id, e.target.value); }}
+                          style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:8, color:"#F2F4F8", fontSize:12.5, fontWeight:600, padding:"9px 12px", fontFamily:"inherit", outline:"none", cursor:"pointer", minWidth:200 }}>
+                          {reps.length === 0 && <option>No reps available</option>}
+                          {reps.map(r => <option key={r.id} value={r.id}>{r.name || "Rep"}</option>)}
+                        </select>
+                      </div>
+                    )}
+
                     {/* Note */}
                     <div>
                       <div style={{ fontSize:9, fontWeight:800, color:"#5E6376", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Note</div>
@@ -1630,6 +1756,62 @@ function Leads({ session, profile, w }) {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Floating bulk action bar (admin only) */}
+      {isAdmin && selected.size > 0 && (
+        <div role="region" aria-label="Bulk lead actions"
+          style={{
+            position:"fixed", left:"50%", transform:"translateX(-50%)",
+            bottom: dk ? 24 : 16, zIndex:80,
+            display:"flex", alignItems:"center", flexWrap:"wrap", gap:dk?10:6,
+            padding: dk ? "10px 14px" : "8px 10px",
+            background:"#15171E",
+            border:"1px solid rgba(204,255,0,0.30)",
+            borderRadius:14,
+            boxShadow:"0 18px 50px rgba(0,0,0,0.55), 0 0 0 1px rgba(0,0,0,0.4)",
+            maxWidth:"calc(100vw - 24px)",
+          }}>
+          <div style={{ display:"flex", alignItems:"center", gap:8, paddingRight:8, borderRight:"1px solid rgba(255,255,255,0.08)" }}>
+            <span className="mono" style={{ fontSize:14, fontWeight:600, color:"#CCFF00" }}>{selected.size}</span>
+            <span style={{ fontSize:11, fontWeight:700, color:"#9098A8", letterSpacing:1.2, textTransform:"uppercase" }}>selected</span>
+          </div>
+
+          {/* Reassign */}
+          <select
+            value=""
+            onChange={e => { if (e.target.value) { bulkReassign(e.target.value); e.target.value = ""; } }}
+            disabled={bulkBusy || reps.length === 0}
+            style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.10)", color:"#F2F4F8", fontSize:12, fontWeight:600, padding:"7px 10px", borderRadius:8, fontFamily:"inherit", cursor: bulkBusy ? "wait" : "pointer", outline:"none" }}>
+            <option value="">Reassign to…</option>
+            {reps.map(r => <option key={r.id} value={r.id}>{r.name || "Rep"}</option>)}
+          </select>
+
+          {/* Move to status */}
+          <select
+            value=""
+            onChange={e => { if (e.target.value) { bulkSetStatus(e.target.value); e.target.value = ""; } }}
+            disabled={bulkBusy}
+            style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.10)", color:"#F2F4F8", fontSize:12, fontWeight:600, padding:"7px 10px", borderRadius:8, fontFamily:"inherit", cursor: bulkBusy ? "wait" : "pointer", outline:"none" }}>
+            <option value="">Move to…</option>
+            {STATUSES.map(opt => <option key={opt.v} value={opt.v}>{opt.label}</option>)}
+          </select>
+
+          {/* Delete */}
+          <button onClick={bulkDelete} disabled={bulkBusy}
+            style={{ background:"rgba(220,38,38,0.10)", border:"1px solid rgba(220,38,38,0.32)", color:"#DC2626", fontSize:11, fontWeight:800, letterSpacing:1.2, textTransform:"uppercase", padding:"7px 12px", borderRadius:8, cursor: bulkBusy ? "wait" : "pointer", fontFamily:"inherit", display:"flex", alignItems:"center", gap:6 }}
+            onMouseEnter={e => { if (!bulkBusy) { e.currentTarget.style.background = "rgba(220,38,38,0.18)"; e.currentTarget.style.borderColor = "rgba(220,38,38,0.55)"; } }}
+            onMouseLeave={e => { e.currentTarget.style.background = "rgba(220,38,38,0.10)"; e.currentTarget.style.borderColor = "rgba(220,38,38,0.32)"; }}>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+            Delete
+          </button>
+
+          {/* Clear */}
+          <button onClick={clearSelection} disabled={bulkBusy}
+            style={{ background:"transparent", border:"1px solid rgba(255,255,255,0.10)", color:"#9098A8", fontSize:11, fontWeight:700, letterSpacing:1.2, textTransform:"uppercase", padding:"7px 12px", borderRadius:8, cursor: bulkBusy ? "wait" : "pointer", fontFamily:"inherit" }}>
+            Cancel
+          </button>
         </div>
       )}
     </div>
@@ -3974,44 +4156,228 @@ export default function App() {
         )}
 
         {/* REDLINE AI TAB */}
-        {tab === "redline-ai" && (
-          <div style={{ animation:"fadeUp 0.35s ease" }}>
-            <div style={{
-              position:"relative", overflow:"hidden",
-              background:"rgba(245,158,11,0.06)",
-              border:"1px solid rgba(245,158,11,0.22)", borderRadius:14,
-              padding:dk?"22px 24px":"18px 18px", marginBottom:16,
-            }}>
-              <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:10 }}>
-                <div style={{ width:24, height:3, background:"linear-gradient(90deg,#F59E0B,transparent)", borderRadius:4 }} />
-                <div style={{ fontSize:9.5, fontWeight:800, color:"#F59E0B", letterSpacing:3, textTransform:"uppercase" }}>Engineering · Dev Section</div>
-              </div>
-              <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?38:30, lineHeight:1.1, color:"#F2F4F8", letterSpacing:1, marginBottom:6 }}>The Operating System for Contractors</div>
-              <p style={{ fontSize:13.5, color:"#A8AEBA", margin:0, lineHeight:1.6, fontWeight:500 }}>
-                Spec, architecture, design system, and resources for the Redline AI build. Read in order. Start with Card 00 →{" "}
-                <a href="https://redline-ai-demo.vercel.app/" target="_blank" rel="noreferrer" style={{ color:"#F59E0B", fontWeight:700, textDecoration:"none", borderBottom:"1px dotted rgba(245,158,11,0.4)" }}>live demo</a>.
+        {tab === "redline-ai" && (() => {
+          const AMBER = "#F59E0B";
+          const tiers = [
+            { name:"LITE",  price:"$79",  unit:"/mo", target:"Solo + small shops", users:"2 users",       proc:"2.9% + 30¢" },
+            { name:"CORE",  price:"$179", unit:"/mo", target:"Small teams · 2–5 techs", users:"5 users · $49 after",  proc:"2.6% + 30¢" },
+            { name:"PRO",   price:"$479", unit:"/mo", target:"Growing · 5–15 techs",    users:"15 users · $59 after", proc:"2.5% + 30¢" },
+            { name:"SCALE", price:"$879", unit:"/mo", target:"Regional · $3M+ rev",     users:"30 users · $79 after", proc:"Near interchange" },
+            { name:"PEAK",  price:"Custom", unit:"",  target:"Multi-brand · PE-backed", users:"Unlimited",            proc:"Custom" },
+          ];
+          const moduleRings = [
+            { label:"CORE OPERATIONS", count:5, accent:AMBER, items:["Lead Management & Pipeline","Scheduling & Dispatch","Invoicing & Estimates","CRM","Embedded Payments"] },
+            { label:"INTELLIGENCE",    count:3, accent:"#F2F4F8", items:["AI Umbrella Chat","BI Dashboard","Call Intelligence"] },
+            { label:"DISTRIBUTION",    count:6, accent:"#9098A8", items:["Marketing Automation","Workflow Automation","Team Management","Mobile App","Customer Portal","Site/App Builder"] },
+          ];
+          const stack = [
+            { name:"ServiceTitan", price:150 },
+            { name:"Mailchimp",    price:30 },
+            { name:"Squarespace",  price:16 },
+            { name:"Review tool",  price:50 },
+            { name:"Scheduling",   price:25 },
+          ];
+          const stackTotal = stack.reduce((s,x)=>s+x.price,0);
+          return (
+          <div style={{ animation:"fadeUp 0.35s ease", display:"flex", flexDirection:"column", gap:dk?22:16 }}>
+
+            {/* Hero — strategic frame, three big numbers */}
+            <div style={{ background:"linear-gradient(135deg, rgba(245,158,11,0.05), rgba(245,158,11,0.01))", border:"1px solid rgba(245,158,11,0.18)", borderRadius:16, padding:dk?"28px 28px":"20px 20px" }}>
+              <div style={{ fontSize:10, fontWeight:800, color:AMBER, letterSpacing:3, textTransform:"uppercase", marginBottom:12 }}>Engineering · Internal Spec</div>
+              <div className="display" style={{ fontSize:dk?44:30, color:"#F2F4F8", letterSpacing:"0.04em", lineHeight:1.05, marginBottom:14 }}>The operating system<br/>for contractors.</div>
+              <p style={{ fontSize:dk?14:13, color:"#A0A4B0", margin:"0 0 22px", lineHeight:1.6, fontWeight:500, maxWidth:720 }}>
+                A vertical, AI-native SaaS platform for HVAC, roofing, solar, plumbing, electrical. One login replaces ServiceTitan + Mailchimp + Squarespace + a scheduling tool + a review tool. Owners live in chat. Their team lives in the command center. Same product.
               </p>
+              <div style={{ display:"grid", gridTemplateColumns:wd?"repeat(4,1fr)":dk?"repeat(2,1fr)":"1fr", gap:dk?14:10, marginBottom:18 }}>
+                {[
+                  { k:"ARR TARGET", v:"$240M",      sub:"Year 9" },
+                  { k:"EXIT WINDOW", v:"6–7yr",     sub:"Redline AI" },
+                  { k:"TAM",         v:"$650–750B", sub:"US home services" },
+                  { k:"V1 MODULES",  v:"14",        sub:"3 dependency rings" },
+                ].map(s => (
+                  <div key={s.k} style={{ background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:12, padding:"14px 16px" }}>
+                    <div style={{ fontSize:9, fontWeight:800, color:"#5E6376", letterSpacing:2, textTransform:"uppercase", marginBottom:6 }}>{s.k}</div>
+                    <div className="mono" style={{ fontSize:dk?26:22, fontWeight:600, color:"#F2F4F8", lineHeight:1 }}>{s.v}</div>
+                    <div style={{ fontSize:10.5, color:"#7E8595", marginTop:5 }}>{s.sub}</div>
+                  </div>
+                ))}
+              </div>
+              <a href="https://redline-ai-demo.vercel.app/" target="_blank" rel="noreferrer"
+                style={{ display:"inline-flex", alignItems:"center", gap:8, padding:"10px 16px", background:AMBER, color:"#15171E", fontSize:12, fontWeight:800, letterSpacing:1.4, textTransform:"uppercase", borderRadius:10, textDecoration:"none" }}>
+                Open live demo
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+              </a>
             </div>
-            <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr 1fr":dk?"1fr 1fr":"1fr", gap:dk?10:8 }}>
-              {devItems.map((x, i) => (
-                <div key={x.id} className="card-hover" onClick={() => { setView(x.k); setTimeout(top, 50); }}
-                  style={{ background:"rgba(255,255,255,0.022)", border:"1px solid rgba(245,158,11,0.10)", borderRadius:16, padding:dk?"20px 18px":"17px 15px", cursor:"pointer", animation:`fadeUp 0.38s ease ${0.05*i}s both` }}>
-                  <div style={{ display:"flex", alignItems:"center", gap:14 }}>
-                    <div style={{ width:50, height:50, borderRadius:14, background:IC_GRAD.DEV, display:"flex", alignItems:"center", justifyContent:"center", fontSize:13, fontWeight:800, color:"#F59E0B", letterSpacing:0.5, flexShrink:0, fontVariantNumeric:"tabular-nums", boxShadow:IC_SHADOW.DEV }}>{x.n}</div>
-                    <div style={{ flex:1, minWidth:0 }}>
-                      <div style={{ fontSize:9, fontWeight:800, color:"#F59E0B", letterSpacing:2.5, marginBottom:4, textTransform:"uppercase" }}>Redline AI</div>
-                      <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF2F8", margin:"0 0 3px", lineHeight:1.3 }}>{x.sub}</h3>
-                      <p style={{ fontSize:11.5, color:"#666C7E", margin:0, lineHeight:1.4, fontWeight:500 }}>{x.d}</p>
-                    </div>
-                    <div style={{ width:32, height:32, borderRadius:10, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.06)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#666C7E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-                    </div>
+
+            {/* Two-mode architecture — the differentiator */}
+            <div>
+              <div className="display" style={{ fontSize:22, color:"#F2F4F8", letterSpacing:"0.08em", marginBottom:14 }}>TWO MODES · ONE PLATFORM</div>
+              <div style={{ display:"grid", gridTemplateColumns:dk?"1fr 56px 1fr":"1fr", gap:dk?0:12, alignItems:"stretch", position:"relative" }}>
+                {/* Max mode */}
+                <div style={{ background:"linear-gradient(180deg, rgba(245,158,11,0.07), rgba(245,158,11,0.015))", border:`1px solid ${AMBER}40`, borderRadius:dk?"14px 0 0 14px":14, padding:dk?"20px 22px":"16px 18px" }}>
+                  <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:10 }}>
+                    <div className="mono" style={{ fontSize:11, fontWeight:600, color:AMBER, letterSpacing:1 }}>MAX</div>
+                    <div style={{ flex:1, height:1, background:"rgba(245,158,11,0.2)" }} />
+                  </div>
+                  <div className="display" style={{ fontSize:dk?28:22, color:"#F2F4F8", letterSpacing:"0.05em", marginBottom:8 }}>AI OPERATOR</div>
+                  <p style={{ fontSize:12.5, color:"#A0A4B0", margin:"0 0 12px", lineHeight:1.55, fontWeight:500 }}>
+                    Full-screen chat. Agentic. Connected to every module. Owners and power users run the whole business from this screen.
+                  </p>
+                  <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
+                    {["Books jobs","Sends invoices","Fires campaigns","Pulls metrics","Generates estimates"].map(c => (
+                      <span key={c} style={{ fontSize:10.5, fontWeight:600, color:AMBER, background:"rgba(245,158,11,0.08)", border:`1px solid ${AMBER}30`, padding:"4px 9px", borderRadius:6 }}>{c}</span>
+                    ))}
                   </div>
                 </div>
-              ))}
+                {/* Toggle indicator (desktop) */}
+                {dk && (
+                  <div style={{ display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(255,255,255,0.025)", borderTop:"1px solid rgba(255,255,255,0.06)", borderBottom:"1px solid rgba(255,255,255,0.06)" }}>
+                    <div style={{ width:36, height:36, borderRadius:"50%", border:`1.5px dashed ${AMBER}80`, display:"flex", alignItems:"center", justifyContent:"center" }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={AMBER} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                    </div>
+                  </div>
+                )}
+                {/* Min mode */}
+                <div style={{ background:"rgba(255,255,255,0.022)", border:"1px solid rgba(255,255,255,0.07)", borderRadius:dk?"0 14px 14px 0":14, padding:dk?"20px 22px":"16px 18px" }}>
+                  <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:10 }}>
+                    <div className="mono" style={{ fontSize:11, fontWeight:600, color:"#9098A8", letterSpacing:1 }}>MIN</div>
+                    <div style={{ flex:1, height:1, background:"rgba(255,255,255,0.08)" }} />
+                  </div>
+                  <div className="display" style={{ fontSize:dk?28:22, color:"#F2F4F8", letterSpacing:"0.05em", marginBottom:8 }}>COMMAND CENTER</div>
+                  <p style={{ fontSize:12.5, color:"#A0A4B0", margin:"0 0 12px", lineHeight:1.55, fontWeight:500 }}>
+                    Traditional dashboard. Pipeline view, schedule grid, invoice table, BI charts. Same data — different surface for office staff and techs.
+                  </p>
+                  <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
+                    {["Pipeline","Schedule grid","Invoices","Customer profiles","BI charts"].map(c => (
+                      <span key={c} style={{ fontSize:10.5, fontWeight:600, color:"#A0A4B0", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", padding:"4px 9px", borderRadius:6 }}>{c}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
+
+            {/* Pricing tiers */}
+            <div>
+              <div className="display" style={{ fontSize:22, color:"#F2F4F8", letterSpacing:"0.08em", marginBottom:14 }}>PRICING · 5 LOCKED TIERS</div>
+              <div style={{ display:"grid", gridTemplateColumns:wd?"repeat(5,1fr)":dk?"repeat(2,1fr)":"1fr", gap:dk?10:8 }}>
+                {tiers.map((t, i) => {
+                  const isPro = t.name === "PRO"; // anchor tier
+                  return (
+                    <div key={t.name} style={{
+                      background: isPro ? "linear-gradient(180deg, rgba(245,158,11,0.06), rgba(245,158,11,0.01))" : "rgba(255,255,255,0.022)",
+                      border:`1px solid ${isPro ? AMBER+"45" : "rgba(255,255,255,0.07)"}`,
+                      borderRadius:14, padding:dk?"18px 16px":"14px 14px",
+                      animation:`fadeUp 0.35s ease ${0.04*i}s both`,
+                      position:"relative",
+                    }}>
+                      {isPro && <div style={{ position:"absolute", top:-1, right:14, fontSize:9, fontWeight:800, color:"#15171E", background:AMBER, padding:"3px 8px", borderRadius:"0 0 5px 5px", letterSpacing:1.5, textTransform:"uppercase" }}>Anchor</div>}
+                      <div className="display" style={{ fontSize:15, color: isPro ? AMBER : "#F2F4F8", letterSpacing:"0.1em", marginBottom:10 }}>{t.name}</div>
+                      <div style={{ display:"flex", alignItems:"baseline", gap:3, marginBottom:14 }}>
+                        <span className="mono" style={{ fontSize:dk?26:22, fontWeight:600, color:"#F2F4F8", lineHeight:1 }}>{t.price}</span>
+                        {t.unit && <span className="mono" style={{ fontSize:13, fontWeight:500, color:"#7E8595" }}>{t.unit}</span>}
+                      </div>
+                      <div style={{ fontSize:11, color:"#A0A4B0", lineHeight:1.5, fontWeight:600, marginBottom:10 }}>{t.target}</div>
+                      <div style={{ display:"flex", flexDirection:"column", gap:6, fontSize:10.5, color:"#7E8595" }}>
+                        <div><span style={{ color:"#5E6376", textTransform:"uppercase", letterSpacing:1.5, fontSize:9, fontWeight:700, marginRight:6 }}>USERS</span>{t.users}</div>
+                        <div><span style={{ color:"#5E6376", textTransform:"uppercase", letterSpacing:1.5, fontSize:9, fontWeight:700, marginRight:6 }}>PROC</span><span className="mono">{t.proc}</span></div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div style={{ display:"flex", alignItems:"flex-start", gap:10, marginTop:14, padding:"12px 14px", background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:10 }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7E8595" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0, marginTop:2 }}><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                <span style={{ fontSize:11.5, color:"#9098A8", lineHeight:1.5 }}>Lower tiers subsidize themselves through processing margin. At GMV scale, payments revenue exceeds SaaS revenue per customer — the Toast / Shopify / Square dynamic.</span>
+              </div>
+            </div>
+
+            {/* 14 modules grouped by ring */}
+            <div>
+              <div className="display" style={{ fontSize:22, color:"#F2F4F8", letterSpacing:"0.08em", marginBottom:6 }}>14 MODULES · 3 DEPENDENCY RINGS</div>
+              <div style={{ fontSize:12, color:"#7E8595", marginBottom:16 }}>Build outside-in. Core ships first, Intelligence reads from it, Distribution sits on top.</div>
+              <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr 1fr":"1fr", gap:dk?12:10 }}>
+                {moduleRings.map(r => (
+                  <div key={r.label} style={{ background:"rgba(255,255,255,0.022)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:14, padding:dk?"18px 18px":"14px 14px" }}>
+                    <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:14 }}>
+                      <div className="display" style={{ fontSize:13, color: r.accent, letterSpacing:"0.1em" }}>{r.label}</div>
+                      <div className="mono" style={{ fontSize:12, fontWeight:600, color:"#5E6376" }}>{r.count}</div>
+                    </div>
+                    <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+                      {r.items.map((it, idx) => (
+                        <div key={it} style={{ display:"flex", alignItems:"center", gap:10, fontSize:12, color:"#D6DAE2" }}>
+                          <span className="mono" style={{ fontSize:10, color:"#5E6376", width:20 }}>{String(idx+1).padStart(2,"0")}</span>
+                          <span>{it}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Replacement math */}
+            <div>
+              <div className="display" style={{ fontSize:22, color:"#F2F4F8", letterSpacing:"0.08em", marginBottom:14 }}>THE REPLACEMENT</div>
+              <div style={{ display:"grid", gridTemplateColumns:dk?"1fr 32px 1fr":"1fr", gap:dk?0:12, alignItems:"stretch" }}>
+                {/* Before */}
+                <div style={{ background:"rgba(255,255,255,0.022)", border:"1px solid rgba(255,255,255,0.07)", borderRadius:dk?"14px 0 0 14px":14, padding:dk?"18px 20px":"14px 14px" }}>
+                  <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:14 }}>
+                    <div style={{ fontSize:10, fontWeight:800, color:"#7E8595", letterSpacing:2, textTransform:"uppercase" }}>Today · 5 disconnected tools</div>
+                    <span className="mono" style={{ fontSize:18, fontWeight:600, color:"#7E8595", textDecoration:"line-through" }}>${stackTotal}/mo</span>
+                  </div>
+                  <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
+                    {stack.map(s => (
+                      <div key={s.name} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"7px 10px", background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.04)", borderRadius:8 }}>
+                        <span style={{ fontSize:12.5, color:"#A0A4B0", fontWeight:500 }}>{s.name}</span>
+                        <span className="mono" style={{ fontSize:11.5, color:"#7E8595" }}>${s.price}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                {/* Arrow */}
+                {dk && (
+                  <div style={{ display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(245,158,11,0.04)", borderTop:`1px solid ${AMBER}30`, borderBottom:`1px solid ${AMBER}30` }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={AMBER} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                  </div>
+                )}
+                {/* After */}
+                <div style={{ background:"linear-gradient(180deg, rgba(245,158,11,0.07), rgba(245,158,11,0.015))", border:`1px solid ${AMBER}40`, borderRadius:dk?"0 14px 14px 0":14, padding:dk?"18px 20px":"14px 14px" }}>
+                  <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:14 }}>
+                    <div style={{ fontSize:10, fontWeight:800, color:AMBER, letterSpacing:2, textTransform:"uppercase" }}>Redline AI · Core</div>
+                    <span className="mono" style={{ fontSize:18, fontWeight:600, color:"#F2F4F8" }}>$179/mo</span>
+                  </div>
+                  <div style={{ fontSize:13, color:"#D6DAE2", lineHeight:1.55, fontWeight:500, marginBottom:12 }}>
+                    Everything in those five tools — pipeline, scheduling, invoicing, CRM, payments, marketing — in one platform with an AI operator on top.
+                  </div>
+                  <div style={{ display:"inline-flex", alignItems:"baseline", gap:6, padding:"7px 12px", background:AMBER, borderRadius:8 }}>
+                    <span className="mono" style={{ fontSize:12, fontWeight:700, color:"#15171E" }}>−${stackTotal - 179}/mo</span>
+                    <span style={{ fontSize:11, fontWeight:700, color:"#15171E" }}>vs. the stack</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Full spec — collapsed deep-dive grid */}
+            <div>
+              <div className="display" style={{ fontSize:22, color:"#F2F4F8", letterSpacing:"0.08em", marginBottom:6 }}>FULL SPEC</div>
+              <div style={{ fontSize:12, color:"#7E8595", marginBottom:16 }}>Ten cards. Read in order. Open each for the full text.</div>
+              <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr":"1fr", gap:dk?8:6 }}>
+                {devItems.map((x, i) => (
+                  <button key={x.id} onClick={() => { setView(x.k); setTimeout(top, 50); }}
+                    style={{ display:"flex", alignItems:"center", gap:14, padding:dk?"14px 16px":"12px 14px", background:"rgba(255,255,255,0.022)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:10, cursor:"pointer", fontFamily:"inherit", textAlign:"left", transition:"all 0.16s ease", animation:`fadeUp 0.3s ease ${0.025*i}s both` }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = `${AMBER}40`; e.currentTarget.style.background = "rgba(245,158,11,0.04)"; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)"; e.currentTarget.style.background = "rgba(255,255,255,0.022)"; }}>
+                    <span className="mono" style={{ fontSize:13, fontWeight:600, color:AMBER, width:24, flexShrink:0 }}>{x.n}</span>
+                    <span style={{ flex:1, minWidth:0, fontSize:13, fontWeight:600, color:"#F2F4F8", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{x.sub}</span>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#5E6376" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0 }}><polyline points="9 18 15 12 9 6"/></svg>
+                  </button>
+                ))}
+              </div>
+            </div>
+
           </div>
-        )}
+          );
+        })()}
 
       </div>
 
