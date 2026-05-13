@@ -1452,6 +1452,8 @@ function Leads({ session, profile, w }) {
 
   // Generate a 2–3 line discovery-call opener personalized from the lead's CSV row.
   // Computed at render time — no DB write — so it applies to every existing and future lead for free.
+  // The rep name is the one the lead is ASSIGNED to (not necessarily the viewer), so when an admin
+  // pulls up a rep's lead the script is still in that rep's voice.
   const bookingScript = (lead) => {
     const d = lead?.data || {};
     const business = pickField(d, "business name", "business", "company", "company name", "name");
@@ -1461,20 +1463,31 @@ function Leads({ session, profile, w }) {
     const city = pickField(d, "city", "location", "town", "area", "market");
     const websiteRaw = pickField(d, "website", "site", "url", "domain", "site url");
     const website = websiteRaw ? websiteRaw.replace(/^https?:\/\//i, "").replace(/\/.*$/, "") : null;
-    const repName = profile?.name || "[Rep]";
 
-    const greeting = firstName ? `Hey ${firstName}` : (business ? `Hey — calling for ${business}` : "Hey there");
+    // Use the assigned rep's name (not the viewer's) so admins see the script in the rep's voice.
+    const repName = (repById[lead?.assigned_to] && repById[lead.assigned_to] !== "Rep")
+      ? repById[lead.assigned_to]
+      : (profile?.name || "your Redline rep");
+
+    // Opening line — confident, drops "this is" for natural phone cadence.
+    const opener = firstName
+      ? `Hey ${firstName}, ${repName} with Redline`
+      : (business ? `Hey — ${repName} with Redline, calling for ${business}` : `Hey, ${repName} with Redline`);
+
     const nicheClause = niche ? `${niche.toLowerCase()} contractors` : "home service contractors";
-    const whereClause = city ? ` running ${city}` : "";
-    const siteClause = website
-      ? `Took a quick look at ${website} — flagging one thing that's costing you booked jobs.`
-      : `Had a quick look at your setup — flagging one thing that's costing you booked jobs.`;
+    const whereClause = city ? ` in ${city}` : "";
+    const positioning = `we build conversion-focused websites for ${nicheClause}${whereClause}`;
 
-    return [
-      `${greeting}, this is ${repName} with Redline — we build sites for ${nicheClause}${whereClause}.`,
-      siteClause,
-      `Got 60 seconds for the real reason I'm calling?`,
-    ].join(" ");
+    // Middle line — specific, grounds it in real research, frames value.
+    const targetLabel = business ? business : (website || "your site");
+    const middle = website
+      ? `I had a look at ${website} this morning, and there's one specific thing on the homepage that's almost certainly costing you booked jobs every week.`
+      : `I pulled up ${targetLabel} this morning, and there's one specific thing that's almost certainly costing you booked jobs every week.`;
+
+    // Closer — gives a reason to listen, not just asking permission.
+    const closer = `Got 60 seconds for me to walk you through it?`;
+
+    return `${opener} — ${positioning}. ${middle} ${closer}`;
   };
 
   // Render a CSV value: if it looks like a URL/email/phone, make it clickable.
