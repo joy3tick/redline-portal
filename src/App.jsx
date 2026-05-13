@@ -1472,23 +1472,23 @@ function Leads({ session, profile, w }) {
     const greeting = firstName ? `Hey ${firstName}` : "Hey there";
     const open = `${greeting}, this is ${repName} with Redline — we run a small web agency out of Boston that specializes specifically in websites for contractors.`;
 
-    // 2. Why I'm calling — sincere, not salesy. Names the business + site if we have them.
+    // 2. Why I'm calling — sincere, direct, no padding.
     let reachOut;
     if (business && website) {
-      reachOut = `I came across ${business} and took a quick look at ${website} — wanted to be straight with you and just reach out directly.`;
+      reachOut = `Came across ${business}, took a look at ${website}, and figured I'd just reach out directly.`;
     } else if (business) {
-      reachOut = `I came across ${business} and wanted to be straight with you and just reach out directly.`;
+      reachOut = `Came across ${business} and figured I'd just reach out directly.`;
     } else if (website) {
-      reachOut = `I came across ${website} and wanted to be straight with you and just reach out directly.`;
+      reachOut = `Came across ${website} and figured I'd just reach out directly.`;
     } else {
-      reachOut = `I came across your ${niche ? niche.toLowerCase() + " " : ""}business and wanted to be straight with you and just reach out directly.`;
+      reachOut = `Came across your ${niche ? niche.toLowerCase() + " " : ""}business and figured I'd just reach out directly.`;
     }
 
     // 3. The ask — 5 minutes, walkthrough, free fully-built site, low friction
     const ask = `Got 5 minutes later this week to hop on a quick call? I'd walk you through exactly what working with us looks like, and I'll have a fully built website ready for you to look over — completely free, no commitment, just so you can see what we'd actually do for you.`;
 
-    // 4. Out — gives them permission to say no, removes pressure
-    const out = `If it's not a fit or not the right time, no worries at all — I'll take you off our list and you won't hear from me again.`;
+    // 4. Out — gives them permission to say no, removes pressure.
+    const out = `If it's not a fit, no worries — I'll take you off the list and you won't hear from me again.`;
 
     return `${open}\n\n${reachOut}\n\n${ask}\n\n${out}`;
   };
