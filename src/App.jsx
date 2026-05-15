@@ -27,7 +27,7 @@ const TOKENS = {
   // Funnel status colors (lead pipeline only — do not reuse as UI accents)
   funnel: { new:"#06D6F0", contacted:"#F59E0B", quoted:"#A78BFA", booked:"#14B8A6", closed:"#22C55E", dead:"#DC2626" },
   // Top performer accent — gold (used sparingly for #1 / Final Exam)
-  gold:      "#FFD700",
+  gold:      "#CA8A04",
   // Type system
   fontDisplay: "'Bebas Neue', sans-serif",
   fontBody:    "'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif",
@@ -1012,11 +1012,11 @@ function Scheduler({ session, profile, w }) {
               return (
                 <div key={dateStr} onClick={() => !isPast && !isFull && toggle(day)}
                   className={isPast || isFull ? "" : "card-hover"}
-                  style={{ background: isMine?"#DC262608":"#F1F5F9", border:"1px solid "+(isMine?"#DC262630":isToday?"#404450":"#F1F5F9"), borderRadius:16, padding:"16px 14px", cursor:isPast||isFull?"default":"pointer", opacity:isPast?0.35:1, transition:"all 0.2s", minHeight:140, position:"relative" }}>
+                  style={{ background: isMine?"rgba(220,38,38,0.05)":"var(--surface-2)", border:"1px solid "+(isMine?"rgba(220,38,38,0.20)":isToday?"var(--border-strong)":"var(--border)"), borderRadius:16, padding:"16px 14px", cursor:isPast||isFull?"default":"pointer", opacity:isPast?0.35:1, transition:"all 0.2s", minHeight:140, position:"relative" }}>
                   {isToday && !isFull && <div style={{ position:"absolute", top:10, right:12, fontSize:8, fontWeight:700, color:"#DC2626", letterSpacing:2, textTransform:"uppercase" }}>Today</div>}
                   {isFull && <div style={{ position:"absolute", top:10, right:12, fontSize:8, fontWeight:700, color:"#F59E0B", letterSpacing:2, textTransform:"uppercase" }}>Full</div>}
                   <div style={{ fontSize:9, fontWeight:700, color:isToday?"#DC2626":"var(--text-muted)", letterSpacing:2, marginBottom:4 }}>{DAY_NAMES[di]}</div>
-                  <div style={{ fontSize:22, fontWeight:800, color:isToday?"#FFF":"var(--text-muted)", marginBottom:4, lineHeight:1 }}>
+                  <div style={{ fontSize:22, fontWeight:800, color:isToday?"#DC2626":"var(--text)", marginBottom:4, lineHeight:1 }}>
                     {day.getDate()} <span style={{ fontSize:12, fontWeight:500, color:"var(--text-muted)" }}>{MONTHS[day.getMonth()]}</span>
                   </div>
                   <div style={{ fontSize:9, color:"var(--text-muted)", marginBottom:12, letterSpacing:1, display:"flex", justifyContent:"space-between" }}>
@@ -1025,7 +1025,7 @@ function Scheduler({ session, profile, w }) {
                   </div>
                   <div style={{ display:"flex", flexDirection:"column", gap:5 }}>
                     {dayEntries.map(e => (
-                      <div key={e.id} style={{ fontSize:11, fontWeight:600, color:e.user_id===session.user.id?"#DC2626":"var(--text-2)", background:e.user_id===session.user.id?"#DC262612":"#F1F5F9", border:"1px solid "+(e.user_id===session.user.id?"#DC262625":"#E2E8F0"), borderRadius:6, padding:"4px 8px" }}>
+                      <div key={e.id} style={{ fontSize:11, fontWeight:600, color:e.user_id===session.user.id?"#DC2626":"var(--text)", background:e.user_id===session.user.id?"rgba(220,38,38,0.08)":"var(--surface)", border:"1px solid "+(e.user_id===session.user.id?"rgba(220,38,38,0.20)":"var(--border)"), borderRadius:6, padding:"4px 8px" }}>
                         {repProfiles[e.user_id] || "Rep"}
                       </div>
                     ))}
@@ -1046,7 +1046,7 @@ function Scheduler({ session, profile, w }) {
   );
 }
 
-const TIER_GLOW = { trial:"rgba(6,214,240,0.3)", bronze:"rgba(184,115,42,0.35)", silver:"rgba(192,200,216,0.3)", gold:"rgba(255,215,0,0.4)", platinum:"rgba(167,139,250,0.35)", diamond:"rgba(220,38,38,0.4)" };
+const TIER_GLOW = { trial:"rgba(6,214,240,0.3)", bronze:"rgba(184,115,42,0.35)", silver:"rgba(192,200,216,0.3)", gold:"rgba(202,138,4,0.4)", platinum:"rgba(167,139,250,0.35)", diamond:"rgba(220,38,38,0.4)" };
 
 function Leads({ session, profile, w }) {
   const [leads, setLeads] = useState([]);
@@ -2028,9 +2028,9 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
               const isMe = rep.uid === session.user.id;
               const leadCount = rankedWeek[0]?.count || 1;
               const pct = Math.max(8, Math.round((rep.count / leadCount) * 100));
-              const barColor = isMe ? "#DC2626" : i===0 ? "#FFD700" : "var(--text-muted)";
+              const barColor = isMe ? "#DC2626" : i===0 ? "#CA8A04" : "var(--text-muted)";
               return (
-                <div key={rep.uid} style={{ position:"relative", overflow:"hidden", background: isMe ? "rgba(220,38,38,0.06)" : i===0 ? "rgba(255,215,0,0.04)" : "rgba(15,23,42,0.04)", border:`1px solid ${isMe ? "rgba(220,38,38,0.18)" : i===0 ? "rgba(255,215,0,0.12)" : "rgba(15,23,42,0.10)"}`, borderRadius:10, padding:"10px 12px" }}>
+                <div key={rep.uid} style={{ position:"relative", overflow:"hidden", background: isMe ? "rgba(220,38,38,0.06)" : i===0 ? "rgba(202,138,4,0.04)" : "rgba(15,23,42,0.04)", border:`1px solid ${isMe ? "rgba(220,38,38,0.18)" : i===0 ? "rgba(202,138,4,0.12)" : "rgba(15,23,42,0.10)"}`, borderRadius:10, padding:"10px 12px" }}>
                   <div style={{ position:"absolute", inset:0, width:`${pct}%`, background:`linear-gradient(90deg,${barColor}18,${barColor}04)`, transition:"width 0.6s ease" }} />
                   <div style={{ position:"relative", display:"flex", alignItems:"center", gap:10 }}>
                     <div style={{ fontSize:16, minWidth:22, textAlign:"center" }}>{MEDALS[i]}</div>
@@ -2288,7 +2288,7 @@ function Leaderboard({ session, profile, w }) {
         <div style={{ display:"flex", background:"rgba(15,23,42,0.04)", border:"1px solid var(--border)", borderRadius:10, padding:3, gap:2 }}>
           {PERIODS.map(p => (
             <button key={p.key} onClick={() => setPeriod(p.key)}
-              style={{ background: period===p.key ? "rgba(255,215,0,0.12)" : "none", border: period===p.key ? "1px solid rgba(255,215,0,0.2)" : "1px solid transparent", borderRadius:7, color: period===p.key ? "#FFD700" : "var(--text-faint)", fontSize:10.5, fontWeight:700, letterSpacing:1.5, padding:"8px 16px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", transition:"all 0.15s" }}>
+              style={{ background: period===p.key ? "rgba(202,138,4,0.12)" : "none", border: period===p.key ? "1px solid rgba(202,138,4,0.2)" : "1px solid transparent", borderRadius:7, color: period===p.key ? "#CA8A04" : "var(--text-faint)", fontSize:10.5, fontWeight:700, letterSpacing:1.5, padding:"8px 16px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", transition:"all 0.15s" }}>
               {p.label}
             </button>
           ))}
@@ -2393,11 +2393,11 @@ function Leaderboard({ session, profile, w }) {
             const isTop = i < 3;
             const medal = MEDALS[i];
             return (
-              <div key={rep.uid} style={{ display:"flex", alignItems:"center", gap:dk?16:12, background: isMe ? "rgba(220,38,38,0.06)" : i===0 ? "rgba(255,215,0,0.04)" : "rgba(15,23,42,0.04)", border:`1px solid ${isMe ? "rgba(220,38,38,0.18)" : i===0 ? "rgba(255,215,0,0.12)" : "rgba(15,23,42,0.10)"}`, borderRadius:13, padding:dk?"16px 20px":"13px 16px", transition:"all 0.15s" }}>
+              <div key={rep.uid} style={{ display:"flex", alignItems:"center", gap:dk?16:12, background: isMe ? "rgba(220,38,38,0.06)" : i===0 ? "rgba(202,138,4,0.04)" : "rgba(15,23,42,0.04)", border:`1px solid ${isMe ? "rgba(220,38,38,0.18)" : i===0 ? "rgba(202,138,4,0.12)" : "rgba(15,23,42,0.10)"}`, borderRadius:13, padding:dk?"16px 20px":"13px 16px", transition:"all 0.15s" }}>
                 <div style={{ fontSize: isTop ? 22 : 14, fontWeight:800, color:"var(--text-muted)", minWidth:32, textAlign:"center", lineHeight:1 }}>
                   {medal ?? `#${i+1}`}
                 </div>
-                <div style={{ width:36, height:36, borderRadius:9, background: isMe ? "linear-gradient(135deg,#DC2626,#7F1D1D)" : "linear-gradient(135deg,#F1F5F9,#F1F5F9)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Geist',sans-serif", fontSize:14, fontWeight:800, color: isMe ? "#FFFFFF" : "var(--text-muted)", flexShrink:0, boxShadow: isMe ? "0 2px 10px rgba(220,38,38,0.3)" : "none" }}>
+                <div style={{ width:36, height:36, borderRadius:9, background: isMe ? "linear-gradient(135deg,#DC2626,#7F1D1D)" : "var(--surface-2)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Geist',sans-serif", fontSize:14, fontWeight:800, color: isMe ? "#FFFFFF" : "var(--text-muted)", flexShrink:0, boxShadow: isMe ? "0 2px 10px rgba(220,38,38,0.3)" : "none" }}>
                   {rep.name[0]?.toUpperCase()}
                 </div>
                 <div style={{ flex:1, minWidth:0 }}>
@@ -2408,7 +2408,7 @@ function Leaderboard({ session, profile, w }) {
                   </div>
                 </div>
                 <div style={{ textAlign:"right", flexShrink:0 }}>
-                  <div style={{ fontSize:dk?26:22, fontWeight:900, color: i===0 ? "#FFD700" : isMe ? "#DC2626" : "var(--text-faint)", lineHeight:1, letterSpacing:"-0.02em" }}>{rep.count}</div>
+                  <div style={{ fontSize:dk?26:22, fontWeight:900, color: i===0 ? "#CA8A04" : isMe ? "#DC2626" : "var(--text-faint)", lineHeight:1, letterSpacing:"-0.02em" }}>{rep.count}</div>
                   <div style={{ fontSize:9, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1.5, fontWeight:700, marginTop:3 }}>{rep.count === 1 ? "sale" : "sales"}</div>
                 </div>
               </div>
@@ -2478,11 +2478,11 @@ function Leaderboard({ session, profile, w }) {
             <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:16 }}>
               <div style={{ display:"flex", alignItems:"center", gap:10 }}>
                 <div style={{ fontSize:16 }}>🏆</div>
-                <div style={{ fontSize:10, fontWeight:800, color:"#FFD700", letterSpacing:3, textTransform:"uppercase" }}>Active Bonus</div>
+                <div style={{ fontSize:10, fontWeight:800, color:"#CA8A04", letterSpacing:3, textTransform:"uppercase" }}>Active Bonus</div>
               </div>
               {isAdmin && !activeBonus && !showAddBonus && (
                 <button onClick={() => { resetBonusForm(); setShowAddBonus(true); }}
-                  style={{ background:"rgba(255,215,0,0.08)", border:"1px solid rgba(255,215,0,0.2)", borderRadius:8, color:"#FFD700", fontSize:10, fontWeight:700, letterSpacing:1.5, padding:"7px 14px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>
+                  style={{ background:"rgba(202,138,4,0.08)", border:"1px solid rgba(202,138,4,0.2)", borderRadius:8, color:"#CA8A04", fontSize:10, fontWeight:700, letterSpacing:1.5, padding:"7px 14px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>
                   + Set Bonus
                 </button>
               )}
@@ -2490,14 +2490,14 @@ function Leaderboard({ session, profile, w }) {
 
             {/* Add / Edit bonus form (admin only) */}
             {isAdmin && (showAddBonus || editingBonus) && (
-              <div style={{ background:"var(--surface)", border:"1px solid rgba(255,215,0,0.12)", borderRadius:14, padding:18, marginBottom:16, animation:"fadeUp 0.2s ease" }}>
+              <div style={{ background:"var(--surface)", border:"1px solid rgba(202,138,4,0.12)", borderRadius:14, padding:18, marginBottom:16, animation:"fadeUp 0.2s ease" }}>
                 <div style={{ fontSize:10, fontWeight:700, color:"var(--text-muted)", letterSpacing:2, textTransform:"uppercase", marginBottom:14 }}>{editingBonus ? "Edit Active Bonus" : "Set Active Bonus"}</div>
                 <div style={{ marginBottom:12 }}>
                   <div style={{ fontSize:9, fontWeight:700, color:"var(--text-muted)", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Period</div>
                   <div style={{ display:"flex", gap:6 }}>
                     {[{v:"week", l:"This Week"}, {v:"month", l:"This Month"}].map(p => (
                       <button key={p.v} type="button" onClick={() => setBonusForm(f => ({...f, period:p.v}))}
-                        style={{ flex:1, background: bonusForm.period===p.v ? "rgba(255,215,0,0.15)" : "rgba(15,23,42,0.04)", border:`1px solid ${bonusForm.period===p.v ? "rgba(255,215,0,0.4)" : "rgba(15,23,42,0.10)"}`, borderRadius:8, color: bonusForm.period===p.v ? "#FFD700" : "var(--text-muted)", fontSize:12, fontWeight:700, padding:"10px 0", cursor:"pointer", fontFamily:"inherit" }}>
+                        style={{ flex:1, background: bonusForm.period===p.v ? "rgba(202,138,4,0.15)" : "rgba(15,23,42,0.04)", border:`1px solid ${bonusForm.period===p.v ? "rgba(202,138,4,0.4)" : "rgba(15,23,42,0.10)"}`, borderRadius:8, color: bonusForm.period===p.v ? "#CA8A04" : "var(--text-muted)", fontSize:12, fontWeight:700, padding:"10px 0", cursor:"pointer", fontFamily:"inherit" }}>
                         {p.l}
                       </button>
                     ))}
@@ -2516,7 +2516,7 @@ function Leaderboard({ session, profile, w }) {
                   </div>
                 </div>
                 <div style={{ marginBottom:8, fontSize:11, color:"var(--text-muted)", fontWeight:500 }}>
-                  Hit <span style={{ color:"#FFD700", fontWeight:700 }}>{bonusForm.threshold || "?"} sale{bonusForm.threshold==="1"?"":"s"}</span> {bonusForm.period === "week" ? "this week" : "this month"} to earn <span style={{ color:"#FFD700", fontWeight:700 }}>${bonusForm.amount ? Number(bonusForm.amount).toLocaleString() : "?"}</span>.
+                  Hit <span style={{ color:"#CA8A04", fontWeight:700 }}>{bonusForm.threshold || "?"} sale{bonusForm.threshold==="1"?"":"s"}</span> {bonusForm.period === "week" ? "this week" : "this month"} to earn <span style={{ color:"#CA8A04", fontWeight:700 }}>${bonusForm.amount ? Number(bonusForm.amount).toLocaleString() : "?"}</span>.
                 </div>
                 <div style={{ marginBottom:12 }}>
                   <div style={{ fontSize:9, fontWeight:700, color:"var(--text-muted)", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Description (optional)</div>
@@ -2524,7 +2524,7 @@ function Leaderboard({ session, profile, w }) {
                     style={{ width:"100%", background:"rgba(15,23,42,0.06)", border:"1px solid rgba(0,0,0,0.09)", borderRadius:8, color:"var(--text)", fontSize:13, fontWeight:500, padding:"9px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }} />
                 </div>
                 <div style={{ display:"flex", gap:8 }}>
-                  <button onClick={saveBonus} style={{ background:"#FFD700", border:"none", borderRadius:8, color:"#111", fontSize:12, fontWeight:800, letterSpacing:1, padding:"10px 22px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Save</button>
+                  <button onClick={saveBonus} style={{ background:"#CA8A04", border:"none", borderRadius:8, color:"#111", fontSize:12, fontWeight:800, letterSpacing:1, padding:"10px 22px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Save</button>
                   <button onClick={resetBonusForm} style={{ background:"rgba(15,23,42,0.06)", border:"1px solid var(--border)", borderRadius:8, color:"var(--text-muted)", fontSize:12, fontWeight:700, padding:"10px 16px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Cancel</button>
                 </div>
               </div>
@@ -2540,20 +2540,20 @@ function Leaderboard({ session, profile, w }) {
               const pct = Math.min(100, b.threshold ? (myCount / b.threshold) * 100 : 0);
               const periodLabel = b.period === "week" ? "this week" : "this month";
               return (
-                <div style={{ background: reached ? "linear-gradient(180deg,rgba(255,215,0,0.10),rgba(255,215,0,0.04))" : "rgba(0,0,0,0.03)", border:`1px solid ${reached ? "rgba(255,215,0,0.32)" : "rgba(15,23,42,0.10)"}`, borderRadius:16, padding:dk?"22px 26px":"18px 20px", position:"relative" }}>
-                  {reached && <div style={{ position:"absolute", top:14, right:16, fontSize:10, fontWeight:800, color:"#FFD700", letterSpacing:1.5, textTransform:"uppercase" }}>✓ Reached</div>}
-                  <div style={{ fontSize:9.5, fontWeight:800, color:"#FFD700", letterSpacing:2.5, textTransform:"uppercase", marginBottom:6 }}>{b.period === "week" ? "Weekly Goal" : "Monthly Goal"}</div>
+                <div style={{ background: reached ? "linear-gradient(180deg,rgba(202,138,4,0.10),rgba(202,138,4,0.04))" : "rgba(0,0,0,0.03)", border:`1px solid ${reached ? "rgba(202,138,4,0.32)" : "rgba(15,23,42,0.10)"}`, borderRadius:16, padding:dk?"22px 26px":"18px 20px", position:"relative" }}>
+                  {reached && <div style={{ position:"absolute", top:14, right:16, fontSize:10, fontWeight:800, color:"#CA8A04", letterSpacing:1.5, textTransform:"uppercase" }}>✓ Reached</div>}
+                  <div style={{ fontSize:9.5, fontWeight:800, color:"#CA8A04", letterSpacing:2.5, textTransform:"uppercase", marginBottom:6 }}>{b.period === "week" ? "Weekly Goal" : "Monthly Goal"}</div>
                   <div style={{ display:"flex", alignItems:"baseline", gap:10, flexWrap:"wrap", marginBottom:10 }}>
-                    <div style={{ fontSize:dk?34:28, fontWeight:900, color: reached ? "#FFD700" : "var(--text)", lineHeight:1, letterSpacing:"-0.02em" }}>${Number(b.amount).toLocaleString()}</div>
+                    <div style={{ fontSize:dk?34:28, fontWeight:900, color: reached ? "#CA8A04" : "var(--text)", lineHeight:1, letterSpacing:"-0.02em" }}>${Number(b.amount).toLocaleString()}</div>
                     <div style={{ fontSize:13, fontWeight:600, color:"var(--text-muted)" }}>for {b.threshold} {b.threshold===1?"sale":"sales"} {periodLabel}</div>
                   </div>
                   {b.label && <div style={{ fontSize:13, fontWeight:600, color:"var(--text-2)", marginBottom:b.description?4:10 }}>{b.label}</div>}
                   {b.description && <div style={{ fontSize:12, color:"var(--text-muted)", marginBottom:10 }}>{b.description}</div>}
                   <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:6 }}>
                     <div style={{ flex:1, height:6, background:"rgba(15,23,42,0.10)", borderRadius:4, overflow:"hidden" }}>
-                      <div style={{ height:"100%", width:`${pct}%`, background:"linear-gradient(90deg,#DC2626,#FFD700)", borderRadius:4, transition:"width 0.4s" }} />
+                      <div style={{ height:"100%", width:`${pct}%`, background:"linear-gradient(90deg,#DC2626,#CA8A04)", borderRadius:4, transition:"width 0.4s" }} />
                     </div>
-                    <div style={{ fontSize:12, fontWeight:700, color: reached ? "#FFD700" : "var(--text-2)", whiteSpace:"nowrap" }}>{myCount} / {b.threshold}</div>
+                    <div style={{ fontSize:12, fontWeight:700, color: reached ? "#CA8A04" : "var(--text-2)", whiteSpace:"nowrap" }}>{myCount} / {b.threshold}</div>
                   </div>
                   {isAdmin && (
                     <div style={{ display:"flex", gap:8, marginTop:14 }}>
@@ -2579,7 +2579,7 @@ const TIERS = [
   { v: "trial",    label: "Trial",    short: "TRIAL", emoji: "🆕", color: "#06D6F0" },
   { v: "bronze",   label: "Bronze",   short: "T1",    emoji: "🟤", color: "#B8732A" },
   { v: "silver",   label: "Silver",   short: "T2",    emoji: "⚪", color: "var(--text-2)" },
-  { v: "gold",     label: "Gold",     short: "T3",    emoji: "🟡", color: "#FFD700" },
+  { v: "gold",     label: "Gold",     short: "T3",    emoji: "🟡", color: "#CA8A04" },
   { v: "platinum", label: "Platinum", short: "T4",    emoji: "🟣", color: "#A78BFA" },
   { v: "diamond",  label: "Diamond",  short: "T5",    emoji: "💎", color: "#DC2626" },
 ];
@@ -2588,7 +2588,7 @@ const TIER_BY_VALUE = Object.fromEntries(TIERS.map(t => [t.v, t]));
 const ROLEABLE_TABS = [
   { key:"dashboard",     label:"Dashboard",     color:"#22C55E" },
   { key:"leads",         label:"Leads",         color:"#06D6F0" },
-  { key:"leaderboard",   label:"Leaderboard",   color:"#FFD700" },
+  { key:"leaderboard",   label:"Leaderboard",   color:"#CA8A04" },
   { key:"scheduling",    label:"Scheduling",    color:"#F59E0B" },
   { key:"training",      label:"Training",      color:"#DC2626" },
   { key:"reference",     label:"Reference",     color:"#06D6F0" },
@@ -2860,7 +2860,7 @@ function AdminPanel({ profile, roles, setRoles, onBack, w, onSignOut }) {
                 )}
                 <button onClick={() => resetFinalExam(u.id, u.name)}
                   title="Clear this rep's Final Exam attempt so they can retake it"
-                  style={{ background:"rgba(255,215,0,0.05)", border:"1px solid rgba(255,215,0,0.22)", color:"#FFD700", fontSize:10, fontWeight:800, cursor:"pointer", padding:"9px 12px", borderRadius:10, fontFamily:"inherit", letterSpacing:1.5, flexShrink:0, textTransform:"uppercase" }}>
+                  style={{ background:"rgba(202,138,4,0.05)", border:"1px solid rgba(202,138,4,0.22)", color:"#CA8A04", fontSize:10, fontWeight:800, cursor:"pointer", padding:"9px 12px", borderRadius:10, fontFamily:"inherit", letterSpacing:1.5, flexShrink:0, textTransform:"uppercase" }}>
                   Reset Final
                 </button>
               </div>
@@ -2933,7 +2933,7 @@ function Viewer({ ck, onBack, w, onComplete }) {
                 <button className="acc-btn" onClick={() => setOi(open ? null : i)}
                   style={{
                     width:"100%", textAlign:"left",
-                    background: open ? "rgba(0,0,0,0.03)" : "#FFFFFF",
+                    background: open ? "rgba(0,0,0,0.03)" : "var(--surface)",
                     border: `1px solid ${open ? "rgba(15,23,42,0.14)" : "rgba(15,23,42,0.10)"}`,
                     borderRadius: open ? "12px 12px 0 0" : 12,
                     padding: dk ? "20px 24px" : "17px 20px",
@@ -2967,10 +2967,10 @@ function Viewer({ ck, onBack, w, onComplete }) {
 const COMP_TIERS = [
   { name:"DIAMOND",  num:5, tag:"Top 1%",      rev:"$40K+ collected / mo",  pay:"Salary + 38–40% commission",  monthlyMin:"$20,000+",  monthlyMax:null,           yearly:"$240K – $420K+ / yr",  grad:"linear-gradient(135deg,#A78BFA 0%,#06D6F0 100%)", border:"rgba(167,139,250,0.45)", glow:"rgba(167,139,250,0.35)", text:"#F7F7F8", featured:true },
   { name:"PLATINUM", num:4, tag:"Elite",       rev:"$25K – $40K / mo",      pay:"$20/hr + 36% commission",     monthlyMin:"$12,460",   monthlyMax:"$17,860",      yearly:"$150K – $214K / yr",   grad:"linear-gradient(135deg,#E2E8F0 0%,#64748B 100%)", border:"rgba(226,232,240,0.35)", glow:"rgba(148,163,184,0.25)", text:"#F7F7F8", featured:false },
-  { name:"GOLD",     num:3, tag:"Performer",   rev:"$12K – $25K / mo",      pay:"$15/hr + 33% commission",     monthlyMin:"$6,560",    monthlyMax:"$10,850",      yearly:"$79K – $130K / yr",    grad:"linear-gradient(135deg,#FFD700 0%,#D97706 100%)", border:"rgba(255,215,0,0.45)",   glow:"rgba(255,215,0,0.3)",    text:"#F7F7F8", featured:false },
+  { name:"GOLD",     num:3, tag:"Performer",   rev:"$12K – $25K / mo",      pay:"$15/hr + 33% commission",     monthlyMin:"$6,560",    monthlyMax:"$10,850",      yearly:"$79K – $130K / yr",    grad:"linear-gradient(135deg,#CA8A04 0%,#D97706 100%)", border:"rgba(202,138,4,0.45)",   glow:"rgba(202,138,4,0.3)",    text:"#F7F7F8", featured:false },
   { name:"SILVER",   num:2, tag:"Building",    rev:"$5K – $12K / mo",       pay:"33% commission",              monthlyMin:"$1,650",    monthlyMax:"$3,960",       yearly:"$20K – $48K / yr",     grad:"linear-gradient(135deg,#CBD5E1 0%,#64748B 100%)", border:"rgba(203,213,225,0.3)",  glow:"rgba(203,213,225,0.2)",  text:"#F7F7F8", featured:false },
   { name:"BRONZE",   num:1, tag:"Starting",    rev:"$1.5K – $5K / mo",      pay:"30% commission",              monthlyMin:"$450",      monthlyMax:"$1,500",       yearly:"$5K – $18K / yr",      grad:"linear-gradient(135deg,#F97316 0%,#7C2D12 100%)", border:"rgba(249,115,22,0.35)",  glow:"rgba(249,115,22,0.2)",   text:"#FFF6EE", featured:false },
-  { name:"TRIAL",    num:0, tag:"First month", rev:"Onboarding period",     pay:"25% commission",              monthlyMin:"Variable",  monthlyMax:null,           yearly:"Placed into tier at month-end", grad:"linear-gradient(135deg,#475569 0%,#1E293B 100%)", border:"rgba(148,163,184,0.18)", glow:"rgba(71,85,105,0.15)",   text:"#F1F5F9", featured:false },
+  { name:"TRIAL",    num:0, tag:"First month", rev:"Onboarding period",     pay:"25% commission",              monthlyMin:"Variable",  monthlyMax:null,           yearly:"Placed into tier at month-end", grad:"linear-gradient(135deg,#475569 0%,#1E293B 100%)", border:"rgba(148,163,184,0.18)", glow:"rgba(71,85,105,0.15)",   text:"var(--surface-2)", featured:false },
 ];
 
 const COMP_RULES = [
@@ -3023,7 +3023,7 @@ function CompPlanView({ dk }) {
             <div style={{ display:"flex", gap:dk?14:10, flexWrap:"wrap" }}>
               <CompStat label="Top monthly take-home" value="$20K+" accent="#A78BFA" dk={dk} />
               <CompStat label="Top commission rate" value="40%" accent="#06D6F0" dk={dk} />
-              <CompStat label="Tiers" value="5" accent="#FFD700" dk={dk} />
+              <CompStat label="Tiers" value="5" accent="#CA8A04" dk={dk} />
             </div>
           </div>
         </div>
@@ -3207,7 +3207,7 @@ const IC_GRAD = {
   BOOTCAMP:  "rgba(245,158,11,0.10)",
   REFERENCE: "rgba(6,214,240,0.10)",
   QUIZ:      "rgba(16,185,129,0.10)",
-  FINAL:     "rgba(255,215,0,0.10)",
+  FINAL:     "rgba(202,138,4,0.10)",
   DEV:       "rgba(245,158,11,0.12)",
 };
 const IC_SHADOW = {
@@ -3215,7 +3215,7 @@ const IC_SHADOW = {
   BOOTCAMP:  "inset 0 0 0 1px rgba(245,158,11,0.22)",
   REFERENCE: "inset 0 0 0 1px rgba(6,214,240,0.22)",
   QUIZ:      "inset 0 0 0 1px rgba(16,185,129,0.22)",
-  FINAL:     "inset 0 0 0 1px rgba(255,215,0,0.35)",
+  FINAL:     "inset 0 0 0 1px rgba(202,138,4,0.35)",
   DEV:       "inset 0 0 0 1px rgba(245,158,11,0.30)",
 };
 const LINK_ICONS = [
@@ -3324,7 +3324,7 @@ export default function App() {
   const FONT_LINK = "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Geist:wght@400..900&family=Geist+Mono:wght@400..700&display=swap";
   const baseStyle = { minHeight:"100dvh", background:"var(--bg)", color:"var(--text)" };
 
-  const bc = { MODULE:"#DC2626", BOOTCAMP:"#F59E0B", REFERENCE:"#06D6F0", QUIZ:"#10B981", FINAL:"#FFD700" };
+  const bc = { MODULE:"#DC2626", BOOTCAMP:"#F59E0B", REFERENCE:"#06D6F0", QUIZ:"#10B981", FINAL:"#CA8A04" };
   const trainingGroups = [
     { label:null, color:"#DC2626", items:CATS.filter(x=>x.t==="MODULE") },
     { label:"BOOTCAMPS", color:"#F59E0B", items:CATS.filter(x=>x.t==="BOOTCAMP") },
@@ -3345,7 +3345,7 @@ export default function App() {
   const ALL_TABS = [
     { key:"dashboard",     label:"Dashboard",     short:"Home",     color:"#22C55E" },
     { key:"leads",         label:"Leads",         short:"Leads",    color:"#06D6F0" },
-    { key:"leaderboard",   label:"Leaderboard",   short:"Board",    color:"#FFD700" },
+    { key:"leaderboard",   label:"Leaderboard",   short:"Board",    color:"#CA8A04" },
     { key:"scheduling",    label:"Scheduling",    short:"Schedule", color:"#F59E0B" },
     { key:"training",      label:"Training",      short:"Train",    color:"#DC2626" },
     { key:"reference",     label:"Reference",     short:"Ref",      color:"#06D6F0" },
@@ -3659,7 +3659,7 @@ export default function App() {
 
             {finalItem && (
               <>
-                <SectionLabel color="#FFD700" label="FINAL EXAM" delay={0.04 * (trainingGroups.length + 1)} />
+                <SectionLabel color="#CA8A04" label="FINAL EXAM" delay={0.04 * (trainingGroups.length + 1)} />
                 <div onClick={() => {
                   if (finalAttempted) {
                     const qs = quizScores["q-final"];
@@ -3675,8 +3675,8 @@ export default function App() {
                 }}
                 className={finalUnlocked && !finalAttempted ? "card-hover" : ""}
                 style={{
-                  background: finalAttempted ? "rgba(255,215,0,0.04)" : finalUnlocked ? "linear-gradient(135deg,rgba(255,215,0,0.06),rgba(0,0,0,0.02))" : "#FFFFFF",
-                  border: `1px solid ${finalAttempted ? "rgba(255,215,0,0.25)" : finalUnlocked ? "rgba(255,215,0,0.32)" : "rgba(15,23,42,0.06)"}`,
+                  background: finalAttempted ? "rgba(202,138,4,0.04)" : finalUnlocked ? "linear-gradient(135deg,rgba(202,138,4,0.06),rgba(0,0,0,0.02))" : "var(--surface)",
+                  border: `1px solid ${finalAttempted ? "rgba(202,138,4,0.25)" : finalUnlocked ? "rgba(202,138,4,0.32)" : "rgba(15,23,42,0.06)"}`,
                   borderRadius:16, padding:dk?"22px 20px":"18px 16px", cursor: finalAttempted || !finalUnlocked ? "not-allowed" : "pointer",
                   opacity: finalUnlocked || finalAttempted ? 1 : 0.6,
                   animation:`fadeUp 0.38s ease ${0.05*(quizItems.length+1)}s both`,
@@ -3684,9 +3684,9 @@ export default function App() {
                   <div style={{ display:"flex", alignItems:"center", gap:14 }}>
                     <div style={{ width:50, height:50, borderRadius:14, background:IC_GRAD.FINAL, display:"flex", alignItems:"center", justifyContent:"center", fontSize:24, flexShrink:0, boxShadow:IC_SHADOW.FINAL }}>{finalItem.ic}</div>
                     <div style={{ flex:1, minWidth:0 }}>
-                      <div style={{ fontSize:9, fontWeight:800, color:"#FFD700", letterSpacing:2.5, marginBottom:4, textTransform:"uppercase" }}>{finalItem.n}</div>
+                      <div style={{ fontSize:9, fontWeight:800, color:"#CA8A04", letterSpacing:2.5, marginBottom:4, textTransform:"uppercase" }}>{finalItem.n}</div>
                       <h3 style={{ fontSize:14, fontWeight:700, color:"var(--text)", margin:"0 0 3px", lineHeight:1.3 }}>{finalItem.sub}</h3>
-                      <p style={{ fontSize:11.5, color: finalAttempted ? "#FFD700" : finalUnlocked ? "var(--text-3)" : "var(--text-faint)", margin:0, lineHeight:1.4, fontWeight:500 }}>
+                      <p style={{ fontSize:11.5, color: finalAttempted ? "#CA8A04" : finalUnlocked ? "var(--text-3)" : "var(--text-faint)", margin:0, lineHeight:1.4, fontWeight:500 }}>
                         {finalAttempted
                           ? `Submitted · ${quizScores["q-final"].score}/${quizScores["q-final"].total} (${Math.round(quizScores["q-final"].score/quizScores["q-final"].total*100)}%)`
                           : finalUnlocked
@@ -3851,7 +3851,7 @@ export default function App() {
                   const isPro = t.name === "PRO"; // anchor tier
                   return (
                     <div key={t.name} style={{
-                      background: isPro ? "linear-gradient(180deg, rgba(245,158,11,0.06), rgba(245,158,11,0.01))" : "#FFFFFF",
+                      background: isPro ? "linear-gradient(180deg, rgba(245,158,11,0.06), rgba(245,158,11,0.01))" : "var(--surface)",
                       border:`1px solid ${isPro ? AMBER+"45" : "rgba(15,23,42,0.10)"}`,
                       borderRadius:14, padding:dk?"18px 16px":"14px 14px",
                       animation:`fadeUp 0.35s ease ${0.04*i}s both`,
