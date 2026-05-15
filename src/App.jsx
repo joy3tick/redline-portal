@@ -1063,15 +1063,28 @@ function Leads({ session, profile, w }) {
   const [parsed, setParsed] = useState(null); // { headers, rows, fileName }
   const [assignTo, setAssignTo] = useState("");
   const fileInputRef = useRef(null);
+  // Outreach tracking — events log + per-user goals
+  const [outreach, setOutreach] = useState([]);
+  const [goals, setGoals] = useState({ daily: 0, weekly: 0, monthly: 0 });
+  const [showGoals, setShowGoals] = useState(false);
+  const [goalsDraft, setGoalsDraft] = useState({ daily: "", weekly: "", monthly: "" });
   const dk = w >= 768;
   const isAdmin = profile?.role === "admin";
 
   const load = async () => {
-    const [leadsRes, profRes] = await Promise.all([
+    const [leadsRes, profRes, outreachRes, goalsRes] = await Promise.all([
       supabase.from("leads")
         .select("id, assigned_to, assigned_by, data, status, note, created_at")
         .order("created_at", { ascending: false }),
       supabase.from("profiles").select("id, name, role").order("name"),
+      // Own outreach event log (RLS scopes it to the current user; admin sees all).
+      supabase.from("outreach_events")
+        .select("id, user_id, created_at")
+        .order("created_at", { ascending: false }),
+      supabase.from("outreach_goals")
+        .select("daily, weekly, monthly")
+        .eq("user_id", session.user.id)
+        .maybeSingle(),
     ]);
     setLeads(leadsRes.data ?? []);
     // Assignable list = every rep + the current admin (so admin can hand
@@ -1080,6 +1093,8 @@ function Leads({ session, profile, w }) {
     const repList = all.filter(p => p.role === "rep" || p.id === session.user.id);
     setReps(repList);
     if (!assignTo && repList.length) setAssignTo(repList[0].id);
+    setOutreach(outreachRes.data ?? []);
+    if (goalsRes.data) setGoals(goalsRes.data);
     setLoading(false);
   };
 
@@ -1087,6 +1102,7 @@ function Leads({ session, profile, w }) {
     load();
     const ch = supabase.channel("leads-rt")
       .on("postgres_changes", { event: "*", schema: "public", table: "leads" }, load)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "outreach_events" }, load)
       .subscribe();
     return () => supabase.removeChannel(ch);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1178,6 +1194,45 @@ function Leads({ session, profile, w }) {
       return;
     }
     setLeads(prev => prev.map(l => l.id === id ? { ...l, note: data.note } : l));
+  };
+
+  // ── Outreach counters: scope event log to the current user (rep view) and
+  //   compute Today / Week / Month / All-time. Day boundaries are user-local.
+  const myOutreach = isAdmin
+    ? outreach
+    : outreach.filter(e => e.user_id === session.user.id);
+  const startOfToday = (() => { const d = new Date(); d.setHours(0,0,0,0); return d.getTime(); })();
+  const startOfWeek = (() => {
+    const d = new Date(); d.setHours(0,0,0,0);
+    const dow = d.getDay(); // 0 = Sun
+    d.setDate(d.getDate() - dow);
+    return d.getTime();
+  })();
+  const startOfMonth = (() => { const d = new Date(); d.setHours(0,0,0,0); d.setDate(1); return d.getTime(); })();
+  const todayCount = myOutreach.filter(e => new Date(e.created_at).getTime() >= startOfToday).length;
+  const weekCount  = myOutreach.filter(e => new Date(e.created_at).getTime() >= startOfWeek).length;
+  const monthCount = myOutreach.filter(e => new Date(e.created_at).getTime() >= startOfMonth).length;
+  const allCount   = myOutreach.length;
+
+  const openGoals = () => {
+    setGoalsDraft({
+      daily:   goals.daily   ? String(goals.daily)   : "",
+      weekly:  goals.weekly  ? String(goals.weekly)  : "",
+      monthly: goals.monthly ? String(goals.monthly) : "",
+    });
+    setShowGoals(true);
+  };
+  const saveGoals = async () => {
+    const payload = {
+      user_id: session.user.id,
+      daily:   Math.max(0, parseInt(goalsDraft.daily,   10) || 0),
+      weekly:  Math.max(0, parseInt(goalsDraft.weekly,  10) || 0),
+      monthly: Math.max(0, parseInt(goalsDraft.monthly, 10) || 0),
+    };
+    const { error } = await supabase.from("outreach_goals").upsert(payload);
+    if (error) { alert(`Couldn't save goals: ${error.message}`); return; }
+    setGoals({ daily: payload.daily, weekly: payload.weekly, monthly: payload.monthly });
+    setShowGoals(false);
   };
 
   const removeLead = async (id) => {
@@ -1407,6 +1462,80 @@ function Leads({ session, profile, w }) {
 
   return (
     <div style={{ animation:"fadeUp 0.35s ease", display:"flex", flexDirection:"column", gap:14 }}>
+
+      {/* Outreach tracker — Today / Week / Month / All time + per-user goals */}
+      {!loading && !isAdmin && (
+        <div className="dash-card" style={{ padding:dk?"18px 22px":"14px 16px" }}>
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:14, gap:10, flexWrap:"wrap" }}>
+            <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+              <div style={{ width:24, height:3, background:"linear-gradient(90deg,#DC2626,transparent)", borderRadius:4 }} />
+              <div style={{ fontSize:9.5, fontWeight:800, color:"#DC2626", letterSpacing:3, textTransform:"uppercase" }}>Outreach</div>
+            </div>
+            <button onClick={openGoals} className="btn-ghost" style={{ fontSize:10, padding:"6px 12px" }}>
+              {goals.daily || goals.weekly || goals.monthly ? "Edit goals" : "Set goals"}
+            </button>
+          </div>
+          <div style={{ display:"grid", gridTemplateColumns: dk ? "repeat(4, 1fr)" : "repeat(2, 1fr)", gap:dk?16:12 }}>
+            {[
+              { label:"Today",      n:todayCount, goal:goals.daily,   accent:"#DC2626" },
+              { label:"This Week",  n:weekCount,  goal:goals.weekly,  accent:"#F59E0B" },
+              { label:"This Month", n:monthCount, goal:goals.monthly, accent:"#06D6F0" },
+              { label:"All Time",   n:allCount,   goal:0,             accent:"#CA8A04" },
+            ].map(s => {
+              const pct = s.goal > 0 ? Math.min(100, Math.round((s.n / s.goal) * 100)) : null;
+              const hit = pct !== null && pct >= 100;
+              return (
+                <div key={s.label} style={{ background:"var(--surface-2)", border:"1px solid var(--border)", borderRadius:12, padding:dk?"14px 14px":"12px 12px" }}>
+                  <div style={{ fontSize:9, fontWeight:800, color: hit ? "#22C55E" : s.accent, letterSpacing:1.8, textTransform:"uppercase" }}>{s.label}</div>
+                  <div style={{ display:"flex", alignItems:"baseline", gap:6, marginTop:6 }}>
+                    <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?32:26, color:"var(--text)", lineHeight:1, fontVariantNumeric:"tabular-nums" }}>{s.n}</div>
+                    {s.goal > 0 && (
+                      <div style={{ fontSize:11, color:"var(--text-muted)", fontWeight:600, fontVariantNumeric:"tabular-nums" }}>/ {s.goal}</div>
+                    )}
+                  </div>
+                  {s.goal > 0 && (
+                    <div style={{ marginTop:8, height:4, borderRadius:2, background:"var(--border)", overflow:"hidden" }}>
+                      <div style={{ width:`${pct}%`, height:"100%", background: hit ? "#22C55E" : s.accent, transition:"width 0.3s ease" }} />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Goals dialog */}
+      {showGoals && (
+        <div onClick={() => setShowGoals(false)} style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.5)", zIndex:200, display:"flex", alignItems:"center", justifyContent:"center", padding:20, animation:"fadeIn 0.18s ease" }}>
+          <div onClick={e => e.stopPropagation()} className="dash-card" style={{ width:"100%", maxWidth:380, padding:dk?"24px 24px":"20px 18px", animation:"popIn 0.2s ease" }}>
+            <div style={{ fontSize:10, fontWeight:800, color:"#DC2626", letterSpacing:2.5, textTransform:"uppercase", marginBottom:12 }}>Set Your Outreach Goals</div>
+            <div style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.5, marginBottom:18, fontWeight:500 }}>
+              How many leads do you want to move out of <strong style={{ color:"var(--text)" }}>New</strong> per day, week, and month? Leave blank to skip a goal.
+            </div>
+            {[
+              { k:"daily",   label:"Daily",   accent:"#DC2626" },
+              { k:"weekly",  label:"Weekly",  accent:"#F59E0B" },
+              { k:"monthly", label:"Monthly", accent:"#06D6F0" },
+            ].map(g => (
+              <div key={g.k} style={{ marginBottom:12 }}>
+                <label style={{ display:"block", fontSize:9.5, fontWeight:800, color:g.accent, letterSpacing:1.8, textTransform:"uppercase", marginBottom:6 }}>{g.label}</label>
+                <input
+                  type="number" min="0" inputMode="numeric"
+                  value={goalsDraft[g.k]}
+                  onChange={e => setGoalsDraft(d => ({ ...d, [g.k]: e.target.value }))}
+                  placeholder="0"
+                  style={{ width:"100%", background:"var(--surface-2)", border:"1px solid var(--border)", borderRadius:9, color:"var(--text)", fontSize:14, fontWeight:600, padding:"10px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }}
+                />
+              </div>
+            ))}
+            <div style={{ display:"flex", gap:8, marginTop:14 }}>
+              <button onClick={() => setShowGoals(false)} className="btn-ghost" style={{ flex:1, fontSize:11, padding:"10px 0" }}>Cancel</button>
+              <button onClick={saveGoals} className="btn-primary" style={{ flex:2, fontSize:11, padding:"10px 0" }}>Save Goals</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Pipeline overview */}
       {!loading && totalForFilter > 0 && (

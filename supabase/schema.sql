@@ -451,3 +451,104 @@ update public.roles
 -- Built-in 'admin' is still the only role that grants admin powers (the
 -- is_admin() function checks role = 'admin' literally).
 alter table public.profiles drop constraint if exists profiles_role_check;
+
+
+-- ─── OUTREACH TRACKING ──────────────────────────────────────
+-- Immutable event log: every time a lead moves OUT of 'new' status,
+-- one row is inserted. Rows persist even if the lead is later deleted
+-- (lead_id is ON DELETE SET NULL), so reps' historical totals are
+-- preserved no matter what they do with the underlying lead.
+create table if not exists public.outreach_events (
+  id          uuid default gen_random_uuid() primary key,
+  user_id     uuid references auth.users(id) on delete cascade not null,
+  lead_id     uuid references public.leads(id) on delete set null,
+  from_status text,
+  to_status   text,
+  created_at  timestamptz not null default now()
+);
+
+create index if not exists outreach_events_user_idx
+  on public.outreach_events (user_id, created_at desc);
+
+alter table public.outreach_events enable row level security;
+
+drop policy if exists "Own outreach events read" on public.outreach_events;
+create policy "Own outreach events read"
+  on public.outreach_events for select
+  using (auth.uid() = user_id);
+
+drop policy if exists "Admins read all outreach" on public.outreach_events;
+create policy "Admins read all outreach"
+  on public.outreach_events for select
+  using (public.is_admin());
+
+-- Only the system (via trigger) inserts. No client-side insert/update/delete.
+-- (No policies granted for those actions; security definer trigger fn handles inserts.)
+
+-- Per-user goals — reps set their own targets for daily/weekly/monthly outreach.
+create table if not exists public.outreach_goals (
+  user_id    uuid references auth.users(id) on delete cascade primary key,
+  daily      integer not null default 0,
+  weekly     integer not null default 0,
+  monthly    integer not null default 0,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.outreach_goals enable row level security;
+
+drop policy if exists "Own goals read" on public.outreach_goals;
+create policy "Own goals read"
+  on public.outreach_goals for select
+  using (auth.uid() = user_id);
+
+drop policy if exists "Own goals upsert" on public.outreach_goals;
+create policy "Own goals upsert"
+  on public.outreach_goals for insert
+  with check (auth.uid() = user_id);
+
+drop policy if exists "Own goals update" on public.outreach_goals;
+create policy "Own goals update"
+  on public.outreach_goals for update
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+drop policy if exists "Admins read all goals" on public.outreach_goals;
+create policy "Admins read all goals"
+  on public.outreach_goals for select
+  using (public.is_admin());
+
+-- Trigger: log an outreach event whenever a lead status transitions
+-- AWAY FROM 'new'. Subsequent transitions (contacted → booked, etc.)
+-- don't re-log — the count reflects "leads first touched".
+-- Attributes the event to the lead's assigned_to so each rep gets credit
+-- for their own pipeline movement.
+create or replace function public.log_outreach_event()
+returns trigger
+language plpgsql
+security definer
+as $$
+begin
+  if (old.status = 'new' and new.status <> 'new' and new.status is not null) then
+    insert into public.outreach_events (user_id, lead_id, from_status, to_status)
+    values (new.assigned_to, new.id, old.status, new.status);
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists on_lead_status_change on public.leads;
+create trigger on_lead_status_change
+  after update of status on public.leads
+  for each row execute procedure public.log_outreach_event();
+
+-- Realtime: opt outreach_events into supabase_realtime so the UI updates
+-- live when a status change fires the trigger.
+do $$
+begin
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'outreach_events'
+  ) then
+    alter publication supabase_realtime add table public.outreach_events;
+  end if;
+end $$;
