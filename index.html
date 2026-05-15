@@ -11,14 +11,25 @@
     <title>Redline Portal</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <script>
+      // Apply persisted theme before first paint so users don't see a flash
+      // of light theme when they've chosen dark. The full var palette is
+      // defined in GLOBAL_CSS once the React bundle loads.
+      try {
+        var t = localStorage.getItem("portalTheme");
+        if (t === "dark" || t === "light") document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    </script>
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
       html, body, #root { min-height: 100dvh; background: #F7F7F8; }
+      html[data-theme="dark"], html[data-theme="dark"] body, html[data-theme="dark"] #root { background: #0E0F14; color: #F2F4F8; }
       body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; font-family: 'Geist', system-ui, sans-serif; letter-spacing: -0.014em; font-feature-settings: "kern","liga","calt","ss03","cv01","cv11"; }
       ::selection { background: rgba(220,38,38,0.28); color: #FFFFFF; }
       ::-webkit-scrollbar { width: 6px; }
       ::-webkit-scrollbar-track { background: transparent; }
       ::-webkit-scrollbar-thumb { background: rgba(15,23,42,0.10); border-radius: 10px; }
+      html[data-theme="dark"] ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.10); }
       ::-webkit-scrollbar-thumb:hover { background: rgba(220,38,38,0.3); }
       input::placeholder { color: #94A3B8; }
     </style>
