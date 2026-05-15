@@ -1,5 +1,34 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, Component } from "react";
 import { supabase } from "./lib/supabase";
+
+// Top-level safety net. Catches any uncaught render error in the tree below
+// and shows a fallback so a single bad component can't black-page the portal.
+// Must be a class component (hooks can't be used for error boundaries).
+class ErrorBoundary extends Component {
+  constructor(props) { super(props); this.state = { err: null }; }
+  static getDerivedStateFromError(err) { return { err }; }
+  componentDidCatch(err, info) { try { console.error("[ErrorBoundary]", err, info?.componentStack); } catch { /* noop */ } }
+  render() {
+    if (!this.state.err) return this.props.children;
+    const msg = String(this.state.err?.message || this.state.err || "Unknown error");
+    return (
+      <div style={{ minHeight:"100dvh", background:"#0E0F14", color:"#F2F4F8", fontFamily:"'Geist',system-ui,sans-serif", display:"flex", alignItems:"center", justifyContent:"center", padding:"40px 20px" }}>
+        <div style={{ maxWidth:520, width:"100%", textAlign:"center" }}>
+          <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:48, letterSpacing:8, color:"#DC2626", marginBottom:12 }}>REDLINE</div>
+          <div style={{ fontSize:11, fontWeight:800, color:"#F59E0B", letterSpacing:3, textTransform:"uppercase", marginBottom:18 }}>Something broke</div>
+          <p style={{ fontSize:14, color:"#A8AEBA", lineHeight:1.6, marginBottom:24, fontWeight:500 }}>
+            The portal hit an unexpected error. Try refreshing — the page should recover.
+          </p>
+          <pre style={{ textAlign:"left", fontSize:11, color:"#7E8595", background:"rgba(255,255,255,0.025)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:12, padding:"14px 16px", overflow:"auto", maxHeight:160, fontFamily:"'Geist Mono',ui-monospace,monospace" }}>{msg}</pre>
+          <div style={{ marginTop:18, display:"flex", gap:8, justifyContent:"center", flexWrap:"wrap" }}>
+            <button onClick={() => this.setState({ err: null })} style={{ background:"linear-gradient(135deg,#CCFF00,#A8D900)", color:"#15171E", fontWeight:800, fontSize:11, letterSpacing:1.5, textTransform:"uppercase", border:"none", borderRadius:10, padding:"10px 22px", cursor:"pointer", fontFamily:"inherit" }}>Try again</button>
+            <button onClick={() => window.location.reload()} style={{ background:"rgba(255,255,255,0.04)", color:"#A8AEBA", fontWeight:700, fontSize:11, letterSpacing:1.5, textTransform:"uppercase", border:"1px solid rgba(255,255,255,0.08)", borderRadius:10, padding:"10px 22px", cursor:"pointer", fontFamily:"inherit" }}>Reload</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
 
 /* ═══════════════════════════════════════════
    DESIGN TOKENS — single source of truth
@@ -2075,12 +2104,14 @@ function Chat({ session, profile, w, width, minW = 220, maxW = 520, onResize }) 
     return palette[h % palette.length];
   };
 
+  // Drag-to-resize sidebar ref — hook MUST be called before any conditional
+  // return so the hook count stays stable across viewport resizes across 768.
+  const dragRef = useRef({ active: false });
+
   // Hide on small mobile screens (no room for a permanent sidebar).
   if (w < 768) return null;
   const sidebarW = typeof width === "number" ? width : (w >= 1280 ? 320 : 280);
 
-  // Drag-to-resize the sidebar
-  const dragRef = useRef({ active: false });
   const startDrag = (e) => {
     e.preventDefault();
     dragRef.current.active = true;
@@ -3727,6 +3758,10 @@ const LINK_ICONS = [
 ];
 
 export default function App() {
+  return <ErrorBoundary><AppInner /></ErrorBoundary>;
+}
+
+function AppInner() {
   const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
   const [roles, setRoles] = useState([]);
@@ -3741,27 +3776,37 @@ export default function App() {
 
   const top = useCallback(() => { ref.current?.scrollIntoView({ behavior:"smooth" }); }, []);
 
+  // Monotonic request id — stale loadUserData responses are dropped so the
+  // older fetch can't overwrite the newer one (auth fires twice on sign-in).
+  const loadReqRef = useRef(0);
+
   useEffect(() => {
+    let cancelled = false;
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (cancelled) return;
       setSession(session);
       if (session) loadUserData(session.user.id);
       else setLoading(false);
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (cancelled) return;
       setSession(session);
       if (session) loadUserData(session.user.id);
       else { setProfile(null); setCompletedModules(new Set()); setQuizScores({}); setLoading(false); }
     });
-    return () => subscription.unsubscribe();
+    return () => { cancelled = true; subscription.unsubscribe(); };
   }, []);
 
   const loadUserData = async (userId) => {
+    const myReq = ++loadReqRef.current;
     const [profileRes, progressRes, scoresRes, rolesRes] = await Promise.all([
       supabase.from("profiles").select("*").eq("id", userId).single(),
       supabase.from("module_progress").select("module_id").eq("user_id", userId),
       supabase.from("quiz_scores").select("quiz_id, score, total").eq("user_id", userId),
       supabase.from("roles").select("*").order("is_builtin", { ascending: false }).order("label"),
     ]);
+    // A newer loadUserData started while we were awaiting — drop this result.
+    if (myReq !== loadReqRef.current) return;
     setProfile(profileRes.data);
     setRoles(rolesRes.data ?? []);
     setCompletedModules(new Set(progressRes.data?.map(r => r.module_id) ?? []));
