@@ -599,7 +599,7 @@ button{font-family:inherit}
 .tab-pill {
   position:relative; background:none; border:none; cursor:pointer;
   font-family:inherit; font-weight:700; letter-spacing:1.8px; text-transform:uppercase;
-  color: rgba(242,244,248,0.65); transition: color 0.18s ease;
+  color: #64748B; transition: color 0.18s ease;
   border-radius:10px;
 }
 .tab-pill::after {
