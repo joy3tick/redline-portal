@@ -6,20 +6,20 @@ import { supabase } from "./lib/supabase";
    Hero = chartreuse only. Red = urgent only.
    ═══════════════════════════════════════════ */
 const TOKENS = {
-  bg:        "#0E0F14",
-  surface:   "#15171E",
-  surface2:  "rgba(255,255,255,0.03)",
-  border:    "rgba(255,255,255,0.07)",
-  borderStrong:"rgba(255,255,255,0.14)",
-  text:      "#F2F4F8",
-  textMuted: "#9098A8",
-  textDim:   "#5E6376",
-  textFaint: "#3D414B",
+  bg:        "#F7F7F8",
+  surface:   "#FFFFFF",
+  surface2:  "rgba(0,0,0,0.03)",
+  border:    "rgba(15,23,42,0.10)",
+  borderStrong:"rgba(15,23,42,0.18)",
+  text:      "var(--text)",
+  textMuted: "var(--text-muted)",
+  textDim:   "var(--text-faint)",
+  textFaint: "#E2E8F0",
   // Hero — the ONLY accent for positive / active / energetic states
-  hero:      "#CCFF00",
-  heroDark:  "#88AB00",
-  heroSoft:  "rgba(204,255,0,0.10)",
-  heroBorder:"rgba(204,255,0,0.30)",
+  hero:      "#DC2626",
+  heroDark:  "#991B1B",
+  heroSoft:  "rgba(220,38,38,0.10)",
+  heroBorder:"rgba(220,38,38,0.30)",
   // Brand red — reserved for urgent / negative / overdue / dead
   danger:    "#DC2626",
   dangerSoft:"rgba(220,38,38,0.10)",
@@ -27,7 +27,7 @@ const TOKENS = {
   // Funnel status colors (lead pipeline only — do not reuse as UI accents)
   funnel: { new:"#06D6F0", contacted:"#F59E0B", quoted:"#A78BFA", booked:"#14B8A6", closed:"#22C55E", dead:"#DC2626" },
   // Top performer accent — gold (used sparingly for #1 / Final Exam)
-  gold:      "#FFD700",
+  gold:      "#CA8A04",
   // Type system
   fontDisplay: "'Bebas Neue', sans-serif",
   fontBody:    "'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif",
@@ -499,75 +499,136 @@ const GLOBAL_CSS = `
 @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.04)} }
 @keyframes popIn { from{opacity:0;transform:scale(0.96)} to{opacity:1;transform:scale(1)} }
 
+/* ── Theme tokens ───────────────────────────────────────────
+   All surface, text, and border colors that DIFFER between
+   light and dark themes go through CSS variables here. Accent
+   colors (red, amber, success, etc.) stay the same in both. */
+:root, [data-theme="light"] {
+  --bg:            #F7F7F8;
+  --surface:       #FFFFFF;
+  --surface-2:     #F1F5F9;
+  --surface-glass: rgba(255,255,255,0.92);
+  --surface-header:rgba(255,255,255,0.92);
+  --text:          #0F172A;
+  --text-2:        #334155;
+  --text-3:        #475569;
+  --text-muted:    #64748B;
+  --text-faint:    #94A3B8;
+  --border:        rgba(15,23,42,0.10);
+  --border-strong: rgba(15,23,42,0.16);
+  --hairline:      rgba(15,23,42,0.06);
+  --shadow-soft:   0 1px 2px rgba(15,23,42,0.04), 0 1px 1px rgba(15,23,42,0.03);
+  --shadow-hover:  0 4px 14px rgba(15,23,42,0.06), 0 2px 4px rgba(15,23,42,0.04);
+  --scroll-thumb:  rgba(15,23,42,0.10);
+  --dot:           rgba(15,23,42,0.07);
+}
+[data-theme="dark"] {
+  --bg:            #0E0F14;
+  --surface:       rgba(255,255,255,0.025);
+  --surface-2:     rgba(255,255,255,0.05);
+  --surface-glass: rgba(20,22,28,0.88);
+  --surface-header:rgba(14,15,20,0.85);
+  --text:          #F2F4F8;
+  --text-2:        #D6DAE2;
+  --text-3:        #A8AEBA;
+  --text-muted:    #94A3B8;
+  --text-faint:    #64748B;
+  --border:        rgba(255,255,255,0.07);
+  --border-strong: rgba(255,255,255,0.14);
+  --hairline:      rgba(255,255,255,0.05);
+  --shadow-soft:   0 1px 2px rgba(0,0,0,0.25);
+  --shadow-hover:  0 6px 18px rgba(0,0,0,0.35);
+  --scroll-thumb:  rgba(255,255,255,0.10);
+  --dot:           rgba(255,255,255,0.06);
+}
+
 *{margin:0;padding:0;box-sizing:border-box}
-html,body,#root{min-height:100dvh;background:#0E0F14}
-body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden;font-family:'Geist',system-ui,sans-serif;letter-spacing:-0.014em;font-feature-settings:"kern","liga","calt","ss03","cv01","cv11"}
-::selection{background:rgba(204,255,0,0.32);color:#15171E}
+html,body,#root{min-height:100dvh;background:var(--bg);color:var(--text)}
+body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden;font-family:'Geist',system-ui,sans-serif;letter-spacing:-0.014em;font-feature-settings:"kern","liga","calt","ss03","cv01","cv11";transition:background 0.2s ease,color 0.2s ease}
+::selection{background:rgba(220,38,38,0.32);color:#FFFFFF}
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:10px;transition:background 0.2s}
-::-webkit-scrollbar-thumb:hover{background:rgba(204,255,0,0.3)}
-input::placeholder{color:#3A3D47}
+::-webkit-scrollbar-thumb{background:var(--scroll-thumb);border-radius:10px;transition:background 0.2s}
+::-webkit-scrollbar-thumb:hover{background:rgba(220,38,38,0.3)}
+input::placeholder{color:#64748B}
 button{font-family:inherit}
 
 /* Backgrounds */
 .dotgrid {
-  background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-image: radial-gradient(circle, var(--dot) 1px, transparent 1px);
   background-size: 32px 32px;
 }
 
 /* Glass surface */
 .glass {
-  background: rgba(20,22,28,0.88);
+  background: var(--surface-glass);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-hover);
 }
 .glass-soft {
-  background: rgba(255,255,255,0.02);
-  border: 1px solid rgba(255,255,255,0.06);
+  background: var(--surface);
+  border: 1px solid var(--border);
 }
 
 /* Sticky header chrome */
 .app-header {
   position:sticky; top:0; z-index:30;
-  background: rgba(14,15,20,0.85);
+  background: var(--surface-header);
   backdrop-filter: blur(22px);
   -webkit-backdrop-filter: blur(22px);
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+  border-bottom: 1px solid var(--hairline);
 }
 
-/* Cards — flat, minimal */
-.card-hover { transition: background 0.18s ease, border-color 0.18s ease }
-.card-hover:hover { background:rgba(255,255,255,0.028) !important; border-color:rgba(255,255,255,0.12) !important }
+/* Cards — themed surface + real borders + soft elevation */
+.card-hover { transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease }
+.card-hover:hover {
+  background: var(--surface) !important;
+  border-color: var(--border-strong) !important;
+  box-shadow: var(--shadow-hover) !important;
+  transform: translateY(-1px);
+}
 
 .dash-card {
   position:relative;
-  background: rgba(255,255,255,0.022);
-  border: 1px solid rgba(255,255,255,0.06);
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 14px;
-  transition: background 0.18s ease, border-color 0.18s ease;
+  box-shadow: var(--shadow-soft);
+  transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
   overflow:hidden;
 }
 .dash-card::before { content:none; }
-.dash-card:hover { background:rgba(255,255,255,0.032); border-color:rgba(255,255,255,0.10); }
+.dash-card:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-hover);
+}
 
 /* Accordion */
-.acc-btn { transition: background 0.18s ease }
-.acc-btn:hover { background:rgba(255,255,255,0.03) !important }
+.acc-btn { transition: background 0.18s ease, border-color 0.18s ease }
+.acc-btn:hover { background: var(--surface-2) !important; border-color: var(--border-strong) !important }
 
 /* Nav back */
 .back-btn { transition: opacity 0.18s, transform 0.18s }
 .back-btn:hover { opacity:0.75; transform:translateX(-2px) }
 
 /* Video card */
-.vid-card { transition: background 0.18s ease, border-color 0.18s ease }
-.vid-card:hover { background:rgba(255,255,255,0.03) !important; border-color:rgba(204,255,0,0.35) !important }
+.vid-card { transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease }
+.vid-card:hover {
+  background: var(--surface) !important;
+  border-color:rgba(220,38,38,0.45) !important;
+  box-shadow: 0 4px 14px rgba(220,38,38,0.10) !important;
+}
 .play-pulse { animation: pulse 2.5s ease-in-out infinite }
 
 /* Stat cards */
-.stat-card { transition: background 0.18s ease, border-color 0.18s ease }
-.stat-card:hover { background:rgba(255,255,255,0.03) !important; border-color:rgba(255,255,255,0.12) !important }
+.stat-card { transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease }
+.stat-card:hover {
+  background: var(--surface) !important;
+  border-color: var(--border-strong) !important;
+  box-shadow: var(--shadow-hover) !important;
+}
 
 /* Tabular numerals for any displayed numeric data */
 .num-display, .stat-card, .dash-card { font-variant-numeric: tabular-nums }
@@ -601,8 +662,8 @@ button{font-family:inherit}
 /* Buttons — three variants only */
 /* Primary: chartreuse fill, charcoal text — main CTAs */
 .btn-primary {
-  background:#CCFF00;
-  color:#15171E; font-weight:800; letter-spacing:1.2px; text-transform:uppercase;
+  background:#DC2626;
+  color:#FFFFFF; font-weight:800; letter-spacing:1.2px; text-transform:uppercase;
   border:none; border-radius:10px; cursor:pointer;
   transition: filter 0.16s ease, background 0.16s ease;
 }
@@ -612,46 +673,46 @@ button{font-family:inherit}
 
 /* Secondary: charcoal fill, chartreuse border + text — less critical actions */
 .btn-secondary {
-  background:transparent; border:1px solid #CCFF00; color:#CCFF00;
+  background:transparent; border:1px solid #DC2626; color:#DC2626;
   font-weight:800; letter-spacing:1.2px; text-transform:uppercase;
   border-radius:10px; cursor:pointer; transition: all 0.16s ease;
 }
-.btn-secondary:hover { background:rgba(204,255,0,0.08) }
-.btn-secondary:active { background:rgba(204,255,0,0.14) }
+.btn-secondary:hover { background:rgba(220,38,38,0.08) }
+.btn-secondary:active { background:rgba(220,38,38,0.14) }
 
-/* Tertiary (ghost): muted text, chartreuse on hover — utility / nav */
+/* Tertiary (ghost): muted text, red on hover — utility / nav */
 .btn-ghost {
   background:transparent; border:1px solid transparent;
-  color:#9098A8; font-weight:700; letter-spacing:1.5px; text-transform:uppercase;
+  color: var(--text-muted); font-weight:700; letter-spacing:1.5px; text-transform:uppercase;
   border-radius:10px; cursor:pointer; transition: all 0.16s ease;
 }
-.btn-ghost:hover { color:#CCFF00; background:rgba(204,255,0,0.06); border-color:rgba(204,255,0,0.20) }
+.btn-ghost:hover { color:#DC2626; background:rgba(220,38,38,0.06); border-color:rgba(220,38,38,0.20) }
 
 /* Type utilities */
 .mono { font-family: 'Geist Mono', ui-monospace, 'SFMono-Regular', monospace; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
 .display { font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.08em; line-height: 1; }
-.eyebrow { font-size: 9px; font-weight: 800; letter-spacing: 2.4px; text-transform: uppercase; color: #9098A8; }
+.eyebrow { font-size: 9px; font-weight: 800; letter-spacing: 2.4px; text-transform: uppercase; color: var(--text-muted); }
 
-/* Header pill buttons — Admin / Sign Out / Profile (all tertiary) */
+/* Header pill buttons — Admin / Sign Out / Profile / Theme toggle (all tertiary) */
 .btn-pill {
   display:inline-flex; align-items:center; justify-content:center; gap:7px;
   height:42px; padding:0 14px; font-size:11px; font-weight:700;
   letter-spacing:1.4px; text-transform:uppercase; border-radius:12px;
   cursor:pointer; transition: all 0.16s ease; font-family:inherit;
-  background: transparent; border: 1px solid transparent; color:#9098A8;
+  background: transparent; border: 1px solid transparent; color: var(--text-muted);
 }
-.btn-pill:hover { background: rgba(204,255,0,0.06); border-color: rgba(204,255,0,0.22); color:#CCFF00 }
+.btn-pill:hover { background: rgba(220,38,38,0.06); border-color: rgba(220,38,38,0.22); color:#DC2626 }
 .btn-pill.amber, .btn-pill.amber:hover { /* legacy class — collapsed to tertiary so no orange admin outlier */ }
 .btn-pill.icon-only { padding:0; width:42px; gap:0 }
 .btn-pill svg { display:block }
 
 /* Live header status tiles */
-.hdr-stat { display:flex; flex-direction:column; align-items:flex-start; gap:2px; padding:0 18px; border-left:1px solid rgba(255,255,255,0.06) }
+.hdr-stat { display:flex; flex-direction:column; align-items:flex-start; gap:2px; padding:0 18px; border-left:1px solid var(--border) }
 .hdr-stat:first-child { border-left:none; padding-left:0 }
-.hdr-stat-val { font-family:'Geist Mono', ui-monospace, monospace; font-variant-numeric: tabular-nums; font-weight:600; font-size:22px; color:#F2F4F8; line-height:1; letter-spacing:-0.02em }
-.hdr-stat-val.hero { color:#CCFF00 }
+.hdr-stat-val { font-family:'Geist Mono', ui-monospace, monospace; font-variant-numeric: tabular-nums; font-weight:600; font-size:22px; color: var(--text); line-height:1; letter-spacing:-0.02em }
+.hdr-stat-val.hero { color:#DC2626 }
 .hdr-stat-val.danger { color:#DC2626 }
-.hdr-stat-label { font-size:9px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#5E6376 }
+.hdr-stat-label { font-size:9px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color: var(--text-muted) }
 .title-display {
   font-family:'Bebas Neue',sans-serif; letter-spacing:0.32em; line-height:1;
 }
@@ -659,8 +720,8 @@ button{font-family:inherit}
 /* Profile pill */
 .profile-pill {
   display:flex; align-items:center; gap:10px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
-  border: 1px solid rgba(255,255,255,0.08);
+  background: linear-gradient(180deg, rgba(15,23,42,0.06), rgba(0,0,0,0.02));
+  border: 1px solid rgba(15,23,42,0.10);
   border-radius: 12px; padding: 6px 14px 6px 6px; cursor:pointer;
   transition: all 0.2s ease;
 }
@@ -729,20 +790,20 @@ function RedlineLogo({ height = 28, style }) {
 function RichText({ text }) {
   const lines = text.split("\n");
   return (
-    <div style={{ fontSize:13.5, color:"#D6DAE2", lineHeight:1.85 }}>
+    <div style={{ fontSize:13.5, color:"var(--text-2)", lineHeight:1.85 }}>
       {lines.map((line, i) => {
         const t = line.trim();
         if (!t) return <div key={i} style={{ height:12 }} />;
 
         if (t === "—" || t === "---" || t === "———") return (
           <div key={i} style={{ padding:"8px 0" }}>
-            <div style={{ height:1, background:"linear-gradient(90deg,transparent,#3D414B,transparent)" }} />
+            <div style={{ height:1, background:"linear-gradient(90deg,transparent,#E2E8F0,transparent)" }} />
           </div>
         );
 
         if (t.startsWith("→ ") || t.startsWith("• ")) return (
           <div key={i} style={{ display:"flex", gap:12, padding:"4px 0 4px 2px" }}>
-            <span style={{ color:"#CCFF00", flexShrink:0, fontSize:8, marginTop:7, width:6, height:6, borderRadius:"50%", background:"#CCFF00", display:"inline-block" }}></span>
+            <span style={{ color:"#DC2626", flexShrink:0, fontSize:8, marginTop:7, width:6, height:6, borderRadius:"50%", background:"#DC2626", display:"inline-block" }}></span>
             <span style={{ flex:1 }}>{t.slice(2)}</span>
           </div>
         );
@@ -751,28 +812,28 @@ function RichText({ text }) {
           const sp = t.indexOf(" ");
           return (
             <div key={i} style={{ display:"flex", gap:12, padding:"6px 0", alignItems:"flex-start" }}>
-              <span style={{ background:"#CCFF0015", color:"#CCFF00", width:28, height:28, borderRadius:8, display:"flex", alignItems:"center", justifyContent:"center", fontSize:13, flexShrink:0, fontWeight:700 }}>{t.slice(0,sp)}</span>
-              <span style={{ fontWeight:600, color:"#E8ECF0", paddingTop:3 }}>{t.slice(sp+1)}</span>
+              <span style={{ background:"#DC262615", color:"#DC2626", width:28, height:28, borderRadius:8, display:"flex", alignItems:"center", justifyContent:"center", fontSize:13, flexShrink:0, fontWeight:700 }}>{t.slice(0,sp)}</span>
+              <span style={{ fontWeight:600, color:"var(--text)", paddingTop:3 }}>{t.slice(sp+1)}</span>
             </div>
           );
         }
 
         if (t.startsWith("⚠️") || t.startsWith("⚠")) return (
-          <div key={i} style={{ background:"linear-gradient(135deg,#1a120810,#1a120820)", border:"1px solid #33281025", borderRadius:10, padding:"12px 16px", margin:"8px 0", fontSize:12.5, color:"#F59E0B", display:"flex", gap:10, alignItems:"flex-start" }}>
+          <div key={i} style={{ background:"linear-gradient(135deg,#FEF3C710,#FEF3C720)", border:"1px solid #FCD34D25", borderRadius:10, padding:"12px 16px", margin:"8px 0", fontSize:12.5, color:"#F59E0B", display:"flex", gap:10, alignItems:"flex-start" }}>
             <span style={{ fontSize:16, flexShrink:0, marginTop:1 }}>⚠️</span><span style={{flex:1}}>{t.replace(/^⚠️?\s*/, "")}</span>
           </div>
         );
 
         if (t.startsWith("💡")) return (
-          <div key={i} style={{ background:"linear-gradient(135deg,#0a121810,#0a121820)", border:"1px solid #0f203025", borderRadius:10, padding:"12px 16px", margin:"8px 0", fontSize:12.5, color:"#60A5FA", display:"flex", gap:10, alignItems:"flex-start" }}>
+          <div key={i} style={{ background:"linear-gradient(135deg,#DBEAFE10,#DBEAFE20)", border:"1px solid #BFDBFE25", borderRadius:10, padding:"12px 16px", margin:"8px 0", fontSize:12.5, color:"#60A5FA", display:"flex", gap:10, alignItems:"flex-start" }}>
             <span style={{ fontSize:16, flexShrink:0, marginTop:1 }}>💡</span><span style={{flex:1}}>{t.replace(/^💡\s*/, "")}</span>
           </div>
         );
 
         const isSub = /^[A-Z][A-Z\s&\/\-—:()]{6,}$/.test(t) || (/^[A-Z🔵🔴🔥✅📌]/.test(t) && t.endsWith(":") && t.length < 60);
         if (isSub) return (
-          <div key={i} style={{ fontSize:10.5, fontWeight:700, color:"#CCFF00", letterSpacing:2, marginTop:20, marginBottom:6, textTransform:"uppercase", display:"flex", alignItems:"center", gap:8 }}>
-            <span style={{ width:12, height:1, background:"#CCFF0050" }}></span>
+          <div key={i} style={{ fontSize:10.5, fontWeight:700, color:"#DC2626", letterSpacing:2, marginTop:20, marginBottom:6, textTransform:"uppercase", display:"flex", alignItems:"center", gap:8 }}>
+            <span style={{ width:12, height:1, background:"#DC262650" }}></span>
             {t.replace(/:$/, "")}
           </div>
         );
@@ -781,8 +842,8 @@ function RichText({ text }) {
           const parts = t.split(/\s[—–-]\s/);
           if (parts.length === 2) return (
             <div key={i} style={{ padding:"5px 0", display:"flex", gap:6 }}>
-              <span style={{ fontWeight:700, color:"#EEF0F4" }}>{parts[0]}</span>
-              <span style={{ color:"#8E929D" }}>—</span>
+              <span style={{ fontWeight:700, color:"var(--text)" }}>{parts[0]}</span>
+              <span style={{ color:"var(--text-muted)" }}>—</span>
               <span style={{flex:1}}>{parts[1]}</span>
             </div>
           );
@@ -794,15 +855,15 @@ function RichText({ text }) {
             const label = t.replace(urlMatch[0], "").replace(/^[▶\s]+/, "").trim();
             return (
               <div key={i} style={{ padding:"4px 0" }}>
-                {label && <span style={{ color:"#EEF0F4", fontWeight:500 }}>{label} </span>}
-                <a href={urlMatch[0]} target="_blank" rel="noreferrer" style={{ color:"#CCFF00", wordBreak:"break-all", fontSize:12, textDecoration:"none", borderBottom:"1px solid #CCFF0040" }}>{urlMatch[0]}</a>
+                {label && <span style={{ color:"var(--text)", fontWeight:500 }}>{label} </span>}
+                <a href={urlMatch[0]} target="_blank" rel="noreferrer" style={{ color:"#DC2626", wordBreak:"break-all", fontSize:12, textDecoration:"none", borderBottom:"1px solid #DC262640" }}>{urlMatch[0]}</a>
               </div>
             );
           }
         }
 
         if (t.includes("$") && (t.includes("T1") || t.includes("Starter") || t.includes("Pro ") || t.includes("Elite"))) return (
-          <div key={i} style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:11, color:"#8A8E98", padding:"2px 0", whiteSpace:"pre", background:"#272A32", borderRadius:6, padding:"8px 12px", margin:"4px 0", border:"1px solid #3D414B" }}>{line}</div>
+          <div key={i} style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:11, color:"var(--text-muted)", padding:"2px 0", whiteSpace:"pre", background:"var(--surface-2)", borderRadius:6, padding:"8px 12px", margin:"4px 0", border:"1px solid #E2E8F0" }}>{line}</div>
         );
 
         return <div key={i} style={{ padding:"2px 0" }}>{t}</div>;
@@ -839,33 +900,33 @@ function Login() {
 
   const fieldStyle = (hasErr) => ({
     width:"100%", padding:"15px 20px",
-    background:"rgba(7,8,12,0.9)",
-    border: `1.5px solid ${hasErr ? "#DC2626" : "rgba(255,255,255,0.07)"}`,
-    borderRadius:14, color:"#F2F4F8", fontSize:15, outline:"none",
+    background:"rgba(255,255,255,0.9)",
+    border: `1.5px solid ${hasErr ? "#DC2626" : "rgba(15,23,42,0.10)"}`,
+    borderRadius:14, color:"var(--text)", fontSize:15, outline:"none",
     boxSizing:"border-box", fontFamily:"inherit", transition:"all 0.22s ease",
   });
 
-  const onFocus = e => { e.target.style.borderColor = "rgba(204,255,0,0.6)"; e.target.style.boxShadow = "0 0 0 4px rgba(204,255,0,0.08)"; };
-  const onBlur  = (e, hasErr) => { e.target.style.borderColor = hasErr ? "#DC2626" : "rgba(255,255,255,0.07)"; e.target.style.boxShadow = "none"; };
+  const onFocus = e => { e.target.style.borderColor = "rgba(220,38,38,0.6)"; e.target.style.boxShadow = "0 0 0 4px rgba(220,38,38,0.08)"; };
+  const onBlur  = (e, hasErr) => { e.target.style.borderColor = hasErr ? "#DC2626" : "rgba(15,23,42,0.10)"; e.target.style.boxShadow = "none"; };
 
   return (
-    <div className="dotgrid" style={{ minHeight:"100dvh", background:"#0E0F14", display:"flex", alignItems:"center", justifyContent:"center", padding:24, position:"relative", overflow:"hidden" }}>
+    <div className="dotgrid" style={{ minHeight:"100dvh", background:"var(--bg)", display:"flex", alignItems:"center", justifyContent:"center", padding:24, position:"relative", overflow:"hidden" }}>
       <div style={{ width:"100%", maxWidth:420, animation:"fadeUp 0.5s ease", position:"relative", zIndex:1 }}>
         <div style={{ textAlign:"center", marginBottom:36 }}>
           <div style={{ display:"flex", justifyContent:"center", margin:"0 auto 20px" }}>
             <RedlineLogo height={52} />
           </div>
-          <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:38, letterSpacing:12, color:"#F2F4F8", lineHeight:1 }}>REDLINE</div>
-          <div style={{ fontSize:10.5, fontWeight:700, color:"#5E6376", letterSpacing:5, textTransform:"uppercase", marginTop:8 }}>Portal</div>
+          <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:38, letterSpacing:12, color:"var(--text)", lineHeight:1 }}>REDLINE</div>
+          <div style={{ fontSize:10.5, fontWeight:700, color:"var(--text-muted)", letterSpacing:5, textTransform:"uppercase", marginTop:8 }}>Portal</div>
         </div>
 
-        <div style={{ background:"linear-gradient(145deg,rgba(16,18,24,0.99),rgba(11,12,17,0.99))", border:"1px solid rgba(255,255,255,0.07)", borderRadius:24, padding:"36px 32px 32px", boxShadow:"0 24px 80px rgba(0,0,0,0.65), 0 0 0 1px rgba(204,255,0,0.06)" }}>
+        <div style={{ background:"linear-gradient(145deg,rgba(255,255,255,0.99),rgba(255,255,255,0.99))", border:"1px solid var(--border)", borderRadius:24, padding:"36px 32px 32px", boxShadow:"0 24px 80px rgba(15,23,42,0.10), 0 0 0 1px rgba(220,38,38,0.06)" }}>
           <div style={{ marginBottom:16 }}>
-            <label style={{ display:"block", fontSize:9.5, fontWeight:700, color:"#4D5260", letterSpacing:3, marginBottom:10, textTransform:"uppercase" }}>Email</label>
+            <label style={{ display:"block", fontSize:9.5, fontWeight:700, color:"var(--text-muted)", letterSpacing:3, marginBottom:10, textTransform:"uppercase" }}>Email</label>
             <input type="email" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&go()} placeholder="you@redline.com" autoFocus style={fieldStyle(!!err)} onFocus={onFocus} onBlur={e=>onBlur(e,!!err)} />
           </div>
           <div>
-            <label style={{ display:"block", fontSize:9.5, fontWeight:700, color:"#4D5260", letterSpacing:3, marginBottom:10, textTransform:"uppercase" }}>Password</label>
+            <label style={{ display:"block", fontSize:9.5, fontWeight:700, color:"var(--text-muted)", letterSpacing:3, marginBottom:10, textTransform:"uppercase" }}>Password</label>
             <input type="password" value={password} onChange={e=>setPassword(e.target.value)} onKeyDown={e=>e.key==="Enter"&&go()} placeholder="••••••••" style={fieldStyle(!!err)} onFocus={onFocus} onBlur={e=>onBlur(e,!!err)} />
           </div>
           {err && (
@@ -874,11 +935,11 @@ function Login() {
               <p style={{ color:"#DC2626", fontSize:12, fontWeight:600 }}>{err}</p>
             </div>
           )}
-          <button onClick={go} disabled={ld} style={{ width:"100%", padding:"16px", background: ld ? "#3E5200" : "linear-gradient(135deg,#CCFF00,#6E9100)", color: ld ? "#FFF" : "#15171E", border:"none", borderRadius:14, fontSize:11, fontWeight:800, letterSpacing:4, cursor: ld ? "wait" : "pointer", marginTop:20, textTransform:"uppercase", boxShadow: ld ? "none" : "0 6px 28px rgba(204,255,0,0.3)", transition:"all 0.25s ease", fontFamily:"inherit" }}>
+          <button onClick={go} disabled={ld} style={{ width:"100%", padding:"16px", background: ld ? "#FCA5A5" : "linear-gradient(135deg,#DC2626,#7F1D1D)", color: ld ? "#FFF" : "#FFFFFF", border:"none", borderRadius:14, fontSize:11, fontWeight:800, letterSpacing:4, cursor: ld ? "wait" : "pointer", marginTop:20, textTransform:"uppercase", boxShadow: ld ? "none" : "0 6px 28px rgba(220,38,38,0.3)", transition:"all 0.25s ease", fontFamily:"inherit" }}>
             {ld ? "Signing In…" : "Enter Portal"}
           </button>
         </div>
-        <p style={{ color:"#292C35", fontSize:9, marginTop:32, letterSpacing:2, textTransform:"uppercase", textAlign:"center" }}>© 2026 Redline Web Services LLC</p>
+        <p style={{ color:"var(--text-faint)", fontSize:9, marginTop:32, letterSpacing:2, textTransform:"uppercase", textAlign:"center" }}>© 2026 Redline Web Services LLC</p>
       </div>
     </div>
   );
@@ -1203,194 +1264,7 @@ function Scheduler({ session, profile, w }) {
   );
 }
 
-const TIER_GLOW = { trial:"rgba(6,214,240,0.3)", bronze:"rgba(184,115,42,0.35)", silver:"rgba(192,200,216,0.3)", gold:"rgba(255,215,0,0.4)", platinum:"rgba(167,139,250,0.35)", diamond:"rgba(204,255,0,0.4)" };
-
-function Announcements({ session, profile, w }) {
-  const [items, setItems] = useState([]);
-  const [authors, setAuthors] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [composing, setComposing] = useState(false);
-  const [title, setTitle] = useState("");
-  const [body, setBody] = useState("");
-  const [saving, setSaving] = useState(false);
-  const dk = w >= 768;
-  const isAdmin = profile?.role === "admin";
-
-  const load = async () => {
-    const [annRes, profRes] = await Promise.all([
-      supabase.from("announcements").select("id, posted_by, title, body, pinned, created_at").order("pinned", { ascending: false }).order("created_at", { ascending: false }),
-      supabase.from("profiles").select("id, name"),
-    ]);
-    setItems(annRes.data ?? []);
-    const am = {};
-    for (const p of profRes.data ?? []) am[p.id] = p.name || "Admin";
-    setAuthors(am);
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    load();
-    const ch = supabase.channel("announcements-rt")
-      .on("postgres_changes", { event: "*", schema: "public", table: "announcements" }, load)
-      .subscribe();
-    return () => supabase.removeChannel(ch);
-  }, []);
-
-  const post = async () => {
-    const trimmedBody = body.trim();
-    if (!trimmedBody) return;
-    setSaving(true);
-    const { data, error } = await supabase
-      .from("announcements")
-      .insert({ posted_by: session.user.id, title: title.trim() || null, body: trimmedBody })
-      .select()
-      .single();
-    setSaving(false);
-    if (error || !data) {
-      alert(`Couldn't post: ${error?.message ?? "no row returned"}`);
-      return;
-    }
-    setTitle(""); setBody(""); setComposing(false);
-    setItems(prev => [data, ...prev]);
-  };
-
-  const remove = async (id) => {
-    if (!confirm("Delete this announcement?")) return;
-    const { error } = await supabase.from("announcements").delete().eq("id", id);
-    if (error) {
-      alert(`Couldn't delete: ${error.message}`);
-      return;
-    }
-    setItems(prev => prev.filter(i => i.id !== id));
-  };
-
-  const togglePin = async (id, pinned) => {
-    const { data, error } = await supabase
-      .from("announcements")
-      .update({ pinned: !pinned })
-      .eq("id", id)
-      .select()
-      .single();
-    if (error || !data) {
-      alert(`Couldn't update: ${error?.message ?? "no row returned"}`);
-      return;
-    }
-    setItems(prev => {
-      const next = prev.map(i => i.id === id ? { ...i, pinned: data.pinned } : i);
-      next.sort((a, b) => (b.pinned - a.pinned) || (new Date(b.created_at) - new Date(a.created_at)));
-      return next;
-    });
-  };
-
-  const fmtWhen = (iso) => {
-    const d = new Date(iso);
-    const today = new Date(); today.setHours(0,0,0,0);
-    const ds = new Date(d); ds.setHours(0,0,0,0);
-    const diff = Math.round((today - ds) / 86400000);
-    const time = d.toLocaleTimeString("en-US",{ hour:"numeric", minute:"2-digit" });
-    if (diff === 0) return `Today · ${time}`;
-    if (diff === 1) return `Yesterday · ${time}`;
-    if (diff < 7) return d.toLocaleDateString("en-US",{ weekday:"long" }) + ` · ${time}`;
-    return d.toLocaleDateString("en-US",{ month:"short", day:"numeric", year: d.getFullYear() === today.getFullYear() ? undefined : "numeric" });
-  };
-
-  return (
-    <div style={{ animation:"fadeUp 0.35s ease", display:"flex", flexDirection:"column", gap:14 }}>
-
-      {isAdmin && (
-        <div className="dash-card" style={{ padding:dk?"20px 22px":"16px 18px" }}>
-          {!composing ? (
-            <button onClick={() => setComposing(true)}
-              style={{ display:"flex", alignItems:"center", gap:12, width:"100%", background:"rgba(255,255,255,0.02)", border:"1px dashed rgba(255,255,255,0.1)", borderRadius:12, padding:"14px 16px", cursor:"pointer", fontFamily:"inherit", textAlign:"left", color:"#666C7E", fontSize:13, fontWeight:600, transition:"all 0.18s" }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor="rgba(245,158,11,0.35)"; e.currentTarget.style.color="#F59E0B"; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor="rgba(255,255,255,0.1)"; e.currentTarget.style.color="#666C7E"; }}>
-              <div style={{ width:32, height:32, borderRadius:9, background:"rgba(245,158,11,0.12)", border:"1px solid rgba(245,158,11,0.22)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              </div>
-              Post a new announcement…
-            </button>
-          ) : (
-            <div>
-              <div style={{ fontSize:10, fontWeight:800, color:"#F59E0B", letterSpacing:2.5, textTransform:"uppercase", marginBottom:14 }}>New Announcement</div>
-              <input
-                autoFocus
-                value={title}
-                onChange={e => setTitle(e.target.value)}
-                placeholder="Title (optional)"
-                style={{ width:"100%", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:10, color:"#F2F4F8", fontSize:14, fontWeight:700, padding:"11px 14px", fontFamily:"inherit", outline:"none", boxSizing:"border-box", marginBottom:8 }}
-              />
-              <textarea
-                value={body}
-                onChange={e => setBody(e.target.value)}
-                placeholder="What do reps need to know?"
-                rows={4}
-                style={{ width:"100%", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:10, color:"#F2F4F8", fontSize:13, fontWeight:500, padding:"11px 14px", fontFamily:"inherit", outline:"none", boxSizing:"border-box", resize:"vertical", lineHeight:1.5 }}
-              />
-              <div style={{ display:"flex", gap:8, marginTop:12, justifyContent:"flex-end" }}>
-                <button onClick={() => { setComposing(false); setTitle(""); setBody(""); }} className="btn-ghost" style={{ fontSize:11, padding:"10px 18px" }}>Cancel</button>
-                <button onClick={post} disabled={saving || !body.trim()} className="btn-primary" style={{ fontSize:11, padding:"10px 22px", opacity: saving || !body.trim() ? 0.5 : 1, cursor: saving || !body.trim() ? "default" : "pointer" }}>
-                  {saving ? "Posting…" : "Post"}
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {loading ? (
-        <div style={{ textAlign:"center", padding:60, color:"#666C7E", fontSize:13 }}>Loading…</div>
-      ) : items.length === 0 ? (
-        <div className="dash-card" style={{ padding:"48px 24px", textAlign:"center" }}>
-          <div style={{ width:54, height:54, borderRadius:16, background:"rgba(245,158,11,0.08)", border:"1px solid rgba(245,158,11,0.2)", display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 16px" }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
-          </div>
-          <div style={{ fontSize:14, fontWeight:700, color:"#D6DAE2", marginBottom:6 }}>No announcements yet</div>
-          <div style={{ fontSize:12, color:"#666C7E" }}>{isAdmin ? "Post the first one above." : "Check back soon — leadership posts updates here."}</div>
-        </div>
-      ) : (
-        items.map((a, i) => {
-          const accent = a.pinned ? "#F59E0B" : "#06D6F0";
-          return (
-            <div key={a.id} className="dash-card" style={{ padding:dk?"20px 22px":"16px 18px", animation:`fadeUp 0.35s ease ${0.04*i}s both`, borderColor: a.pinned ? "rgba(245,158,11,0.22)" : undefined }}>
-              <div style={{ display:"flex", alignItems:"flex-start", gap:14 }}>
-                <div style={{ width:38, height:38, borderRadius:11, background: a.pinned ? "linear-gradient(135deg,#F59E0B,#B45309)" : "linear-gradient(135deg,#06D6F0,#0891B2)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, boxShadow: a.pinned ? "0 4px 14px rgba(245,158,11,0.35)" : "0 4px 14px rgba(6,214,240,0.3)" }}>
-                  {a.pinned ? (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#15171E" stroke="#15171E" strokeWidth="0.5" strokeLinecap="round" strokeLinejoin="round"><path d="M16 4l4 4-7 7-1 4-4-4 4-1 7-7-3-3z"/></svg>
-                  ) : (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15171E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
-                  )}
-                </div>
-                <div style={{ flex:1, minWidth:0 }}>
-                  <div style={{ display:"flex", alignItems:"center", gap:8, flexWrap:"wrap", marginBottom:a.title?6:4 }}>
-                    {a.pinned && <span style={{ fontSize:8.5, fontWeight:800, color:"#F59E0B", background:"rgba(245,158,11,0.12)", border:"1px solid rgba(245,158,11,0.25)", padding:"3px 8px", borderRadius:5, letterSpacing:1.5, textTransform:"uppercase" }}>Pinned</span>}
-                    <span style={{ fontSize:10.5, fontWeight:700, color:"#D6DAE2" }}>{authors[a.posted_by] || "Admin"}</span>
-                    <span style={{ fontSize:10, color:"#5E6376" }}>· {fmtWhen(a.created_at)}</span>
-                  </div>
-                  {a.title && <div style={{ fontSize:dk?17:15, fontWeight:800, color:"#F2F4F8", letterSpacing:"-0.01em", lineHeight:1.3, marginBottom:6 }}>{a.title}</div>}
-                  <div style={{ fontSize:dk?13.5:12.5, color:"#C4C8D4", lineHeight:1.6, fontWeight:500, whiteSpace:"pre-wrap" }}>{a.body}</div>
-                </div>
-                {isAdmin && (
-                  <div style={{ display:"flex", flexDirection:"column", gap:6, flexShrink:0 }}>
-                    <button onClick={() => togglePin(a.id, a.pinned)} title={a.pinned ? "Unpin" : "Pin"}
-                      style={{ width:30, height:30, borderRadius:8, background:"rgba(255,255,255,0.04)", border:`1px solid ${a.pinned ? "rgba(245,158,11,0.3)" : "rgba(255,255,255,0.08)"}`, color: a.pinned ? "#F59E0B" : "#666C7E", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", padding:0, transition:"all 0.18s" }}>
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill={a.pinned ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg>
-                    </button>
-                    <button onClick={() => remove(a.id)} title="Delete"
-                      style={{ width:30, height:30, borderRadius:8, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", color:"#666C7E", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", padding:0, transition:"all 0.18s" }}
-                      onMouseEnter={e => { e.currentTarget.style.color="#DC2626"; e.currentTarget.style.borderColor="rgba(220,38,38,0.3)"; }}
-                      onMouseLeave={e => { e.currentTarget.style.color="#666C7E"; e.currentTarget.style.borderColor="rgba(255,255,255,0.08)"; }}>
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          );
-        })
-      )}
-    </div>
-  );
-}
+const TIER_GLOW = { trial:"rgba(6,214,240,0.3)", bronze:"rgba(184,115,42,0.35)", silver:"rgba(192,200,216,0.3)", gold:"rgba(202,138,4,0.4)", platinum:"rgba(167,139,250,0.35)", diamond:"rgba(220,38,38,0.4)" };
 
 function Leads({ session, profile, w }) {
   const [leads, setLeads] = useState([]);
@@ -1690,23 +1564,23 @@ function Leads({ session, profile, w }) {
     const greeting = firstName ? `Hey ${firstName}` : "Hey there";
     const open = `${greeting}, this is ${repName} with Redline — we run a small web agency out of Boston that specializes specifically in websites for contractors.`;
 
-    // 2. Why I'm calling — sincere, not salesy. Names the business + site if we have them.
+    // 2. Why I'm calling — sincere, direct, no padding.
     let reachOut;
     if (business && website) {
-      reachOut = `I came across ${business} and took a quick look at ${website} — wanted to be straight with you and just reach out directly.`;
+      reachOut = `Came across ${business}, took a look at ${website}, and figured I'd just reach out directly.`;
     } else if (business) {
-      reachOut = `I came across ${business} and wanted to be straight with you and just reach out directly.`;
+      reachOut = `Came across ${business} and figured I'd just reach out directly.`;
     } else if (website) {
-      reachOut = `I came across ${website} and wanted to be straight with you and just reach out directly.`;
+      reachOut = `Came across ${website} and figured I'd just reach out directly.`;
     } else {
-      reachOut = `I came across your ${niche ? niche.toLowerCase() + " " : ""}business and wanted to be straight with you and just reach out directly.`;
+      reachOut = `Came across your ${niche ? niche.toLowerCase() + " " : ""}business and figured I'd just reach out directly.`;
     }
 
     // 3. The ask — 5 minutes, walkthrough, free fully-built site, low friction
     const ask = `Got 5 minutes later this week to hop on a quick call? I'd walk you through exactly what working with us looks like, and I'll have a fully built website ready for you to look over — completely free, no commitment, just so you can see what we'd actually do for you.`;
 
-    // 4. Out — gives them permission to say no, removes pressure
-    const out = `If it's not a fit or not the right time, no worries at all — I'll take you off our list and you won't hear from me again.`;
+    // 4. Out — gives them permission to say no, removes pressure.
+    const out = `If it's not a fit, no worries — I'll take you off the list and you won't hear from me again.`;
 
     return `${open}\n\n${reachOut}\n\n${ask}\n\n${out}`;
   };
@@ -1716,8 +1590,8 @@ function Leads({ session, profile, w }) {
   // can't smuggle a javascript:/data:/file: href through to the browser.
   const renderValue = (v) => {
     const s = (v ?? "").toString().trim();
-    if (!s) return <span style={{ color:"#3A3D47" }}>—</span>;
-    const linkStyle = { color:"#CCFF00", textDecoration:"none", borderBottom:"1px dotted rgba(204,255,0,0.4)" };
+    if (!s) return <span style={{ color:"var(--text-muted)" }}>—</span>;
+    const linkStyle = { color:"#DC2626", textDecoration:"none", borderBottom:"1px dotted rgba(220,38,38,0.4)" };
     const safeHttpUrl = (raw) => {
       try {
         const u = new URL(raw);
@@ -1757,14 +1631,14 @@ function Leads({ session, profile, w }) {
         <div className="dash-card" style={{ padding:dk?"16px 22px":"14px 16px" }}>
           <div style={{ display:"flex", alignItems:"baseline", justifyContent:"space-between", flexWrap:"wrap", gap:14 }}>
             <div>
-              <div style={{ fontSize:9.5, fontWeight:800, color:"#5E6376", letterSpacing:2.5, textTransform:"uppercase" }}>Pipeline</div>
-              <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?38:32, lineHeight:1, color:"#F2F4F8", letterSpacing:0.5, marginTop:4, fontVariantNumeric:"tabular-nums" }}>{totalForFilter}<span style={{ fontSize:dk?14:12, color:"#5E6376", marginLeft:8, letterSpacing:1.5, fontFamily:"'Geist',sans-serif", fontWeight:600 }}>leads</span></div>
+              <div style={{ fontSize:9.5, fontWeight:800, color:"var(--text-muted)", letterSpacing:2.5, textTransform:"uppercase" }}>Pipeline</div>
+              <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?38:32, lineHeight:1, color:"var(--text)", letterSpacing:0.5, marginTop:4, fontVariantNumeric:"tabular-nums" }}>{totalForFilter}<span style={{ fontSize:dk?14:12, color:"var(--text-muted)", marginLeft:8, letterSpacing:1.5, fontFamily:"'Geist',sans-serif", fontWeight:600 }}>leads</span></div>
             </div>
             <div style={{ display:"flex", gap:dk?20:14, flexWrap:"wrap" }}>
               {STATUSES.filter(s => (counts[s.v] ?? 0) > 0).map(s => (
                 <div key={s.v}>
                   <div style={{ fontSize:9, fontWeight:800, color:s.color, letterSpacing:1.8, textTransform:"uppercase" }}>{s.label}</div>
-                  <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?22:20, lineHeight:1, color:"#F2F4F8", marginTop:3, fontVariantNumeric:"tabular-nums" }}>{counts[s.v] ?? 0}</div>
+                  <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?22:20, lineHeight:1, color:"var(--text)", marginTop:3, fontVariantNumeric:"tabular-nums" }}>{counts[s.v] ?? 0}</div>
                 </div>
               ))}
             </div>
@@ -1783,15 +1657,15 @@ function Leads({ session, profile, w }) {
             <div>
               <label
                 htmlFor="leads-csv-input"
-                style={{ display:"flex", alignItems:"center", gap:14, padding:"16px 18px", background:"rgba(255,255,255,0.02)", border:"1px dashed rgba(255,255,255,0.1)", borderRadius:12, cursor:"pointer", transition:"all 0.18s" }}
+                style={{ display:"flex", alignItems:"center", gap:14, padding:"16px 18px", background:"rgba(0,0,0,0.02)", border:"1px dashed rgba(0,0,0,0.1)", borderRadius:12, cursor:"pointer", transition:"all 0.18s" }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor="rgba(245,158,11,0.35)"; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor="rgba(255,255,255,0.1)"; }}>
+                onMouseLeave={e => { e.currentTarget.style.borderColor="rgba(0,0,0,0.1)"; }}>
                 <div style={{ width:38, height:38, borderRadius:11, background:"rgba(245,158,11,0.12)", border:"1px solid rgba(245,158,11,0.22)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 12 15 15"/></svg>
                 </div>
                 <div style={{ flex:1, minWidth:0 }}>
-                  <div style={{ fontSize:13, fontWeight:700, color:"#EEF2F8" }}>Upload a CSV file</div>
-                  <div style={{ fontSize:11, color:"#666C7E", marginTop:3 }}>First row should be column headers (Business, Phone, Email, etc.)</div>
+                  <div style={{ fontSize:13, fontWeight:700, color:"var(--text)" }}>Upload a CSV file</div>
+                  <div style={{ fontSize:11, color:"var(--text-muted)", marginTop:3 }}>First row should be column headers (Business, Phone, Email, etc.)</div>
                 </div>
               </label>
               <input
@@ -1807,43 +1681,43 @@ function Leads({ session, profile, w }) {
             <div>
               <div style={{ display:"flex", alignItems:"center", gap:12, padding:"10px 14px", background:"rgba(34,197,94,0.06)", border:"1px solid rgba(34,197,94,0.2)", borderRadius:10, marginBottom:14 }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                <div style={{ flex:1, minWidth:0, fontSize:12, fontWeight:600, color:"#D6DAE2" }}>
-                  <span style={{ color:"#22C55E", fontWeight:800 }}>{parsed.rows.length}</span> {parsed.rows.length === 1 ? "lead" : "leads"} parsed from <span style={{ color:"#F2F4F8" }}>{parsed.fileName}</span>
+                <div style={{ flex:1, minWidth:0, fontSize:12, fontWeight:600, color:"var(--text-2)" }}>
+                  <span style={{ color:"#22C55E", fontWeight:800 }}>{parsed.rows.length}</span> {parsed.rows.length === 1 ? "lead" : "leads"} parsed from <span style={{ color:"var(--text)" }}>{parsed.fileName}</span>
                 </div>
                 <button onClick={() => { setParsed(null); if (fileInputRef.current) fileInputRef.current.value=""; }}
-                  style={{ background:"none", border:"none", color:"#666C7E", fontSize:11, fontWeight:700, cursor:"pointer", textTransform:"uppercase", letterSpacing:1.5, padding:"4px 8px", fontFamily:"inherit" }}>Clear</button>
+                  style={{ background:"none", border:"none", color:"var(--text-muted)", fontSize:11, fontWeight:700, cursor:"pointer", textTransform:"uppercase", letterSpacing:1.5, padding:"4px 8px", fontFamily:"inherit" }}>Clear</button>
               </div>
 
               {/* Preview a few rows */}
-              <div style={{ overflow:"auto", border:"1px solid rgba(255,255,255,0.06)", borderRadius:10, marginBottom:14, maxHeight:200 }}>
+              <div style={{ overflow:"auto", border:"1px solid var(--border)", borderRadius:10, marginBottom:14, maxHeight:200 }}>
                 <table style={{ width:"100%", borderCollapse:"collapse", fontSize:11.5 }}>
-                  <thead style={{ position:"sticky", top:0, background:"rgba(20,22,28,0.95)", backdropFilter:"blur(8px)" }}>
+                  <thead style={{ position:"sticky", top:0, background:"rgba(255,255,255,0.95)", backdropFilter:"blur(8px)" }}>
                     <tr>
                       {parsed.headers.map(h => (
-                        <th key={h} style={{ textAlign:"left", padding:"8px 12px", fontSize:9.5, fontWeight:800, color:"#666C7E", letterSpacing:1.5, textTransform:"uppercase", borderBottom:"1px solid rgba(255,255,255,0.05)" }}>{h}</th>
+                        <th key={h} style={{ textAlign:"left", padding:"8px 12px", fontSize:9.5, fontWeight:800, color:"var(--text-muted)", letterSpacing:1.5, textTransform:"uppercase", borderBottom:"1px solid var(--hairline)" }}>{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
                     {parsed.rows.slice(0, 6).map((r, i) => (
-                      <tr key={i} style={{ borderBottom:"1px solid rgba(255,255,255,0.04)" }}>
+                      <tr key={i} style={{ borderBottom:"1px solid rgba(15,23,42,0.04)" }}>
                         {parsed.headers.map(h => (
-                          <td key={h} style={{ padding:"8px 12px", color:"#C4C8D4", whiteSpace:"nowrap", maxWidth:200, overflow:"hidden", textOverflow:"ellipsis" }}>{r[h] || "—"}</td>
+                          <td key={h} style={{ padding:"8px 12px", color:"var(--text-2)", whiteSpace:"nowrap", maxWidth:200, overflow:"hidden", textOverflow:"ellipsis" }}>{r[h] || "—"}</td>
                         ))}
                       </tr>
                     ))}
                   </tbody>
                 </table>
                 {parsed.rows.length > 6 && (
-                  <div style={{ padding:"8px 12px", fontSize:10.5, color:"#5E6376", textAlign:"center", borderTop:"1px solid rgba(255,255,255,0.04)" }}>+ {parsed.rows.length - 6} more row{parsed.rows.length - 6 === 1 ? "" : "s"}</div>
+                  <div style={{ padding:"8px 12px", fontSize:10.5, color:"var(--text-muted)", textAlign:"center", borderTop:"1px solid rgba(15,23,42,0.04)" }}>+ {parsed.rows.length - 6} more row{parsed.rows.length - 6 === 1 ? "" : "s"}</div>
                 )}
               </div>
 
               <div style={{ display:"flex", gap:10, alignItems:"center", flexWrap:"wrap" }}>
                 <div style={{ flex:"1 1 200px" }}>
-                  <div style={{ fontSize:9.5, fontWeight:700, color:"#666C7E", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Assign to rep</div>
+                  <div style={{ fontSize:9.5, fontWeight:700, color:"var(--text-muted)", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Assign to rep</div>
                   <select value={assignTo} onChange={e => setAssignTo(e.target.value)}
-                    style={{ width:"100%", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:10, color:"#F2F4F8", fontSize:13, fontWeight:600, padding:"10px 12px", fontFamily:"inherit", outline:"none", cursor:"pointer" }}>
+                    style={{ width:"100%", background:"rgba(15,23,42,0.04)", border:"1px solid var(--border)", borderRadius:10, color:"var(--text)", fontSize:13, fontWeight:600, padding:"10px 12px", fontFamily:"inherit", outline:"none", cursor:"pointer" }}>
                     {reps.length === 0 && <option>No reps available</option>}
                     {reps.map(r => <option key={r.id} value={r.id}>{(r.name || "Rep") + (r.id === session.user.id ? " (you)" : "")}</option>)}
                   </select>
@@ -1876,28 +1750,28 @@ function Leads({ session, profile, w }) {
                 title={allSelected ? "Deselect all visible" : "Select all visible"}
                 style={{
                   display:"flex", alignItems:"center", justifyContent:"center", gap:6,
-                  background: allSelected ? "rgba(204,255,0,0.10)" : "rgba(255,255,255,0.02)",
-                  border:`1px solid ${allSelected ? "rgba(204,255,0,0.35)" : "rgba(255,255,255,0.08)"}`,
-                  color: allSelected ? "#CCFF00" : "#9098A8",
+                  background: allSelected ? "rgba(220,38,38,0.10)" : "rgba(0,0,0,0.02)",
+                  border:`1px solid ${allSelected ? "rgba(220,38,38,0.35)" : "rgba(15,23,42,0.10)"}`,
+                  color: allSelected ? "#DC2626" : "var(--text-muted)",
                   fontSize:11, fontWeight:700, letterSpacing:1.2, textTransform:"uppercase",
                   padding:"8px 12px", borderRadius:10, cursor:"pointer", fontFamily:"inherit", transition:"all 0.16s",
                 }}>
-                <span style={{ width:14, height:14, borderRadius:3, border:`1.5px solid ${allSelected ? "#CCFF00" : "rgba(255,255,255,0.25)"}`, background: allSelected ? "#CCFF00" : "transparent", display:"flex", alignItems:"center", justifyContent:"center" }}>
-                  {allSelected && <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#15171E" strokeWidth="3.6" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
+                <span style={{ width:14, height:14, borderRadius:3, border:`1.5px solid ${allSelected ? "#DC2626" : "rgba(0,0,0,0.25)"}`, background: allSelected ? "#DC2626" : "transparent", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                  {allSelected && <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3.6" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
                 </span>
                 {allSelected ? "Clear" : "Select all"}
               </button>
             );
           })()}
           <button onClick={() => setStatusFilter("all")}
-            style={{ background: statusFilter === "all" ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.02)", border:`1px solid ${statusFilter === "all" ? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.06)"}`, color: statusFilter === "all" ? "#F2F4F8" : "#7E8595", fontSize:11, fontWeight:700, letterSpacing:1.2, textTransform:"uppercase", padding:"8px 14px", borderRadius:10, cursor:"pointer", fontFamily:"inherit", transition:"all 0.18s", display:"flex", alignItems:"center", gap:8 }}>
-            All <span style={{ fontVariantNumeric:"tabular-nums", color: statusFilter === "all" ? "#A8AEBA" : "#5E6376", fontSize:11 }}>{totalForFilter}</span>
+            style={{ background: statusFilter === "all" ? "rgba(15,23,42,0.10)" : "rgba(0,0,0,0.02)", border:`1px solid ${statusFilter === "all" ? "rgba(15,23,42,0.18)" : "rgba(15,23,42,0.10)"}`, color: statusFilter === "all" ? "var(--text)" : "var(--text-muted)", fontSize:11, fontWeight:700, letterSpacing:1.2, textTransform:"uppercase", padding:"8px 14px", borderRadius:10, cursor:"pointer", fontFamily:"inherit", transition:"all 0.18s", display:"flex", alignItems:"center", gap:8 }}>
+            All <span style={{ fontVariantNumeric:"tabular-nums", color: statusFilter === "all" ? "var(--text-3)" : "var(--text-faint)", fontSize:11 }}>{totalForFilter}</span>
           </button>
           {STATUSES.map(s => (
             <button key={s.v} onClick={() => setStatusFilter(s.v)}
-              style={{ background: statusFilter === s.v ? `${s.color}14` : "rgba(255,255,255,0.02)", border:`1px solid ${statusFilter === s.v ? `${s.color}40` : "rgba(255,255,255,0.06)"}`, color: statusFilter === s.v ? s.color : "#7E8595", fontSize:11, fontWeight:700, letterSpacing:1.2, textTransform:"uppercase", padding:"8px 14px", borderRadius:10, cursor:"pointer", fontFamily:"inherit", transition:"all 0.18s", display:"flex", alignItems:"center", gap:8 }}>
+              style={{ background: statusFilter === s.v ? `${s.color}14` : "rgba(0,0,0,0.02)", border:`1px solid ${statusFilter === s.v ? `${s.color}40` : "rgba(15,23,42,0.10)"}`, color: statusFilter === s.v ? s.color : "var(--text-muted)", fontSize:11, fontWeight:700, letterSpacing:1.2, textTransform:"uppercase", padding:"8px 14px", borderRadius:10, cursor:"pointer", fontFamily:"inherit", transition:"all 0.18s", display:"flex", alignItems:"center", gap:8 }}>
               <span style={{ width:6, height:6, borderRadius:"50%", background:s.color, opacity: statusFilter === s.v ? 1 : 0.5 }} />
-              {s.label} <span style={{ fontVariantNumeric:"tabular-nums", color: statusFilter === s.v ? s.color : "#5E6376", fontSize:11 }}>{counts[s.v] ?? 0}</span>
+              {s.label} <span style={{ fontVariantNumeric:"tabular-nums", color: statusFilter === s.v ? s.color : "var(--text-faint)", fontSize:11 }}>{counts[s.v] ?? 0}</span>
             </button>
           ))}
         </div>
@@ -1917,14 +1791,14 @@ function Leads({ session, profile, w }) {
 
       {/* Leads list */}
       {loading ? (
-        <div style={{ textAlign:"center", padding:60, color:"#666C7E", fontSize:13 }}>Loading…</div>
+        <div style={{ textAlign:"center", padding:60, color:"var(--text-muted)", fontSize:13 }}>Loading…</div>
       ) : visible.length === 0 ? (
         <div className="dash-card" style={{ padding:"48px 24px", textAlign:"center" }}>
           <div style={{ width:54, height:54, borderRadius:16, background:"rgba(6,214,240,0.08)", border:"1px solid rgba(6,214,240,0.2)", display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 16px" }}>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#06D6F0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
           </div>
-          <div style={{ fontSize:14, fontWeight:700, color:"#D6DAE2", marginBottom:6 }}>No leads {statusFilter === "all" ? "yet" : `· ${statusByV[statusFilter]?.label ?? statusFilter}`}</div>
-          <div style={{ fontSize:12, color:"#666C7E" }}>{isAdmin ? "Upload a CSV above to assign leads to a rep." : "When admin sends you leads, they'll show up here."}</div>
+          <div style={{ fontSize:14, fontWeight:700, color:"var(--text-2)", marginBottom:6 }}>No leads {statusFilter === "all" ? "yet" : `· ${statusByV[statusFilter]?.label ?? statusFilter}`}</div>
+          <div style={{ fontSize:12, color:"var(--text-muted)" }}>{isAdmin ? "Upload a CSV above to assign leads to a rep." : "When admin sends you leads, they'll show up here."}</div>
         </div>
       ) : (
         <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
@@ -1933,7 +1807,7 @@ function Leads({ session, profile, w }) {
             const isExpanded = expandedId === l.id;
             const data = l.data || {};
             return (
-              <div key={l.id} className="dash-card" style={{ padding:0, animation:`fadeUp 0.3s ease ${0.03*i}s both`, overflow:"hidden", position:"relative", borderColor: selected.has(l.id) ? "rgba(204,255,0,0.35)" : undefined }}>
+              <div key={l.id} className="dash-card" style={{ padding:0, animation:`fadeUp 0.3s ease ${0.03*i}s both`, overflow:"hidden", position:"relative", borderColor: selected.has(l.id) ? "rgba(220,38,38,0.35)" : undefined }}>
                 <div style={{ position:"absolute", left:0, top:0, bottom:0, width:3, background:s.color, opacity:isExpanded?1:0.7 }} />
                 <div onClick={() => { setExpandedId(isExpanded ? null : l.id); setDraftNote(l.note || ""); }}
                   style={{ display:"flex", alignItems:"center", gap:dk?16:12, cursor:"pointer", padding:dk?"16px 20px 16px 22px":"14px 14px 14px 18px" }}>
@@ -1944,38 +1818,38 @@ function Leads({ session, profile, w }) {
                       aria-label={selected.has(l.id) ? "Deselect lead" : "Select lead"}
                       style={{
                         width:20, height:20, flexShrink:0, padding:0, cursor:"pointer",
-                        background: selected.has(l.id) ? "#CCFF00" : "transparent",
-                        border:`1.5px solid ${selected.has(l.id) ? "#CCFF00" : "rgba(255,255,255,0.18)"}`,
+                        background: selected.has(l.id) ? "#DC2626" : "transparent",
+                        border:`1.5px solid ${selected.has(l.id) ? "#DC2626" : "rgba(0,0,0,0.18)"}`,
                         borderRadius:5, display:"flex", alignItems:"center", justifyContent:"center",
                         transition:"all 0.12s ease",
                       }}>
                       {selected.has(l.id) && (
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#15171E" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                       )}
                     </button>
                   )}
                   <div style={{ flex:1, minWidth:0 }}>
-                    <div style={{ fontSize:dk?14.5:13.5, fontWeight:700, color:"#EEF2F8", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", letterSpacing:"-0.005em" }}>{primaryLine(data)}</div>
-                    {secondaryLine(data) && <div style={{ fontSize:11.5, color:"#666C7E", marginTop:4, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{secondaryLine(data)}</div>}
+                    <div style={{ fontSize:dk?14.5:13.5, fontWeight:700, color:"var(--text)", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", letterSpacing:"-0.005em" }}>{primaryLine(data)}</div>
+                    {secondaryLine(data) && <div style={{ fontSize:11.5, color:"var(--text-muted)", marginTop:4, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{secondaryLine(data)}</div>}
                   </div>
                   <span style={{ fontSize:9, fontWeight:800, color:s.color, background:`${s.color}14`, border:`1px solid ${s.color}30`, padding:"4px 9px", borderRadius:5, letterSpacing:1.5, textTransform:"uppercase", flexShrink:0 }}>{s.label}</span>
                   {isAdmin && (
-                    <span style={{ fontSize:10.5, fontWeight:700, color:"#9098A8", flexShrink:0 }}>→ {repById[l.assigned_to] || "Rep"}</span>
+                    <span style={{ fontSize:10.5, fontWeight:700, color:"var(--text-muted)", flexShrink:0 }}>→ {repById[l.assigned_to] || "Rep"}</span>
                   )}
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5E6376" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0, transform: isExpanded ? "rotate(90deg)" : "none", transition:"transform 0.18s" }}><polyline points="9 18 15 12 9 6"/></svg>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0, transform: isExpanded ? "rotate(90deg)" : "none", transition:"transform 0.18s" }}><polyline points="9 18 15 12 9 6"/></svg>
                 </div>
 
                 {isExpanded && (
-                  <div style={{ padding:dk?"16px 20px 18px 22px":"14px 14px 16px 18px", borderTop:"1px solid rgba(255,255,255,0.06)", display:"flex", flexDirection:"column", gap:14, animation:"fadeUp 0.2s ease" }}>
+                  <div style={{ padding:dk?"16px 20px 18px 22px":"14px 14px 16px 18px", borderTop:"1px solid var(--border)", display:"flex", flexDirection:"column", gap:14, animation:"fadeUp 0.2s ease" }}>
                     {/* Booking-call opener — pre-filled from CSV data */}
                     {(() => {
                       const script = bookingScript(l);
                       return (
-                        <div style={{ position:"relative", padding:dk?"14px 16px 14px 16px":"12px 12px", background:"rgba(204,255,0,0.05)", border:"1px solid rgba(204,255,0,0.22)", borderRadius:10 }}>
+                        <div style={{ position:"relative", padding:dk?"14px 16px 14px 16px":"12px 12px", background:"rgba(220,38,38,0.05)", border:"1px solid rgba(220,38,38,0.22)", borderRadius:10 }}>
                           <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:8 }}>
                             <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#CCFF00" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                              <div style={{ fontSize:9, fontWeight:800, color:"#CCFF00", letterSpacing:1.6, textTransform:"uppercase" }}>Booking-call opener</div>
+                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                              <div style={{ fontSize:9, fontWeight:800, color:"#DC2626", letterSpacing:1.6, textTransform:"uppercase" }}>Booking-call opener</div>
                             </div>
                             <button
                               type="button"
@@ -1990,12 +1864,12 @@ function Leads({ session, profile, w }) {
                                 } catch { /* ignore */ }
                               }}
                               title="Copy script"
-                              style={{ background:"rgba(204,255,0,0.10)", border:"1px solid rgba(204,255,0,0.30)", color:"#CCFF00", fontSize:9.5, fontWeight:800, letterSpacing:1.4, textTransform:"uppercase", padding:"5px 10px", borderRadius:6, cursor:"pointer", fontFamily:"inherit", display:"flex", alignItems:"center", gap:5 }}>
+                              style={{ background:"rgba(220,38,38,0.10)", border:"1px solid rgba(220,38,38,0.30)", color:"#DC2626", fontSize:9.5, fontWeight:800, letterSpacing:1.4, textTransform:"uppercase", padding:"5px 10px", borderRadius:6, cursor:"pointer", fontFamily:"inherit", display:"flex", alignItems:"center", gap:5 }}>
                               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                               Copy
                             </button>
                           </div>
-                          <p style={{ fontSize:dk?13.5:12.5, color:"#EEF2F8", lineHeight:1.55, fontWeight:500, margin:0, whiteSpace:"pre-wrap" }}>{script}</p>
+                          <p style={{ fontSize:dk?13.5:12.5, color:"var(--text)", lineHeight:1.55, fontWeight:500, margin:0, whiteSpace:"pre-wrap" }}>{script}</p>
                         </div>
                       );
                     })()}
@@ -2004,19 +1878,19 @@ function Leads({ session, profile, w }) {
                     <div style={{ display:"grid", gridTemplateColumns:dk?"repeat(auto-fill, minmax(200px, 1fr))":"1fr", gap:10 }}>
                       {Object.entries(data).map(([k, v]) => (
                         <div key={k}>
-                          <div style={{ fontSize:9, fontWeight:800, color:"#5E6376", letterSpacing:1.5, textTransform:"uppercase", marginBottom:3 }}>{k}</div>
-                          <div style={{ fontSize:12.5, color:"#EEF2F8", fontWeight:500, wordBreak:"break-word" }}>{renderValue(v)}</div>
+                          <div style={{ fontSize:9, fontWeight:800, color:"var(--text-muted)", letterSpacing:1.5, textTransform:"uppercase", marginBottom:3 }}>{k}</div>
+                          <div style={{ fontSize:12.5, color:"var(--text)", fontWeight:500, wordBreak:"break-word" }}>{renderValue(v)}</div>
                         </div>
                       ))}
                     </div>
 
                     {/* Status setter */}
                     <div>
-                      <div style={{ fontSize:9, fontWeight:800, color:"#5E6376", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Update status</div>
+                      <div style={{ fontSize:9, fontWeight:800, color:"var(--text-muted)", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Update status</div>
                       <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
                         {STATUSES.map(opt => (
                           <button key={opt.v} onClick={() => setStatus(l.id, opt.v)}
-                            style={{ background: l.status === opt.v ? `${opt.color}18` : "rgba(255,255,255,0.04)", border:`1px solid ${l.status === opt.v ? `${opt.color}55` : "rgba(255,255,255,0.07)"}`, color: l.status === opt.v ? opt.color : "#9098A8", fontSize:10, fontWeight:800, letterSpacing:1.3, textTransform:"uppercase", padding:"6px 12px", borderRadius:7, cursor:"pointer", fontFamily:"inherit", transition:"all 0.18s" }}>
+                            style={{ background: l.status === opt.v ? `${opt.color}18` : "rgba(15,23,42,0.04)", border:`1px solid ${l.status === opt.v ? `${opt.color}55` : "rgba(15,23,42,0.10)"}`, color: l.status === opt.v ? opt.color : "var(--text-muted)", fontSize:10, fontWeight:800, letterSpacing:1.3, textTransform:"uppercase", padding:"6px 12px", borderRadius:7, cursor:"pointer", fontFamily:"inherit", transition:"all 0.18s" }}>
                             {opt.label}
                           </button>
                         ))}
@@ -2026,11 +1900,11 @@ function Leads({ session, profile, w }) {
                     {/* Reassign (admin only) */}
                     {isAdmin && (
                       <div>
-                        <div style={{ fontSize:9, fontWeight:800, color:"#5E6376", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Assigned to</div>
+                        <div style={{ fontSize:9, fontWeight:800, color:"var(--text-muted)", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Assigned to</div>
                         <select
                           value={l.assigned_to}
                           onChange={e => { if (e.target.value !== l.assigned_to) reassignOne(l.id, e.target.value); }}
-                          style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:8, color:"#F2F4F8", fontSize:12.5, fontWeight:600, padding:"9px 12px", fontFamily:"inherit", outline:"none", cursor:"pointer", minWidth:200 }}>
+                          style={{ background:"rgba(15,23,42,0.04)", border:"1px solid var(--border)", borderRadius:8, color:"var(--text)", fontSize:12.5, fontWeight:600, padding:"9px 12px", fontFamily:"inherit", outline:"none", cursor:"pointer", minWidth:200 }}>
                           {reps.length === 0 && <option>No reps available</option>}
                           {reps.map(r => <option key={r.id} value={r.id}>{r.name || "Rep"}</option>)}
                         </select>
@@ -2039,16 +1913,16 @@ function Leads({ session, profile, w }) {
 
                     {/* Note */}
                     <div>
-                      <div style={{ fontSize:9, fontWeight:800, color:"#5E6376", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Note</div>
+                      <div style={{ fontSize:9, fontWeight:800, color:"var(--text-muted)", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Note</div>
                       <textarea
                         value={draftNote}
                         onChange={e => setDraftNote(e.target.value)}
                         placeholder="Call notes, contact attempts, next steps…"
                         rows={2}
-                        style={{ width:"100%", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:10, color:"#F2F4F8", fontSize:12.5, fontWeight:500, padding:"10px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box", resize:"vertical", lineHeight:1.5 }}
+                        style={{ width:"100%", background:"rgba(15,23,42,0.04)", border:"1px solid var(--border)", borderRadius:10, color:"var(--text)", fontSize:12.5, fontWeight:500, padding:"10px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box", resize:"vertical", lineHeight:1.5 }}
                       />
                       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginTop:8 }}>
-                        <div style={{ fontSize:10, color:"#5E6376" }}>
+                        <div style={{ fontSize:10, color:"var(--text-muted)" }}>
                           Assigned {new Date(l.created_at).toLocaleDateString("en-US",{ month:"short", day:"numeric" })}
                           {l.assigned_by && repById[l.assigned_by] ? ` · by ${repById[l.assigned_by]}` : ""}
                         </div>
@@ -2076,15 +1950,15 @@ function Leads({ session, profile, w }) {
             bottom: dk ? 24 : 16, zIndex:80,
             display:"flex", alignItems:"center", flexWrap:"wrap", gap:dk?10:6,
             padding: dk ? "10px 14px" : "8px 10px",
-            background:"#15171E",
-            border:"1px solid rgba(204,255,0,0.30)",
+            background:"var(--surface)",
+            border:"1px solid rgba(220,38,38,0.30)",
             borderRadius:14,
-            boxShadow:"0 18px 50px rgba(0,0,0,0.55), 0 0 0 1px rgba(0,0,0,0.4)",
+            boxShadow:"0 18px 50px rgba(15,23,42,0.08), 0 0 0 1px rgba(15,23,42,0.06)",
             maxWidth:"calc(100vw - 24px)",
           }}>
-          <div style={{ display:"flex", alignItems:"center", gap:8, paddingRight:8, borderRight:"1px solid rgba(255,255,255,0.08)" }}>
-            <span className="mono" style={{ fontSize:14, fontWeight:600, color:"#CCFF00" }}>{selected.size}</span>
-            <span style={{ fontSize:11, fontWeight:700, color:"#9098A8", letterSpacing:1.2, textTransform:"uppercase" }}>selected</span>
+          <div style={{ display:"flex", alignItems:"center", gap:8, paddingRight:8, borderRight:"1px solid var(--border)" }}>
+            <span className="mono" style={{ fontSize:14, fontWeight:600, color:"#DC2626" }}>{selected.size}</span>
+            <span style={{ fontSize:11, fontWeight:700, color:"var(--text-muted)", letterSpacing:1.2, textTransform:"uppercase" }}>selected</span>
           </div>
 
           {/* Reassign */}
@@ -2092,7 +1966,7 @@ function Leads({ session, profile, w }) {
             value=""
             onChange={e => { if (e.target.value) { bulkReassign(e.target.value); e.target.value = ""; } }}
             disabled={bulkBusy || reps.length === 0}
-            style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.10)", color:"#F2F4F8", fontSize:12, fontWeight:600, padding:"7px 10px", borderRadius:8, fontFamily:"inherit", cursor: bulkBusy ? "wait" : "pointer", outline:"none" }}>
+            style={{ background:"rgba(15,23,42,0.06)", border:"1px solid rgba(15,23,42,0.14)", color:"var(--text)", fontSize:12, fontWeight:600, padding:"7px 10px", borderRadius:8, fontFamily:"inherit", cursor: bulkBusy ? "wait" : "pointer", outline:"none" }}>
             <option value="">Reassign to…</option>
             {reps.map(r => <option key={r.id} value={r.id}>{r.name || "Rep"}</option>)}
           </select>
@@ -2102,7 +1976,7 @@ function Leads({ session, profile, w }) {
             value=""
             onChange={e => { if (e.target.value) { bulkSetStatus(e.target.value); e.target.value = ""; } }}
             disabled={bulkBusy}
-            style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.10)", color:"#F2F4F8", fontSize:12, fontWeight:600, padding:"7px 10px", borderRadius:8, fontFamily:"inherit", cursor: bulkBusy ? "wait" : "pointer", outline:"none" }}>
+            style={{ background:"rgba(15,23,42,0.06)", border:"1px solid rgba(15,23,42,0.14)", color:"var(--text)", fontSize:12, fontWeight:600, padding:"7px 10px", borderRadius:8, fontFamily:"inherit", cursor: bulkBusy ? "wait" : "pointer", outline:"none" }}>
             <option value="">Move to…</option>
             {STATUSES.map(opt => <option key={opt.v} value={opt.v}>{opt.label}</option>)}
           </select>
@@ -2118,386 +1992,12 @@ function Leads({ session, profile, w }) {
 
           {/* Clear */}
           <button onClick={clearSelection} disabled={bulkBusy}
-            style={{ background:"transparent", border:"1px solid rgba(255,255,255,0.10)", color:"#9098A8", fontSize:11, fontWeight:700, letterSpacing:1.2, textTransform:"uppercase", padding:"7px 12px", borderRadius:8, cursor: bulkBusy ? "wait" : "pointer", fontFamily:"inherit" }}>
+            style={{ background:"transparent", border:"1px solid rgba(15,23,42,0.14)", color:"var(--text-muted)", fontSize:11, fontWeight:700, letterSpacing:1.2, textTransform:"uppercase", padding:"7px 12px", borderRadius:8, cursor: bulkBusy ? "wait" : "pointer", fontFamily:"inherit" }}>
             Cancel
           </button>
         </div>
       )}
     </div>
-  );
-}
-
-function Chat({ session, profile, w, width, minW = 220, maxW = 520, onResize }) {
-  const [msgs, setMsgs] = useState([]);
-  const [reps, setReps] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [body, setBody] = useState("");
-  const [sending, setSending] = useState(false);
-  const [typing, setTyping] = useState({}); // { uid: { name, t: epoch } }
-  const scrollRef = useRef(null);
-  const stickyRef = useRef(true);
-  const channelRef = useRef(null);
-  const lastTypingSentRef = useRef(0);
-  const dk = w >= 768;
-  const isAdmin = profile?.role === "admin";
-  const myName = profile?.name || "Rep";
-
-  const load = async () => {
-    const [mRes, pRes] = await Promise.all([
-      supabase.from("messages").select("id, user_id, body, created_at").order("created_at", { ascending: true }).limit(200),
-      supabase.from("profiles").select("id, name, role"),
-    ]);
-    setMsgs(mRes.data ?? []);
-    const pm = {};
-    for (const p of pRes.data ?? []) pm[p.id] = { name: p.name || "Rep", role: p.role };
-    setReps(pm);
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    load();
-    const ch = supabase.channel("messages-rt", { config: { broadcast: { self: false } } });
-    ch.on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, (payload) => {
-        setMsgs(prev => prev.some(m => m.id === payload.new.id) ? prev : [...prev, payload.new]);
-        // Hide typing indicator for the sender as soon as their message arrives
-        setTyping(prev => {
-          if (!prev[payload.new.user_id]) return prev;
-          const next = { ...prev }; delete next[payload.new.user_id]; return next;
-        });
-      })
-      .on("postgres_changes", { event: "DELETE", schema: "public", table: "messages" }, (payload) => {
-        setMsgs(prev => prev.filter(m => m.id !== payload.old.id));
-      })
-      .on("broadcast", { event: "typing" }, ({ payload }) => {
-        if (!payload?.uid || payload.uid === session.user.id) return;
-        setTyping(prev => ({ ...prev, [payload.uid]: { name: payload.name || "Rep", t: Date.now() } }));
-      })
-      .on("broadcast", { event: "stop_typing" }, ({ payload }) => {
-        if (!payload?.uid) return;
-        setTyping(prev => {
-          if (!prev[payload.uid]) return prev;
-          const next = { ...prev }; delete next[payload.uid]; return next;
-        });
-      })
-      .subscribe();
-    channelRef.current = ch;
-
-    // Tick to expire stale typing entries after 4s of silence
-    const tick = setInterval(() => {
-      const now = Date.now();
-      setTyping(prev => {
-        let changed = false;
-        const next = {};
-        for (const [uid, info] of Object.entries(prev)) {
-          if (now - info.t < 4000) next[uid] = info; else changed = true;
-        }
-        return changed ? next : prev;
-      });
-    }, 1000);
-
-    return () => { clearInterval(tick); supabase.removeChannel(ch); channelRef.current = null; };
-  }, []);
-
-  const broadcastTyping = () => {
-    if (!channelRef.current) return;
-    const now = Date.now();
-    if (now - lastTypingSentRef.current < 1500) return;
-    lastTypingSentRef.current = now;
-    channelRef.current.send({ type:"broadcast", event:"typing", payload: { uid: session.user.id, name: myName } });
-  };
-
-  const broadcastStopTyping = () => {
-    if (!channelRef.current) return;
-    lastTypingSentRef.current = 0;
-    channelRef.current.send({ type:"broadcast", event:"stop_typing", payload: { uid: session.user.id } });
-  };
-
-  const onScroll = () => {
-    const el = scrollRef.current; if (!el) return;
-    stickyRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
-  };
-
-  useEffect(() => {
-    if (loading) return;
-    const el = scrollRef.current; if (!el) return;
-    if (stickyRef.current) el.scrollTop = el.scrollHeight;
-  }, [msgs, loading]);
-
-  const send = async () => {
-    const trimmed = body.trim();
-    if (!trimmed || sending) return;
-    setSending(true);
-    const { data, error } = await supabase
-      .from("messages")
-      .insert({ user_id: session.user.id, body: trimmed })
-      .select()
-      .single();
-    setSending(false);
-    if (error || !data) {
-      alert(`Couldn't send: ${error?.message ?? "no row returned (likely RLS or missing 'messages' table)"}`);
-      return;
-    }
-    setBody("");
-    broadcastStopTyping();
-    stickyRef.current = true;
-    setMsgs(prev => prev.some(m => m.id === data.id) ? prev : [...prev, data]);
-  };
-
-  const onBodyChange = (val) => {
-    setBody(val);
-    if (val.trim()) broadcastTyping();
-    else broadcastStopTyping();
-  };
-
-  const remove = async (id) => {
-    if (!confirm("Delete this message?")) return;
-    const { error } = await supabase.from("messages").delete().eq("id", id);
-    if (error) { alert(`Couldn't delete: ${error.message}`); return; }
-    setMsgs(prev => prev.filter(m => m.id !== id));
-  };
-
-  const fmtTime = (iso) => new Date(iso).toLocaleTimeString("en-US",{ hour:"numeric", minute:"2-digit" });
-  const fmtDay = (iso) => {
-    const d = new Date(iso);
-    const today = new Date(); today.setHours(0,0,0,0);
-    const ds = new Date(d); ds.setHours(0,0,0,0);
-    const diff = Math.round((today - ds) / 86400000);
-    if (diff === 0) return "Today";
-    if (diff === 1) return "Yesterday";
-    if (diff < 7) return d.toLocaleDateString("en-US",{ weekday:"long" });
-    return d.toLocaleDateString("en-US",{ month:"short", day:"numeric", year: d.getFullYear() === today.getFullYear() ? undefined : "numeric" });
-  };
-
-  // Group messages by day, then collapse runs by same author within 3 minutes
-  const grouped = [];
-  let lastDay = null, lastUid = null, lastTs = 0;
-  for (const m of msgs) {
-    const day = fmtDay(m.created_at);
-    if (day !== lastDay) {
-      grouped.push({ kind: "day", id: `d-${day}-${m.id}`, label: day });
-      lastDay = day; lastUid = null;
-    }
-    const ts = new Date(m.created_at).getTime();
-    const continued = m.user_id === lastUid && (ts - lastTs) < 3 * 60 * 1000;
-    grouped.push({ kind: "msg", continued, ...m });
-    lastUid = m.user_id; lastTs = ts;
-  }
-
-  const onKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
-  };
-
-  const palette = ["#CCFF00","#06D6F0","#F59E0B","#FFD700","#A78BFA","#22C55E","#FF7AB6","#FB7185"];
-  const colorFor = (uid) => {
-    let h = 0; for (let i = 0; i < uid.length; i++) h = (h * 31 + uid.charCodeAt(i)) >>> 0;
-    return palette[h % palette.length];
-  };
-
-  // Hide on small mobile screens (no room for a permanent sidebar).
-  if (w < 768) return null;
-  const sidebarW = typeof width === "number" ? width : (w >= 1280 ? 320 : 280);
-
-  // Drag-to-resize the sidebar
-  const dragRef = useRef({ active: false });
-  const startDrag = (e) => {
-    e.preventDefault();
-    dragRef.current.active = true;
-    document.body.style.cursor = "ew-resize";
-    document.body.style.userSelect = "none";
-    const move = (ev) => {
-      if (!dragRef.current.active) return;
-      const x = ev.clientX ?? (ev.touches && ev.touches[0]?.clientX) ?? 0;
-      const next = Math.max(minW, Math.min(maxW, x));
-      onResize?.(next);
-    };
-    const up = () => {
-      dragRef.current.active = false;
-      document.body.style.cursor = "";
-      document.body.style.userSelect = "";
-      window.removeEventListener("mousemove", move);
-      window.removeEventListener("mouseup", up);
-      window.removeEventListener("touchmove", move);
-      window.removeEventListener("touchend", up);
-    };
-    window.addEventListener("mousemove", move);
-    window.addEventListener("mouseup", up);
-    window.addEventListener("touchmove", move);
-    window.addEventListener("touchend", up);
-  };
-
-  return (
-    <>
-      {/* Permanent left sidebar */}
-      <aside
-        style={{
-          position:"fixed", left:0, top:0, bottom:0, zIndex:40,
-          width:sidebarW,
-          display:"flex", flexDirection:"column",
-          background:"linear-gradient(180deg, rgba(18,20,26,0.97), rgba(11,12,16,0.97))",
-          backdropFilter:"blur(24px) saturate(140%)",
-          WebkitBackdropFilter:"blur(24px) saturate(140%)",
-          borderRight:"1px solid rgba(255,255,255,0.06)",
-          boxShadow:"8px 0 40px rgba(0,0,0,0.45)",
-          overflow:"hidden",
-        }}>
-        {/* Resize handle */}
-        <div
-          onMouseDown={startDrag}
-          onTouchStart={startDrag}
-          title="Drag to resize"
-          className="chat-resize-handle"
-          style={{
-            position:"absolute", top:0, bottom:0, right:-4, width:10,
-            cursor:"ew-resize", zIndex:41, touchAction:"none",
-          }}>
-          <div className="chat-resize-grip" style={{
-            position:"absolute", top:"50%", right:1, transform:"translateY(-50%)",
-            width:3, height:46, borderRadius:2,
-            background:"rgba(255,255,255,0.07)",
-            transition:"background 0.15s ease, height 0.15s ease",
-          }} />
-        </div>
-
-        {/* Header */}
-        <div style={{ display:"flex", alignItems:"center", gap:10, padding:"18px 20px", borderBottom:"1px solid rgba(255,255,255,0.05)", flexShrink:0, position:"relative" }}>
-          <div className="display" style={{ fontSize:18, color:"#F2F4F8", letterSpacing:"0.08em" }}>TEAM CHAT</div>
-        </div>
-
-        {/* Messages */}
-        <div style={{ flex:1, position:"relative", minHeight:0 }}>
-          {/* Top fade — softens the line where messages disappear under the header */}
-          <div aria-hidden="true" style={{ position:"absolute", top:0, left:0, right:0, height:24, background:"linear-gradient(180deg, rgba(11,12,16,0.85), transparent)", pointerEvents:"none", zIndex:1 }} />
-          <div ref={scrollRef} onScroll={onScroll} className="chat-scroll" style={{ position:"absolute", inset:0, overflowY:"auto", padding:dk?"16px 22px":"14px 16px" }}>
-          {loading ? (
-            <div style={{ textAlign:"center", padding:60, color:"#666C7E", fontSize:13 }}>Loading…</div>
-          ) : msgs.length === 0 ? (
-            <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", height:"100%", textAlign:"center", color:"#666C7E", padding:"40px 20px" }}>
-              <div style={{ width:54, height:54, borderRadius:16, background:"rgba(204,255,0,0.08)", border:"1px solid rgba(204,255,0,0.2)", display:"flex", alignItems:"center", justifyContent:"center", marginBottom:14 }}>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#CCFF00" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-              </div>
-              <div style={{ fontSize:14, fontWeight:700, color:"#D6DAE2", marginBottom:6 }}>No messages yet</div>
-              <div style={{ fontSize:12 }}>Send the first one.</div>
-            </div>
-          ) : (
-            <div style={{ display:"flex", flexDirection:"column", gap:2 }}>
-              {grouped.map(g => {
-                if (g.kind === "day") return (
-                  <div key={g.id} style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:12, margin:"22px 0 12px" }}>
-                    <div style={{ flex:1, height:1, background:"linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent)" }} />
-                    <div style={{ fontSize:9, fontWeight:800, color:"#7E8595", letterSpacing:2, textTransform:"uppercase", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.06)", padding:"4px 10px", borderRadius:999, whiteSpace:"nowrap" }}>{g.label}</div>
-                    <div style={{ flex:1, height:1, background:"linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent)" }} />
-                  </div>
-                );
-                const isMe = g.user_id === session.user.id;
-                const r = reps[g.user_id];
-                const name = r?.name || "Rep";
-                const isAdminMsg = r?.role === "admin";
-                const c = colorFor(g.user_id);
-                return (
-                  <div key={g.id} style={{ display:"flex", flexDirection: isMe ? "row-reverse" : "row", gap:10, marginTop:g.continued?2:10, alignItems:"flex-end" }}>
-                    <div style={{ width:32, height:32, flexShrink:0, visibility: g.continued ? "hidden" : "visible" }}>
-                      <div style={{ width:32, height:32, borderRadius:10, background: isMe ? "linear-gradient(135deg,#CCFF00,#88AB00)" : `linear-gradient(135deg,${c},${c}88)`, display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Geist',sans-serif", fontSize:12.5, fontWeight:900, color:"#15171E", boxShadow: isMe ? "0 4px 14px rgba(204,255,0,0.32), inset 0 1px 0 rgba(255,255,255,0.4)" : `0 3px 10px ${c}40, inset 0 1px 0 rgba(255,255,255,0.3)` }}>
-                        {name[0]?.toUpperCase()}
-                      </div>
-                    </div>
-                    <div style={{ maxWidth:"min(74%, 560px)", display:"flex", flexDirection:"column", alignItems: isMe ? "flex-end" : "flex-start" }}>
-                      {!g.continued && (
-                        <div style={{ display:"flex", gap:8, alignItems:"baseline", padding: isMe ? "0 4px 5px 0" : "0 0 5px 4px", flexDirection: isMe ? "row-reverse" : "row" }}>
-                          <span style={{ fontSize:11, fontWeight:700, color: isMe ? "#CCFF00" : "#D6DAE2", letterSpacing:"-0.005em" }}>{isMe ? "You" : name}</span>
-                          {isAdminMsg && !isMe && <span style={{ fontSize:8, fontWeight:800, color:"#F59E0B", background:"rgba(245,158,11,0.12)", border:"1px solid rgba(245,158,11,0.25)", padding:"1.5px 6px", borderRadius:4, letterSpacing:1.5, textTransform:"uppercase" }}>Admin</span>}
-                          <span style={{ fontSize:9.5, color:"#5E6376" }}>{fmtTime(g.created_at)}</span>
-                        </div>
-                      )}
-                      <div className="chat-bubble" style={{ position:"relative", padding:"10px 14px", background: isMe ? "linear-gradient(135deg,rgba(204,255,0,0.18),rgba(204,255,0,0.07))" : "linear-gradient(180deg,rgba(255,255,255,0.055),rgba(255,255,255,0.035))", border:`1px solid ${isMe ? "rgba(204,255,0,0.3)" : "rgba(255,255,255,0.08)"}`, borderRadius: g.continued
-                        ? (isMe ? "18px 6px 18px 18px" : "6px 18px 18px 18px")
-                        : (isMe ? "18px 4px 18px 18px" : "4px 18px 18px 18px"),
-                        color:"#EEF2F8", fontSize:13.5, lineHeight:1.5, fontWeight:500, whiteSpace:"pre-wrap", wordBreak:"break-word", boxShadow: isMe ? "0 2px 12px rgba(204,255,0,0.08)" : "0 2px 10px rgba(0,0,0,0.25)", transition:"border-color 0.18s ease, background 0.18s ease" }}>
-                        {g.body}
-                        {(isMe || isAdmin) && (
-                          <button onClick={() => remove(g.id)} title="Delete message" className="msg-del"
-                            style={{ position:"absolute", top:-8, right: isMe ? -8 : "auto", left: isMe ? "auto" : -8, width:22, height:22, borderRadius:6, background:"rgba(20,22,28,0.95)", border:"1px solid rgba(255,255,255,0.1)", color:"#666C7E", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", padding:0, transition:"all 0.15s", opacity:0, pointerEvents:"none" }}>
-                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-          </div>
-        </div>
-
-        {/* Typing indicator */}
-        {(() => {
-          const others = Object.entries(typing).filter(([uid]) => uid !== session.user.id).map(([, v]) => v.name);
-          if (others.length === 0) return null;
-          const label = others.length === 1
-            ? `${others[0]} is typing`
-            : others.length === 2
-              ? `${others[0]} and ${others[1]} are typing`
-              : `${others.length} people are typing`;
-          return (
-            <div style={{ display:"flex", alignItems:"center", gap:10, padding:dk?"8px 22px 0":"6px 16px 0", flexShrink:0, color:"#A0A4B0", fontSize:11.5, fontWeight:600, height:22, animation:"fadeIn 0.2s ease" }}>
-              <span className="typing-dots" aria-hidden="true">
-                <span /><span /><span />
-              </span>
-              <span>{label}</span>
-            </div>
-          );
-        })()}
-
-        {/* Composer */}
-        <div style={{ display:"flex", gap:10, padding:dk?"12px 18px 16px":"10px 14px 14px", borderTop:"1px solid rgba(255,255,255,0.05)", background:"linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.025))", flexShrink:0, alignItems:"flex-end" }}>
-          <div className="chat-input-wrap" style={{ flex:1, position:"relative" }}>
-            <textarea
-              value={body}
-              onChange={e => onBodyChange(e.target.value)}
-              onBlur={() => { if (!body.trim()) broadcastStopTyping(); }}
-              onKeyDown={onKeyDown}
-              placeholder="Chat"
-              rows={1}
-              className="chat-input"
-              style={{ width:"100%", background:"rgba(255,255,255,0.045)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:14, color:"#F2F4F8", fontSize:13.5, fontWeight:500, padding:"12px 15px", fontFamily:"inherit", outline:"none", boxSizing:"border-box", resize:"none", lineHeight:1.5, maxHeight:140, transition:"border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease" }}
-            />
-          </div>
-          <button onClick={send} disabled={sending || !body.trim()} className="btn-primary chat-send"
-            aria-label="Send message"
-            style={{ width:42, height:42, padding:0, borderRadius:14, opacity: sending || !body.trim() ? 0.45 : 1, cursor: sending || !body.trim() ? "default" : "pointer", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-          </button>
-        </div>
-      </aside>
-
-      <style>{`
-        .chat-bubble:hover { border-color: rgba(255,255,255,0.14) !important; }
-        .chat-bubble:hover .msg-del { opacity: 1 !important; pointer-events: auto !important; }
-        .msg-del:hover { color: #DC2626 !important; border-color: rgba(220,38,38,0.4) !important; }
-
-        @keyframes typingBounce { 0%,80%,100% { transform: translateY(0); opacity: 0.4 } 40% { transform: translateY(-3px); opacity: 1 } }
-        .typing-dots { display:inline-flex; gap:3px; align-items:center }
-        .typing-dots span { width:4px; height:4px; border-radius:50%; background:#9098A8; display:inline-block; animation: typingBounce 1.2s ease-in-out infinite }
-        .typing-dots span:nth-child(2) { animation-delay: 0.15s }
-        .typing-dots span:nth-child(3) { animation-delay: 0.3s }
-
-        .chat-resize-handle:hover .chat-resize-grip,
-        .chat-resize-handle:active .chat-resize-grip { background: rgba(255,255,255,0.18) !important; height: 56px !important; }
-
-        .chat-input:focus {
-          border-color: rgba(255,255,255,0.18) !important;
-          background: rgba(255,255,255,0.055) !important;
-        }
-        .chat-input::placeholder { color: rgba(255,255,255,0.25); }
-
-        .chat-send:not(:disabled):hover { filter: brightness(1.05); }
-        .chat-send:not(:disabled):active { filter: brightness(0.95); }
-
-        .chat-scroll::-webkit-scrollbar { width: 5px; }
-        .chat-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.07); border-radius: 6px; }
-        .chat-scroll::-webkit-scrollbar-thumb:hover { background: rgba(204,255,0,0.35); }
-      `}</style>
-    </>
   );
 }
 
@@ -2610,14 +2110,14 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
                   height: h || 3,
                   background: v > 0
                     ? `linear-gradient(180deg,${accent},${accent}66)`
-                    : "rgba(255,255,255,0.06)",
+                    : "rgba(15,23,42,0.10)",
                   borderRadius:6,
                   boxShadow: v > 0 ? `0 0 12px ${accent}40` : "none",
                   border: isToday ? `1px solid ${accent}` : "none",
                   transition:"height 0.5s cubic-bezier(0.4,0,0.2,1)"
                 }} />
               </div>
-              <div style={{ fontSize:9, fontWeight:800, color: isToday ? accent : "#5E6376", letterSpacing:1 }}>{dayLabels[i]}</div>
+              <div style={{ fontSize:9, fontWeight:800, color: isToday ? accent : "var(--text-faint)", letterSpacing:1 }}>{dayLabels[i]}</div>
             </div>
           );
         })}
@@ -2633,15 +2133,15 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
     return (
       <div style={{ position:"relative", width:size, height:size, flexShrink:0 }}>
         <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-          <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={stroke} />
+          <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(15,23,42,0.10)" strokeWidth={stroke} />
           <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={accent} strokeWidth={stroke} strokeLinecap="round"
             strokeDasharray={c} strokeDashoffset={offset}
             transform={`rotate(-90 ${size/2} ${size/2})`}
             style={{ transition:"stroke-dashoffset 0.7s cubic-bezier(0.4,0,0.2,1)", filter:`drop-shadow(0 0 6px ${accent}55)` }} />
         </svg>
         <div style={{ position:"absolute", inset:0, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center" }}>
-          <div style={{ fontSize:18, fontWeight:900, color:"#F2F4F8", lineHeight:1, letterSpacing:"-0.02em" }}>{label}</div>
-          {sublabel && <div style={{ fontSize:8.5, fontWeight:800, color:"#666C7E", letterSpacing:1.5, textTransform:"uppercase", marginTop:3 }}>{sublabel}</div>}
+          <div style={{ fontSize:18, fontWeight:900, color:"var(--text)", lineHeight:1, letterSpacing:"-0.02em" }}>{label}</div>
+          {sublabel && <div style={{ fontSize:8.5, fontWeight:800, color:"var(--text-muted)", letterSpacing:1.5, textTransform:"uppercase", marginTop:3 }}>{sublabel}</div>}
         </div>
       </div>
     );
@@ -2651,7 +2151,7 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
     <div className="dash-card" onMouseMove={onCardMove}
       style={{ padding:dk?"22px 24px":"18px 20px", gridColumn: fullWidth && wd ? "1 / -1" : undefined }}>
       <div style={{ display:"flex", alignItems:"baseline", justifyContent:"space-between", marginBottom:16, position:"relative", gap:12 }}>
-        <div className="display" style={{ fontSize:dk?18:16, color:"#F2F4F8", letterSpacing:"0.07em" }}>{title}</div>
+        <div className="display" style={{ fontSize:dk?18:16, color:"var(--text)", letterSpacing:"0.07em" }}>{title}</div>
         {action && (
           <button onClick={actionOnClick} className="btn-ghost"
             style={{ fontSize:9.5, padding:"5px 9px", borderRadius:7, height:"auto" }}>
@@ -2663,7 +2163,7 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
     </div>
   );
 
-  if (loading) return <div style={{ textAlign:"center", padding:60, color:"#7E8290", fontSize:13 }}>Loading…</div>;
+  if (loading) return <div style={{ textAlign:"center", padding:60, color:"var(--text-muted)", fontSize:13 }}>Loading…</div>;
 
   return (
     <div style={{ animation:"fadeUp 0.35s ease", display:"grid", gridTemplateColumns: wd ? "1fr 1fr" : "1fr", gap:dk?18:14 }}>
@@ -2671,33 +2171,33 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
       {/* Tier Card — full width */}
       <div className="dash-card" onMouseMove={onCardMove}
         style={{ padding:dk?"22px 26px":"18px 18px", gridColumn: wd ? "1 / -1" : undefined }}>
-        <div style={{ fontSize:9, fontWeight:800, color:"#5E6376", letterSpacing:2.4, textTransform:"uppercase", marginBottom:14 }}>Current Tier</div>
+        <div style={{ fontSize:9, fontWeight:800, color:"var(--text-muted)", letterSpacing:2.4, textTransform:"uppercase", marginBottom:14 }}>Current Tier</div>
         <div style={{ display:"flex", alignItems:"center", gap:dk?12:6, position:"relative" }}>
           {/* Connector line that runs behind the badges */}
-          <div aria-hidden="true" style={{ position:"absolute", left:0, right:0, top:dk?22:18, height:1, background:"linear-gradient(90deg, rgba(255,255,255,0.04), rgba(255,255,255,0.08), rgba(255,255,255,0.04))", zIndex:0 }} />
+          <div aria-hidden="true" style={{ position:"absolute", left:0, right:0, top:dk?22:18, height:1, background:"linear-gradient(90deg, rgba(15,23,42,0.04), rgba(15,23,42,0.10), rgba(15,23,42,0.04))", zIndex:0 }} />
           {TIERS.map((t, i) => {
             const active = t.v === profile?.tier;
             const passed = tierIdx >= 0 && i < tierIdx;
-            const hero = "#CCFF00";
+            const hero = "#DC2626";
             return (
               <div key={t.v} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:8, position:"relative", zIndex:1 }}>
                 <div style={{
                   width:dk?46:34, height:dk?46:34, borderRadius:dk?13:10,
-                  background: active ? "rgba(204,255,0,0.10)" : passed ? "rgba(204,255,0,0.04)" : "rgba(255,255,255,0.025)",
-                  border: `1.5px solid ${active ? hero : passed ? "rgba(204,255,0,0.30)" : "rgba(255,255,255,0.07)"}`,
+                  background: active ? "rgba(220,38,38,0.10)" : passed ? "rgba(220,38,38,0.04)" : "rgba(15,23,42,0.04)",
+                  border: `1.5px solid ${active ? hero : passed ? "rgba(220,38,38,0.30)" : "rgba(15,23,42,0.10)"}`,
                   display:"flex", alignItems:"center", justifyContent:"center",
-                  boxShadow: active ? `0 0 28px rgba(204,255,0,0.32), 0 0 0 4px rgba(204,255,0,0.06)` : "none",
+                  boxShadow: active ? `0 0 28px rgba(220,38,38,0.32), 0 0 0 4px rgba(220,38,38,0.06)` : "none",
                   transition:"all 0.22s ease",
                 }}>
                   {active ? (
                     <span style={{ fontSize:dk?18:14, lineHeight:1 }}>{t.emoji}</span>
                   ) : passed ? (
-                    <svg width={dk?14:11} height={dk?14:11} viewBox="0 0 24 24" fill="none" stroke="#CCFF00" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    <svg width={dk?14:11} height={dk?14:11} viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                   ) : (
-                    <div style={{ width:5, height:5, borderRadius:"50%", background:"rgba(255,255,255,0.18)" }} />
+                    <div style={{ width:5, height:5, borderRadius:"50%", background:"rgba(0,0,0,0.18)" }} />
                   )}
                 </div>
-                <div className="display" style={{ fontSize:dk?13:11, color: active ? "#F2F4F8" : passed ? "#A0A4B0" : "#5E6376", letterSpacing:"0.06em" }}>{t.label}</div>
+                <div className="display" style={{ fontSize:dk?13:11, color: active ? "var(--text)" : passed ? "var(--text-3)" : "var(--text-faint)", letterSpacing:"0.06em" }}>{t.label}</div>
               </div>
             );
           })}
@@ -2705,7 +2205,7 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
       </div>
 
       {/* Your Week */}
-      <Card title="Your Week" accent="#CCFF00">
+      <Card title="Your Week" accent="#DC2626">
         <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:8 }}>
           {[
             { v: myRankWeek >= 0 ? myRankWeek + 1 : "—", unit: myRankWeek >= 0 ? "rank" : null, l: "Rank",     hero: false },
@@ -2713,23 +2213,23 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
             { v: trainingPct,                                 unit: "%",                                   l: "Training", hero: trainingPct === 100 },
             { v: doneQuizzes,                                 unit: `/${totalQuizzes}`,                    l: "Quizzes",  hero: doneQuizzes === totalQuizzes && totalQuizzes > 0 },
           ].map(s => (
-            <div key={s.l} style={{ background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:10, padding:"12px 8px", textAlign:"center" }}>
+            <div key={s.l} style={{ background:"rgba(0,0,0,0.02)", border:"1px solid var(--border)", borderRadius:10, padding:"12px 8px", textAlign:"center" }}>
               <div style={{ display:"flex", alignItems:"baseline", justifyContent:"center", gap:3 }}>
-                <span className="mono" style={{ fontSize:dk?24:20, fontWeight:600, color: s.hero ? "#CCFF00" : "#F2F4F8", lineHeight:1 }}>{s.v}</span>
-                {s.unit && <span className="mono" style={{ fontSize:dk?13:11, fontWeight:500, color: s.hero ? "rgba(204,255,0,0.55)" : "#5E6376", lineHeight:1 }}>{s.unit}</span>}
+                <span className="mono" style={{ fontSize:dk?24:20, fontWeight:600, color: s.hero ? "#DC2626" : "var(--text)", lineHeight:1 }}>{s.v}</span>
+                {s.unit && <span className="mono" style={{ fontSize:dk?13:11, fontWeight:500, color: s.hero ? "rgba(220,38,38,0.55)" : "var(--text-faint)", lineHeight:1 }}>{s.unit}</span>}
               </div>
-              <div style={{ fontSize:8.5, color:"#5E6376", textTransform:"uppercase", letterSpacing:1.6, fontWeight:700, marginTop:6 }}>{s.l}</div>
+              <div style={{ fontSize:8.5, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1.6, fontWeight:700, marginTop:6 }}>{s.l}</div>
             </div>
           ))}
         </div>
-        <div style={{ marginTop:16, padding:"14px 14px 10px", background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.05)", borderRadius:12 }}>
+        <div style={{ marginTop:16, padding:"14px 14px 10px", background:"rgba(0,0,0,0.02)", border:"1px solid var(--hairline)", borderRadius:12 }}>
           <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:10 }}>
-            <div style={{ fontSize:9, fontWeight:800, color:"#666C7E", letterSpacing:1.8, textTransform:"uppercase" }}>Daily Activity</div>
+            <div style={{ fontSize:9, fontWeight:800, color:"var(--text-muted)", letterSpacing:1.8, textTransform:"uppercase" }}>Daily Activity</div>
             {myWeek.total > 0 && (
-              <div className="mono" style={{ fontSize:12, fontWeight:600, color:"#CCFF00" }}>${myWeek.total.toLocaleString()}</div>
+              <div className="mono" style={{ fontSize:12, fontWeight:600, color:"#DC2626" }}>${myWeek.total.toLocaleString()}</div>
             )}
           </div>
-          <BarChart data={myDaily} accent="#CCFF00" highlight={todayIdx} height={dk?56:48} />
+          <BarChart data={myDaily} accent="#DC2626" highlight={todayIdx} height={dk?56:48} />
         </div>
       </Card>
 
@@ -2737,7 +2237,7 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
       <Card title="This Week" action="Leaderboard" actionOnClick={() => onGoTab("leaderboard")}>
         {rankedWeek.length === 0 ? (
           <button onClick={() => onGoTab("leaderboard")}
-            style={{ display:"block", width:"100%", padding:"10px 0", background:"transparent", border:"none", color:"#CCFF00", fontSize:13, fontWeight:700, letterSpacing:0.3, cursor:"pointer", fontFamily:"inherit", textAlign:"left" }}>
+            style={{ display:"block", width:"100%", padding:"10px 0", background:"transparent", border:"none", color:"#DC2626", fontSize:13, fontWeight:700, letterSpacing:0.3, cursor:"pointer", fontFamily:"inherit", textAlign:"left" }}>
             Be first on the board →
           </button>
         ) : (
@@ -2746,14 +2246,14 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
               const isMe = rep.uid === session.user.id;
               const leadCount = rankedWeek[0]?.count || 1;
               const pct = Math.max(8, Math.round((rep.count / leadCount) * 100));
-              const barColor = isMe ? "#CCFF00" : i===0 ? "#FFD700" : "#888D9C";
+              const barColor = isMe ? "#DC2626" : i===0 ? "#CA8A04" : "var(--text-muted)";
               return (
-                <div key={rep.uid} style={{ position:"relative", overflow:"hidden", background: isMe ? "rgba(204,255,0,0.06)" : i===0 ? "rgba(255,215,0,0.04)" : "rgba(255,255,255,0.025)", border:`1px solid ${isMe ? "rgba(204,255,0,0.18)" : i===0 ? "rgba(255,215,0,0.12)" : "rgba(255,255,255,0.06)"}`, borderRadius:10, padding:"10px 12px" }}>
+                <div key={rep.uid} style={{ position:"relative", overflow:"hidden", background: isMe ? "rgba(220,38,38,0.06)" : i===0 ? "rgba(202,138,4,0.04)" : "rgba(15,23,42,0.04)", border:`1px solid ${isMe ? "rgba(220,38,38,0.18)" : i===0 ? "rgba(202,138,4,0.12)" : "rgba(15,23,42,0.10)"}`, borderRadius:10, padding:"10px 12px" }}>
                   <div style={{ position:"absolute", inset:0, width:`${pct}%`, background:`linear-gradient(90deg,${barColor}18,${barColor}04)`, transition:"width 0.6s ease" }} />
                   <div style={{ position:"relative", display:"flex", alignItems:"center", gap:10 }}>
                     <div style={{ fontSize:16, minWidth:22, textAlign:"center" }}>{MEDALS[i]}</div>
-                    <div style={{ flex:1, minWidth:0, fontSize:12.5, fontWeight:700, color: isMe ? "#F2F4F8" : "#D6DAE2", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
-                      {rep.name}{isMe ? <span style={{ fontSize:9, fontWeight:700, color:"#CCFF00", letterSpacing:1.5, marginLeft:7, textTransform:"uppercase" }}>you</span> : ""}
+                    <div style={{ flex:1, minWidth:0, fontSize:12.5, fontWeight:700, color: isMe ? "var(--text)" : "var(--text-2)", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                      {rep.name}{isMe ? <span style={{ fontSize:9, fontWeight:700, color:"#DC2626", letterSpacing:1.5, marginLeft:7, textTransform:"uppercase" }}>you</span> : ""}
                     </div>
                     <div style={{ fontSize:17, fontWeight:900, color: barColor, lineHeight:1 }}>{rep.count}</div>
                   </div>
@@ -2765,28 +2265,28 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
       </Card>
 
       {/* Continue Training */}
-      <Card title="Training" accent="#CCFF00" action="All Modules" actionOnClick={() => onGoTab("training")}>
+      <Card title="Training" accent="#DC2626" action="All Modules" actionOnClick={() => onGoTab("training")}>
         <div style={{ display:"flex", alignItems:"center", gap:dk?18:14 }}>
-          <Ring pct={trainingPct} accent="#CCFF00" size={dk?92:78} stroke={dk?9:8} label={`${trainingPct}%`} sublabel={`${doneModules}/${totalModules}`} />
+          <Ring pct={trainingPct} accent="#DC2626" size={dk?92:78} stroke={dk?9:8} label={`${trainingPct}%`} sublabel={`${doneModules}/${totalModules}`} />
           <div style={{ flex:1, minWidth:0 }}>
             {nextModule ? (
               <div onClick={() => onOpenModule(nextModule.k)}
-                style={{ display:"flex", alignItems:"center", gap:12, cursor:"pointer", background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:12, padding:"10px 12px", transition:"border-color 0.2s" }}
-                onMouseEnter={e => e.currentTarget.style.borderColor="rgba(204,255,0,0.2)"}
-                onMouseLeave={e => e.currentTarget.style.borderColor="rgba(255,255,255,0.06)"}>
+                style={{ display:"flex", alignItems:"center", gap:12, cursor:"pointer", background:"rgba(0,0,0,0.02)", border:"1px solid var(--border)", borderRadius:12, padding:"10px 12px", transition:"border-color 0.2s" }}
+                onMouseEnter={e => e.currentTarget.style.borderColor="rgba(220,38,38,0.2)"}
+                onMouseLeave={e => e.currentTarget.style.borderColor="rgba(15,23,42,0.10)"}>
                 <div style={{ width:42, height:42, borderRadius:11, background:IC_GRAD[nextModule.t], display:"flex", alignItems:"center", justifyContent:"center", fontSize:18, flexShrink:0, boxShadow:IC_SHADOW[nextModule.t] }}>{nextModule.ic}</div>
                 <div style={{ flex:1, minWidth:0 }}>
-                  <div style={{ fontSize:9, fontWeight:800, color: nextModule.t === "MODULE" ? "#CCFF00" : "#F59E0B", letterSpacing:2, marginBottom:3, textTransform:"uppercase" }}>Up Next</div>
-                  <div style={{ fontSize:13, fontWeight:700, color:"#EEF2F8", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{nextModule.sub}</div>
+                  <div style={{ fontSize:9, fontWeight:800, color: nextModule.t === "MODULE" ? "#DC2626" : "#F59E0B", letterSpacing:2, marginBottom:3, textTransform:"uppercase" }}>Up Next</div>
+                  <div style={{ fontSize:13, fontWeight:700, color:"var(--text)", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{nextModule.sub}</div>
                 </div>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#555A6A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0 }}><polyline points="9 18 15 12 9 6"/></svg>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0 }}><polyline points="9 18 15 12 9 6"/></svg>
               </div>
             ) : (
               <div style={{ display:"flex", alignItems:"center", gap:10 }}>
                 <div style={{ width:36, height:36, borderRadius:10, background:"rgba(34,197,94,0.12)", display:"flex", alignItems:"center", justifyContent:"center" }}>
                   <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                 </div>
-                <div style={{ fontSize:13, fontWeight:700, color:"#CCFF00" }}>All modules complete</div>
+                <div style={{ fontSize:13, fontWeight:700, color:"#DC2626" }}>All modules complete</div>
               </div>
             )}
           </div>
@@ -2797,7 +2297,7 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
       <Card title="On the Floor Today" action="Schedule" actionOnClick={() => onGoTab("scheduling")}>
         {todaysReps.length === 0 ? (
           <button onClick={() => onGoTab("scheduling")}
-            style={{ display:"block", width:"100%", padding:"10px 0", background:"transparent", border:"none", color:"#CCFF00", fontSize:13, fontWeight:700, letterSpacing:0.3, cursor:"pointer", fontFamily:"inherit", textAlign:"left" }}>
+            style={{ display:"block", width:"100%", padding:"10px 0", background:"transparent", border:"none", color:"#DC2626", fontSize:13, fontWeight:700, letterSpacing:0.3, cursor:"pointer", fontFamily:"inherit", textAlign:"left" }}>
             {isAdmin ? "Get reps on the floor →" : "Book yourself in →"}
           </button>
         ) : (
@@ -2805,11 +2305,11 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
             {todaysReps.map((name, i) => {
               const isMe = schedule[i]?.user_id === session.user.id;
               return (
-                <div key={i} style={{ display:"flex", alignItems:"center", gap:7, background:isMe?"rgba(204,255,0,0.08)":"rgba(255,255,255,0.04)", border:`1px solid ${isMe?"rgba(204,255,0,0.2)":"rgba(255,255,255,0.07)"}`, borderRadius:8, padding:"6px 10px" }}>
-                  <div style={{ width:22, height:22, borderRadius:6, background: isMe ? "linear-gradient(135deg,#CCFF00,#6E9100)" : "rgba(255,255,255,0.06)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, fontWeight:800, color: isMe?"#15171E":"#666C7E" }}>
+                <div key={i} style={{ display:"flex", alignItems:"center", gap:7, background:isMe?"rgba(220,38,38,0.08)":"rgba(15,23,42,0.04)", border:`1px solid ${isMe?"rgba(220,38,38,0.2)":"rgba(15,23,42,0.10)"}`, borderRadius:8, padding:"6px 10px" }}>
+                  <div style={{ width:22, height:22, borderRadius:6, background: isMe ? "linear-gradient(135deg,#DC2626,#7F1D1D)" : "rgba(15,23,42,0.10)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, fontWeight:800, color: isMe?"#FFFFFF":"var(--text-faint)" }}>
                     {name[0]?.toUpperCase()}
                   </div>
-                  <div style={{ fontSize:12, fontWeight:600, color: isMe?"#F2F4F8":"#B0B5C4" }}>{name}</div>
+                  <div style={{ fontSize:12, fontWeight:600, color: isMe?"var(--text)":"#B0B5C4" }}>{name}</div>
                 </div>
               );
             })}
@@ -2822,41 +2322,41 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
         <div style={{ display:"flex", alignItems:"baseline", justifyContent:"space-between", marginBottom:12 }}>
           <div>
             <div style={{ display:"flex", alignItems:"baseline", gap:6 }}>
-              <span className="mono" style={{ fontSize:dk?28:24, fontWeight:600, color:"#F2F4F8", lineHeight:1 }}>{teamWeekCount}</span>
-              <span style={{ fontSize:13, color:"#5E6376", fontWeight:700 }}>{teamWeekCount === 1 ? "sale" : "sales"}</span>
+              <span className="mono" style={{ fontSize:dk?28:24, fontWeight:600, color:"var(--text)", lineHeight:1 }}>{teamWeekCount}</span>
+              <span style={{ fontSize:13, color:"var(--text-muted)", fontWeight:700 }}>{teamWeekCount === 1 ? "sale" : "sales"}</span>
             </div>
             {teamWeekTotal > 0 && (
-              <div className="mono" style={{ fontSize:12, color:"#CCFF00", fontWeight:600, marginTop:6 }}>
-                ${teamWeekTotal.toLocaleString()} <span style={{ color:"#5E6376", fontWeight:600, fontFamily:"inherit" }}>team revenue</span>
+              <div className="mono" style={{ fontSize:12, color:"#DC2626", fontWeight:600, marginTop:6 }}>
+                ${teamWeekTotal.toLocaleString()} <span style={{ color:"var(--text-muted)", fontWeight:600, fontFamily:"inherit" }}>team revenue</span>
               </div>
             )}
           </div>
           <div style={{ textAlign:"right" }}>
-            <div className="mono" style={{ fontSize:18, fontWeight:600, color:"#F2F4F8", lineHeight:1 }}>{rankedWeek.length}</div>
-            <div style={{ fontSize:8.5, color:"#5E6376", textTransform:"uppercase", letterSpacing:1.5, fontWeight:800, marginTop:4 }}>Active reps</div>
+            <div className="mono" style={{ fontSize:18, fontWeight:600, color:"var(--text)", lineHeight:1 }}>{rankedWeek.length}</div>
+            <div style={{ fontSize:8.5, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1.5, fontWeight:800, marginTop:4 }}>Active reps</div>
           </div>
         </div>
-        <BarChart data={teamDaily} accent="#CCFF00" highlight={todayIdx} height={dk?72:60} />
+        <BarChart data={teamDaily} accent="#DC2626" highlight={todayIdx} height={dk?72:60} />
       </Card>
 
       {/* Recent Sales */}
       <Card title="Recent Sales" action="All Sales" actionOnClick={() => onGoTab("leaderboard")}>
         {recentSales.length === 0 ? (
           <button onClick={() => onGoTab("leaderboard")}
-            style={{ display:"block", width:"100%", padding:"10px 0", background:"transparent", border:"none", color:"#CCFF00", fontSize:13, fontWeight:700, letterSpacing:0.3, cursor:"pointer", fontFamily:"inherit", textAlign:"left" }}>
+            style={{ display:"block", width:"100%", padding:"10px 0", background:"transparent", border:"none", color:"#DC2626", fontSize:13, fontWeight:700, letterSpacing:0.3, cursor:"pointer", fontFamily:"inherit", textAlign:"left" }}>
             Log your first sale →
           </button>
         ) : (
           <div style={{ display:"flex", flexDirection:"column", gap:5 }}>
             {recentSales.map(s => (
-              <div key={s.id} style={{ display:"flex", alignItems:"center", gap:10, padding:"8px 12px", background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.05)", borderRadius:9 }}>
-                <div style={{ width:28, height:28, borderRadius:8, background: s.user_id===session.user.id ? "linear-gradient(135deg,#CCFF00,#6E9100)" : "rgba(255,255,255,0.05)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, fontWeight:800, color: s.user_id===session.user.id ? "#15171E" : "#555A6A", flexShrink:0 }}>
+              <div key={s.id} style={{ display:"flex", alignItems:"center", gap:10, padding:"8px 12px", background:"rgba(0,0,0,0.02)", border:"1px solid var(--hairline)", borderRadius:9 }}>
+                <div style={{ width:28, height:28, borderRadius:8, background: s.user_id===session.user.id ? "linear-gradient(135deg,#DC2626,#7F1D1D)" : "rgba(15,23,42,0.06)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, fontWeight:800, color: s.user_id===session.user.id ? "#FFFFFF" : "var(--text-faint)", flexShrink:0 }}>
                   {(repProfiles[s.user_id] || "R")[0]?.toUpperCase()}
                 </div>
-                <div style={{ flex:1, minWidth:0, fontSize:12, color:"#C4C9D4", fontWeight:600, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                <div style={{ flex:1, minWidth:0, fontSize:12, color:"var(--text-2)", fontWeight:600, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
                   {repProfiles[s.user_id] || "Rep"}
                 </div>
-                {s.amount > 0 && <div className="mono" style={{ fontSize:13, fontWeight:600, color:"#CCFF00", flexShrink:0 }}>${Number(s.amount).toLocaleString()}</div>}
+                {s.amount > 0 && <div className="mono" style={{ fontSize:13, fontWeight:600, color:"#DC2626", flexShrink:0 }}>${Number(s.amount).toLocaleString()}</div>}
               </div>
             ))}
           </div>
@@ -3003,26 +2503,26 @@ function Leaderboard({ session, profile, w }) {
 
       {/* Header row */}
       <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:20, flexWrap:"wrap", gap:12 }}>
-        <div style={{ display:"flex", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.07)", borderRadius:10, padding:3, gap:2 }}>
+        <div style={{ display:"flex", background:"rgba(15,23,42,0.04)", border:"1px solid var(--border)", borderRadius:10, padding:3, gap:2 }}>
           {PERIODS.map(p => (
             <button key={p.key} onClick={() => setPeriod(p.key)}
-              style={{ background: period===p.key ? "rgba(255,215,0,0.12)" : "none", border: period===p.key ? "1px solid rgba(255,215,0,0.2)" : "1px solid transparent", borderRadius:7, color: period===p.key ? "#FFD700" : "#666C7E", fontSize:10.5, fontWeight:700, letterSpacing:1.5, padding:"8px 16px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", transition:"all 0.15s" }}>
+              style={{ background: period===p.key ? "rgba(202,138,4,0.12)" : "none", border: period===p.key ? "1px solid rgba(202,138,4,0.2)" : "1px solid transparent", borderRadius:7, color: period===p.key ? "#CA8A04" : "var(--text-faint)", fontSize:10.5, fontWeight:700, letterSpacing:1.5, padding:"8px 16px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", transition:"all 0.15s" }}>
               {p.label}
             </button>
           ))}
         </div>
         <button onClick={() => setShowAdd(v => !v)}
-          style={{ background:"#CCFF00", border:"none", borderRadius:9, color:"#15171E", fontSize:11, fontWeight:800, letterSpacing:1.5, padding:"10px 20px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", boxShadow:"0 4px 16px rgba(204,255,0,0.35)", transition:"all 0.18s" }}>
+          style={{ background:"#DC2626", border:"none", borderRadius:9, color:"#FFFFFF", fontSize:11, fontWeight:800, letterSpacing:1.5, padding:"10px 20px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", boxShadow:"0 4px 16px rgba(220,38,38,0.35)", transition:"all 0.18s" }}>
           + Log Sale
         </button>
       </div>
 
       {/* Add sale form */}
       {showAdd && (
-        <div style={{ background:"#1A1C24", border:"1px solid rgba(255,255,255,0.08)", borderRadius:16, padding:22, marginBottom:20, animation:"fadeUp 0.2s ease" }}>
+        <div style={{ background:"var(--surface)", border:"1px solid var(--border)", borderRadius:16, padding:22, marginBottom:20, animation:"fadeUp 0.2s ease" }}>
           <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:20 }}>
-            <div style={{ fontSize:10, fontWeight:800, color:"#666C7E", letterSpacing:2.5, textTransform:"uppercase" }}>Log a Sale</div>
-            <button onClick={resetForm} style={{ background:"none", border:"none", color:"#444856", fontSize:18, cursor:"pointer", lineHeight:1, padding:0 }}>×</button>
+            <div style={{ fontSize:10, fontWeight:800, color:"var(--text-muted)", letterSpacing:2.5, textTransform:"uppercase" }}>Log a Sale</div>
+            <button onClick={resetForm} style={{ background:"none", border:"none", color:"var(--text-muted)", fontSize:18, cursor:"pointer", lineHeight:1, padding:0 }}>×</button>
           </div>
 
           {/* Step 1: Deal Value */}
@@ -3033,19 +2533,19 @@ function Leaderboard({ session, profile, w }) {
             <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
               {DEAL_OPTS.map(v => (
                 <button key={v} onClick={() => setDealAmt(v)}
-                  style={{ background: dealAmt===v ? "rgba(204,255,0,0.15)" : "rgba(255,255,255,0.04)", border:`1px solid ${dealAmt===v ? "rgba(204,255,0,0.4)" : "rgba(255,255,255,0.08)"}`, borderRadius:10, color: dealAmt===v ? "#DDFF40" : "#9CA3AF", fontSize:14, fontWeight:700, padding:"12px 20px", cursor:"pointer", fontFamily:"inherit", transition:"all 0.15s" }}>
+                  style={{ background: dealAmt===v ? "rgba(220,38,38,0.15)" : "rgba(15,23,42,0.04)", border:`1px solid ${dealAmt===v ? "rgba(220,38,38,0.4)" : "rgba(15,23,42,0.10)"}`, borderRadius:10, color: dealAmt===v ? "#FCA5A5" : "var(--text-muted)", fontSize:14, fontWeight:700, padding:"12px 20px", cursor:"pointer", fontFamily:"inherit", transition:"all 0.15s" }}>
                   ${v.toLocaleString()}
                 </button>
               ))}
               <button onClick={() => setDealAmt("custom")}
-                style={{ background: dealAmt==="custom" ? "rgba(204,255,0,0.15)" : "rgba(255,255,255,0.04)", border:`1px solid ${dealAmt==="custom" ? "rgba(204,255,0,0.4)" : "rgba(255,255,255,0.08)"}`, borderRadius:10, color: dealAmt==="custom" ? "#DDFF40" : "#9CA3AF", fontSize:13, fontWeight:700, padding:"12px 16px", cursor:"pointer", fontFamily:"inherit", transition:"all 0.15s" }}>
+                style={{ background: dealAmt==="custom" ? "rgba(220,38,38,0.15)" : "rgba(15,23,42,0.04)", border:`1px solid ${dealAmt==="custom" ? "rgba(220,38,38,0.4)" : "rgba(15,23,42,0.10)"}`, borderRadius:10, color: dealAmt==="custom" ? "#FCA5A5" : "var(--text-muted)", fontSize:13, fontWeight:700, padding:"12px 16px", cursor:"pointer", fontFamily:"inherit", transition:"all 0.15s" }}>
                 Custom
               </button>
             </div>
             {dealAmt === "custom" && (
               <input autoFocus type="number" min="0" value={customAmt} onChange={e => setCustomAmt(e.target.value)}
                 placeholder="Enter amount…"
-                style={{ marginTop:10, width:"100%", maxWidth:200, background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:8, color:"#F2F4F8", fontSize:14, fontWeight:600, padding:"10px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }} />
+                style={{ marginTop:10, width:"100%", maxWidth:200, background:"rgba(15,23,42,0.06)", border:"1px solid rgba(0,0,0,0.1)", borderRadius:8, color:"var(--text)", fontSize:14, fontWeight:600, padding:"10px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }} />
             )}
           </div>
 
@@ -3058,12 +2558,12 @@ function Leaderboard({ session, profile, w }) {
               <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
                 {RETAINER_OPTS.map(v => (
                   <button key={v} onClick={() => setRetainer(v)}
-                    style={{ background: retainer===v ? "rgba(6,214,240,0.15)" : "rgba(255,255,255,0.04)", border:`1px solid ${retainer===v ? "rgba(6,214,240,0.4)" : "rgba(255,255,255,0.08)"}`, borderRadius:10, color: retainer===v ? "#5DE9F8" : "#9CA3AF", fontSize:14, fontWeight:700, padding:"12px 20px", cursor:"pointer", fontFamily:"inherit", transition:"all 0.15s" }}>
+                    style={{ background: retainer===v ? "rgba(6,214,240,0.15)" : "rgba(15,23,42,0.04)", border:`1px solid ${retainer===v ? "rgba(6,214,240,0.4)" : "rgba(15,23,42,0.10)"}`, borderRadius:10, color: retainer===v ? "#5DE9F8" : "var(--text-muted)", fontSize:14, fontWeight:700, padding:"12px 20px", cursor:"pointer", fontFamily:"inherit", transition:"all 0.15s" }}>
                     ${v}/mo
                   </button>
                 ))}
                 <button onClick={() => setRetainer(0)}
-                  style={{ background: retainer===0 ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.04)", border:`1px solid ${retainer===0 ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.08)"}`, borderRadius:10, color: retainer===0 ? "#D6DAE2" : "#9CA3AF", fontSize:13, fontWeight:700, padding:"12px 16px", cursor:"pointer", fontFamily:"inherit", transition:"all 0.15s" }}>
+                  style={{ background: retainer===0 ? "rgba(15,23,42,0.10)" : "rgba(15,23,42,0.04)", border:`1px solid ${retainer===0 ? "rgba(0,0,0,0.2)" : "rgba(15,23,42,0.10)"}`, borderRadius:10, color: retainer===0 ? "var(--text-2)" : "var(--text-muted)", fontSize:13, fontWeight:700, padding:"12px 16px", cursor:"pointer", fontFamily:"inherit", transition:"all 0.15s" }}>
                   No Retainer
                 </button>
               </div>
@@ -3073,13 +2573,13 @@ function Leaderboard({ session, profile, w }) {
           {/* Note + Save (only shown after both steps done) */}
           {dealAmt && retainer !== null && (
             <div style={{ animation:"fadeUp 0.2s ease" }}>
-              <div style={{ fontSize:9.5, fontWeight:700, color:"#444856", letterSpacing:2, textTransform:"uppercase", marginBottom:8 }}>Note (optional)</div>
+              <div style={{ fontSize:9.5, fontWeight:700, color:"var(--text-muted)", letterSpacing:2, textTransform:"uppercase", marginBottom:8 }}>Note (optional)</div>
               <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
                 <input type="text" value={note} onChange={e => setNote(e.target.value)} onKeyDown={e => e.key === "Enter" && addSale()}
                   placeholder="Client name, product, etc."
-                  style={{ flex:"1 1 200px", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:500, padding:"10px 12px", fontFamily:"inherit", outline:"none" }} />
+                  style={{ flex:"1 1 200px", background:"rgba(15,23,42,0.06)", border:"1px solid rgba(0,0,0,0.09)", borderRadius:8, color:"var(--text)", fontSize:13, fontWeight:500, padding:"10px 12px", fontFamily:"inherit", outline:"none" }} />
                 <button onClick={addSale} disabled={saving}
-                  style={{ background:"#CCFF00", border:"none", borderRadius:8, color:"#15171E", fontSize:12, fontWeight:800, letterSpacing:1, padding:"10px 24px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", opacity:saving?0.6:1, flexShrink:0 }}>
+                  style={{ background:"#DC2626", border:"none", borderRadius:8, color:"#FFFFFF", fontSize:12, fontWeight:800, letterSpacing:1, padding:"10px 24px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", opacity:saving?0.6:1, flexShrink:0 }}>
                   {saving ? "Saving…" : "Save"}
                 </button>
               </div>
@@ -3090,18 +2590,18 @@ function Leaderboard({ session, profile, w }) {
 
       {/* My rank badge */}
       {myRank && (
-        <div style={{ display:"flex", alignItems:"center", gap:12, background:"rgba(204,255,0,0.06)", border:"1px solid rgba(204,255,0,0.15)", borderRadius:12, padding:"12px 18px", marginBottom:16 }}>
+        <div style={{ display:"flex", alignItems:"center", gap:12, background:"rgba(220,38,38,0.06)", border:"1px solid rgba(220,38,38,0.15)", borderRadius:12, padding:"12px 18px", marginBottom:16 }}>
           <div style={{ fontSize:20 }}>{MEDALS[myRank-1] ?? `#${myRank}`}</div>
           <div>
-            <div style={{ fontSize:11, fontWeight:700, color:"#CCFF00", letterSpacing:1.5, textTransform:"uppercase" }}>Your Rank</div>
-            <div style={{ fontSize:13, fontWeight:600, color:"#D6DAE2" }}>{myEntry.count} {myEntry.count === 1 ? "sale" : "sales"}{myEntry.total > 0 ? ` · $${myEntry.total.toLocaleString()}` : ""}</div>
+            <div style={{ fontSize:11, fontWeight:700, color:"#DC2626", letterSpacing:1.5, textTransform:"uppercase" }}>Your Rank</div>
+            <div style={{ fontSize:13, fontWeight:600, color:"var(--text-2)" }}>{myEntry.count} {myEntry.count === 1 ? "sale" : "sales"}{myEntry.total > 0 ? ` · $${myEntry.total.toLocaleString()}` : ""}</div>
           </div>
         </div>
       )}
 
       {/* Leaderboard list */}
       {ranked.length === 0 ? (
-        <div style={{ textAlign:"center", padding:"60px 0", color:"#444856", fontSize:13 }}>
+        <div style={{ textAlign:"center", padding:"60px 0", color:"var(--text-muted)", fontSize:13 }}>
           No sales logged {period === "week" ? "this week" : period === "month" ? "this month" : "yet"}.
         </div>
       ) : (
@@ -3111,23 +2611,23 @@ function Leaderboard({ session, profile, w }) {
             const isTop = i < 3;
             const medal = MEDALS[i];
             return (
-              <div key={rep.uid} style={{ display:"flex", alignItems:"center", gap:dk?16:12, background: isMe ? "rgba(204,255,0,0.06)" : i===0 ? "rgba(255,215,0,0.04)" : "rgba(255,255,255,0.025)", border:`1px solid ${isMe ? "rgba(204,255,0,0.18)" : i===0 ? "rgba(255,215,0,0.12)" : "rgba(255,255,255,0.06)"}`, borderRadius:13, padding:dk?"16px 20px":"13px 16px", transition:"all 0.15s" }}>
-                <div style={{ fontSize: isTop ? 22 : 14, fontWeight:800, color:"#444856", minWidth:32, textAlign:"center", lineHeight:1 }}>
+              <div key={rep.uid} style={{ display:"flex", alignItems:"center", gap:dk?16:12, background: isMe ? "rgba(220,38,38,0.06)" : i===0 ? "rgba(202,138,4,0.04)" : "rgba(15,23,42,0.04)", border:`1px solid ${isMe ? "rgba(220,38,38,0.18)" : i===0 ? "rgba(202,138,4,0.12)" : "rgba(15,23,42,0.10)"}`, borderRadius:13, padding:dk?"16px 20px":"13px 16px", transition:"all 0.15s" }}>
+                <div style={{ fontSize: isTop ? 22 : 14, fontWeight:800, color:"var(--text-muted)", minWidth:32, textAlign:"center", lineHeight:1 }}>
                   {medal ?? `#${i+1}`}
                 </div>
-                <div style={{ width:36, height:36, borderRadius:9, background: isMe ? "linear-gradient(135deg,#CCFF00,#6E9100)" : "linear-gradient(135deg,#2A2D38,#1E2028)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Geist',sans-serif", fontSize:14, fontWeight:800, color: isMe ? "#15171E" : "#888D9C", flexShrink:0, boxShadow: isMe ? "0 2px 10px rgba(204,255,0,0.3)" : "none" }}>
+                <div style={{ width:36, height:36, borderRadius:9, background: isMe ? "linear-gradient(135deg,#DC2626,#7F1D1D)" : "var(--surface-2)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Geist',sans-serif", fontSize:14, fontWeight:800, color: isMe ? "#FFFFFF" : "var(--text-muted)", flexShrink:0, boxShadow: isMe ? "0 2px 10px rgba(220,38,38,0.3)" : "none" }}>
                   {rep.name[0]?.toUpperCase()}
                 </div>
                 <div style={{ flex:1, minWidth:0 }}>
-                  <div style={{ fontSize:14, fontWeight:700, color: isMe ? "#F2F4F8" : "#D6DAE2", lineHeight:1 }}>{rep.name}{isMe ? <span style={{ fontSize:9, fontWeight:700, color:"#CCFF00", letterSpacing:1.5, marginLeft:8, textTransform:"uppercase" }}>you</span> : ""}</div>
-                  <div style={{ fontSize:11, color:"#444856", marginTop:3, display:"flex", gap:8 }}>
+                  <div style={{ fontSize:14, fontWeight:700, color: isMe ? "var(--text)" : "var(--text-2)", lineHeight:1 }}>{rep.name}{isMe ? <span style={{ fontSize:9, fontWeight:700, color:"#DC2626", letterSpacing:1.5, marginLeft:8, textTransform:"uppercase" }}>you</span> : ""}</div>
+                  <div style={{ fontSize:11, color:"var(--text-muted)", marginTop:3, display:"flex", gap:8 }}>
                     {rep.total > 0 && <span style={{ color:"#22C55E66" }}>${rep.total.toLocaleString()}</span>}
                     {rep.retainerTotal > 0 && <span style={{ color:"#06D6F066" }}>+${rep.retainerTotal.toLocaleString()}/mo retainer</span>}
                   </div>
                 </div>
                 <div style={{ textAlign:"right", flexShrink:0 }}>
-                  <div style={{ fontSize:dk?26:22, fontWeight:900, color: i===0 ? "#FFD700" : isMe ? "#CCFF00" : "#666C7E", lineHeight:1, letterSpacing:"-0.02em" }}>{rep.count}</div>
-                  <div style={{ fontSize:9, color:"#5E6376", textTransform:"uppercase", letterSpacing:1.5, fontWeight:700, marginTop:3 }}>{rep.count === 1 ? "sale" : "sales"}</div>
+                  <div style={{ fontSize:dk?26:22, fontWeight:900, color: i===0 ? "#CA8A04" : isMe ? "#DC2626" : "var(--text-faint)", lineHeight:1, letterSpacing:"-0.02em" }}>{rep.count}</div>
+                  <div style={{ fontSize:9, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1.5, fontWeight:700, marginTop:3 }}>{rep.count === 1 ? "sale" : "sales"}</div>
                 </div>
               </div>
             );
@@ -3138,24 +2638,24 @@ function Leaderboard({ session, profile, w }) {
       {/* Recent activity feed */}
       {filtered.length > 0 && (
         <div style={{ marginTop:32 }}>
-          <div style={{ fontSize:9.5, fontWeight:800, color:"#444856", letterSpacing:3, textTransform:"uppercase", marginBottom:14 }}>Recent Activity</div>
+          <div style={{ fontSize:9.5, fontWeight:800, color:"var(--text-muted)", letterSpacing:3, textTransform:"uppercase", marginBottom:14 }}>Recent Activity</div>
           <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
             {filtered.slice(0, 10).map(s => {
               const isOwn = s.user_id === session.user.id;
               return (
-                <div key={s.id} style={{ display:"flex", alignItems:"center", gap:12, padding:"10px 16px", background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.05)", borderRadius:10 }}>
-                  <div style={{ width:28, height:28, borderRadius:7, background: isOwn ? "linear-gradient(135deg,#CCFF00,#6E9100)" : "rgba(255,255,255,0.05)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, fontWeight:800, color: isOwn ? "#15171E" : "#666C7E", flexShrink:0 }}>
+                <div key={s.id} style={{ display:"flex", alignItems:"center", gap:12, padding:"10px 16px", background:"rgba(0,0,0,0.02)", border:"1px solid var(--hairline)", borderRadius:10 }}>
+                  <div style={{ width:28, height:28, borderRadius:7, background: isOwn ? "linear-gradient(135deg,#DC2626,#7F1D1D)" : "rgba(15,23,42,0.06)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, fontWeight:800, color: isOwn ? "#FFFFFF" : "var(--text-faint)", flexShrink:0 }}>
                     {(repProfiles[s.user_id] || "R")[0]?.toUpperCase()}
                   </div>
                   <div style={{ flex:1, minWidth:0 }}>
-                    <span style={{ fontSize:12, fontWeight:600, color:"#D6DAE2" }}>{repProfiles[s.user_id] || "Rep"}</span>
-                    {s.note && <span style={{ fontSize:11, color:"#444856" }}> — {s.note}</span>}
+                    <span style={{ fontSize:12, fontWeight:600, color:"var(--text-2)" }}>{repProfiles[s.user_id] || "Rep"}</span>
+                    {s.note && <span style={{ fontSize:11, color:"var(--text-muted)" }}> — {s.note}</span>}
                   </div>
                   <div style={{ display:"flex", flexDirection:"column", alignItems:"flex-end", gap:2, flexShrink:0 }}>
-                    {s.amount > 0 && <div className="mono" style={{ fontSize:13, fontWeight:600, color:"#CCFF00" }}>${Number(s.amount).toLocaleString()}</div>}
-                    {s.retainer > 0 && <div className="mono" style={{ fontSize:10, fontWeight:600, color:"#9098A8" }}>+${Number(s.retainer).toLocaleString()}/mo</div>}
+                    {s.amount > 0 && <div className="mono" style={{ fontSize:13, fontWeight:600, color:"#DC2626" }}>${Number(s.amount).toLocaleString()}</div>}
+                    {s.retainer > 0 && <div className="mono" style={{ fontSize:10, fontWeight:600, color:"var(--text-muted)" }}>+${Number(s.retainer).toLocaleString()}/mo</div>}
                   </div>
-                  <div style={{ fontSize:10, color:"#5E6376", flexShrink:0 }}>{new Date(s.sale_date).toLocaleDateString("en-US",{month:"short",day:"numeric"})}</div>
+                  <div style={{ fontSize:10, color:"var(--text-muted)", flexShrink:0 }}>{new Date(s.sale_date).toLocaleDateString("en-US",{month:"short",day:"numeric"})}</div>
                   {isOwn && (
                     <button onClick={async () => {
                       setSales(prev => prev.filter(x => x.id !== s.id));
@@ -3164,9 +2664,9 @@ function Leaderboard({ session, profile, w }) {
                         alert(`Couldn't delete sale: ${error.message}`);
                         setSales(prev => prev.some(x => x.id === s.id) ? prev : [s, ...prev].sort((a,b) => new Date(b.created_at) - new Date(a.created_at)));
                       }
-                    }} style={{ background:"none", border:"none", color:"#5E6376", fontSize:16, cursor:"pointer", padding:"0 2px", lineHeight:1, flexShrink:0, transition:"color 0.15s" }}
+                    }} style={{ background:"none", border:"none", color:"var(--text-muted)", fontSize:16, cursor:"pointer", padding:"0 2px", lineHeight:1, flexShrink:0, transition:"color 0.15s" }}
                       onMouseEnter={e => e.target.style.color="#DC2626"}
-                      onMouseLeave={e => e.target.style.color="#5E6376"}>
+                      onMouseLeave={e => e.target.style.color="var(--text-faint)"}>
                       ×
                     </button>
                   )}
@@ -3196,11 +2696,11 @@ function Leaderboard({ session, profile, w }) {
             <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:16 }}>
               <div style={{ display:"flex", alignItems:"center", gap:10 }}>
                 <div style={{ fontSize:16 }}>🏆</div>
-                <div style={{ fontSize:10, fontWeight:800, color:"#FFD700", letterSpacing:3, textTransform:"uppercase" }}>Active Bonus</div>
+                <div style={{ fontSize:10, fontWeight:800, color:"#CA8A04", letterSpacing:3, textTransform:"uppercase" }}>Active Bonus</div>
               </div>
               {isAdmin && !activeBonus && !showAddBonus && (
                 <button onClick={() => { resetBonusForm(); setShowAddBonus(true); }}
-                  style={{ background:"rgba(255,215,0,0.08)", border:"1px solid rgba(255,215,0,0.2)", borderRadius:8, color:"#FFD700", fontSize:10, fontWeight:700, letterSpacing:1.5, padding:"7px 14px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>
+                  style={{ background:"rgba(202,138,4,0.08)", border:"1px solid rgba(202,138,4,0.2)", borderRadius:8, color:"#CA8A04", fontSize:10, fontWeight:700, letterSpacing:1.5, padding:"7px 14px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>
                   + Set Bonus
                 </button>
               )}
@@ -3208,14 +2708,14 @@ function Leaderboard({ session, profile, w }) {
 
             {/* Add / Edit bonus form (admin only) */}
             {isAdmin && (showAddBonus || editingBonus) && (
-              <div style={{ background:"#1A1C24", border:"1px solid rgba(255,215,0,0.12)", borderRadius:14, padding:18, marginBottom:16, animation:"fadeUp 0.2s ease" }}>
-                <div style={{ fontSize:10, fontWeight:700, color:"#666C7E", letterSpacing:2, textTransform:"uppercase", marginBottom:14 }}>{editingBonus ? "Edit Active Bonus" : "Set Active Bonus"}</div>
+              <div style={{ background:"var(--surface)", border:"1px solid rgba(202,138,4,0.12)", borderRadius:14, padding:18, marginBottom:16, animation:"fadeUp 0.2s ease" }}>
+                <div style={{ fontSize:10, fontWeight:700, color:"var(--text-muted)", letterSpacing:2, textTransform:"uppercase", marginBottom:14 }}>{editingBonus ? "Edit Active Bonus" : "Set Active Bonus"}</div>
                 <div style={{ marginBottom:12 }}>
-                  <div style={{ fontSize:9, fontWeight:700, color:"#444856", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Period</div>
+                  <div style={{ fontSize:9, fontWeight:700, color:"var(--text-muted)", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Period</div>
                   <div style={{ display:"flex", gap:6 }}>
                     {[{v:"week", l:"This Week"}, {v:"month", l:"This Month"}].map(p => (
                       <button key={p.v} type="button" onClick={() => setBonusForm(f => ({...f, period:p.v}))}
-                        style={{ flex:1, background: bonusForm.period===p.v ? "rgba(255,215,0,0.15)" : "rgba(255,255,255,0.04)", border:`1px solid ${bonusForm.period===p.v ? "rgba(255,215,0,0.4)" : "rgba(255,255,255,0.08)"}`, borderRadius:8, color: bonusForm.period===p.v ? "#FFD700" : "#9CA3AF", fontSize:12, fontWeight:700, padding:"10px 0", cursor:"pointer", fontFamily:"inherit" }}>
+                        style={{ flex:1, background: bonusForm.period===p.v ? "rgba(202,138,4,0.15)" : "rgba(15,23,42,0.04)", border:`1px solid ${bonusForm.period===p.v ? "rgba(202,138,4,0.4)" : "rgba(15,23,42,0.10)"}`, borderRadius:8, color: bonusForm.period===p.v ? "#CA8A04" : "var(--text-muted)", fontSize:12, fontWeight:700, padding:"10px 0", cursor:"pointer", fontFamily:"inherit" }}>
                         {p.l}
                       </button>
                     ))}
@@ -3223,34 +2723,34 @@ function Leaderboard({ session, profile, w }) {
                 </div>
                 <div style={{ display:"flex", gap:10, flexWrap:"wrap", marginBottom:10 }}>
                   <div style={{ flex:"1 1 120px" }}>
-                    <div style={{ fontSize:9, fontWeight:700, color:"#444856", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Sales Needed</div>
+                    <div style={{ fontSize:9, fontWeight:700, color:"var(--text-muted)", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Sales Needed</div>
                     <input type="number" min="1" value={bonusForm.threshold} onChange={e => setBonusForm(p=>({...p, threshold:e.target.value}))} placeholder="e.g. 5"
-                      style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:600, padding:"9px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }} />
+                      style={{ width:"100%", background:"rgba(15,23,42,0.06)", border:"1px solid rgba(0,0,0,0.09)", borderRadius:8, color:"var(--text)", fontSize:13, fontWeight:600, padding:"9px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }} />
                   </div>
                   <div style={{ flex:"1 1 120px" }}>
-                    <div style={{ fontSize:9, fontWeight:700, color:"#444856", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Bonus ($)</div>
+                    <div style={{ fontSize:9, fontWeight:700, color:"var(--text-muted)", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Bonus ($)</div>
                     <input type="number" min="1" value={bonusForm.amount} onChange={e => setBonusForm(p=>({...p, amount:e.target.value}))} placeholder="e.g. 500"
-                      style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:600, padding:"9px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }} />
+                      style={{ width:"100%", background:"rgba(15,23,42,0.06)", border:"1px solid rgba(0,0,0,0.09)", borderRadius:8, color:"var(--text)", fontSize:13, fontWeight:600, padding:"9px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }} />
                   </div>
                 </div>
-                <div style={{ marginBottom:8, fontSize:11, color:"#7E8595", fontWeight:500 }}>
-                  Hit <span style={{ color:"#FFD700", fontWeight:700 }}>{bonusForm.threshold || "?"} sale{bonusForm.threshold==="1"?"":"s"}</span> {bonusForm.period === "week" ? "this week" : "this month"} to earn <span style={{ color:"#FFD700", fontWeight:700 }}>${bonusForm.amount ? Number(bonusForm.amount).toLocaleString() : "?"}</span>.
+                <div style={{ marginBottom:8, fontSize:11, color:"var(--text-muted)", fontWeight:500 }}>
+                  Hit <span style={{ color:"#CA8A04", fontWeight:700 }}>{bonusForm.threshold || "?"} sale{bonusForm.threshold==="1"?"":"s"}</span> {bonusForm.period === "week" ? "this week" : "this month"} to earn <span style={{ color:"#CA8A04", fontWeight:700 }}>${bonusForm.amount ? Number(bonusForm.amount).toLocaleString() : "?"}</span>.
                 </div>
                 <div style={{ marginBottom:12 }}>
-                  <div style={{ fontSize:9, fontWeight:700, color:"#444856", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Description (optional)</div>
+                  <div style={{ fontSize:9, fontWeight:700, color:"var(--text-muted)", letterSpacing:1.5, textTransform:"uppercase", marginBottom:6 }}>Description (optional)</div>
                   <input value={bonusForm.description} onChange={e => setBonusForm(p=>({...p, description:e.target.value}))} placeholder="Any extra details…"
-                    style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:8, color:"#F2F4F8", fontSize:13, fontWeight:500, padding:"9px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }} />
+                    style={{ width:"100%", background:"rgba(15,23,42,0.06)", border:"1px solid rgba(0,0,0,0.09)", borderRadius:8, color:"var(--text)", fontSize:13, fontWeight:500, padding:"9px 12px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }} />
                 </div>
                 <div style={{ display:"flex", gap:8 }}>
-                  <button onClick={saveBonus} style={{ background:"#FFD700", border:"none", borderRadius:8, color:"#111", fontSize:12, fontWeight:800, letterSpacing:1, padding:"10px 22px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Save</button>
-                  <button onClick={resetBonusForm} style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:8, color:"#666C7E", fontSize:12, fontWeight:700, padding:"10px 16px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Cancel</button>
+                  <button onClick={saveBonus} style={{ background:"#CA8A04", border:"none", borderRadius:8, color:"#111", fontSize:12, fontWeight:800, letterSpacing:1, padding:"10px 22px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Save</button>
+                  <button onClick={resetBonusForm} style={{ background:"rgba(15,23,42,0.06)", border:"1px solid var(--border)", borderRadius:8, color:"var(--text-muted)", fontSize:12, fontWeight:700, padding:"10px 16px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase" }}>Cancel</button>
                 </div>
               </div>
             )}
 
             {/* Active bonus card */}
             {!activeBonus && !showAddBonus ? (
-              <div style={{ fontSize:12, color:"#5E6376", padding:"20px 0" }}>{isAdmin ? "No active bonus. Click + Set Bonus to create one." : "No active bonus right now."}</div>
+              <div style={{ fontSize:12, color:"var(--text-muted)", padding:"20px 0" }}>{isAdmin ? "No active bonus. Click + Set Bonus to create one." : "No active bonus right now."}</div>
             ) : activeBonus ? (() => {
               const b = activeBonus;
               const myCount = computeMyCount(b);
@@ -3258,28 +2758,28 @@ function Leaderboard({ session, profile, w }) {
               const pct = Math.min(100, b.threshold ? (myCount / b.threshold) * 100 : 0);
               const periodLabel = b.period === "week" ? "this week" : "this month";
               return (
-                <div style={{ background: reached ? "linear-gradient(180deg,rgba(255,215,0,0.10),rgba(255,215,0,0.04))" : "rgba(255,255,255,0.03)", border:`1px solid ${reached ? "rgba(255,215,0,0.32)" : "rgba(255,255,255,0.08)"}`, borderRadius:16, padding:dk?"22px 26px":"18px 20px", position:"relative" }}>
-                  {reached && <div style={{ position:"absolute", top:14, right:16, fontSize:10, fontWeight:800, color:"#FFD700", letterSpacing:1.5, textTransform:"uppercase" }}>✓ Reached</div>}
-                  <div style={{ fontSize:9.5, fontWeight:800, color:"#FFD700", letterSpacing:2.5, textTransform:"uppercase", marginBottom:6 }}>{b.period === "week" ? "Weekly Goal" : "Monthly Goal"}</div>
+                <div style={{ background: reached ? "linear-gradient(180deg,rgba(202,138,4,0.10),rgba(202,138,4,0.04))" : "rgba(0,0,0,0.03)", border:`1px solid ${reached ? "rgba(202,138,4,0.32)" : "rgba(15,23,42,0.10)"}`, borderRadius:16, padding:dk?"22px 26px":"18px 20px", position:"relative" }}>
+                  {reached && <div style={{ position:"absolute", top:14, right:16, fontSize:10, fontWeight:800, color:"#CA8A04", letterSpacing:1.5, textTransform:"uppercase" }}>✓ Reached</div>}
+                  <div style={{ fontSize:9.5, fontWeight:800, color:"#CA8A04", letterSpacing:2.5, textTransform:"uppercase", marginBottom:6 }}>{b.period === "week" ? "Weekly Goal" : "Monthly Goal"}</div>
                   <div style={{ display:"flex", alignItems:"baseline", gap:10, flexWrap:"wrap", marginBottom:10 }}>
-                    <div style={{ fontSize:dk?34:28, fontWeight:900, color: reached ? "#FFD700" : "#F2F4F8", lineHeight:1, letterSpacing:"-0.02em" }}>${Number(b.amount).toLocaleString()}</div>
-                    <div style={{ fontSize:13, fontWeight:600, color:"#9CA3AF" }}>for {b.threshold} {b.threshold===1?"sale":"sales"} {periodLabel}</div>
+                    <div style={{ fontSize:dk?34:28, fontWeight:900, color: reached ? "#CA8A04" : "var(--text)", lineHeight:1, letterSpacing:"-0.02em" }}>${Number(b.amount).toLocaleString()}</div>
+                    <div style={{ fontSize:13, fontWeight:600, color:"var(--text-muted)" }}>for {b.threshold} {b.threshold===1?"sale":"sales"} {periodLabel}</div>
                   </div>
-                  {b.label && <div style={{ fontSize:13, fontWeight:600, color:"#D6DAE2", marginBottom:b.description?4:10 }}>{b.label}</div>}
-                  {b.description && <div style={{ fontSize:12, color:"#7E8595", marginBottom:10 }}>{b.description}</div>}
+                  {b.label && <div style={{ fontSize:13, fontWeight:600, color:"var(--text-2)", marginBottom:b.description?4:10 }}>{b.label}</div>}
+                  {b.description && <div style={{ fontSize:12, color:"var(--text-muted)", marginBottom:10 }}>{b.description}</div>}
                   <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:6 }}>
-                    <div style={{ flex:1, height:6, background:"rgba(255,255,255,0.06)", borderRadius:4, overflow:"hidden" }}>
-                      <div style={{ height:"100%", width:`${pct}%`, background:"linear-gradient(90deg,#CCFF00,#FFD700)", borderRadius:4, transition:"width 0.4s" }} />
+                    <div style={{ flex:1, height:6, background:"rgba(15,23,42,0.10)", borderRadius:4, overflow:"hidden" }}>
+                      <div style={{ height:"100%", width:`${pct}%`, background:"linear-gradient(90deg,#DC2626,#CA8A04)", borderRadius:4, transition:"width 0.4s" }} />
                     </div>
-                    <div style={{ fontSize:12, fontWeight:700, color: reached ? "#FFD700" : "#D6DAE2", whiteSpace:"nowrap" }}>{myCount} / {b.threshold}</div>
+                    <div style={{ fontSize:12, fontWeight:700, color: reached ? "#CA8A04" : "var(--text-2)", whiteSpace:"nowrap" }}>{myCount} / {b.threshold}</div>
                   </div>
                   {isAdmin && (
                     <div style={{ display:"flex", gap:8, marginTop:14 }}>
                       <button onClick={() => { setEditingBonus(b); setBonusForm({ label:b.label??'', threshold:b.threshold??'', amount:b.amount, period:b.period||"month", description:b.description??'' }); setShowAddBonus(false); }}
-                        style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:6, color:"#9CA3AF", fontSize:10, fontWeight:700, padding:"6px 14px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", letterSpacing:1 }}>Edit</button>
+                        style={{ background:"rgba(15,23,42,0.06)", border:"1px solid var(--border)", borderRadius:6, color:"var(--text-muted)", fontSize:10, fontWeight:700, padding:"6px 14px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", letterSpacing:1 }}>Edit</button>
                       <button onClick={() => deleteBonus(b.id)}
-                        style={{ background:"none", border:"none", color:"#5E6376", fontSize:10, fontWeight:700, padding:"6px 10px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", letterSpacing:1, transition:"color 0.15s" }}
-                        onMouseEnter={e=>e.target.style.color="#DC2626"} onMouseLeave={e=>e.target.style.color="#5E6376"}>End Bonus</button>
+                        style={{ background:"none", border:"none", color:"var(--text-muted)", fontSize:10, fontWeight:700, padding:"6px 10px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", letterSpacing:1, transition:"color 0.15s" }}
+                        onMouseEnter={e=>e.target.style.color="#DC2626"} onMouseLeave={e=>e.target.style.color="var(--text-faint)"}>End Bonus</button>
                     </div>
                   )}
                 </div>
@@ -3296,21 +2796,19 @@ function Leaderboard({ session, profile, w }) {
 const TIERS = [
   { v: "trial",    label: "Trial",    short: "TRIAL", emoji: "🆕", color: "#06D6F0" },
   { v: "bronze",   label: "Bronze",   short: "T1",    emoji: "🟤", color: "#B8732A" },
-  { v: "silver",   label: "Silver",   short: "T2",    emoji: "⚪", color: "#C0C8D8" },
-  { v: "gold",     label: "Gold",     short: "T3",    emoji: "🟡", color: "#FFD700" },
+  { v: "silver",   label: "Silver",   short: "T2",    emoji: "⚪", color: "var(--text-2)" },
+  { v: "gold",     label: "Gold",     short: "T3",    emoji: "🟡", color: "#CA8A04" },
   { v: "platinum", label: "Platinum", short: "T4",    emoji: "🟣", color: "#A78BFA" },
-  { v: "diamond",  label: "Diamond",  short: "T5",    emoji: "💎", color: "#CCFF00" },
+  { v: "diamond",  label: "Diamond",  short: "T5",    emoji: "💎", color: "#DC2626" },
 ];
 const TIER_BY_VALUE = Object.fromEntries(TIERS.map(t => [t.v, t]));
 
 const ROLEABLE_TABS = [
   { key:"dashboard",     label:"Dashboard",     color:"#22C55E" },
-  { key:"announcements", label:"Announcements", color:"#F59E0B" },
-  { key:"chat",          label:"Chat",          color:"#CCFF00" },
   { key:"leads",         label:"Leads",         color:"#06D6F0" },
-  { key:"leaderboard",   label:"Leaderboard",   color:"#FFD700" },
+  { key:"leaderboard",   label:"Leaderboard",   color:"#CA8A04" },
   { key:"scheduling",    label:"Scheduling",    color:"#F59E0B" },
-  { key:"training",      label:"Training",      color:"#CCFF00" },
+  { key:"training",      label:"Training",      color:"#DC2626" },
   { key:"reference",     label:"Reference",     color:"#06D6F0" },
   { key:"redline-ai",    label:"Redline AI",    color:"#F59E0B" },
 ];
@@ -3426,13 +2924,13 @@ function AdminPanel({ profile, roles, setRoles, onBack, w, onSignOut }) {
 
   return (
     <div>
-      <div style={{ position:"sticky", top:0, zIndex:20, background:"rgba(7,8,12,0.92)", backdropFilter:"blur(24px)", WebkitBackdropFilter:"blur(24px)", borderBottom:"1px solid rgba(255,255,255,0.05)" }}>
+      <div style={{ position:"sticky", top:0, zIndex:20, background:"rgba(255,255,255,0.92)", backdropFilter:"blur(24px)", WebkitBackdropFilter:"blur(24px)", borderBottom:"1px solid var(--hairline)" }}>
         <div style={{ maxWidth:1000, margin:"0 auto", padding:dk?"0 44px":"0 20px", height:52, display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-          <button className="back-btn" onClick={onBack} style={{ background:"none", border:"none", color:"#CCFF00", fontSize:13, fontWeight:700, cursor:"pointer", padding:"6px 0", display:"flex", alignItems:"center", gap:8, fontFamily:"inherit" }}>
+          <button className="back-btn" onClick={onBack} style={{ background:"none", border:"none", color:"#DC2626", fontSize:13, fontWeight:700, cursor:"pointer", padding:"6px 0", display:"flex", alignItems:"center", gap:8, fontFamily:"inherit" }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
             Back to Portal
           </button>
-          <button onClick={onSignOut} style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", color:"#7E8595", fontSize:10, fontWeight:700, cursor:"pointer", padding:"8px 16px", borderRadius:9, fontFamily:"inherit", letterSpacing:1.5, textTransform:"uppercase" }}>Sign Out</button>
+          <button onClick={onSignOut} style={{ background:"rgba(15,23,42,0.04)", border:"1px solid var(--border)", color:"var(--text-muted)", fontSize:10, fontWeight:700, cursor:"pointer", padding:"8px 16px", borderRadius:9, fontFamily:"inherit", letterSpacing:1.5, textTransform:"uppercase" }}>Sign Out</button>
         </div>
       </div>
 
@@ -3442,15 +2940,15 @@ function AdminPanel({ profile, roles, setRoles, onBack, w, onSignOut }) {
             <div style={{ width:32, height:4, background:"linear-gradient(90deg,#F59E0B,transparent)", borderRadius:4 }} />
             <div style={{ fontSize:9.5, fontWeight:800, color:"#F59E0B", letterSpacing:3.5, textTransform:"uppercase" }}>Admin</div>
           </div>
-          <h2 style={{ fontSize:dk?30:24, fontWeight:800, color:"#F2F4F8", margin:"0 0 8px", letterSpacing:"-0.03em" }}>Admin Panel</h2>
-          <p style={{ fontSize:14, color:"#7E8595", margin:0, fontWeight:500 }}>Rep accounts, progress, and access management.</p>
+          <h2 style={{ fontSize:dk?30:24, fontWeight:800, color:"var(--text)", margin:"0 0 8px", letterSpacing:"-0.03em" }}>Admin Panel</h2>
+          <p style={{ fontSize:14, color:"var(--text-muted)", margin:0, fontWeight:500 }}>Rep accounts, progress, and access management.</p>
         </div>
 
         <a href={SUPABASE_USERS_URL} target="_blank" rel="noreferrer" className="card-hover vid-card"
-          style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:16, background:"linear-gradient(135deg,rgba(20,16,8,0.95),rgba(14,12,6,0.95))", border:"1px solid rgba(245,158,11,0.2)", borderRadius:18, padding:"20px 24px", marginBottom:28, textDecoration:"none", animation:"fadeUp 0.5s ease 0.1s both", boxShadow:"0 4px 24px rgba(0,0,0,0.35)" }}>
+          style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:16, background:"linear-gradient(135deg,rgba(254,243,199,0.6),rgba(254,243,199,0.6))", border:"1px solid rgba(245,158,11,0.2)", borderRadius:18, padding:"20px 24px", marginBottom:28, textDecoration:"none", animation:"fadeUp 0.5s ease 0.1s both", boxShadow:"0 4px 24px rgba(15,23,42,0.06)" }}>
           <div>
             <div style={{ fontSize:9.5, fontWeight:800, color:"#F59E0B", letterSpacing:3, marginBottom:6, textTransform:"uppercase" }}>Add New Rep</div>
-            <div style={{ fontSize:13, color:"#7E8595", lineHeight:1.6, fontWeight:500 }}>Open Supabase → Authentication → Users → Add User. New accounts appear here automatically.</div>
+            <div style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.6, fontWeight:500 }}>Open Supabase → Authentication → Users → Add User. New accounts appear here automatically.</div>
           </div>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
         </a>
@@ -3468,15 +2966,15 @@ function AdminPanel({ profile, roles, setRoles, onBack, w, onSignOut }) {
             <div style={{ background:"rgba(167,139,250,0.05)", border:"1px solid rgba(167,139,250,0.22)", borderRadius:14, padding:dk?"20px 22px":"16px 18px", marginBottom:14 }}>
               <div style={{ display:"flex", gap:10, flexWrap:"wrap", marginBottom:14 }}>
                 <input value={draftRole.label} onChange={e => setDraftRole(d => ({ ...d, label: e.target.value }))} placeholder="Role name (e.g. Sales Manager)" autoFocus
-                  style={{ flex:"1 1 240px", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.10)", borderRadius:10, color:"#F2F4F8", fontSize:13, fontWeight:600, padding:"10px 12px", fontFamily:"inherit", outline:"none" }} />
+                  style={{ flex:"1 1 240px", background:"rgba(15,23,42,0.04)", border:"1px solid rgba(15,23,42,0.14)", borderRadius:10, color:"var(--text)", fontSize:13, fontWeight:600, padding:"10px 12px", fontFamily:"inherit", outline:"none" }} />
               </div>
-              <div style={{ fontSize:9.5, fontWeight:800, color:"#7E8595", letterSpacing:1.8, textTransform:"uppercase", marginBottom:10 }}>Allowed Tabs</div>
+              <div style={{ fontSize:9.5, fontWeight:800, color:"var(--text-muted)", letterSpacing:1.8, textTransform:"uppercase", marginBottom:10 }}>Allowed Tabs</div>
               <div style={{ display:"flex", gap:6, flexWrap:"wrap", marginBottom:14 }}>
                 {ROLEABLE_TABS.map(t => {
                   const on = draftRole.allowed_tabs.includes(t.key);
                   return (
                     <button key={t.key} onClick={() => toggleTabInDraft(t.key)}
-                      style={{ background: on ? `${t.color}18` : "rgba(255,255,255,0.03)", border:`1px solid ${on ? `${t.color}55` : "rgba(255,255,255,0.08)"}`, color: on ? t.color : "#7E8595", fontSize:11, fontWeight:700, letterSpacing:1.2, textTransform:"uppercase", padding:"7px 13px", borderRadius:9, cursor:"pointer", fontFamily:"inherit", display:"flex", alignItems:"center", gap:7 }}>
+                      style={{ background: on ? `${t.color}18` : "rgba(0,0,0,0.03)", border:`1px solid ${on ? `${t.color}55` : "rgba(15,23,42,0.10)"}`, color: on ? t.color : "var(--text-muted)", fontSize:11, fontWeight:700, letterSpacing:1.2, textTransform:"uppercase", padding:"7px 13px", borderRadius:9, cursor:"pointer", fontFamily:"inherit", display:"flex", alignItems:"center", gap:7 }}>
                       <span style={{ width:6, height:6, borderRadius:"50%", background:t.color, opacity: on ? 1 : 0.4 }} />
                       {t.label}
                     </button>
@@ -3495,22 +2993,22 @@ function AdminPanel({ profile, roles, setRoles, onBack, w, onSignOut }) {
               const userCount = users.filter(u => u.role === r.name).length;
               const tabs = r.allowed_tabs || [];
               return (
-                <div key={r.name} style={{ background:"rgba(255,255,255,0.022)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:14, padding:dk?"16px 18px":"14px 16px" }}>
+                <div key={r.name} style={{ background:"var(--surface)", border:"1px solid var(--border)", borderRadius:14, padding:dk?"16px 18px":"14px 16px" }}>
                   <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:10, marginBottom:10 }}>
                     <div style={{ display:"flex", alignItems:"baseline", gap:10, minWidth:0 }}>
-                      <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:22, color:"#F2F4F8", letterSpacing:1.5, lineHeight:1 }}>{r.label}</div>
-                      {r.is_builtin && <span style={{ fontSize:9, fontWeight:800, color:"#7E8595", letterSpacing:1.5, textTransform:"uppercase" }}>Built-in</span>}
-                      <span style={{ fontSize:11, color:"#7E8595", fontVariantNumeric:"tabular-nums" }}>· {userCount} {userCount===1?"member":"members"}</span>
+                      <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:22, color:"var(--text)", letterSpacing:1.5, lineHeight:1 }}>{r.label}</div>
+                      {r.is_builtin && <span style={{ fontSize:9, fontWeight:800, color:"var(--text-muted)", letterSpacing:1.5, textTransform:"uppercase" }}>Built-in</span>}
+                      <span style={{ fontSize:11, color:"var(--text-muted)", fontVariantNumeric:"tabular-nums" }}>· {userCount} {userCount===1?"member":"members"}</span>
                     </div>
                     <div style={{ display:"flex", gap:6 }}>
-                      <button onClick={() => startEditRole(r)} style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", color:"#9098A8", fontSize:10, fontWeight:700, cursor:"pointer", padding:"5px 10px", borderRadius:7, fontFamily:"inherit", letterSpacing:1.2, textTransform:"uppercase" }}>Edit</button>
+                      <button onClick={() => startEditRole(r)} style={{ background:"rgba(15,23,42,0.04)", border:"1px solid var(--border)", color:"var(--text-muted)", fontSize:10, fontWeight:700, cursor:"pointer", padding:"5px 10px", borderRadius:7, fontFamily:"inherit", letterSpacing:1.2, textTransform:"uppercase" }}>Edit</button>
                       {!r.is_builtin && (
                         <button onClick={() => deleteRole(r)} style={{ background:"rgba(220,38,38,0.06)", border:"1px solid rgba(220,38,38,0.18)", color:"#DC2626", fontSize:10, fontWeight:700, cursor:"pointer", padding:"5px 10px", borderRadius:7, fontFamily:"inherit", letterSpacing:1.2, textTransform:"uppercase" }}>Delete</button>
                       )}
                     </div>
                   </div>
                   <div style={{ display:"flex", gap:5, flexWrap:"wrap" }}>
-                    {tabs.length === 0 ? <span style={{ fontSize:11, color:"#5E6376" }}>No tabs assigned</span> :
+                    {tabs.length === 0 ? <span style={{ fontSize:11, color:"var(--text-muted)" }}>No tabs assigned</span> :
                       ROLEABLE_TABS.filter(t => tabs.includes(t.key)).map(t => (
                         <span key={t.key} style={{ fontSize:9.5, fontWeight:700, color:t.color, letterSpacing:1.2, textTransform:"uppercase", background:`${t.color}14`, padding:"3px 8px", borderRadius:5, border:`1px solid ${t.color}30` }}>{t.label}</span>
                       ))}
@@ -3523,19 +3021,19 @@ function AdminPanel({ profile, roles, setRoles, onBack, w, onSignOut }) {
 
         {/* User list */}
         {loading ? (
-          <div style={{ textAlign:"center", padding:60, color:"#666C7E", fontSize:13 }}>Loading reps…</div>
+          <div style={{ textAlign:"center", padding:60, color:"var(--text-muted)", fontSize:13 }}>Loading reps…</div>
         ) : users.length === 0 ? (
-          <div style={{ textAlign:"center", padding:60, color:"#666C7E", fontSize:13 }}>No users yet.</div>
+          <div style={{ textAlign:"center", padding:60, color:"var(--text-muted)", fontSize:13 }}>No users yet.</div>
         ) : (
           <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
             <div style={{ fontSize:9.5, fontWeight:800, color:"#06D6F0", letterSpacing:3, textTransform:"uppercase", marginBottom:8 }}>People · {users.length}</div>
             {users.map((u, i) => (
-              <div key={u.id} style={{ background:"rgba(255,255,255,0.022)", border:"1px solid rgba(255,255,255,0.055)", borderRadius:16, padding:dk?"20px 24px":"16px 18px", display:"flex", alignItems:"center", gap:16, flexWrap:"wrap", animation:`fadeUp 0.4s ease ${0.05*i}s both`,  }}>
-                <div style={{ width:46, height:46, borderRadius:14, background:"linear-gradient(135deg,#CCFF00,#5C7A00)", display:"flex", alignItems:"center", justifyContent:"center", fontWeight:800, color:"#15171E", fontSize:18, flexShrink:0, boxShadow:"0 4px 14px rgba(204,255,0,0.35)" }}>
+              <div key={u.id} style={{ background:"var(--surface)", border:"1px solid var(--border)", borderRadius:16, padding:dk?"20px 24px":"16px 18px", display:"flex", alignItems:"center", gap:16, flexWrap:"wrap", animation:`fadeUp 0.4s ease ${0.05*i}s both`,  }}>
+                <div style={{ width:46, height:46, borderRadius:14, background:"linear-gradient(135deg,#DC2626,#7F1D1D)", display:"flex", alignItems:"center", justifyContent:"center", fontWeight:800, color:"#FFFFFF", fontSize:18, flexShrink:0, boxShadow:"0 4px 14px rgba(220,38,38,0.35)" }}>
                   {u.name?.[0]?.toUpperCase() ?? "?"}
                 </div>
                 <div style={{ flex:1, minWidth:140 }}>
-                  <div style={{ fontSize:15, fontWeight:700, color:"#EEF2F8" }}>{u.name || "—"}</div>
+                  <div style={{ fontSize:15, fontWeight:700, color:"var(--text)" }}>{u.name || "—"}</div>
                   <div style={{ display:"flex", gap:6, marginTop:4, flexWrap:"wrap" }}>
                     {(() => {
                       const isAdminRole = u.role === "admin";
@@ -3560,12 +3058,12 @@ function AdminPanel({ profile, roles, setRoles, onBack, w, onSignOut }) {
                   ].map(([val, lab, col]) => (
                     <div key={lab} style={{ textAlign:"center" }}>
                       <div style={{ fontSize:20, fontWeight:900, color:col, lineHeight:1, letterSpacing:"-0.02em" }}>{val}</div>
-                      <div style={{ fontSize:9, color:"#666C7E", textTransform:"uppercase", letterSpacing:1.5, marginTop:3, fontWeight:700 }}>{lab}</div>
+                      <div style={{ fontSize:9, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1.5, marginTop:3, fontWeight:700 }}>{lab}</div>
                     </div>
                   ))}
                 </div>
                 <select value={u.tier ?? ""} onChange={e => setTier(u.id, e.target.value)}
-                  style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", color:"#D6DAE2", fontSize:11, fontWeight:700, cursor:"pointer", padding:"9px 12px", borderRadius:10, fontFamily:"inherit", letterSpacing:0.5, flexShrink:0, outline:"none" }}>
+                  style={{ background:"rgba(15,23,42,0.04)", border:"1px solid var(--border)", color:"var(--text-2)", fontSize:11, fontWeight:700, cursor:"pointer", padding:"9px 12px", borderRadius:10, fontFamily:"inherit", letterSpacing:0.5, flexShrink:0, outline:"none" }}>
                   <option value="">— No tier —</option>
                   {TIERS.map(t => (
                     <option key={t.v} value={t.v}>{t.emoji} {t.label} ({t.short})</option>
@@ -3573,14 +3071,14 @@ function AdminPanel({ profile, roles, setRoles, onBack, w, onSignOut }) {
                 </select>
                 {u.id !== profile.id && (
                   <select value={u.role || "rep"} onChange={e => setUserRole(u.id, e.target.value)}
-                    style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", color:"#D6DAE2", fontSize:11, fontWeight:700, cursor:"pointer", padding:"9px 12px", borderRadius:10, fontFamily:"inherit", letterSpacing:0.5, flexShrink:0, outline:"none" }}>
+                    style={{ background:"rgba(15,23,42,0.04)", border:"1px solid var(--border)", color:"var(--text-2)", fontSize:11, fontWeight:700, cursor:"pointer", padding:"9px 12px", borderRadius:10, fontFamily:"inherit", letterSpacing:0.5, flexShrink:0, outline:"none" }}>
                     {roles.map(r => <option key={r.name} value={r.name}>{r.label}</option>)}
                     {!roles.find(r => r.name === u.role) && u.role && <option value={u.role}>{u.role}</option>}
                   </select>
                 )}
                 <button onClick={() => resetFinalExam(u.id, u.name)}
                   title="Clear this rep's Final Exam attempt so they can retake it"
-                  style={{ background:"rgba(255,215,0,0.05)", border:"1px solid rgba(255,215,0,0.22)", color:"#FFD700", fontSize:10, fontWeight:800, cursor:"pointer", padding:"9px 12px", borderRadius:10, fontFamily:"inherit", letterSpacing:1.5, flexShrink:0, textTransform:"uppercase" }}>
+                  style={{ background:"rgba(202,138,4,0.05)", border:"1px solid rgba(202,138,4,0.22)", color:"#CA8A04", fontSize:10, fontWeight:800, cursor:"pointer", padding:"9px 12px", borderRadius:10, fontFamily:"inherit", letterSpacing:1.5, flexShrink:0, textTransform:"uppercase" }}>
                   Reset Final
                 </button>
               </div>
@@ -3601,8 +3099,8 @@ function Viewer({ ck, onBack, w, onComplete }) {
   const c = C[ck];
   const dk = w >= 768;
   const isDev = ck.startsWith("dev-");
-  const accent = isDev ? "#F59E0B" : ck.includes("bc") ? "#F59E0B" : ck.includes("call") || ck.includes("comp") || ck.includes("onboard") ? "#06D6F0" : "#CCFF00";
-  const accentBg = isDev ? "rgba(245,158,11,0.08)" : ck.includes("bc") ? "rgba(245,158,11,0.08)" : ck.includes("call") || ck.includes("comp") || ck.includes("onboard") ? "rgba(6,214,240,0.08)" : "rgba(204,255,0,0.08)";
+  const accent = isDev ? "#F59E0B" : ck.includes("bc") ? "#F59E0B" : ck.includes("call") || ck.includes("comp") || ck.includes("onboard") ? "#06D6F0" : "#DC2626";
+  const accentBg = isDev ? "rgba(245,158,11,0.08)" : ck.includes("bc") ? "rgba(245,158,11,0.08)" : ck.includes("call") || ck.includes("comp") || ck.includes("onboard") ? "rgba(6,214,240,0.08)" : "rgba(220,38,38,0.08)";
 
   useEffect(() => {
     ref.current?.scrollIntoView({ behavior:"smooth" });
@@ -3613,7 +3111,7 @@ function Viewer({ ck, onBack, w, onComplete }) {
   return (
     <div ref={ref}>
       {/* Sticky nav */}
-      <div style={{ position:"sticky", top:0, zIndex:20, background:"rgba(7,8,12,0.9)", backdropFilter:"blur(24px)", WebkitBackdropFilter:"blur(24px)", borderBottom:"1px solid rgba(255,255,255,0.05)" }}>
+      <div style={{ position:"sticky", top:0, zIndex:20, background:"rgba(255,255,255,0.9)", backdropFilter:"blur(24px)", WebkitBackdropFilter:"blur(24px)", borderBottom:"1px solid var(--hairline)" }}>
         <div style={{ maxWidth:820, margin:"0 auto", padding:dk?"0 44px":"0 20px", height:52, display:"flex", alignItems:"center" }}>
           <button className="back-btn" onClick={onBack} style={{ background:"none", border:"none", color:accent, fontSize:13, fontWeight:700, cursor:"pointer", padding:"6px 0", display:"flex", alignItems:"center", gap:8, fontFamily:"inherit", letterSpacing:0.3 }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
@@ -3631,8 +3129,8 @@ function Viewer({ ck, onBack, w, onComplete }) {
               {isDev ? "Redline AI · Dev" : ck.includes("m") && !ck.includes("bc") ? "Training Module" : ck.includes("bc") ? "Bootcamp" : ck.includes("q-") ? "Quiz" : "Reference"}
             </div>
           </div>
-          <h2 style={{ fontSize:dk?32:24, fontWeight:800, color:"#F2F4F8", margin:"0 0 10px", letterSpacing:"-0.03em", lineHeight:1.15 }}>{c.t}</h2>
-          <p style={{ fontSize:14, color:"#7E8595", margin:0, lineHeight:1.6, fontWeight:500 }}>{c.st}</p>
+          <h2 style={{ fontSize:dk?32:24, fontWeight:800, color:"var(--text)", margin:"0 0 10px", letterSpacing:"-0.03em", lineHeight:1.15 }}>{c.t}</h2>
+          <p style={{ fontSize:14, color:"var(--text-muted)", margin:0, lineHeight:1.6, fontWeight:500 }}>{c.st}</p>
           {c.demo && (
             <a href={c.demo} target="_blank" rel="noreferrer"
               style={{ display:"inline-flex", alignItems:"center", gap:10, marginTop:18, padding:"12px 18px", background:"rgba(245,158,11,0.10)", border:"1px solid rgba(245,158,11,0.35)", borderRadius:12, color:"#F59E0B", textDecoration:"none", fontSize:12, fontWeight:800, letterSpacing:1.5, textTransform:"uppercase" }}>
@@ -3653,22 +3151,22 @@ function Viewer({ ck, onBack, w, onComplete }) {
                 <button className="acc-btn" onClick={() => setOi(open ? null : i)}
                   style={{
                     width:"100%", textAlign:"left",
-                    background: open ? "rgba(255,255,255,0.03)" : "rgba(255,255,255,0.018)",
-                    border: `1px solid ${open ? "rgba(255,255,255,0.10)" : "rgba(255,255,255,0.06)"}`,
+                    background: open ? "rgba(0,0,0,0.03)" : "var(--surface)",
+                    border: `1px solid ${open ? "rgba(15,23,42,0.14)" : "rgba(15,23,42,0.10)"}`,
                     borderRadius: open ? "12px 12px 0 0" : 12,
                     padding: dk ? "20px 24px" : "17px 20px",
                     cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"space-between",
                     fontFamily:"inherit", minHeight:58
                   }}>
-                  <span style={{ fontSize:dk?14.5:13.5, fontWeight:700, color: open ? "#F2F4F8" : "#8892A0", lineHeight:1.35, paddingRight:16 }}>{s.h}</span>
-                  <div style={{ width:30, height:30, borderRadius:9, background: open ? accentBg : "rgba(255,255,255,0.04)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, transition:"all 0.25s", border:`1px solid ${open ? accent+"25" : "transparent"}` }}>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={open ? accent : "#5E6376"} strokeWidth="2.5" strokeLinecap="round" style={{ transition:"transform 0.25s ease", transform: open ? "rotate(180deg)" : "none" }}><polyline points="6 9 12 15 18 9"/></svg>
+                  <span style={{ fontSize:dk?14.5:13.5, fontWeight:700, color: open ? "var(--text)" : "var(--text-muted)", lineHeight:1.35, paddingRight:16 }}>{s.h}</span>
+                  <div style={{ width:30, height:30, borderRadius:9, background: open ? accentBg : "rgba(15,23,42,0.04)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, transition:"all 0.25s", border:`1px solid ${open ? accent+"25" : "transparent"}` }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={open ? accent : "var(--text-faint)"} strokeWidth="2.5" strokeLinecap="round" style={{ transition:"transform 0.25s ease", transform: open ? "rotate(180deg)" : "none" }}><polyline points="6 9 12 15 18 9"/></svg>
                   </div>
                 </button>
                 {open && (
                   <div style={{
-                    background:"rgba(255,255,255,0.012)",
-                    border:"1px solid rgba(255,255,255,0.10)", borderTop:"none",
+                    background:"rgba(15,23,42,0.025)",
+                    border:"1px solid rgba(15,23,42,0.14)", borderTop:"none",
                     borderRadius:"0 0 12px 12px", padding:dk?"28px 26px 30px":"22px 20px 26px",
                     animation:"fadeIn 0.25s ease",
                   }}>
@@ -3685,12 +3183,12 @@ function Viewer({ ck, onBack, w, onComplete }) {
 }
 
 const COMP_TIERS = [
-  { name:"DIAMOND",  num:5, tag:"Top 1%",      rev:"$40K+ collected / mo",  pay:"Salary + 38–40% commission",  monthlyMin:"$20,000+",  monthlyMax:null,           yearly:"$240K – $420K+ / yr",  grad:"linear-gradient(135deg,#A78BFA 0%,#06D6F0 100%)", border:"rgba(167,139,250,0.45)", glow:"rgba(167,139,250,0.35)", text:"#0E0F14", featured:true },
-  { name:"PLATINUM", num:4, tag:"Elite",       rev:"$25K – $40K / mo",      pay:"$20/hr + 36% commission",     monthlyMin:"$12,460",   monthlyMax:"$17,860",      yearly:"$150K – $214K / yr",   grad:"linear-gradient(135deg,#E2E8F0 0%,#64748B 100%)", border:"rgba(226,232,240,0.35)", glow:"rgba(148,163,184,0.25)", text:"#0E0F14", featured:false },
-  { name:"GOLD",     num:3, tag:"Performer",   rev:"$12K – $25K / mo",      pay:"$15/hr + 33% commission",     monthlyMin:"$6,560",    monthlyMax:"$10,850",      yearly:"$79K – $130K / yr",    grad:"linear-gradient(135deg,#FFD700 0%,#D97706 100%)", border:"rgba(255,215,0,0.45)",   glow:"rgba(255,215,0,0.3)",    text:"#0E0F14", featured:false },
-  { name:"SILVER",   num:2, tag:"Building",    rev:"$5K – $12K / mo",       pay:"33% commission",              monthlyMin:"$1,650",    monthlyMax:"$3,960",       yearly:"$20K – $48K / yr",     grad:"linear-gradient(135deg,#CBD5E1 0%,#64748B 100%)", border:"rgba(203,213,225,0.3)",  glow:"rgba(203,213,225,0.2)",  text:"#0E0F14", featured:false },
+  { name:"DIAMOND",  num:5, tag:"Top 1%",      rev:"$40K+ collected / mo",  pay:"Salary + 38–40% commission",  monthlyMin:"$20,000+",  monthlyMax:null,           yearly:"$240K – $420K+ / yr",  grad:"linear-gradient(135deg,#A78BFA 0%,#06D6F0 100%)", border:"rgba(167,139,250,0.45)", glow:"rgba(167,139,250,0.35)", text:"#F7F7F8", featured:true },
+  { name:"PLATINUM", num:4, tag:"Elite",       rev:"$25K – $40K / mo",      pay:"$20/hr + 36% commission",     monthlyMin:"$12,460",   monthlyMax:"$17,860",      yearly:"$150K – $214K / yr",   grad:"linear-gradient(135deg,#E2E8F0 0%,#64748B 100%)", border:"rgba(226,232,240,0.35)", glow:"rgba(148,163,184,0.25)", text:"#F7F7F8", featured:false },
+  { name:"GOLD",     num:3, tag:"Performer",   rev:"$12K – $25K / mo",      pay:"$15/hr + 33% commission",     monthlyMin:"$6,560",    monthlyMax:"$10,850",      yearly:"$79K – $130K / yr",    grad:"linear-gradient(135deg,#CA8A04 0%,#D97706 100%)", border:"rgba(202,138,4,0.45)",   glow:"rgba(202,138,4,0.3)",    text:"#F7F7F8", featured:false },
+  { name:"SILVER",   num:2, tag:"Building",    rev:"$5K – $12K / mo",       pay:"33% commission",              monthlyMin:"$1,650",    monthlyMax:"$3,960",       yearly:"$20K – $48K / yr",     grad:"linear-gradient(135deg,#CBD5E1 0%,#64748B 100%)", border:"rgba(203,213,225,0.3)",  glow:"rgba(203,213,225,0.2)",  text:"#F7F7F8", featured:false },
   { name:"BRONZE",   num:1, tag:"Starting",    rev:"$1.5K – $5K / mo",      pay:"30% commission",              monthlyMin:"$450",      monthlyMax:"$1,500",       yearly:"$5K – $18K / yr",      grad:"linear-gradient(135deg,#F97316 0%,#7C2D12 100%)", border:"rgba(249,115,22,0.35)",  glow:"rgba(249,115,22,0.2)",   text:"#FFF6EE", featured:false },
-  { name:"TRIAL",    num:0, tag:"First month", rev:"Onboarding period",     pay:"25% commission",              monthlyMin:"Variable",  monthlyMax:null,           yearly:"Placed into tier at month-end", grad:"linear-gradient(135deg,#475569 0%,#1E293B 100%)", border:"rgba(148,163,184,0.18)", glow:"rgba(71,85,105,0.15)",   text:"#F1F5F9", featured:false },
+  { name:"TRIAL",    num:0, tag:"First month", rev:"Onboarding period",     pay:"25% commission",              monthlyMin:"Variable",  monthlyMax:null,           yearly:"Placed into tier at month-end", grad:"linear-gradient(135deg,#475569 0%,#1E293B 100%)", border:"rgba(148,163,184,0.18)", glow:"rgba(71,85,105,0.15)",   text:"var(--surface-2)", featured:false },
 ];
 
 const COMP_RULES = [
@@ -3705,9 +3203,9 @@ const COMP_RULES = [
 
 function CompStat({ label, value, accent, dk }) {
   return (
-    <div style={{ background:"rgba(255,255,255,0.025)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:12, padding:dk?"10px 14px":"9px 12px", minWidth:dk?120:"auto" }}>
+    <div style={{ background:"rgba(15,23,42,0.04)", border:"1px solid var(--border)", borderRadius:12, padding:dk?"10px 14px":"9px 12px", minWidth:dk?120:"auto" }}>
       <div style={{ fontSize:9, fontWeight:800, color:accent, letterSpacing:1.8, textTransform:"uppercase" }}>{label}</div>
-      <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?24:22, color:"#F2F4F8", letterSpacing:1, lineHeight:1.1, marginTop:3, fontVariantNumeric:"tabular-nums" }}>{value}</div>
+      <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?24:22, color:"var(--text)", letterSpacing:1, lineHeight:1.1, marginTop:3, fontVariantNumeric:"tabular-nums" }}>{value}</div>
     </div>
   );
 }
@@ -3715,8 +3213,8 @@ function CompStat({ label, value, accent, dk }) {
 function CompMetric({ label, value, dk }) {
   return (
     <div>
-      <div style={{ fontSize:9, fontWeight:800, color:"#5E6376", letterSpacing:1.8, textTransform:"uppercase" }}>{label}</div>
-      <div style={{ fontSize:dk?13.5:12.5, color:"#D6DAE2", fontWeight:600, marginTop:4, lineHeight:1.35 }}>{value}</div>
+      <div style={{ fontSize:9, fontWeight:800, color:"var(--text-muted)", letterSpacing:1.8, textTransform:"uppercase" }}>{label}</div>
+      <div style={{ fontSize:dk?13.5:12.5, color:"var(--text-2)", fontWeight:600, marginTop:4, lineHeight:1.35 }}>{value}</div>
     </div>
   );
 }
@@ -3737,13 +3235,13 @@ function CompPlanView({ dk }) {
           </div>
           <div style={{ display:"flex", flexDirection:dk?"row":"column", alignItems:dk?"flex-end":"flex-start", gap:dk?28:18, flexWrap:"wrap" }}>
             <div>
-              <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?68:54, lineHeight:1, color:"#F2F4F8", letterSpacing:1, fontVariantNumeric:"tabular-nums" }}>$240K+</div>
-              <div style={{ fontSize:12, color:"#A8AEBA", marginTop:6, fontWeight:500 }}>Year 1 projection for top performers</div>
+              <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?68:54, lineHeight:1, color:"var(--text)", letterSpacing:1, fontVariantNumeric:"tabular-nums" }}>$240K+</div>
+              <div style={{ fontSize:12, color:"var(--text-3)", marginTop:6, fontWeight:500 }}>Year 1 projection for top performers</div>
             </div>
             <div style={{ display:"flex", gap:dk?14:10, flexWrap:"wrap" }}>
               <CompStat label="Top monthly take-home" value="$20K+" accent="#A78BFA" dk={dk} />
               <CompStat label="Top commission rate" value="40%" accent="#06D6F0" dk={dk} />
-              <CompStat label="Tiers" value="5" accent="#FFD700" dk={dk} />
+              <CompStat label="Tiers" value="5" accent="#CA8A04" dk={dk} />
             </div>
           </div>
         </div>
@@ -3751,15 +3249,15 @@ function CompPlanView({ dk }) {
 
       <div style={{ display:"flex", alignItems:"center", gap:12, padding:"12px 0 16px" }}>
         <div style={{ fontSize:9.5, fontWeight:800, color:"#06D6F0", letterSpacing:3.5, textTransform:"uppercase" }}>Tier Ladder</div>
-        <div style={{ flex:1, height:1, background:"linear-gradient(90deg,rgba(255,255,255,0.05),transparent)" }} />
+        <div style={{ flex:1, height:1, background:"linear-gradient(90deg,rgba(15,23,42,0.06),transparent)" }} />
       </div>
 
       <div style={{ display:"grid", gap:14 }}>
         {COMP_TIERS.map((t, i) => (
           <div key={t.name} style={{
             position:"relative", overflow:"hidden",
-            background:"rgba(255,255,255,0.022)",
-            border:`1px solid ${t.featured ? t.border : "rgba(255,255,255,0.06)"}`,
+            background:"var(--surface)",
+            border:`1px solid ${t.featured ? t.border : "rgba(15,23,42,0.10)"}`,
             borderRadius:14,
             padding:dk?"24px 26px":"20px 18px",
             animation:`fadeUp 0.4s ease ${0.05*i}s both`,
@@ -3776,22 +3274,22 @@ function CompPlanView({ dk }) {
                   <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:22, lineHeight:1, letterSpacing:1 }}>{t.num || "—"}</div>
                 </div>
                 <div>
-                  <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?26:22, color:"#F2F4F8", letterSpacing:2.5, lineHeight:1 }}>{t.name}</div>
-                  <div style={{ fontSize:10.5, color:"#7E8595", letterSpacing:1.8, textTransform:"uppercase", fontWeight:700, marginTop:5 }}>{t.tag}</div>
+                  <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?26:22, color:"var(--text)", letterSpacing:2.5, lineHeight:1 }}>{t.name}</div>
+                  <div style={{ fontSize:10.5, color:"var(--text-muted)", letterSpacing:1.8, textTransform:"uppercase", fontWeight:700, marginTop:5 }}>{t.tag}</div>
                 </div>
               </div>
               <div style={{ flex:1, display:"grid", gridTemplateColumns:"1fr 1fr", gap:dk?14:10, width:"100%" }}>
                 <CompMetric label="Revenue" value={t.rev} dk={dk} />
                 <CompMetric label="Pay" value={t.pay} dk={dk} />
               </div>
-              <div style={{ flexShrink:0, textAlign:dk?"right":"left", minWidth:dk?180:"auto", borderTop:dk?"none":"1px solid rgba(255,255,255,0.05)", paddingTop:dk?0:14, width:dk?"auto":"100%" }}>
+              <div style={{ flexShrink:0, textAlign:dk?"right":"left", minWidth:dk?180:"auto", borderTop:dk?"none":"1px solid var(--hairline)", paddingTop:dk?0:14, width:dk?"auto":"100%" }}>
                 <div style={{ fontSize:9.5, fontWeight:800, color:t.featured?"#A78BFA":"#06D6F0", letterSpacing:2, textTransform:"uppercase" }}>Take-Home</div>
-                <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?38:32, lineHeight:1.05, color:"#F2F4F8", letterSpacing:0.5, marginTop:4, fontVariantNumeric:"tabular-nums" }}>
+                <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?38:32, lineHeight:1.05, color:"var(--text)", letterSpacing:0.5, marginTop:4, fontVariantNumeric:"tabular-nums" }}>
                   {t.monthlyMin}
-                  {t.monthlyMax ? <span style={{ fontSize:dk?20:18, color:"#7E8595" }}>{" – " + t.monthlyMax}</span> : null}
-                  {!t.monthlyMax && t.monthlyMin !== "Variable" ? <span style={{ fontSize:dk?20:18, color:"#7E8595" }}> /mo</span> : null}
+                  {t.monthlyMax ? <span style={{ fontSize:dk?20:18, color:"var(--text-muted)" }}>{" – " + t.monthlyMax}</span> : null}
+                  {!t.monthlyMax && t.monthlyMin !== "Variable" ? <span style={{ fontSize:dk?20:18, color:"var(--text-muted)" }}> /mo</span> : null}
                 </div>
-                <div style={{ fontSize:11.5, color:"#7E8595", marginTop:6, fontWeight:500 }}>{t.yearly}</div>
+                <div style={{ fontSize:11.5, color:"var(--text-muted)", marginTop:6, fontWeight:500 }}>{t.yearly}</div>
               </div>
             </div>
           </div>
@@ -3800,14 +3298,14 @@ function CompPlanView({ dk }) {
 
       <div style={{ display:"flex", alignItems:"center", gap:12, padding:"36px 0 16px" }}>
         <div style={{ fontSize:9.5, fontWeight:800, color:"#F59E0B", letterSpacing:3.5, textTransform:"uppercase" }}>Rules & Mechanics</div>
-        <div style={{ flex:1, height:1, background:"linear-gradient(90deg,rgba(255,255,255,0.05),transparent)" }} />
+        <div style={{ flex:1, height:1, background:"linear-gradient(90deg,rgba(15,23,42,0.06),transparent)" }} />
       </div>
 
-      <div style={{ background:"rgba(255,255,255,0.022)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:14, padding:dk?"24px 26px":"20px 18px" }}>
+      <div style={{ background:"var(--surface)", border:"1px solid var(--border)", borderRadius:14, padding:dk?"24px 26px":"20px 18px" }}>
         {COMP_RULES.map((r, i) => (
-          <div key={i} style={{ display:"flex", gap:14, padding:"12px 0", borderTop: i===0 ? "none" : "1px solid rgba(255,255,255,0.04)" }}>
+          <div key={i} style={{ display:"flex", gap:14, padding:"12px 0", borderTop: i===0 ? "none" : "1px solid rgba(15,23,42,0.04)" }}>
             <div style={{ width:24, height:24, borderRadius:7, background:"rgba(245,158,11,0.12)", border:"1px solid rgba(245,158,11,0.25)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, fontSize:11, fontWeight:800, color:"#F59E0B", fontVariantNumeric:"tabular-nums" }}>{i+1}</div>
-            <div style={{ fontSize:dk?13.5:13, color:"#B9BEC8", lineHeight:1.55, fontWeight:500, paddingTop:2 }}>{r}</div>
+            <div style={{ fontSize:dk?13.5:13, color:"var(--text-2)", lineHeight:1.55, fontWeight:500, paddingTop:2 }}>{r}</div>
           </div>
         ))}
       </div>
@@ -3838,7 +3336,7 @@ function Quiz({ quizKey, onBack, w, onComplete }) {
   const gl = grade >= 0.9 ? "Excellent — you're ready to close" : grade >= 0.7 ? "Good — review weaker areas" : "Needs work — re-study the modules";
   return (
     <div ref={ref}>
-      <div style={{ position:"sticky", top:0, zIndex:20, background:"rgba(7,8,12,0.92)", backdropFilter:"blur(24px)", WebkitBackdropFilter:"blur(24px)", borderBottom:"1px solid rgba(255,255,255,0.05)" }}>
+      <div style={{ position:"sticky", top:0, zIndex:20, background:"rgba(255,255,255,0.92)", backdropFilter:"blur(24px)", WebkitBackdropFilter:"blur(24px)", borderBottom:"1px solid var(--hairline)" }}>
         <div style={{ maxWidth:700, margin:"0 auto", padding:dk?"0 44px":"0 20px", height:52, display:"flex", alignItems:"center" }}>
           <button className="back-btn" onClick={onBack} style={{ background:"none", border:"none", color:"#10B981", fontSize:13, fontWeight:700, cursor:"pointer", padding:"6px 0", display:"flex", alignItems:"center", gap:8, fontFamily:"inherit" }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
@@ -3853,18 +3351,18 @@ function Quiz({ quizKey, onBack, w, onComplete }) {
             <div style={{ width:28, height:3.5, background:"linear-gradient(90deg,#10B981,transparent)", borderRadius:4 }} />
             <span style={{ fontSize:9.5, fontWeight:800, color:"#10B981", letterSpacing:3.5, textTransform:"uppercase" }}>Practice Quiz</span>
           </div>
-          <h2 style={{ fontSize:dk?27:22, fontWeight:800, color:"#F2F4F8", margin:"0 0 6px", letterSpacing:"-0.03em" }}>{q.title}</h2>
-          <p style={{ fontSize:13, color:"#7E8595", margin:0, fontWeight:500 }}>{q.subtitle}</p>
+          <h2 style={{ fontSize:dk?27:22, fontWeight:800, color:"var(--text)", margin:"0 0 6px", letterSpacing:"-0.03em" }}>{q.title}</h2>
+          <p style={{ fontSize:13, color:"var(--text-muted)", margin:0, fontWeight:500 }}>{q.subtitle}</p>
         </div>
 
         {/* Progress */}
         <div style={{ marginBottom:28, animation:"fadeUp 0.5s ease 0.1s both" }}>
           <div style={{ display:"flex", justifyContent:"space-between", marginBottom:8, alignItems:"center" }}>
-            <span style={{ fontSize:11, fontWeight:600, color:"#666C7E", letterSpacing:0.5 }}>{done ? "Complete" : `Question ${ci + 1} of ${tot}`}</span>
-            <span style={{ fontSize:11, fontWeight:800, color: done ? gc : "#666C7E" }}>{pct}%</span>
+            <span style={{ fontSize:11, fontWeight:600, color:"var(--text-muted)", letterSpacing:0.5 }}>{done ? "Complete" : `Question ${ci + 1} of ${tot}`}</span>
+            <span style={{ fontSize:11, fontWeight:800, color: done ? gc : "var(--text-faint)" }}>{pct}%</span>
           </div>
-          <div style={{ height:5, background:"rgba(255,255,255,0.05)", borderRadius:6, overflow:"hidden" }}>
-            <div style={{ height:"100%", width:`${pct}%`, background: done ? `linear-gradient(90deg,${gc},${gc}90)` : "linear-gradient(90deg,#CCFF00,#F59E0B,#10B981)", borderRadius:6, transition:"width 0.55s cubic-bezier(0.4,0,0.2,1)" }} />
+          <div style={{ height:5, background:"rgba(15,23,42,0.06)", borderRadius:6, overflow:"hidden" }}>
+            <div style={{ height:"100%", width:`${pct}%`, background: done ? `linear-gradient(90deg,${gc},${gc}90)` : "linear-gradient(90deg,#DC2626,#F59E0B,#10B981)", borderRadius:6, transition:"width 0.55s cubic-bezier(0.4,0,0.2,1)" }} />
           </div>
         </div>
 
@@ -3874,30 +3372,30 @@ function Quiz({ quizKey, onBack, w, onComplete }) {
               <span style={{ fontSize:32, fontWeight:900, color:gc, lineHeight:1 }}>{score}</span>
               <span style={{ fontSize:12, color:gc+"90", fontWeight:600 }}>/ {tot}</span>
             </div>
-            <h3 style={{ fontSize:28, fontWeight:900, color:"#F2F4F8", margin:"0 0 8px", letterSpacing:"-0.03em" }}>{Math.round(grade * 100)}%</h3>
+            <h3 style={{ fontSize:28, fontWeight:900, color:"var(--text)", margin:"0 0 8px", letterSpacing:"-0.03em" }}>{Math.round(grade * 100)}%</h3>
             <p style={{ fontSize:14, color:gc, fontWeight:700, margin:"0 0 36px", letterSpacing:0.3 }}>{gl}</p>
             <div style={{ display:"flex", gap:12, justifyContent:"center", flexWrap:"wrap" }}>
-              <button onClick={retry} style={{ padding:"14px 28px", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:14, color:"#C0C8D8", fontSize:13, fontWeight:700, cursor:"pointer", fontFamily:"inherit", transition:"all 0.2s" }}>Retake Quiz</button>
-              <button onClick={onBack} style={{ padding:"14px 32px", background:"linear-gradient(135deg,#CCFF00,#6E9100)", border:"none", borderRadius:14, color:"#15171E", fontSize:13, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:"0 6px 24px rgba(204,255,0,0.28)", letterSpacing:0.5 }}>Back to Portal</button>
+              <button onClick={retry} style={{ padding:"14px 28px", background:"rgba(15,23,42,0.04)", border:"1px solid var(--border)", borderRadius:14, color:"var(--text-2)", fontSize:13, fontWeight:700, cursor:"pointer", fontFamily:"inherit", transition:"all 0.2s" }}>Retake Quiz</button>
+              <button onClick={onBack} style={{ padding:"14px 32px", background:"linear-gradient(135deg,#DC2626,#7F1D1D)", border:"none", borderRadius:14, color:"#FFFFFF", fontSize:13, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:"0 6px 24px rgba(220,38,38,0.28)", letterSpacing:0.5 }}>Back to Portal</button>
             </div>
           </div>
         ) : (
           <div style={{ paddingBottom:90, animation:"fadeUp 0.3s ease" }}>
-            <div style={{ background:"rgba(255,255,255,0.022)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:14, padding:dk?"28px":"22px 18px", marginBottom:20 }}>
-              <h3 style={{ fontSize:dk?18:16, fontWeight:700, color:"#F2F4F8", margin:0, lineHeight:1.5 }}>{cur.q}</h3>
+            <div style={{ background:"var(--surface)", border:"1px solid var(--border)", borderRadius:14, padding:dk?"28px":"22px 18px", marginBottom:20 }}>
+              <h3 style={{ fontSize:dk?18:16, fontWeight:700, color:"var(--text)", margin:0, lineHeight:1.5 }}>{cur.q}</h3>
             </div>
             <div style={{ display:"flex", flexDirection:"column", gap:9 }}>
               {cur.o.map((opt, idx) => {
                 const isSel = sel === idx, isCor = idx === cur.a, showG = locked && isCor, showR = locked && isSel && !isCor;
-                let bg = "rgba(12,14,18,0.9)", bd = "rgba(255,255,255,0.05)", tc = "#8892A0";
+                let bg = "rgba(255,255,255,0.9)", bd = "rgba(15,23,42,0.06)", tc = "var(--text-muted)";
                 if (showG) { bg = "rgba(34,197,94,0.08)"; bd = "rgba(34,197,94,0.35)"; tc = "#22C55E"; }
                 if (showR) { bg = "rgba(220,38,38,0.08)"; bd = "rgba(220,38,38,0.35)"; tc = "#DC2626"; }
-                if (!locked && isSel) { bg = "rgba(255,255,255,0.04)"; bd = "rgba(204,255,0,0.5)"; tc = "#F2F4F8"; }
-                if (!locked && !isSel) { tc = "#8892A0"; }
+                if (!locked && isSel) { bg = "rgba(15,23,42,0.04)"; bd = "rgba(220,38,38,0.5)"; tc = "var(--text)"; }
+                if (!locked && !isSel) { tc = "var(--text-muted)"; }
                 return (
                   <button key={idx} className="quiz-opt" onClick={() => pick(idx)} disabled={locked}
                     style={{ width:"100%", textAlign:"left", padding:"15px 18px", background:bg, border:`1.5px solid ${bd}`, borderRadius:14, cursor: locked ? "default" : "pointer", display:"flex", alignItems:"center", gap:14, fontFamily:"inherit", fontSize:14, color:tc, fontWeight: isSel || showG ? 600 : 400, boxShadow: showG ? "0 0 20px rgba(34,197,94,0.1)" : showR ? "0 0 20px rgba(220,38,38,0.08)" : "none" }}>
-                    <div style={{ width:34, height:34, borderRadius:10, display:"flex", alignItems:"center", justifyContent:"center", fontSize:12, fontWeight:800, flexShrink:0, background: showG ? "rgba(34,197,94,0.15)" : showR ? "rgba(220,38,38,0.15)" : "rgba(255,255,255,0.04)", color: showG ? "#22C55E" : showR ? "#DC2626" : "#666C7E", border:`1px solid ${showG ? "rgba(34,197,94,0.25)" : showR ? "rgba(220,38,38,0.25)" : "rgba(255,255,255,0.06)"}` }}>
+                    <div style={{ width:34, height:34, borderRadius:10, display:"flex", alignItems:"center", justifyContent:"center", fontSize:12, fontWeight:800, flexShrink:0, background: showG ? "rgba(34,197,94,0.15)" : showR ? "rgba(220,38,38,0.15)" : "rgba(15,23,42,0.04)", color: showG ? "#22C55E" : showR ? "#DC2626" : "var(--text-faint)", border:`1px solid ${showG ? "rgba(34,197,94,0.25)" : showR ? "rgba(220,38,38,0.25)" : "rgba(15,23,42,0.10)"}` }}>
                       {showG ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> : showR ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> : String.fromCharCode(65 + idx)}
                     </div>
                     <span style={{ flex:1 }}>{opt}</span>
@@ -3906,7 +3404,7 @@ function Quiz({ quizKey, onBack, w, onComplete }) {
               })}
             </div>
             {locked && (
-              <button onClick={nxt} style={{ width:"100%", padding:"16px", background:"linear-gradient(135deg,#CCFF00,#6E9100)", color:"#15171E", border:"none", borderRadius:14, fontSize:12, fontWeight:800, letterSpacing:2.5, cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", marginTop:18, boxShadow:"0 6px 24px rgba(204,255,0,0.28)", animation:"fadeUp 0.3s ease" }}>
+              <button onClick={nxt} style={{ width:"100%", padding:"16px", background:"linear-gradient(135deg,#DC2626,#7F1D1D)", color:"#FFFFFF", border:"none", borderRadius:14, fontSize:12, fontWeight:800, letterSpacing:2.5, cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", marginTop:18, boxShadow:"0 6px 24px rgba(220,38,38,0.28)", animation:"fadeUp 0.3s ease" }}>
                 {ci + 1 >= tot ? "See Results" : "Next Question →"}
               </button>
             )}
@@ -3923,19 +3421,19 @@ function Quiz({ quizKey, onBack, w, onComplete }) {
 
 /* Icon gradient per category */
 const IC_GRAD = {
-  MODULE:    "rgba(204,255,0,0.10)",
+  MODULE:    "rgba(220,38,38,0.10)",
   BOOTCAMP:  "rgba(245,158,11,0.10)",
   REFERENCE: "rgba(6,214,240,0.10)",
   QUIZ:      "rgba(16,185,129,0.10)",
-  FINAL:     "rgba(255,215,0,0.10)",
+  FINAL:     "rgba(202,138,4,0.10)",
   DEV:       "rgba(245,158,11,0.12)",
 };
 const IC_SHADOW = {
-  MODULE:    "inset 0 0 0 1px rgba(204,255,0,0.22)",
+  MODULE:    "inset 0 0 0 1px rgba(220,38,38,0.22)",
   BOOTCAMP:  "inset 0 0 0 1px rgba(245,158,11,0.22)",
   REFERENCE: "inset 0 0 0 1px rgba(6,214,240,0.22)",
   QUIZ:      "inset 0 0 0 1px rgba(16,185,129,0.22)",
-  FINAL:     "inset 0 0 0 1px rgba(255,215,0,0.35)",
+  FINAL:     "inset 0 0 0 1px rgba(202,138,4,0.35)",
   DEV:       "inset 0 0 0 1px rgba(245,158,11,0.30)",
 };
 const LINK_ICONS = [
@@ -4011,21 +3509,16 @@ export default function App() {
   const [showNameEdit, setShowNameEdit] = useState(false);
   const [nameEdit, setNameEdit] = useState("");
 
-  const CHAT_MIN = 220, CHAT_MAX = 520;
-  const chatDefault = w >= 1280 ? 320 : 280;
-  const [chatW, setChatW] = useState(() => {
-    try {
-      const saved = parseInt(localStorage.getItem("chatSidebarW") || "", 10);
-      if (!isNaN(saved) && saved >= CHAT_MIN && saved <= CHAT_MAX) return saved;
-    } catch { /* ignore */ }
-    return chatDefault;
+  // Theme toggle — persisted in localStorage and applied to <html data-theme=...>.
+  // CSS variables defined in GLOBAL_CSS handle the actual color swap.
+  const [theme, setTheme] = useState(() => {
+    try { return localStorage.getItem("portalTheme") || "light"; } catch { return "light"; }
   });
-  const persistChatW = (px) => {
-    const clamped = Math.max(CHAT_MIN, Math.min(CHAT_MAX, Math.round(px)));
-    setChatW(clamped);
-    try { localStorage.setItem("chatSidebarW", String(clamped)); } catch { /* ignore */ }
-  };
-  const rawChatSidebarW = w >= 768 ? chatW : 0;
+  useEffect(() => {
+    if (typeof document !== "undefined") document.documentElement.dataset.theme = theme;
+    try { localStorage.setItem("portalTheme", theme); } catch { /* ignore */ }
+  }, [theme]);
+  const toggleTheme = () => setTheme(t => t === "dark" ? "light" : "dark");
 
   const saveName = async () => {
     const trimmed = nameEdit.trim();
@@ -4047,11 +3540,11 @@ export default function App() {
   const signOut = async () => { await supabase.auth.signOut(); setView(null); };
 
   const FONT_LINK = "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Geist:wght@400..900&family=Geist+Mono:wght@400..700&display=swap";
-  const baseStyle = { minHeight:"100dvh", background:"#0E0F14", color:"#FFF" };
+  const baseStyle = { minHeight:"100dvh", background:"var(--bg)", color:"var(--text)" };
 
-  const bc = { MODULE:"#CCFF00", BOOTCAMP:"#F59E0B", REFERENCE:"#06D6F0", QUIZ:"#10B981", FINAL:"#FFD700" };
+  const bc = { MODULE:"#DC2626", BOOTCAMP:"#F59E0B", REFERENCE:"#06D6F0", QUIZ:"#10B981", FINAL:"#CA8A04" };
   const trainingGroups = [
-    { label:null, color:"#CCFF00", items:CATS.filter(x=>x.t==="MODULE") },
+    { label:null, color:"#DC2626", items:CATS.filter(x=>x.t==="MODULE") },
     { label:"BOOTCAMPS", color:"#F59E0B", items:CATS.filter(x=>x.t==="BOOTCAMP") },
   ];
   const referenceItems = CATS.filter(x=>x.t==="REFERENCE");
@@ -4069,11 +3562,10 @@ export default function App() {
   const finalAttempted = !!quizScores["q-final"];
   const ALL_TABS = [
     { key:"dashboard",     label:"Dashboard",     short:"Home",     color:"#22C55E" },
-    { key:"announcements", label:"Announcements", short:"News",     color:"#F59E0B" },
     { key:"leads",         label:"Leads",         short:"Leads",    color:"#06D6F0" },
-    { key:"leaderboard",   label:"Leaderboard",   short:"Board",    color:"#FFD700" },
+    { key:"leaderboard",   label:"Leaderboard",   short:"Board",    color:"#CA8A04" },
     { key:"scheduling",    label:"Scheduling",    short:"Schedule", color:"#F59E0B" },
-    { key:"training",      label:"Training",      short:"Train",    color:"#CCFF00" },
+    { key:"training",      label:"Training",      short:"Train",    color:"#DC2626" },
     { key:"reference",     label:"Reference",     short:"Ref",      color:"#06D6F0" },
     { key:"redline-ai",    label:"Redline AI",    short:"AI",       color:"#F59E0B" },
     { key:"people",        label:"People",        short:"Team",     color:"#A78BFA" },
@@ -4083,11 +3575,9 @@ export default function App() {
   // showing all tabs so the portal stays accessible.
   const currentRole = roles.find(r => r.name === profile?.role);
   const allowedKeys = profile?.role === "admin"
-    ? ALL_TABS.map(t => t.key).concat("chat")
-    : (currentRole?.allowed_tabs ?? ALL_TABS.map(t => t.key).concat("chat"));
+    ? ALL_TABS.map(t => t.key)
+    : (currentRole?.allowed_tabs ?? ALL_TABS.map(t => t.key));
   const TABS = ALL_TABS.filter(t => allowedKeys.includes(t.key));
-  const showChat = allowedKeys.includes("chat");
-  const chatSidebarW = showChat ? rawChatSidebarW : 0;
 
   // Live header stats — small batched fetch on session ready, refreshed on realtime events.
   const [hdrStats, setHdrStats] = useState({ active: 0, today: 0, pipe: 0 });
@@ -4130,8 +3620,8 @@ export default function App() {
         <div style={{ display:"flex", justifyContent:"center", margin:"0 auto 16px" }}>
           <RedlineLogo height={44} />
         </div>
-        <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:26, letterSpacing:10, color:"#F2F4F8" }}>REDLINE</div>
-        <div style={{ fontSize:10, color:"#5E6376", letterSpacing:3, textTransform:"uppercase", marginTop:8, fontWeight:700 }}>Loading…</div>
+        <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:26, letterSpacing:10, color:"var(--text)" }}>REDLINE</div>
+        <div style={{ fontSize:10, color:"var(--text-muted)", letterSpacing:3, textTransform:"uppercase", marginTop:8, fontWeight:700 }}>Loading…</div>
       </div>
     </div>
   );
@@ -4145,11 +3635,10 @@ export default function App() {
   );
 
   if (view === "__admin" && profile?.role === "admin") return (
-    <div ref={ref} style={{ ...baseStyle, paddingLeft: chatSidebarW }}>
+    <div ref={ref} style={{ ...baseStyle, }}>
       <style>{GLOBAL_CSS}</style>
       <link href={FONT_LINK} rel="stylesheet" />
       <AdminPanel profile={profile} roles={roles} setRoles={setRoles} onBack={() => setView(null)} w={w} onSignOut={signOut} />
-      {showChat && <Chat session={session} profile={profile} w={w} width={chatSidebarW} onResize={persistChatW} minW={CHAT_MIN} maxW={CHAT_MAX} />}
     </div>
   );
 
@@ -4160,26 +3649,24 @@ export default function App() {
       return null;
     }
     return (
-    <div ref={ref} style={{ ...baseStyle, paddingLeft: chatSidebarW }}>
+    <div ref={ref} style={{ ...baseStyle, }}>
       <style>{GLOBAL_CSS}</style>
       <link href={FONT_LINK} rel="stylesheet" />
       <Quiz quizKey={view} onBack={() => { setView(null); setTimeout(top, 50); }} w={w} onComplete={(sc, tot) => saveScore(view, sc, tot)} />
-      {showChat && <Chat session={session} profile={profile} w={w} width={chatSidebarW} onResize={persistChatW} minW={CHAT_MIN} maxW={CHAT_MAX} />}
     </div>
     );
   }
 
   if (view) return (
-    <div ref={ref} style={{ ...baseStyle, paddingLeft: chatSidebarW }}>
+    <div ref={ref} style={{ ...baseStyle, }}>
       <style>{GLOBAL_CSS}</style>
       <link href={FONT_LINK} rel="stylesheet" />
       <Viewer ck={view} onBack={() => { setView(null); setTimeout(top, 50); }} w={w} onComplete={markComplete} />
-      {showChat && <Chat session={session} profile={profile} w={w} width={chatSidebarW} onResize={persistChatW} minW={CHAT_MIN} maxW={CHAT_MAX} />}
     </div>
   );
 
   return (
-    <div ref={ref} className="dotgrid" style={{ ...baseStyle, position:"relative", paddingLeft: chatSidebarW }}>
+    <div ref={ref} className="dotgrid" style={{ ...baseStyle, position:"relative", }}>
       <style>{GLOBAL_CSS}</style>
       <link href={FONT_LINK} rel="stylesheet" />
 
@@ -4195,8 +3682,8 @@ export default function App() {
               <div style={{ display:"flex", alignItems:"center", gap:dk?12:8, flexShrink:0 }}>
                 <RedlineLogo height={dk?40:32} />
                 <div>
-                  <div className="display" style={{ fontSize:dk?34:24, color:"#F2F4F8", letterSpacing:dk?"0.06em":"0.05em" }}>REDLINE</div>
-                  <div className="eyebrow" style={{ color:"#5E6376", marginTop:dk?4:2 }}>Portal</div>
+                  <div className="display" style={{ fontSize:dk?34:24, color:"var(--text)", letterSpacing:dk?"0.06em":"0.05em" }}>REDLINE</div>
+                  <div className="eyebrow" style={{ color:"var(--text-muted)", marginTop:dk?4:2 }}>Portal</div>
                 </div>
               </div>
 
@@ -4220,6 +3707,20 @@ export default function App() {
 
               {/* Right actions */}
               <div style={{ display:"flex", alignItems:"center", gap:dk?8:6, animation:"fadeUp 0.5s ease 0.06s both" }}>
+                <button onClick={toggleTheme} className="btn-pill icon-only" aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"} title={theme === "dark" ? "Light mode" : "Dark mode"}>
+                  {theme === "dark" ? (
+                    /* Sun */
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="6.34" y2="6.34"/><line x1="17.66" y1="17.66" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="6.34" y2="17.66"/><line x1="17.66" y1="6.34" x2="19.07" y2="4.93"/>
+                    </svg>
+                  ) : (
+                    /* Moon */
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                    </svg>
+                  )}
+                </button>
+
                 {profile?.role === "admin" && (
                   <button onClick={() => setView("__admin")} className={`btn-pill${dk?"":" icon-only"}`} aria-label="Admin">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -4231,22 +3732,22 @@ export default function App() {
                 <div style={{ position:"relative", display:"flex", alignItems:"center", gap:0 }}>
                   <div className="profile-pill"
                     onClick={() => { setShowNameEdit(v => !v); setNameEdit(profile?.name ?? ""); }}>
-                    <div style={{ width:30, height:30, borderRadius:9, background:"linear-gradient(135deg,#CCFF00,#88AB00)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Geist',sans-serif", fontSize:13, fontWeight:900, color:"#15171E", flexShrink:0, boxShadow:"0 2px 10px rgba(204,255,0,0.4), inset 0 1px 0 rgba(255,255,255,0.4)" }}>
+                    <div style={{ width:30, height:30, borderRadius:9, background:"linear-gradient(135deg,#DC2626,#991B1B)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Geist',sans-serif", fontSize:13, fontWeight:900, color:"#FFFFFF", flexShrink:0, boxShadow:"0 2px 10px rgba(220,38,38,0.4), inset 0 1px 0 rgba(255,255,255,0.4)" }}>
                       {profile?.name?.[0]?.toUpperCase() ?? "R"}
                     </div>
-                    {dk && <span style={{ fontSize:12.5, fontWeight:600, color:"#D6DAE2", letterSpacing:0.2 }}>{profile?.name ?? "Rep"}</span>}
-                    {dk && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7E8595" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft:2, transform: showNameEdit?"rotate(180deg)":"none", transition:"transform 0.18s ease" }}><polyline points="6 9 12 15 18 9"/></svg>}
+                    {dk && <span style={{ fontSize:12.5, fontWeight:600, color:"var(--text-2)", letterSpacing:0.2 }}>{profile?.name ?? "Rep"}</span>}
+                    {dk && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft:2, transform: showNameEdit?"rotate(180deg)":"none", transition:"transform 0.18s ease" }}><polyline points="6 9 12 15 18 9"/></svg>}
                   </div>
                   {showNameEdit && (
                     <div className="glass" style={{ position:"absolute", top:"calc(100% + 10px)", right:0, borderRadius:14, padding:18, width:240, zIndex:200, boxShadow:"0 24px 60px rgba(0,0,0,0.7)", animation:"popIn 0.18s ease" }}>
-                      <div style={{ fontSize:10, fontWeight:800, color:"#666C7E", letterSpacing:2.5, textTransform:"uppercase", marginBottom:10 }}>Display Name</div>
+                      <div style={{ fontSize:10, fontWeight:800, color:"var(--text-muted)", letterSpacing:2.5, textTransform:"uppercase", marginBottom:10 }}>Display Name</div>
                       <input
                         autoFocus
                         value={nameEdit}
                         onChange={e => setNameEdit(e.target.value)}
                         onKeyDown={e => { if (e.key === "Enter") saveName(); if (e.key === "Escape") setShowNameEdit(false); }}
                         placeholder="Your name…"
-                        style={{ width:"100%", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:9, color:"#F2F4F8", fontSize:13, fontWeight:500, padding:"11px 13px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }}
+                        style={{ width:"100%", background:"rgba(15,23,42,0.06)", border:"1px solid rgba(0,0,0,0.09)", borderRadius:9, color:"var(--text)", fontSize:13, fontWeight:500, padding:"11px 13px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" }}
                       />
                       <div style={{ display:"flex", gap:8, marginTop:10 }}>
                         <button onClick={saveName} className="btn-primary" style={{ flex:1, fontSize:12, padding:"12px 0" }}>Save</button>
@@ -4304,11 +3805,6 @@ export default function App() {
           />
         )}
 
-        {/* ANNOUNCEMENTS TAB */}
-        {tab === "announcements" && (
-          <Announcements session={session} profile={profile} w={w} />
-        )}
-
         {/* LEADS TAB */}
         {tab === "leads" && (
           <Leads session={session} profile={profile} w={w} />
@@ -4338,18 +3834,18 @@ export default function App() {
                     const done = completedModules.has(x.k);
                     return (
                       <div key={x.id} className="card-hover" onClick={() => { setView(x.k); setTimeout(top, 50); }}
-                        style={{ background:"rgba(255,255,255,0.022)", border:`1px solid ${done ? "rgba(34,197,94,0.15)" : "rgba(255,255,255,0.055)"}`, borderRadius:16, padding:dk?"20px 18px":"17px 15px", cursor:"pointer", animation:`fadeUp 0.38s ease ${0.04*(gi*4+i)}s both`,  }}>
+                        style={{ background:"var(--surface)", border:`1px solid ${done ? "rgba(34,197,94,0.15)" : "rgba(15,23,42,0.09)"}`, borderRadius:16, padding:dk?"20px 18px":"17px 15px", cursor:"pointer", animation:`fadeUp 0.38s ease ${0.04*(gi*4+i)}s both`,  }}>
                         <div style={{ display:"flex", alignItems:"center", gap:14 }}>
                           <div style={{ width:50, height:50, borderRadius:14, background:IC_GRAD[x.t], display:"flex", alignItems:"center", justifyContent:"center", fontSize:22, flexShrink:0, boxShadow:IC_SHADOW[x.t] }}>{x.ic}</div>
                           <div style={{ flex:1, minWidth:0 }}>
                             <div style={{ fontSize:9, fontWeight:800, color:bc[x.t], letterSpacing:2.5, marginBottom:4, textTransform:"uppercase" }}>{x.n || x.t}</div>
-                            <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF2F8", margin:"0 0 3px", lineHeight:1.3 }}>{x.sub}</h3>
-                            <p style={{ fontSize:11.5, color:"#666C7E", margin:0, lineHeight:1.4, fontWeight:500 }}>{x.d}</p>
+                            <h3 style={{ fontSize:14, fontWeight:700, color:"var(--text)", margin:"0 0 3px", lineHeight:1.3 }}>{x.sub}</h3>
+                            <p style={{ fontSize:11.5, color:"var(--text-muted)", margin:0, lineHeight:1.4, fontWeight:500 }}>{x.d}</p>
                           </div>
                           <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6 }}>
                             {done && <div style={{ width:20, height:20, borderRadius:6, background:"rgba(34,197,94,0.12)", border:"1px solid rgba(34,197,94,0.3)", display:"flex", alignItems:"center", justifyContent:"center" }}><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>}
-                            <div style={{ width:32, height:32, borderRadius:10, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.06)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#666C7E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                            <div style={{ width:32, height:32, borderRadius:10, background:"rgba(15,23,42,0.04)", border:"1px solid var(--border)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
                             </div>
                           </div>
                         </div>
@@ -4366,20 +3862,20 @@ export default function App() {
                 const isPerfect = qs && qs.total > 0 && qs.score >= qs.total;
                 return (
                   <div key={x.id} className="card-hover" onClick={() => { setView(x.k); setTimeout(top, 50); }}
-                    style={{ background:"rgba(255,255,255,0.022)", border:`1px solid ${isPerfect ? "rgba(16,185,129,0.28)" : qs ? "rgba(245,158,11,0.18)" : "rgba(255,255,255,0.055)"}`, borderRadius:16, padding:dk?"20px 18px":"17px 15px", cursor:"pointer", animation:`fadeUp 0.38s ease ${0.05*i}s both`,  }}>
+                    style={{ background:"var(--surface)", border:`1px solid ${isPerfect ? "rgba(16,185,129,0.28)" : qs ? "rgba(245,158,11,0.18)" : "rgba(15,23,42,0.09)"}`, borderRadius:16, padding:dk?"20px 18px":"17px 15px", cursor:"pointer", animation:`fadeUp 0.38s ease ${0.05*i}s both`,  }}>
                     <div style={{ display:"flex", alignItems:"center", gap:14 }}>
                       <div style={{ width:50, height:50, borderRadius:14, background:IC_GRAD.QUIZ, display:"flex", alignItems:"center", justifyContent:"center", fontSize:22, flexShrink:0, boxShadow:IC_SHADOW.QUIZ }}>{x.ic}</div>
                       <div style={{ flex:1, minWidth:0 }}>
                         <div style={{ fontSize:9, fontWeight:800, color:"#10B981", letterSpacing:2.5, marginBottom:4, textTransform:"uppercase" }}>QUIZ</div>
-                        <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF2F8", margin:"0 0 3px", lineHeight:1.3 }}>{x.sub}</h3>
-                        <p style={{ fontSize:11.5, color: isPerfect ? "#10B981" : qs ? "#F59E0B" : "#666C7E", margin:0, lineHeight:1.4, fontWeight: qs ? 600 : 500 }}>
+                        <h3 style={{ fontSize:14, fontWeight:700, color:"var(--text)", margin:"0 0 3px", lineHeight:1.3 }}>{x.sub}</h3>
+                        <p style={{ fontSize:11.5, color: isPerfect ? "#10B981" : qs ? "#F59E0B" : "var(--text-faint)", margin:0, lineHeight:1.4, fontWeight: qs ? 600 : 500 }}>
                           {isPerfect ? "Passed · 100%" : qs ? `Best: ${Math.round(qs.score/qs.total*100)}% — retake for 100%` : x.d}
                         </p>
                       </div>
                       <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6 }}>
                         {isPerfect && <div style={{ width:20, height:20, borderRadius:6, background:"rgba(16,185,129,0.12)", border:"1px solid rgba(16,185,129,0.3)", display:"flex", alignItems:"center", justifyContent:"center" }}><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>}
-                        <div style={{ width:32, height:32, borderRadius:10, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.06)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#666C7E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                        <div style={{ width:32, height:32, borderRadius:10, background:"rgba(15,23,42,0.04)", border:"1px solid var(--border)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
                         </div>
                       </div>
                     </div>
@@ -4390,7 +3886,7 @@ export default function App() {
 
             {finalItem && (
               <>
-                <SectionLabel color="#FFD700" label="FINAL EXAM" delay={0.04 * (trainingGroups.length + 1)} />
+                <SectionLabel color="#CA8A04" label="FINAL EXAM" delay={0.04 * (trainingGroups.length + 1)} />
                 <div onClick={() => {
                   if (finalAttempted) {
                     const qs = quizScores["q-final"];
@@ -4406,8 +3902,8 @@ export default function App() {
                 }}
                 className={finalUnlocked && !finalAttempted ? "card-hover" : ""}
                 style={{
-                  background: finalAttempted ? "rgba(255,215,0,0.04)" : finalUnlocked ? "linear-gradient(135deg,rgba(255,215,0,0.06),rgba(255,255,255,0.02))" : "rgba(255,255,255,0.022)",
-                  border: `1px solid ${finalAttempted ? "rgba(255,215,0,0.25)" : finalUnlocked ? "rgba(255,215,0,0.32)" : "rgba(255,255,255,0.05)"}`,
+                  background: finalAttempted ? "rgba(202,138,4,0.04)" : finalUnlocked ? "linear-gradient(135deg,rgba(202,138,4,0.06),rgba(0,0,0,0.02))" : "var(--surface)",
+                  border: `1px solid ${finalAttempted ? "rgba(202,138,4,0.25)" : finalUnlocked ? "rgba(202,138,4,0.32)" : "rgba(15,23,42,0.06)"}`,
                   borderRadius:16, padding:dk?"22px 20px":"18px 16px", cursor: finalAttempted || !finalUnlocked ? "not-allowed" : "pointer",
                   opacity: finalUnlocked || finalAttempted ? 1 : 0.6,
                   animation:`fadeUp 0.38s ease ${0.05*(quizItems.length+1)}s both`,
@@ -4415,9 +3911,9 @@ export default function App() {
                   <div style={{ display:"flex", alignItems:"center", gap:14 }}>
                     <div style={{ width:50, height:50, borderRadius:14, background:IC_GRAD.FINAL, display:"flex", alignItems:"center", justifyContent:"center", fontSize:24, flexShrink:0, boxShadow:IC_SHADOW.FINAL }}>{finalItem.ic}</div>
                     <div style={{ flex:1, minWidth:0 }}>
-                      <div style={{ fontSize:9, fontWeight:800, color:"#FFD700", letterSpacing:2.5, marginBottom:4, textTransform:"uppercase" }}>{finalItem.n}</div>
-                      <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF2F8", margin:"0 0 3px", lineHeight:1.3 }}>{finalItem.sub}</h3>
-                      <p style={{ fontSize:11.5, color: finalAttempted ? "#FFD700" : finalUnlocked ? "#A0A4B0" : "#666C7E", margin:0, lineHeight:1.4, fontWeight:500 }}>
+                      <div style={{ fontSize:9, fontWeight:800, color:"#CA8A04", letterSpacing:2.5, marginBottom:4, textTransform:"uppercase" }}>{finalItem.n}</div>
+                      <h3 style={{ fontSize:14, fontWeight:700, color:"var(--text)", margin:"0 0 3px", lineHeight:1.3 }}>{finalItem.sub}</h3>
+                      <p style={{ fontSize:11.5, color: finalAttempted ? "#CA8A04" : finalUnlocked ? "var(--text-3)" : "var(--text-faint)", margin:0, lineHeight:1.4, fontWeight:500 }}>
                         {finalAttempted
                           ? `Submitted · ${quizScores["q-final"].score}/${quizScores["q-final"].total} (${Math.round(quizScores["q-final"].score/quizScores["q-final"].total*100)}%)`
                           : finalUnlocked
@@ -4427,10 +3923,10 @@ export default function App() {
                     </div>
                     <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6 }}>
                       {!finalUnlocked && !finalAttempted && (
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5E6376" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                       )}
-                      <div style={{ width:32, height:32, borderRadius:10, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.06)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#666C7E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                      <div style={{ width:32, height:32, borderRadius:10, background:"rgba(15,23,42,0.04)", border:"1px solid var(--border)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
                       </div>
                     </div>
                   </div>
@@ -4444,27 +3940,27 @@ export default function App() {
         {tab === "reference" && (
           <div style={{ animation:"fadeUp 0.35s ease" }}>
             <a href="https://www.redlinewebservices.net/" target="_blank" rel="noreferrer" className="card-hover"
-              style={{ display:"flex", alignItems:"center", gap:14, background:"rgba(255,255,255,0.022)", border:"1px solid rgba(255,255,255,0.055)", borderRadius:16, padding:dk?"18px":"15px 14px", textDecoration:"none", marginBottom:10,  }}>
+              style={{ display:"flex", alignItems:"center", gap:14, background:"var(--surface)", border:"1px solid var(--border)", borderRadius:16, padding:dk?"18px":"15px 14px", textDecoration:"none", marginBottom:10,  }}>
               <div style={{ width:46, height:46, borderRadius:13, background:"linear-gradient(135deg,#06D6F0,#0588A0)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, fontSize:22, boxShadow:"0 4px 16px rgba(6,214,240,0.35)" }}>🌐</div>
               <div style={{ flex:1, minWidth:0 }}>
-                <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF2F8", margin:"0 0 2px" }}>Redline Homepage</h3>
-                <p style={{ fontSize:11.5, color:"#4A5060", margin:0, fontWeight:500 }}>redlinewebservices.net</p>
+                <h3 style={{ fontSize:14, fontWeight:700, color:"var(--text)", margin:"0 0 2px" }}>Redline Homepage</h3>
+                <p style={{ fontSize:11.5, color:"var(--text-muted)", margin:0, fontWeight:500 }}>redlinewebservices.net</p>
               </div>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5E6376" strokeWidth="2" strokeLinecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" strokeWidth="2" strokeLinecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
             </a>
             <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr 1fr":dk?"1fr 1fr":"1fr", gap:dk?10:8 }}>
               {referenceItems.map((x, i) => (
                 <div key={x.id} className="card-hover" onClick={() => { setView(x.k); setTimeout(top, 50); }}
-                  style={{ background:"rgba(255,255,255,0.022)", border:"1px solid rgba(255,255,255,0.055)", borderRadius:16, padding:dk?"20px 18px":"17px 15px", cursor:"pointer", animation:`fadeUp 0.38s ease ${0.05*i}s both`,  }}>
+                  style={{ background:"var(--surface)", border:"1px solid var(--border)", borderRadius:16, padding:dk?"20px 18px":"17px 15px", cursor:"pointer", animation:`fadeUp 0.38s ease ${0.05*i}s both`,  }}>
                   <div style={{ display:"flex", alignItems:"center", gap:14 }}>
                     <div style={{ width:50, height:50, borderRadius:14, background:IC_GRAD.REFERENCE, display:"flex", alignItems:"center", justifyContent:"center", fontSize:22, flexShrink:0, boxShadow:IC_SHADOW.REFERENCE }}>{x.ic}</div>
                     <div style={{ flex:1, minWidth:0 }}>
                       <div style={{ fontSize:9, fontWeight:800, color:"#06D6F0", letterSpacing:2.5, marginBottom:4, textTransform:"uppercase" }}>REFERENCE</div>
-                      <h3 style={{ fontSize:14, fontWeight:700, color:"#EEF2F8", margin:"0 0 3px", lineHeight:1.3 }}>{x.sub}</h3>
-                      <p style={{ fontSize:11.5, color:"#666C7E", margin:0, lineHeight:1.4, fontWeight:500 }}>{x.d}</p>
+                      <h3 style={{ fontSize:14, fontWeight:700, color:"var(--text)", margin:"0 0 3px", lineHeight:1.3 }}>{x.sub}</h3>
+                      <p style={{ fontSize:11.5, color:"var(--text-muted)", margin:0, lineHeight:1.4, fontWeight:500 }}>{x.d}</p>
                     </div>
-                    <div style={{ width:32, height:32, borderRadius:10, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.06)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#666C7E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                    <div style={{ width:32, height:32, borderRadius:10, background:"rgba(15,23,42,0.04)", border:"1px solid var(--border)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
                     </div>
                   </div>
                 </div>
@@ -4485,8 +3981,8 @@ export default function App() {
           ];
           const moduleRings = [
             { label:"CORE OPERATIONS", count:5, accent:AMBER, items:["Lead Management & Pipeline","Scheduling & Dispatch","Invoicing & Estimates","CRM","Embedded Payments"] },
-            { label:"INTELLIGENCE",    count:3, accent:"#F2F4F8", items:["AI Umbrella Chat","BI Dashboard","Call Intelligence"] },
-            { label:"DISTRIBUTION",    count:6, accent:"#9098A8", items:["Marketing Automation","Workflow Automation","Team Management","Mobile App","Customer Portal","Site/App Builder"] },
+            { label:"INTELLIGENCE",    count:3, accent:"var(--text)", items:["AI Umbrella Chat","BI Dashboard","Call Intelligence"] },
+            { label:"DISTRIBUTION",    count:6, accent:"var(--text-muted)", items:["Marketing Automation","Workflow Automation","Team Management","Mobile App","Customer Portal","Site/App Builder"] },
           ];
           const stack = [
             { name:"ServiceTitan", price:150 },
@@ -4502,8 +3998,8 @@ export default function App() {
             {/* Hero — strategic frame, three big numbers */}
             <div style={{ background:"linear-gradient(135deg, rgba(245,158,11,0.05), rgba(245,158,11,0.01))", border:"1px solid rgba(245,158,11,0.18)", borderRadius:16, padding:dk?"28px 28px":"20px 20px" }}>
               <div style={{ fontSize:10, fontWeight:800, color:AMBER, letterSpacing:3, textTransform:"uppercase", marginBottom:12 }}>Engineering · Internal Spec</div>
-              <div className="display" style={{ fontSize:dk?44:30, color:"#F2F4F8", letterSpacing:"0.04em", lineHeight:1.05, marginBottom:14 }}>The operating system<br/>for contractors.</div>
-              <p style={{ fontSize:dk?14:13, color:"#A0A4B0", margin:"0 0 22px", lineHeight:1.6, fontWeight:500, maxWidth:720 }}>
+              <div className="display" style={{ fontSize:dk?44:30, color:"var(--text)", letterSpacing:"0.04em", lineHeight:1.05, marginBottom:14 }}>The operating system<br/>for contractors.</div>
+              <p style={{ fontSize:dk?14:13, color:"var(--text-3)", margin:"0 0 22px", lineHeight:1.6, fontWeight:500, maxWidth:720 }}>
                 A vertical, AI-native SaaS platform for HVAC, roofing, solar, plumbing, electrical. One login replaces ServiceTitan + Mailchimp + Squarespace + a scheduling tool + a review tool. Owners live in chat. Their team lives in the command center. Same product.
               </p>
               <div style={{ display:"grid", gridTemplateColumns:wd?"repeat(4,1fr)":dk?"repeat(2,1fr)":"1fr", gap:dk?14:10, marginBottom:18 }}>
@@ -4513,15 +4009,15 @@ export default function App() {
                   { k:"TAM",         v:"$650–750B", sub:"US home services" },
                   { k:"V1 MODULES",  v:"14",        sub:"3 dependency rings" },
                 ].map(s => (
-                  <div key={s.k} style={{ background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:12, padding:"14px 16px" }}>
-                    <div style={{ fontSize:9, fontWeight:800, color:"#5E6376", letterSpacing:2, textTransform:"uppercase", marginBottom:6 }}>{s.k}</div>
-                    <div className="mono" style={{ fontSize:dk?26:22, fontWeight:600, color:"#F2F4F8", lineHeight:1 }}>{s.v}</div>
-                    <div style={{ fontSize:10.5, color:"#7E8595", marginTop:5 }}>{s.sub}</div>
+                  <div key={s.k} style={{ background:"rgba(0,0,0,0.02)", border:"1px solid var(--border)", borderRadius:12, padding:"14px 16px" }}>
+                    <div style={{ fontSize:9, fontWeight:800, color:"var(--text-muted)", letterSpacing:2, textTransform:"uppercase", marginBottom:6 }}>{s.k}</div>
+                    <div className="mono" style={{ fontSize:dk?26:22, fontWeight:600, color:"var(--text)", lineHeight:1 }}>{s.v}</div>
+                    <div style={{ fontSize:10.5, color:"var(--text-muted)", marginTop:5 }}>{s.sub}</div>
                   </div>
                 ))}
               </div>
               <a href="https://redline-ai-demo.vercel.app/" target="_blank" rel="noreferrer"
-                style={{ display:"inline-flex", alignItems:"center", gap:8, padding:"10px 16px", background:AMBER, color:"#15171E", fontSize:12, fontWeight:800, letterSpacing:1.4, textTransform:"uppercase", borderRadius:10, textDecoration:"none" }}>
+                style={{ display:"inline-flex", alignItems:"center", gap:8, padding:"10px 16px", background:AMBER, color:"#FFFFFF", fontSize:12, fontWeight:800, letterSpacing:1.4, textTransform:"uppercase", borderRadius:10, textDecoration:"none" }}>
                 Open live demo
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
               </a>
@@ -4529,7 +4025,7 @@ export default function App() {
 
             {/* Two-mode architecture — the differentiator */}
             <div>
-              <div className="display" style={{ fontSize:22, color:"#F2F4F8", letterSpacing:"0.08em", marginBottom:14 }}>TWO MODES · ONE PLATFORM</div>
+              <div className="display" style={{ fontSize:22, color:"var(--text)", letterSpacing:"0.08em", marginBottom:14 }}>TWO MODES · ONE PLATFORM</div>
               <div style={{ display:"grid", gridTemplateColumns:dk?"1fr 56px 1fr":"1fr", gap:dk?0:12, alignItems:"stretch", position:"relative" }}>
                 {/* Max mode */}
                 <div style={{ background:"linear-gradient(180deg, rgba(245,158,11,0.07), rgba(245,158,11,0.015))", border:`1px solid ${AMBER}40`, borderRadius:dk?"14px 0 0 14px":14, padding:dk?"20px 22px":"16px 18px" }}>
@@ -4537,8 +4033,8 @@ export default function App() {
                     <div className="mono" style={{ fontSize:11, fontWeight:600, color:AMBER, letterSpacing:1 }}>MAX</div>
                     <div style={{ flex:1, height:1, background:"rgba(245,158,11,0.2)" }} />
                   </div>
-                  <div className="display" style={{ fontSize:dk?28:22, color:"#F2F4F8", letterSpacing:"0.05em", marginBottom:8 }}>AI OPERATOR</div>
-                  <p style={{ fontSize:12.5, color:"#A0A4B0", margin:"0 0 12px", lineHeight:1.55, fontWeight:500 }}>
+                  <div className="display" style={{ fontSize:dk?28:22, color:"var(--text)", letterSpacing:"0.05em", marginBottom:8 }}>AI OPERATOR</div>
+                  <p style={{ fontSize:12.5, color:"var(--text-3)", margin:"0 0 12px", lineHeight:1.55, fontWeight:500 }}>
                     Full-screen chat. Agentic. Connected to every module. Owners and power users run the whole business from this screen.
                   </p>
                   <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
@@ -4549,25 +4045,25 @@ export default function App() {
                 </div>
                 {/* Toggle indicator (desktop) */}
                 {dk && (
-                  <div style={{ display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(255,255,255,0.025)", borderTop:"1px solid rgba(255,255,255,0.06)", borderBottom:"1px solid rgba(255,255,255,0.06)" }}>
+                  <div style={{ display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(15,23,42,0.04)", borderTop:"1px solid var(--border)", borderBottom:"1px solid var(--border)" }}>
                     <div style={{ width:36, height:36, borderRadius:"50%", border:`1.5px dashed ${AMBER}80`, display:"flex", alignItems:"center", justifyContent:"center" }}>
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={AMBER} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
                     </div>
                   </div>
                 )}
                 {/* Min mode */}
-                <div style={{ background:"rgba(255,255,255,0.022)", border:"1px solid rgba(255,255,255,0.07)", borderRadius:dk?"0 14px 14px 0":14, padding:dk?"20px 22px":"16px 18px" }}>
+                <div style={{ background:"var(--surface)", border:"1px solid var(--border)", borderRadius:dk?"0 14px 14px 0":14, padding:dk?"20px 22px":"16px 18px" }}>
                   <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:10 }}>
-                    <div className="mono" style={{ fontSize:11, fontWeight:600, color:"#9098A8", letterSpacing:1 }}>MIN</div>
-                    <div style={{ flex:1, height:1, background:"rgba(255,255,255,0.08)" }} />
+                    <div className="mono" style={{ fontSize:11, fontWeight:600, color:"var(--text-muted)", letterSpacing:1 }}>MIN</div>
+                    <div style={{ flex:1, height:1, background:"rgba(15,23,42,0.10)" }} />
                   </div>
-                  <div className="display" style={{ fontSize:dk?28:22, color:"#F2F4F8", letterSpacing:"0.05em", marginBottom:8 }}>COMMAND CENTER</div>
-                  <p style={{ fontSize:12.5, color:"#A0A4B0", margin:"0 0 12px", lineHeight:1.55, fontWeight:500 }}>
+                  <div className="display" style={{ fontSize:dk?28:22, color:"var(--text)", letterSpacing:"0.05em", marginBottom:8 }}>COMMAND CENTER</div>
+                  <p style={{ fontSize:12.5, color:"var(--text-3)", margin:"0 0 12px", lineHeight:1.55, fontWeight:500 }}>
                     Traditional dashboard. Pipeline view, schedule grid, invoice table, BI charts. Same data — different surface for office staff and techs.
                   </p>
                   <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
                     {["Pipeline","Schedule grid","Invoices","Customer profiles","BI charts"].map(c => (
-                      <span key={c} style={{ fontSize:10.5, fontWeight:600, color:"#A0A4B0", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", padding:"4px 9px", borderRadius:6 }}>{c}</span>
+                      <span key={c} style={{ fontSize:10.5, fontWeight:600, color:"var(--text-3)", background:"rgba(15,23,42,0.04)", border:"1px solid var(--border)", padding:"4px 9px", borderRadius:6 }}>{c}</span>
                     ))}
                   </div>
                 </div>
@@ -4576,54 +4072,54 @@ export default function App() {
 
             {/* Pricing tiers */}
             <div>
-              <div className="display" style={{ fontSize:22, color:"#F2F4F8", letterSpacing:"0.08em", marginBottom:14 }}>PRICING · 5 LOCKED TIERS</div>
+              <div className="display" style={{ fontSize:22, color:"var(--text)", letterSpacing:"0.08em", marginBottom:14 }}>PRICING · 5 LOCKED TIERS</div>
               <div style={{ display:"grid", gridTemplateColumns:wd?"repeat(5,1fr)":dk?"repeat(2,1fr)":"1fr", gap:dk?10:8 }}>
                 {tiers.map((t, i) => {
                   const isPro = t.name === "PRO"; // anchor tier
                   return (
                     <div key={t.name} style={{
-                      background: isPro ? "linear-gradient(180deg, rgba(245,158,11,0.06), rgba(245,158,11,0.01))" : "rgba(255,255,255,0.022)",
-                      border:`1px solid ${isPro ? AMBER+"45" : "rgba(255,255,255,0.07)"}`,
+                      background: isPro ? "linear-gradient(180deg, rgba(245,158,11,0.06), rgba(245,158,11,0.01))" : "var(--surface)",
+                      border:`1px solid ${isPro ? AMBER+"45" : "rgba(15,23,42,0.10)"}`,
                       borderRadius:14, padding:dk?"18px 16px":"14px 14px",
                       animation:`fadeUp 0.35s ease ${0.04*i}s both`,
                       position:"relative",
                     }}>
-                      {isPro && <div style={{ position:"absolute", top:-1, right:14, fontSize:9, fontWeight:800, color:"#15171E", background:AMBER, padding:"3px 8px", borderRadius:"0 0 5px 5px", letterSpacing:1.5, textTransform:"uppercase" }}>Anchor</div>}
-                      <div className="display" style={{ fontSize:15, color: isPro ? AMBER : "#F2F4F8", letterSpacing:"0.1em", marginBottom:10 }}>{t.name}</div>
+                      {isPro && <div style={{ position:"absolute", top:-1, right:14, fontSize:9, fontWeight:800, color:"#FFFFFF", background:AMBER, padding:"3px 8px", borderRadius:"0 0 5px 5px", letterSpacing:1.5, textTransform:"uppercase" }}>Anchor</div>}
+                      <div className="display" style={{ fontSize:15, color: isPro ? AMBER : "var(--text)", letterSpacing:"0.1em", marginBottom:10 }}>{t.name}</div>
                       <div style={{ display:"flex", alignItems:"baseline", gap:3, marginBottom:14 }}>
-                        <span className="mono" style={{ fontSize:dk?26:22, fontWeight:600, color:"#F2F4F8", lineHeight:1 }}>{t.price}</span>
-                        {t.unit && <span className="mono" style={{ fontSize:13, fontWeight:500, color:"#7E8595" }}>{t.unit}</span>}
+                        <span className="mono" style={{ fontSize:dk?26:22, fontWeight:600, color:"var(--text)", lineHeight:1 }}>{t.price}</span>
+                        {t.unit && <span className="mono" style={{ fontSize:13, fontWeight:500, color:"var(--text-muted)" }}>{t.unit}</span>}
                       </div>
-                      <div style={{ fontSize:11, color:"#A0A4B0", lineHeight:1.5, fontWeight:600, marginBottom:10 }}>{t.target}</div>
-                      <div style={{ display:"flex", flexDirection:"column", gap:6, fontSize:10.5, color:"#7E8595" }}>
-                        <div><span style={{ color:"#5E6376", textTransform:"uppercase", letterSpacing:1.5, fontSize:9, fontWeight:700, marginRight:6 }}>USERS</span>{t.users}</div>
-                        <div><span style={{ color:"#5E6376", textTransform:"uppercase", letterSpacing:1.5, fontSize:9, fontWeight:700, marginRight:6 }}>PROC</span><span className="mono">{t.proc}</span></div>
+                      <div style={{ fontSize:11, color:"var(--text-3)", lineHeight:1.5, fontWeight:600, marginBottom:10 }}>{t.target}</div>
+                      <div style={{ display:"flex", flexDirection:"column", gap:6, fontSize:10.5, color:"var(--text-muted)" }}>
+                        <div><span style={{ color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1.5, fontSize:9, fontWeight:700, marginRight:6 }}>USERS</span>{t.users}</div>
+                        <div><span style={{ color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1.5, fontSize:9, fontWeight:700, marginRight:6 }}>PROC</span><span className="mono">{t.proc}</span></div>
                       </div>
                     </div>
                   );
                 })}
               </div>
-              <div style={{ display:"flex", alignItems:"flex-start", gap:10, marginTop:14, padding:"12px 14px", background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:10 }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7E8595" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0, marginTop:2 }}><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                <span style={{ fontSize:11.5, color:"#9098A8", lineHeight:1.5 }}>Lower tiers subsidize themselves through processing margin. At GMV scale, payments revenue exceeds SaaS revenue per customer — the Toast / Shopify / Square dynamic.</span>
+              <div style={{ display:"flex", alignItems:"flex-start", gap:10, marginTop:14, padding:"12px 14px", background:"rgba(0,0,0,0.02)", border:"1px solid var(--border)", borderRadius:10 }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0, marginTop:2 }}><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                <span style={{ fontSize:11.5, color:"var(--text-muted)", lineHeight:1.5 }}>Lower tiers subsidize themselves through processing margin. At GMV scale, payments revenue exceeds SaaS revenue per customer — the Toast / Shopify / Square dynamic.</span>
               </div>
             </div>
 
             {/* 14 modules grouped by ring */}
             <div>
-              <div className="display" style={{ fontSize:22, color:"#F2F4F8", letterSpacing:"0.08em", marginBottom:6 }}>14 MODULES · 3 DEPENDENCY RINGS</div>
-              <div style={{ fontSize:12, color:"#7E8595", marginBottom:16 }}>Build outside-in. Core ships first, Intelligence reads from it, Distribution sits on top.</div>
+              <div className="display" style={{ fontSize:22, color:"var(--text)", letterSpacing:"0.08em", marginBottom:6 }}>14 MODULES · 3 DEPENDENCY RINGS</div>
+              <div style={{ fontSize:12, color:"var(--text-muted)", marginBottom:16 }}>Build outside-in. Core ships first, Intelligence reads from it, Distribution sits on top.</div>
               <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr 1fr":"1fr", gap:dk?12:10 }}>
                 {moduleRings.map(r => (
-                  <div key={r.label} style={{ background:"rgba(255,255,255,0.022)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:14, padding:dk?"18px 18px":"14px 14px" }}>
+                  <div key={r.label} style={{ background:"var(--surface)", border:"1px solid var(--border)", borderRadius:14, padding:dk?"18px 18px":"14px 14px" }}>
                     <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:14 }}>
                       <div className="display" style={{ fontSize:13, color: r.accent, letterSpacing:"0.1em" }}>{r.label}</div>
-                      <div className="mono" style={{ fontSize:12, fontWeight:600, color:"#5E6376" }}>{r.count}</div>
+                      <div className="mono" style={{ fontSize:12, fontWeight:600, color:"var(--text-muted)" }}>{r.count}</div>
                     </div>
                     <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
                       {r.items.map((it, idx) => (
-                        <div key={it} style={{ display:"flex", alignItems:"center", gap:10, fontSize:12, color:"#D6DAE2" }}>
-                          <span className="mono" style={{ fontSize:10, color:"#5E6376", width:20 }}>{String(idx+1).padStart(2,"0")}</span>
+                        <div key={it} style={{ display:"flex", alignItems:"center", gap:10, fontSize:12, color:"var(--text-2)" }}>
+                          <span className="mono" style={{ fontSize:10, color:"var(--text-muted)", width:20 }}>{String(idx+1).padStart(2,"0")}</span>
                           <span>{it}</span>
                         </div>
                       ))}
@@ -4635,19 +4131,19 @@ export default function App() {
 
             {/* Replacement math */}
             <div>
-              <div className="display" style={{ fontSize:22, color:"#F2F4F8", letterSpacing:"0.08em", marginBottom:14 }}>THE REPLACEMENT</div>
+              <div className="display" style={{ fontSize:22, color:"var(--text)", letterSpacing:"0.08em", marginBottom:14 }}>THE REPLACEMENT</div>
               <div style={{ display:"grid", gridTemplateColumns:dk?"1fr 32px 1fr":"1fr", gap:dk?0:12, alignItems:"stretch" }}>
                 {/* Before */}
-                <div style={{ background:"rgba(255,255,255,0.022)", border:"1px solid rgba(255,255,255,0.07)", borderRadius:dk?"14px 0 0 14px":14, padding:dk?"18px 20px":"14px 14px" }}>
+                <div style={{ background:"var(--surface)", border:"1px solid var(--border)", borderRadius:dk?"14px 0 0 14px":14, padding:dk?"18px 20px":"14px 14px" }}>
                   <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:14 }}>
-                    <div style={{ fontSize:10, fontWeight:800, color:"#7E8595", letterSpacing:2, textTransform:"uppercase" }}>Today · 5 disconnected tools</div>
-                    <span className="mono" style={{ fontSize:18, fontWeight:600, color:"#7E8595", textDecoration:"line-through" }}>${stackTotal}/mo</span>
+                    <div style={{ fontSize:10, fontWeight:800, color:"var(--text-muted)", letterSpacing:2, textTransform:"uppercase" }}>Today · 5 disconnected tools</div>
+                    <span className="mono" style={{ fontSize:18, fontWeight:600, color:"var(--text-muted)", textDecoration:"line-through" }}>${stackTotal}/mo</span>
                   </div>
                   <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
                     {stack.map(s => (
-                      <div key={s.name} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"7px 10px", background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.04)", borderRadius:8 }}>
-                        <span style={{ fontSize:12.5, color:"#A0A4B0", fontWeight:500 }}>{s.name}</span>
-                        <span className="mono" style={{ fontSize:11.5, color:"#7E8595" }}>${s.price}</span>
+                      <div key={s.name} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"7px 10px", background:"rgba(0,0,0,0.02)", border:"1px solid rgba(15,23,42,0.04)", borderRadius:8 }}>
+                        <span style={{ fontSize:12.5, color:"var(--text-3)", fontWeight:500 }}>{s.name}</span>
+                        <span className="mono" style={{ fontSize:11.5, color:"var(--text-muted)" }}>${s.price}</span>
                       </div>
                     ))}
                   </div>
@@ -4662,14 +4158,14 @@ export default function App() {
                 <div style={{ background:"linear-gradient(180deg, rgba(245,158,11,0.07), rgba(245,158,11,0.015))", border:`1px solid ${AMBER}40`, borderRadius:dk?"0 14px 14px 0":14, padding:dk?"18px 20px":"14px 14px" }}>
                   <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:14 }}>
                     <div style={{ fontSize:10, fontWeight:800, color:AMBER, letterSpacing:2, textTransform:"uppercase" }}>Redline AI · Core</div>
-                    <span className="mono" style={{ fontSize:18, fontWeight:600, color:"#F2F4F8" }}>$179/mo</span>
+                    <span className="mono" style={{ fontSize:18, fontWeight:600, color:"var(--text)" }}>$179/mo</span>
                   </div>
-                  <div style={{ fontSize:13, color:"#D6DAE2", lineHeight:1.55, fontWeight:500, marginBottom:12 }}>
+                  <div style={{ fontSize:13, color:"var(--text-2)", lineHeight:1.55, fontWeight:500, marginBottom:12 }}>
                     Everything in those five tools — pipeline, scheduling, invoicing, CRM, payments, marketing — in one platform with an AI operator on top.
                   </div>
                   <div style={{ display:"inline-flex", alignItems:"baseline", gap:6, padding:"7px 12px", background:AMBER, borderRadius:8 }}>
-                    <span className="mono" style={{ fontSize:12, fontWeight:700, color:"#15171E" }}>−${stackTotal - 179}/mo</span>
-                    <span style={{ fontSize:11, fontWeight:700, color:"#15171E" }}>vs. the stack</span>
+                    <span className="mono" style={{ fontSize:12, fontWeight:700, color:"#FFFFFF" }}>−${stackTotal - 179}/mo</span>
+                    <span style={{ fontSize:11, fontWeight:700, color:"#FFFFFF" }}>vs. the stack</span>
                   </div>
                 </div>
               </div>
@@ -4677,17 +4173,17 @@ export default function App() {
 
             {/* Full spec — collapsed deep-dive grid */}
             <div>
-              <div className="display" style={{ fontSize:22, color:"#F2F4F8", letterSpacing:"0.08em", marginBottom:6 }}>FULL SPEC</div>
-              <div style={{ fontSize:12, color:"#7E8595", marginBottom:16 }}>Ten cards. Read in order. Open each for the full text.</div>
+              <div className="display" style={{ fontSize:22, color:"var(--text)", letterSpacing:"0.08em", marginBottom:6 }}>FULL SPEC</div>
+              <div style={{ fontSize:12, color:"var(--text-muted)", marginBottom:16 }}>Ten cards. Read in order. Open each for the full text.</div>
               <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr":"1fr", gap:dk?8:6 }}>
                 {devItems.map((x, i) => (
                   <button key={x.id} onClick={() => { setView(x.k); setTimeout(top, 50); }}
-                    style={{ display:"flex", alignItems:"center", gap:14, padding:dk?"14px 16px":"12px 14px", background:"rgba(255,255,255,0.022)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:10, cursor:"pointer", fontFamily:"inherit", textAlign:"left", transition:"all 0.16s ease", animation:`fadeUp 0.3s ease ${0.025*i}s both` }}
+                    style={{ display:"flex", alignItems:"center", gap:14, padding:dk?"14px 16px":"12px 14px", background:"var(--surface)", border:"1px solid var(--border)", borderRadius:10, cursor:"pointer", fontFamily:"inherit", textAlign:"left", transition:"all 0.16s ease", animation:`fadeUp 0.3s ease ${0.025*i}s both` }}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = `${AMBER}40`; e.currentTarget.style.background = "rgba(245,158,11,0.04)"; }}
-                    onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)"; e.currentTarget.style.background = "rgba(255,255,255,0.022)"; }}>
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(15,23,42,0.10)"; e.currentTarget.style.background = "#FFFFFF"; }}>
                     <span className="mono" style={{ fontSize:13, fontWeight:600, color:AMBER, width:24, flexShrink:0 }}>{x.n}</span>
-                    <span style={{ flex:1, minWidth:0, fontSize:13, fontWeight:600, color:"#F2F4F8", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{x.sub}</span>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#5E6376" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0 }}><polyline points="9 18 15 12 9 6"/></svg>
+                    <span style={{ flex:1, minWidth:0, fontSize:13, fontWeight:600, color:"var(--text)", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{x.sub}</span>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0 }}><polyline points="9 18 15 12 9 6"/></svg>
                   </button>
                 ))}
               </div>
@@ -4729,8 +4225,8 @@ function SectionLabel({ color, label, delay = 0 }) {
   // Section headers are typographic, not chromatic — they outrank stat labels via size+weight.
   return (
     <div style={{ display:"flex", alignItems:"center", gap:14, padding:"30px 0 14px", animation:`fadeUp 0.5s ease ${delay}s both` }}>
-      <div className="display" style={{ fontSize:22, color:"#F2F4F8", letterSpacing:"0.08em" }}>{label}</div>
-      <div style={{ flex:1, height:1, background:"linear-gradient(90deg,rgba(255,255,255,0.06),transparent)" }} />
+      <div className="display" style={{ fontSize:22, color:"var(--text)", letterSpacing:"0.08em" }}>{label}</div>
+      <div style={{ flex:1, height:1, background:"linear-gradient(90deg,rgba(15,23,42,0.10),transparent)" }} />
     </div>
   );
 }
