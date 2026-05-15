@@ -1,31 +1,5 @@
-import { useState, useEffect, useRef, useCallback, Component } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "./lib/supabase";
-
-// Catches any uncaught render error and shows a fallback instead of black-paging
-// the whole app. Without this, a single throw deep in any component (Hook order
-// violation, missing field, etc.) unmounts the React tree.
-class ErrorBoundary extends Component {
-  constructor(props) { super(props); this.state = { err: null }; }
-  static getDerivedStateFromError(err) { return { err }; }
-  componentDidCatch(err, info) { console.error("[ErrorBoundary]", err, info?.componentStack); }
-  render() {
-    if (!this.state.err) return this.props.children;
-    return (
-      <div style={{ minHeight:"100dvh", background:"#0E0F14", color:"#F2F4F8", fontFamily:"'Geist',system-ui,sans-serif", display:"flex", alignItems:"center", justifyContent:"center", padding:"40px 20px" }}>
-        <div style={{ maxWidth:520, textAlign:"center" }}>
-          <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:48, letterSpacing:8, color:"#DC2626", marginBottom:12 }}>REDLINE</div>
-          <div style={{ fontSize:11, fontWeight:800, color:"#F59E0B", letterSpacing:3, textTransform:"uppercase", marginBottom:18 }}>Something broke</div>
-          <p style={{ fontSize:14, color:"#A8AEBA", lineHeight:1.6, marginBottom:24, fontWeight:500 }}>
-            The portal hit an unexpected error. Try refreshing — the page should recover. If it keeps happening, send the error message below to support.
-          </p>
-          <pre style={{ textAlign:"left", fontSize:11, color:"#7E8595", background:"rgba(255,255,255,0.025)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:12, padding:"14px 16px", overflow:"auto", maxHeight:160, fontFamily:"'Geist Mono',ui-monospace,monospace" }}>{String(this.state.err?.message || this.state.err)}</pre>
-          <button onClick={() => { this.setState({ err: null }); }} style={{ marginTop:18, background:"linear-gradient(135deg,#CCFF00,#A8D900)", color:"#15171E", fontWeight:800, fontSize:11, letterSpacing:1.5, textTransform:"uppercase", border:"none", borderRadius:10, padding:"10px 22px", cursor:"pointer", fontFamily:"inherit" }}>Try again</button>
-          <button onClick={() => window.location.reload()} style={{ marginTop:18, marginLeft:8, background:"rgba(255,255,255,0.04)", color:"#A8AEBA", fontWeight:700, fontSize:11, letterSpacing:1.5, textTransform:"uppercase", border:"1px solid rgba(255,255,255,0.08)", borderRadius:10, padding:"10px 22px", cursor:"pointer", fontFamily:"inherit" }}>Reload</button>
-        </div>
-      </div>
-    );
-  }
-}
 
 /* ═══════════════════════════════════════════
    DESIGN TOKENS — single source of truth
@@ -2101,14 +2075,12 @@ function Chat({ session, profile, w, width, minW = 220, maxW = 520, onResize }) 
     return palette[h % palette.length];
   };
 
-  // Drag-to-resize the sidebar — hook must come BEFORE any conditional return
-  // so the hook count stays stable when the user resizes across 768px.
-  const dragRef = useRef({ active: false });
-
   // Hide on small mobile screens (no room for a permanent sidebar).
   if (w < 768) return null;
   const sidebarW = typeof width === "number" ? width : (w >= 1280 ? 320 : 280);
 
+  // Drag-to-resize the sidebar
+  const dragRef = useRef({ active: false });
   const startDrag = (e) => {
     e.preventDefault();
     dragRef.current.active = true;
@@ -3755,10 +3727,6 @@ const LINK_ICONS = [
 ];
 
 export default function App() {
-  return <ErrorBoundary><AppInner /></ErrorBoundary>;
-}
-
-function AppInner() {
   const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
   const [roles, setRoles] = useState([]);
@@ -3773,37 +3741,27 @@ function AppInner() {
 
   const top = useCallback(() => { ref.current?.scrollIntoView({ behavior:"smooth" }); }, []);
 
-  // Monotonic request id so a stale loadUserData response can't overwrite a
-  // fresh one, and a fetch that completes after unmount is dropped.
-  const loadReqRef = useRef(0);
-
   useEffect(() => {
-    let cancelled = false;
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (cancelled) return;
       setSession(session);
       if (session) loadUserData(session.user.id);
       else setLoading(false);
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (cancelled) return;
       setSession(session);
       if (session) loadUserData(session.user.id);
       else { setProfile(null); setCompletedModules(new Set()); setQuizScores({}); setLoading(false); }
     });
-    return () => { cancelled = true; subscription.unsubscribe(); };
+    return () => subscription.unsubscribe();
   }, []);
 
   const loadUserData = async (userId) => {
-    const myReq = ++loadReqRef.current;
     const [profileRes, progressRes, scoresRes, rolesRes] = await Promise.all([
       supabase.from("profiles").select("*").eq("id", userId).single(),
       supabase.from("module_progress").select("module_id").eq("user_id", userId),
       supabase.from("quiz_scores").select("quiz_id, score, total").eq("user_id", userId),
       supabase.from("roles").select("*").order("is_builtin", { ascending: false }).order("label"),
     ]);
-    // Newer request started while we were awaiting — drop these results.
-    if (myReq !== loadReqRef.current) return;
     setProfile(profileRes.data);
     setRoles(rolesRes.data ?? []);
     setCompletedModules(new Set(progressRes.data?.map(r => r.module_id) ?? []));
@@ -3976,14 +3934,12 @@ function AppInner() {
     </div>
   );
 
-  // Defense in depth — block the final-exam route if not unlocked or already
-  // submitted. Must be an effect, not a setState during render.
-  useEffect(() => {
-    if (view === "q-final" && (!finalUnlocked || finalAttempted)) setView(null);
-  }, [view, finalUnlocked, finalAttempted]);
-
   if (view && QUIZZES[view]) {
-    if (view === "q-final" && (!finalUnlocked || finalAttempted)) return null;
+    // Defense in depth — block final-exam route if not unlocked or already submitted.
+    if (view === "q-final" && (!finalUnlocked || finalAttempted)) {
+      setView(null);
+      return null;
+    }
     return (
     <div ref={ref} style={{ ...baseStyle, paddingLeft: chatSidebarW }}>
       <style>{GLOBAL_CSS}</style>
