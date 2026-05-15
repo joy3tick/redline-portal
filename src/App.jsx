@@ -11,9 +11,9 @@ const TOKENS = {
   surface2:  "rgba(0,0,0,0.03)",
   border:    "rgba(15,23,42,0.10)",
   borderStrong:"rgba(15,23,42,0.18)",
-  text:      "#0F172A",
-  textMuted: "#64748B",
-  textDim:   "#94A3B8",
+  text:      "var(--text)",
+  textMuted: "var(--text-muted)",
+  textDim:   "var(--text-faint)",
   textFaint: "#E2E8F0",
   // Hero — the ONLY accent for positive / active / energetic states
   hero:      "#DC2626",
@@ -770,7 +770,7 @@ function RichText({ text }) {
           return (
             <div key={i} style={{ display:"flex", gap:12, padding:"6px 0", alignItems:"flex-start" }}>
               <span style={{ background:"#DC262615", color:"#DC2626", width:28, height:28, borderRadius:8, display:"flex", alignItems:"center", justifyContent:"center", fontSize:13, flexShrink:0, fontWeight:700 }}>{t.slice(0,sp)}</span>
-              <span style={{ fontWeight:600, color:"#E8ECF0", paddingTop:3 }}>{t.slice(sp+1)}</span>
+              <span style={{ fontWeight:600, color:"var(--text)", paddingTop:3 }}>{t.slice(sp+1)}</span>
             </div>
           );
         }
@@ -800,7 +800,7 @@ function RichText({ text }) {
           if (parts.length === 2) return (
             <div key={i} style={{ padding:"5px 0", display:"flex", gap:6 }}>
               <span style={{ fontWeight:700, color:"var(--text)" }}>{parts[0]}</span>
-              <span style={{ color:"#8E929D" }}>—</span>
+              <span style={{ color:"var(--text-muted)" }}>—</span>
               <span style={{flex:1}}>{parts[1]}</span>
             </div>
           );
@@ -1015,17 +1015,17 @@ function Scheduler({ session, profile, w }) {
                   style={{ background: isMine?"#DC262608":"#F1F5F9", border:"1px solid "+(isMine?"#DC262630":isToday?"#404450":"#F1F5F9"), borderRadius:16, padding:"16px 14px", cursor:isPast||isFull?"default":"pointer", opacity:isPast?0.35:1, transition:"all 0.2s", minHeight:140, position:"relative" }}>
                   {isToday && !isFull && <div style={{ position:"absolute", top:10, right:12, fontSize:8, fontWeight:700, color:"#DC2626", letterSpacing:2, textTransform:"uppercase" }}>Today</div>}
                   {isFull && <div style={{ position:"absolute", top:10, right:12, fontSize:8, fontWeight:700, color:"#F59E0B", letterSpacing:2, textTransform:"uppercase" }}>Full</div>}
-                  <div style={{ fontSize:9, fontWeight:700, color:isToday?"#DC2626":"#64748B", letterSpacing:2, marginBottom:4 }}>{DAY_NAMES[di]}</div>
-                  <div style={{ fontSize:22, fontWeight:800, color:isToday?"#FFF":"#64748B", marginBottom:4, lineHeight:1 }}>
+                  <div style={{ fontSize:9, fontWeight:700, color:isToday?"#DC2626":"var(--text-muted)", letterSpacing:2, marginBottom:4 }}>{DAY_NAMES[di]}</div>
+                  <div style={{ fontSize:22, fontWeight:800, color:isToday?"#FFF":"var(--text-muted)", marginBottom:4, lineHeight:1 }}>
                     {day.getDate()} <span style={{ fontSize:12, fontWeight:500, color:"var(--text-muted)" }}>{MONTHS[day.getMonth()]}</span>
                   </div>
                   <div style={{ fontSize:9, color:"var(--text-muted)", marginBottom:12, letterSpacing:1, display:"flex", justifyContent:"space-between" }}>
                     <span>9:00 AM – 5:00 PM</span>
-                    <span style={{ color: dayEntries.length >= 6 ? "#F59E0B" : "#94A3B8" }}>{dayEntries.length}/6</span>
+                    <span style={{ color: dayEntries.length >= 6 ? "#F59E0B" : "var(--text-faint)" }}>{dayEntries.length}/6</span>
                   </div>
                   <div style={{ display:"flex", flexDirection:"column", gap:5 }}>
                     {dayEntries.map(e => (
-                      <div key={e.id} style={{ fontSize:11, fontWeight:600, color:e.user_id===session.user.id?"#DC2626":"#334155", background:e.user_id===session.user.id?"#DC262612":"#F1F5F9", border:"1px solid "+(e.user_id===session.user.id?"#DC262625":"#E2E8F0"), borderRadius:6, padding:"4px 8px" }}>
+                      <div key={e.id} style={{ fontSize:11, fontWeight:600, color:e.user_id===session.user.id?"#DC2626":"var(--text-2)", background:e.user_id===session.user.id?"#DC262612":"#F1F5F9", border:"1px solid "+(e.user_id===session.user.id?"#DC262625":"#E2E8F0"), borderRadius:6, padding:"4px 8px" }}>
                         {repProfiles[e.user_id] || "Rep"}
                       </div>
                     ))}
@@ -1534,7 +1534,7 @@ function Leads({ session, profile, w }) {
                   display:"flex", alignItems:"center", justifyContent:"center", gap:6,
                   background: allSelected ? "rgba(220,38,38,0.10)" : "rgba(0,0,0,0.02)",
                   border:`1px solid ${allSelected ? "rgba(220,38,38,0.35)" : "rgba(15,23,42,0.10)"}`,
-                  color: allSelected ? "#DC2626" : "#64748B",
+                  color: allSelected ? "#DC2626" : "var(--text-muted)",
                   fontSize:11, fontWeight:700, letterSpacing:1.2, textTransform:"uppercase",
                   padding:"8px 12px", borderRadius:10, cursor:"pointer", fontFamily:"inherit", transition:"all 0.16s",
                 }}>
@@ -1546,14 +1546,14 @@ function Leads({ session, profile, w }) {
             );
           })()}
           <button onClick={() => setStatusFilter("all")}
-            style={{ background: statusFilter === "all" ? "rgba(15,23,42,0.10)" : "rgba(0,0,0,0.02)", border:`1px solid ${statusFilter === "all" ? "rgba(15,23,42,0.18)" : "rgba(15,23,42,0.10)"}`, color: statusFilter === "all" ? "#0F172A" : "#64748B", fontSize:11, fontWeight:700, letterSpacing:1.2, textTransform:"uppercase", padding:"8px 14px", borderRadius:10, cursor:"pointer", fontFamily:"inherit", transition:"all 0.18s", display:"flex", alignItems:"center", gap:8 }}>
-            All <span style={{ fontVariantNumeric:"tabular-nums", color: statusFilter === "all" ? "#475569" : "#94A3B8", fontSize:11 }}>{totalForFilter}</span>
+            style={{ background: statusFilter === "all" ? "rgba(15,23,42,0.10)" : "rgba(0,0,0,0.02)", border:`1px solid ${statusFilter === "all" ? "rgba(15,23,42,0.18)" : "rgba(15,23,42,0.10)"}`, color: statusFilter === "all" ? "var(--text)" : "var(--text-muted)", fontSize:11, fontWeight:700, letterSpacing:1.2, textTransform:"uppercase", padding:"8px 14px", borderRadius:10, cursor:"pointer", fontFamily:"inherit", transition:"all 0.18s", display:"flex", alignItems:"center", gap:8 }}>
+            All <span style={{ fontVariantNumeric:"tabular-nums", color: statusFilter === "all" ? "var(--text-3)" : "var(--text-faint)", fontSize:11 }}>{totalForFilter}</span>
           </button>
           {STATUSES.map(s => (
             <button key={s.v} onClick={() => setStatusFilter(s.v)}
-              style={{ background: statusFilter === s.v ? `${s.color}14` : "rgba(0,0,0,0.02)", border:`1px solid ${statusFilter === s.v ? `${s.color}40` : "rgba(15,23,42,0.10)"}`, color: statusFilter === s.v ? s.color : "#64748B", fontSize:11, fontWeight:700, letterSpacing:1.2, textTransform:"uppercase", padding:"8px 14px", borderRadius:10, cursor:"pointer", fontFamily:"inherit", transition:"all 0.18s", display:"flex", alignItems:"center", gap:8 }}>
+              style={{ background: statusFilter === s.v ? `${s.color}14` : "rgba(0,0,0,0.02)", border:`1px solid ${statusFilter === s.v ? `${s.color}40` : "rgba(15,23,42,0.10)"}`, color: statusFilter === s.v ? s.color : "var(--text-muted)", fontSize:11, fontWeight:700, letterSpacing:1.2, textTransform:"uppercase", padding:"8px 14px", borderRadius:10, cursor:"pointer", fontFamily:"inherit", transition:"all 0.18s", display:"flex", alignItems:"center", gap:8 }}>
               <span style={{ width:6, height:6, borderRadius:"50%", background:s.color, opacity: statusFilter === s.v ? 1 : 0.5 }} />
-              {s.label} <span style={{ fontVariantNumeric:"tabular-nums", color: statusFilter === s.v ? s.color : "#94A3B8", fontSize:11 }}>{counts[s.v] ?? 0}</span>
+              {s.label} <span style={{ fontVariantNumeric:"tabular-nums", color: statusFilter === s.v ? s.color : "var(--text-faint)", fontSize:11 }}>{counts[s.v] ?? 0}</span>
             </button>
           ))}
         </div>
@@ -1618,7 +1618,7 @@ function Leads({ session, profile, w }) {
                   {isAdmin && (
                     <span style={{ fontSize:10.5, fontWeight:700, color:"var(--text-muted)", flexShrink:0 }}>→ {repById[l.assigned_to] || "Rep"}</span>
                   )}
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0, transform: isExpanded ? "rotate(90deg)" : "none", transition:"transform 0.18s" }}><polyline points="9 18 15 12 9 6"/></svg>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0, transform: isExpanded ? "rotate(90deg)" : "none", transition:"transform 0.18s" }}><polyline points="9 18 15 12 9 6"/></svg>
                 </div>
 
                 {isExpanded && (
@@ -1672,7 +1672,7 @@ function Leads({ session, profile, w }) {
                       <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
                         {STATUSES.map(opt => (
                           <button key={opt.v} onClick={() => setStatus(l.id, opt.v)}
-                            style={{ background: l.status === opt.v ? `${opt.color}18` : "rgba(15,23,42,0.04)", border:`1px solid ${l.status === opt.v ? `${opt.color}55` : "rgba(15,23,42,0.10)"}`, color: l.status === opt.v ? opt.color : "#64748B", fontSize:10, fontWeight:800, letterSpacing:1.3, textTransform:"uppercase", padding:"6px 12px", borderRadius:7, cursor:"pointer", fontFamily:"inherit", transition:"all 0.18s" }}>
+                            style={{ background: l.status === opt.v ? `${opt.color}18` : "rgba(15,23,42,0.04)", border:`1px solid ${l.status === opt.v ? `${opt.color}55` : "rgba(15,23,42,0.10)"}`, color: l.status === opt.v ? opt.color : "var(--text-muted)", fontSize:10, fontWeight:800, letterSpacing:1.3, textTransform:"uppercase", padding:"6px 12px", borderRadius:7, cursor:"pointer", fontFamily:"inherit", transition:"all 0.18s" }}>
                             {opt.label}
                           </button>
                         ))}
@@ -1899,7 +1899,7 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
                   transition:"height 0.5s cubic-bezier(0.4,0,0.2,1)"
                 }} />
               </div>
-              <div style={{ fontSize:9, fontWeight:800, color: isToday ? accent : "#94A3B8", letterSpacing:1 }}>{dayLabels[i]}</div>
+              <div style={{ fontSize:9, fontWeight:800, color: isToday ? accent : "var(--text-faint)", letterSpacing:1 }}>{dayLabels[i]}</div>
             </div>
           );
         })}
@@ -1979,7 +1979,7 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
                     <div style={{ width:5, height:5, borderRadius:"50%", background:"rgba(0,0,0,0.18)" }} />
                   )}
                 </div>
-                <div className="display" style={{ fontSize:dk?13:11, color: active ? "#0F172A" : passed ? "#475569" : "#94A3B8", letterSpacing:"0.06em" }}>{t.label}</div>
+                <div className="display" style={{ fontSize:dk?13:11, color: active ? "var(--text)" : passed ? "var(--text-3)" : "var(--text-faint)", letterSpacing:"0.06em" }}>{t.label}</div>
               </div>
             );
           })}
@@ -1997,8 +1997,8 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
           ].map(s => (
             <div key={s.l} style={{ background:"rgba(0,0,0,0.02)", border:"1px solid var(--border)", borderRadius:10, padding:"12px 8px", textAlign:"center" }}>
               <div style={{ display:"flex", alignItems:"baseline", justifyContent:"center", gap:3 }}>
-                <span className="mono" style={{ fontSize:dk?24:20, fontWeight:600, color: s.hero ? "#DC2626" : "#0F172A", lineHeight:1 }}>{s.v}</span>
-                {s.unit && <span className="mono" style={{ fontSize:dk?13:11, fontWeight:500, color: s.hero ? "rgba(220,38,38,0.55)" : "#94A3B8", lineHeight:1 }}>{s.unit}</span>}
+                <span className="mono" style={{ fontSize:dk?24:20, fontWeight:600, color: s.hero ? "#DC2626" : "var(--text)", lineHeight:1 }}>{s.v}</span>
+                {s.unit && <span className="mono" style={{ fontSize:dk?13:11, fontWeight:500, color: s.hero ? "rgba(220,38,38,0.55)" : "var(--text-faint)", lineHeight:1 }}>{s.unit}</span>}
               </div>
               <div style={{ fontSize:8.5, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1.6, fontWeight:700, marginTop:6 }}>{s.l}</div>
             </div>
@@ -2028,13 +2028,13 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
               const isMe = rep.uid === session.user.id;
               const leadCount = rankedWeek[0]?.count || 1;
               const pct = Math.max(8, Math.round((rep.count / leadCount) * 100));
-              const barColor = isMe ? "#DC2626" : i===0 ? "#FFD700" : "#64748B";
+              const barColor = isMe ? "#DC2626" : i===0 ? "#FFD700" : "var(--text-muted)";
               return (
                 <div key={rep.uid} style={{ position:"relative", overflow:"hidden", background: isMe ? "rgba(220,38,38,0.06)" : i===0 ? "rgba(255,215,0,0.04)" : "rgba(15,23,42,0.04)", border:`1px solid ${isMe ? "rgba(220,38,38,0.18)" : i===0 ? "rgba(255,215,0,0.12)" : "rgba(15,23,42,0.10)"}`, borderRadius:10, padding:"10px 12px" }}>
                   <div style={{ position:"absolute", inset:0, width:`${pct}%`, background:`linear-gradient(90deg,${barColor}18,${barColor}04)`, transition:"width 0.6s ease" }} />
                   <div style={{ position:"relative", display:"flex", alignItems:"center", gap:10 }}>
                     <div style={{ fontSize:16, minWidth:22, textAlign:"center" }}>{MEDALS[i]}</div>
-                    <div style={{ flex:1, minWidth:0, fontSize:12.5, fontWeight:700, color: isMe ? "#0F172A" : "#334155", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                    <div style={{ flex:1, minWidth:0, fontSize:12.5, fontWeight:700, color: isMe ? "var(--text)" : "var(--text-2)", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
                       {rep.name}{isMe ? <span style={{ fontSize:9, fontWeight:700, color:"#DC2626", letterSpacing:1.5, marginLeft:7, textTransform:"uppercase" }}>you</span> : ""}
                     </div>
                     <div style={{ fontSize:17, fontWeight:900, color: barColor, lineHeight:1 }}>{rep.count}</div>
@@ -2061,7 +2061,7 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
                   <div style={{ fontSize:9, fontWeight:800, color: nextModule.t === "MODULE" ? "#DC2626" : "#F59E0B", letterSpacing:2, marginBottom:3, textTransform:"uppercase" }}>Up Next</div>
                   <div style={{ fontSize:13, fontWeight:700, color:"var(--text)", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{nextModule.sub}</div>
                 </div>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0 }}><polyline points="9 18 15 12 9 6"/></svg>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0 }}><polyline points="9 18 15 12 9 6"/></svg>
               </div>
             ) : (
               <div style={{ display:"flex", alignItems:"center", gap:10 }}>
@@ -2088,10 +2088,10 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
               const isMe = schedule[i]?.user_id === session.user.id;
               return (
                 <div key={i} style={{ display:"flex", alignItems:"center", gap:7, background:isMe?"rgba(220,38,38,0.08)":"rgba(15,23,42,0.04)", border:`1px solid ${isMe?"rgba(220,38,38,0.2)":"rgba(15,23,42,0.10)"}`, borderRadius:8, padding:"6px 10px" }}>
-                  <div style={{ width:22, height:22, borderRadius:6, background: isMe ? "linear-gradient(135deg,#DC2626,#7F1D1D)" : "rgba(15,23,42,0.10)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, fontWeight:800, color: isMe?"#FFFFFF":"#94A3B8" }}>
+                  <div style={{ width:22, height:22, borderRadius:6, background: isMe ? "linear-gradient(135deg,#DC2626,#7F1D1D)" : "rgba(15,23,42,0.10)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, fontWeight:800, color: isMe?"#FFFFFF":"var(--text-faint)" }}>
                     {name[0]?.toUpperCase()}
                   </div>
-                  <div style={{ fontSize:12, fontWeight:600, color: isMe?"#0F172A":"#B0B5C4" }}>{name}</div>
+                  <div style={{ fontSize:12, fontWeight:600, color: isMe?"var(--text)":"#B0B5C4" }}>{name}</div>
                 </div>
               );
             })}
@@ -2132,10 +2132,10 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
           <div style={{ display:"flex", flexDirection:"column", gap:5 }}>
             {recentSales.map(s => (
               <div key={s.id} style={{ display:"flex", alignItems:"center", gap:10, padding:"8px 12px", background:"rgba(0,0,0,0.02)", border:"1px solid var(--hairline)", borderRadius:9 }}>
-                <div style={{ width:28, height:28, borderRadius:8, background: s.user_id===session.user.id ? "linear-gradient(135deg,#DC2626,#7F1D1D)" : "rgba(15,23,42,0.06)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, fontWeight:800, color: s.user_id===session.user.id ? "#FFFFFF" : "#94A3B8", flexShrink:0 }}>
+                <div style={{ width:28, height:28, borderRadius:8, background: s.user_id===session.user.id ? "linear-gradient(135deg,#DC2626,#7F1D1D)" : "rgba(15,23,42,0.06)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, fontWeight:800, color: s.user_id===session.user.id ? "#FFFFFF" : "var(--text-faint)", flexShrink:0 }}>
                   {(repProfiles[s.user_id] || "R")[0]?.toUpperCase()}
                 </div>
-                <div style={{ flex:1, minWidth:0, fontSize:12, color:"#C4C9D4", fontWeight:600, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                <div style={{ flex:1, minWidth:0, fontSize:12, color:"var(--text-2)", fontWeight:600, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
                   {repProfiles[s.user_id] || "Rep"}
                 </div>
                 {s.amount > 0 && <div className="mono" style={{ fontSize:13, fontWeight:600, color:"#DC2626", flexShrink:0 }}>${Number(s.amount).toLocaleString()}</div>}
@@ -2288,7 +2288,7 @@ function Leaderboard({ session, profile, w }) {
         <div style={{ display:"flex", background:"rgba(15,23,42,0.04)", border:"1px solid var(--border)", borderRadius:10, padding:3, gap:2 }}>
           {PERIODS.map(p => (
             <button key={p.key} onClick={() => setPeriod(p.key)}
-              style={{ background: period===p.key ? "rgba(255,215,0,0.12)" : "none", border: period===p.key ? "1px solid rgba(255,215,0,0.2)" : "1px solid transparent", borderRadius:7, color: period===p.key ? "#FFD700" : "#94A3B8", fontSize:10.5, fontWeight:700, letterSpacing:1.5, padding:"8px 16px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", transition:"all 0.15s" }}>
+              style={{ background: period===p.key ? "rgba(255,215,0,0.12)" : "none", border: period===p.key ? "1px solid rgba(255,215,0,0.2)" : "1px solid transparent", borderRadius:7, color: period===p.key ? "#FFD700" : "var(--text-faint)", fontSize:10.5, fontWeight:700, letterSpacing:1.5, padding:"8px 16px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", transition:"all 0.15s" }}>
               {p.label}
             </button>
           ))}
@@ -2315,12 +2315,12 @@ function Leaderboard({ session, profile, w }) {
             <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
               {DEAL_OPTS.map(v => (
                 <button key={v} onClick={() => setDealAmt(v)}
-                  style={{ background: dealAmt===v ? "rgba(220,38,38,0.15)" : "rgba(15,23,42,0.04)", border:`1px solid ${dealAmt===v ? "rgba(220,38,38,0.4)" : "rgba(15,23,42,0.10)"}`, borderRadius:10, color: dealAmt===v ? "#FCA5A5" : "#9CA3AF", fontSize:14, fontWeight:700, padding:"12px 20px", cursor:"pointer", fontFamily:"inherit", transition:"all 0.15s" }}>
+                  style={{ background: dealAmt===v ? "rgba(220,38,38,0.15)" : "rgba(15,23,42,0.04)", border:`1px solid ${dealAmt===v ? "rgba(220,38,38,0.4)" : "rgba(15,23,42,0.10)"}`, borderRadius:10, color: dealAmt===v ? "#FCA5A5" : "var(--text-muted)", fontSize:14, fontWeight:700, padding:"12px 20px", cursor:"pointer", fontFamily:"inherit", transition:"all 0.15s" }}>
                   ${v.toLocaleString()}
                 </button>
               ))}
               <button onClick={() => setDealAmt("custom")}
-                style={{ background: dealAmt==="custom" ? "rgba(220,38,38,0.15)" : "rgba(15,23,42,0.04)", border:`1px solid ${dealAmt==="custom" ? "rgba(220,38,38,0.4)" : "rgba(15,23,42,0.10)"}`, borderRadius:10, color: dealAmt==="custom" ? "#FCA5A5" : "#9CA3AF", fontSize:13, fontWeight:700, padding:"12px 16px", cursor:"pointer", fontFamily:"inherit", transition:"all 0.15s" }}>
+                style={{ background: dealAmt==="custom" ? "rgba(220,38,38,0.15)" : "rgba(15,23,42,0.04)", border:`1px solid ${dealAmt==="custom" ? "rgba(220,38,38,0.4)" : "rgba(15,23,42,0.10)"}`, borderRadius:10, color: dealAmt==="custom" ? "#FCA5A5" : "var(--text-muted)", fontSize:13, fontWeight:700, padding:"12px 16px", cursor:"pointer", fontFamily:"inherit", transition:"all 0.15s" }}>
                 Custom
               </button>
             </div>
@@ -2340,12 +2340,12 @@ function Leaderboard({ session, profile, w }) {
               <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
                 {RETAINER_OPTS.map(v => (
                   <button key={v} onClick={() => setRetainer(v)}
-                    style={{ background: retainer===v ? "rgba(6,214,240,0.15)" : "rgba(15,23,42,0.04)", border:`1px solid ${retainer===v ? "rgba(6,214,240,0.4)" : "rgba(15,23,42,0.10)"}`, borderRadius:10, color: retainer===v ? "#5DE9F8" : "#9CA3AF", fontSize:14, fontWeight:700, padding:"12px 20px", cursor:"pointer", fontFamily:"inherit", transition:"all 0.15s" }}>
+                    style={{ background: retainer===v ? "rgba(6,214,240,0.15)" : "rgba(15,23,42,0.04)", border:`1px solid ${retainer===v ? "rgba(6,214,240,0.4)" : "rgba(15,23,42,0.10)"}`, borderRadius:10, color: retainer===v ? "#5DE9F8" : "var(--text-muted)", fontSize:14, fontWeight:700, padding:"12px 20px", cursor:"pointer", fontFamily:"inherit", transition:"all 0.15s" }}>
                     ${v}/mo
                   </button>
                 ))}
                 <button onClick={() => setRetainer(0)}
-                  style={{ background: retainer===0 ? "rgba(15,23,42,0.10)" : "rgba(15,23,42,0.04)", border:`1px solid ${retainer===0 ? "rgba(0,0,0,0.2)" : "rgba(15,23,42,0.10)"}`, borderRadius:10, color: retainer===0 ? "#334155" : "#9CA3AF", fontSize:13, fontWeight:700, padding:"12px 16px", cursor:"pointer", fontFamily:"inherit", transition:"all 0.15s" }}>
+                  style={{ background: retainer===0 ? "rgba(15,23,42,0.10)" : "rgba(15,23,42,0.04)", border:`1px solid ${retainer===0 ? "rgba(0,0,0,0.2)" : "rgba(15,23,42,0.10)"}`, borderRadius:10, color: retainer===0 ? "var(--text-2)" : "var(--text-muted)", fontSize:13, fontWeight:700, padding:"12px 16px", cursor:"pointer", fontFamily:"inherit", transition:"all 0.15s" }}>
                   No Retainer
                 </button>
               </div>
@@ -2397,18 +2397,18 @@ function Leaderboard({ session, profile, w }) {
                 <div style={{ fontSize: isTop ? 22 : 14, fontWeight:800, color:"var(--text-muted)", minWidth:32, textAlign:"center", lineHeight:1 }}>
                   {medal ?? `#${i+1}`}
                 </div>
-                <div style={{ width:36, height:36, borderRadius:9, background: isMe ? "linear-gradient(135deg,#DC2626,#7F1D1D)" : "linear-gradient(135deg,#F1F5F9,#F1F5F9)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Geist',sans-serif", fontSize:14, fontWeight:800, color: isMe ? "#FFFFFF" : "#64748B", flexShrink:0, boxShadow: isMe ? "0 2px 10px rgba(220,38,38,0.3)" : "none" }}>
+                <div style={{ width:36, height:36, borderRadius:9, background: isMe ? "linear-gradient(135deg,#DC2626,#7F1D1D)" : "linear-gradient(135deg,#F1F5F9,#F1F5F9)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Geist',sans-serif", fontSize:14, fontWeight:800, color: isMe ? "#FFFFFF" : "var(--text-muted)", flexShrink:0, boxShadow: isMe ? "0 2px 10px rgba(220,38,38,0.3)" : "none" }}>
                   {rep.name[0]?.toUpperCase()}
                 </div>
                 <div style={{ flex:1, minWidth:0 }}>
-                  <div style={{ fontSize:14, fontWeight:700, color: isMe ? "#0F172A" : "#334155", lineHeight:1 }}>{rep.name}{isMe ? <span style={{ fontSize:9, fontWeight:700, color:"#DC2626", letterSpacing:1.5, marginLeft:8, textTransform:"uppercase" }}>you</span> : ""}</div>
+                  <div style={{ fontSize:14, fontWeight:700, color: isMe ? "var(--text)" : "var(--text-2)", lineHeight:1 }}>{rep.name}{isMe ? <span style={{ fontSize:9, fontWeight:700, color:"#DC2626", letterSpacing:1.5, marginLeft:8, textTransform:"uppercase" }}>you</span> : ""}</div>
                   <div style={{ fontSize:11, color:"var(--text-muted)", marginTop:3, display:"flex", gap:8 }}>
                     {rep.total > 0 && <span style={{ color:"#22C55E66" }}>${rep.total.toLocaleString()}</span>}
                     {rep.retainerTotal > 0 && <span style={{ color:"#06D6F066" }}>+${rep.retainerTotal.toLocaleString()}/mo retainer</span>}
                   </div>
                 </div>
                 <div style={{ textAlign:"right", flexShrink:0 }}>
-                  <div style={{ fontSize:dk?26:22, fontWeight:900, color: i===0 ? "#FFD700" : isMe ? "#DC2626" : "#94A3B8", lineHeight:1, letterSpacing:"-0.02em" }}>{rep.count}</div>
+                  <div style={{ fontSize:dk?26:22, fontWeight:900, color: i===0 ? "#FFD700" : isMe ? "#DC2626" : "var(--text-faint)", lineHeight:1, letterSpacing:"-0.02em" }}>{rep.count}</div>
                   <div style={{ fontSize:9, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1.5, fontWeight:700, marginTop:3 }}>{rep.count === 1 ? "sale" : "sales"}</div>
                 </div>
               </div>
@@ -2426,7 +2426,7 @@ function Leaderboard({ session, profile, w }) {
               const isOwn = s.user_id === session.user.id;
               return (
                 <div key={s.id} style={{ display:"flex", alignItems:"center", gap:12, padding:"10px 16px", background:"rgba(0,0,0,0.02)", border:"1px solid var(--hairline)", borderRadius:10 }}>
-                  <div style={{ width:28, height:28, borderRadius:7, background: isOwn ? "linear-gradient(135deg,#DC2626,#7F1D1D)" : "rgba(15,23,42,0.06)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, fontWeight:800, color: isOwn ? "#FFFFFF" : "#94A3B8", flexShrink:0 }}>
+                  <div style={{ width:28, height:28, borderRadius:7, background: isOwn ? "linear-gradient(135deg,#DC2626,#7F1D1D)" : "rgba(15,23,42,0.06)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, fontWeight:800, color: isOwn ? "#FFFFFF" : "var(--text-faint)", flexShrink:0 }}>
                     {(repProfiles[s.user_id] || "R")[0]?.toUpperCase()}
                   </div>
                   <div style={{ flex:1, minWidth:0 }}>
@@ -2448,7 +2448,7 @@ function Leaderboard({ session, profile, w }) {
                       }
                     }} style={{ background:"none", border:"none", color:"var(--text-muted)", fontSize:16, cursor:"pointer", padding:"0 2px", lineHeight:1, flexShrink:0, transition:"color 0.15s" }}
                       onMouseEnter={e => e.target.style.color="#DC2626"}
-                      onMouseLeave={e => e.target.style.color="#94A3B8"}>
+                      onMouseLeave={e => e.target.style.color="var(--text-faint)"}>
                       ×
                     </button>
                   )}
@@ -2497,7 +2497,7 @@ function Leaderboard({ session, profile, w }) {
                   <div style={{ display:"flex", gap:6 }}>
                     {[{v:"week", l:"This Week"}, {v:"month", l:"This Month"}].map(p => (
                       <button key={p.v} type="button" onClick={() => setBonusForm(f => ({...f, period:p.v}))}
-                        style={{ flex:1, background: bonusForm.period===p.v ? "rgba(255,215,0,0.15)" : "rgba(15,23,42,0.04)", border:`1px solid ${bonusForm.period===p.v ? "rgba(255,215,0,0.4)" : "rgba(15,23,42,0.10)"}`, borderRadius:8, color: bonusForm.period===p.v ? "#FFD700" : "#9CA3AF", fontSize:12, fontWeight:700, padding:"10px 0", cursor:"pointer", fontFamily:"inherit" }}>
+                        style={{ flex:1, background: bonusForm.period===p.v ? "rgba(255,215,0,0.15)" : "rgba(15,23,42,0.04)", border:`1px solid ${bonusForm.period===p.v ? "rgba(255,215,0,0.4)" : "rgba(15,23,42,0.10)"}`, borderRadius:8, color: bonusForm.period===p.v ? "#FFD700" : "var(--text-muted)", fontSize:12, fontWeight:700, padding:"10px 0", cursor:"pointer", fontFamily:"inherit" }}>
                         {p.l}
                       </button>
                     ))}
@@ -2544,8 +2544,8 @@ function Leaderboard({ session, profile, w }) {
                   {reached && <div style={{ position:"absolute", top:14, right:16, fontSize:10, fontWeight:800, color:"#FFD700", letterSpacing:1.5, textTransform:"uppercase" }}>✓ Reached</div>}
                   <div style={{ fontSize:9.5, fontWeight:800, color:"#FFD700", letterSpacing:2.5, textTransform:"uppercase", marginBottom:6 }}>{b.period === "week" ? "Weekly Goal" : "Monthly Goal"}</div>
                   <div style={{ display:"flex", alignItems:"baseline", gap:10, flexWrap:"wrap", marginBottom:10 }}>
-                    <div style={{ fontSize:dk?34:28, fontWeight:900, color: reached ? "#FFD700" : "#0F172A", lineHeight:1, letterSpacing:"-0.02em" }}>${Number(b.amount).toLocaleString()}</div>
-                    <div style={{ fontSize:13, fontWeight:600, color:"#9CA3AF" }}>for {b.threshold} {b.threshold===1?"sale":"sales"} {periodLabel}</div>
+                    <div style={{ fontSize:dk?34:28, fontWeight:900, color: reached ? "#FFD700" : "var(--text)", lineHeight:1, letterSpacing:"-0.02em" }}>${Number(b.amount).toLocaleString()}</div>
+                    <div style={{ fontSize:13, fontWeight:600, color:"var(--text-muted)" }}>for {b.threshold} {b.threshold===1?"sale":"sales"} {periodLabel}</div>
                   </div>
                   {b.label && <div style={{ fontSize:13, fontWeight:600, color:"var(--text-2)", marginBottom:b.description?4:10 }}>{b.label}</div>}
                   {b.description && <div style={{ fontSize:12, color:"var(--text-muted)", marginBottom:10 }}>{b.description}</div>}
@@ -2553,15 +2553,15 @@ function Leaderboard({ session, profile, w }) {
                     <div style={{ flex:1, height:6, background:"rgba(15,23,42,0.10)", borderRadius:4, overflow:"hidden" }}>
                       <div style={{ height:"100%", width:`${pct}%`, background:"linear-gradient(90deg,#DC2626,#FFD700)", borderRadius:4, transition:"width 0.4s" }} />
                     </div>
-                    <div style={{ fontSize:12, fontWeight:700, color: reached ? "#FFD700" : "#334155", whiteSpace:"nowrap" }}>{myCount} / {b.threshold}</div>
+                    <div style={{ fontSize:12, fontWeight:700, color: reached ? "#FFD700" : "var(--text-2)", whiteSpace:"nowrap" }}>{myCount} / {b.threshold}</div>
                   </div>
                   {isAdmin && (
                     <div style={{ display:"flex", gap:8, marginTop:14 }}>
                       <button onClick={() => { setEditingBonus(b); setBonusForm({ label:b.label??'', threshold:b.threshold??'', amount:b.amount, period:b.period||"month", description:b.description??'' }); setShowAddBonus(false); }}
-                        style={{ background:"rgba(15,23,42,0.06)", border:"1px solid var(--border)", borderRadius:6, color:"#9CA3AF", fontSize:10, fontWeight:700, padding:"6px 14px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", letterSpacing:1 }}>Edit</button>
+                        style={{ background:"rgba(15,23,42,0.06)", border:"1px solid var(--border)", borderRadius:6, color:"var(--text-muted)", fontSize:10, fontWeight:700, padding:"6px 14px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", letterSpacing:1 }}>Edit</button>
                       <button onClick={() => deleteBonus(b.id)}
                         style={{ background:"none", border:"none", color:"var(--text-muted)", fontSize:10, fontWeight:700, padding:"6px 10px", cursor:"pointer", fontFamily:"inherit", textTransform:"uppercase", letterSpacing:1, transition:"color 0.15s" }}
-                        onMouseEnter={e=>e.target.style.color="#DC2626"} onMouseLeave={e=>e.target.style.color="#94A3B8"}>End Bonus</button>
+                        onMouseEnter={e=>e.target.style.color="#DC2626"} onMouseLeave={e=>e.target.style.color="var(--text-faint)"}>End Bonus</button>
                     </div>
                   )}
                 </div>
@@ -2756,7 +2756,7 @@ function AdminPanel({ profile, roles, setRoles, onBack, w, onSignOut }) {
                   const on = draftRole.allowed_tabs.includes(t.key);
                   return (
                     <button key={t.key} onClick={() => toggleTabInDraft(t.key)}
-                      style={{ background: on ? `${t.color}18` : "rgba(0,0,0,0.03)", border:`1px solid ${on ? `${t.color}55` : "rgba(15,23,42,0.10)"}`, color: on ? t.color : "#64748B", fontSize:11, fontWeight:700, letterSpacing:1.2, textTransform:"uppercase", padding:"7px 13px", borderRadius:9, cursor:"pointer", fontFamily:"inherit", display:"flex", alignItems:"center", gap:7 }}>
+                      style={{ background: on ? `${t.color}18` : "rgba(0,0,0,0.03)", border:`1px solid ${on ? `${t.color}55` : "rgba(15,23,42,0.10)"}`, color: on ? t.color : "var(--text-muted)", fontSize:11, fontWeight:700, letterSpacing:1.2, textTransform:"uppercase", padding:"7px 13px", borderRadius:9, cursor:"pointer", fontFamily:"inherit", display:"flex", alignItems:"center", gap:7 }}>
                       <span style={{ width:6, height:6, borderRadius:"50%", background:t.color, opacity: on ? 1 : 0.4 }} />
                       {t.label}
                     </button>
@@ -2940,9 +2940,9 @@ function Viewer({ ck, onBack, w, onComplete }) {
                     cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"space-between",
                     fontFamily:"inherit", minHeight:58
                   }}>
-                  <span style={{ fontSize:dk?14.5:13.5, fontWeight:700, color: open ? "#0F172A" : "#64748B", lineHeight:1.35, paddingRight:16 }}>{s.h}</span>
+                  <span style={{ fontSize:dk?14.5:13.5, fontWeight:700, color: open ? "var(--text)" : "var(--text-muted)", lineHeight:1.35, paddingRight:16 }}>{s.h}</span>
                   <div style={{ width:30, height:30, borderRadius:9, background: open ? accentBg : "rgba(15,23,42,0.04)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, transition:"all 0.25s", border:`1px solid ${open ? accent+"25" : "transparent"}` }}>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={open ? accent : "#94A3B8"} strokeWidth="2.5" strokeLinecap="round" style={{ transition:"transform 0.25s ease", transform: open ? "rotate(180deg)" : "none" }}><polyline points="6 9 12 15 18 9"/></svg>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={open ? accent : "var(--text-faint)"} strokeWidth="2.5" strokeLinecap="round" style={{ transition:"transform 0.25s ease", transform: open ? "rotate(180deg)" : "none" }}><polyline points="6 9 12 15 18 9"/></svg>
                   </div>
                 </button>
                 {open && (
@@ -3087,7 +3087,7 @@ function CompPlanView({ dk }) {
         {COMP_RULES.map((r, i) => (
           <div key={i} style={{ display:"flex", gap:14, padding:"12px 0", borderTop: i===0 ? "none" : "1px solid rgba(15,23,42,0.04)" }}>
             <div style={{ width:24, height:24, borderRadius:7, background:"rgba(245,158,11,0.12)", border:"1px solid rgba(245,158,11,0.25)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, fontSize:11, fontWeight:800, color:"#F59E0B", fontVariantNumeric:"tabular-nums" }}>{i+1}</div>
-            <div style={{ fontSize:dk?13.5:13, color:"#B9BEC8", lineHeight:1.55, fontWeight:500, paddingTop:2 }}>{r}</div>
+            <div style={{ fontSize:dk?13.5:13, color:"var(--text-2)", lineHeight:1.55, fontWeight:500, paddingTop:2 }}>{r}</div>
           </div>
         ))}
       </div>
@@ -3141,7 +3141,7 @@ function Quiz({ quizKey, onBack, w, onComplete }) {
         <div style={{ marginBottom:28, animation:"fadeUp 0.5s ease 0.1s both" }}>
           <div style={{ display:"flex", justifyContent:"space-between", marginBottom:8, alignItems:"center" }}>
             <span style={{ fontSize:11, fontWeight:600, color:"var(--text-muted)", letterSpacing:0.5 }}>{done ? "Complete" : `Question ${ci + 1} of ${tot}`}</span>
-            <span style={{ fontSize:11, fontWeight:800, color: done ? gc : "#94A3B8" }}>{pct}%</span>
+            <span style={{ fontSize:11, fontWeight:800, color: done ? gc : "var(--text-faint)" }}>{pct}%</span>
           </div>
           <div style={{ height:5, background:"rgba(15,23,42,0.06)", borderRadius:6, overflow:"hidden" }}>
             <div style={{ height:"100%", width:`${pct}%`, background: done ? `linear-gradient(90deg,${gc},${gc}90)` : "linear-gradient(90deg,#DC2626,#F59E0B,#10B981)", borderRadius:6, transition:"width 0.55s cubic-bezier(0.4,0,0.2,1)" }} />
@@ -3169,15 +3169,15 @@ function Quiz({ quizKey, onBack, w, onComplete }) {
             <div style={{ display:"flex", flexDirection:"column", gap:9 }}>
               {cur.o.map((opt, idx) => {
                 const isSel = sel === idx, isCor = idx === cur.a, showG = locked && isCor, showR = locked && isSel && !isCor;
-                let bg = "rgba(255,255,255,0.9)", bd = "rgba(15,23,42,0.06)", tc = "#64748B";
+                let bg = "rgba(255,255,255,0.9)", bd = "rgba(15,23,42,0.06)", tc = "var(--text-muted)";
                 if (showG) { bg = "rgba(34,197,94,0.08)"; bd = "rgba(34,197,94,0.35)"; tc = "#22C55E"; }
                 if (showR) { bg = "rgba(220,38,38,0.08)"; bd = "rgba(220,38,38,0.35)"; tc = "#DC2626"; }
-                if (!locked && isSel) { bg = "rgba(15,23,42,0.04)"; bd = "rgba(220,38,38,0.5)"; tc = "#0F172A"; }
-                if (!locked && !isSel) { tc = "#64748B"; }
+                if (!locked && isSel) { bg = "rgba(15,23,42,0.04)"; bd = "rgba(220,38,38,0.5)"; tc = "var(--text)"; }
+                if (!locked && !isSel) { tc = "var(--text-muted)"; }
                 return (
                   <button key={idx} className="quiz-opt" onClick={() => pick(idx)} disabled={locked}
                     style={{ width:"100%", textAlign:"left", padding:"15px 18px", background:bg, border:`1.5px solid ${bd}`, borderRadius:14, cursor: locked ? "default" : "pointer", display:"flex", alignItems:"center", gap:14, fontFamily:"inherit", fontSize:14, color:tc, fontWeight: isSel || showG ? 600 : 400, boxShadow: showG ? "0 0 20px rgba(34,197,94,0.1)" : showR ? "0 0 20px rgba(220,38,38,0.08)" : "none" }}>
-                    <div style={{ width:34, height:34, borderRadius:10, display:"flex", alignItems:"center", justifyContent:"center", fontSize:12, fontWeight:800, flexShrink:0, background: showG ? "rgba(34,197,94,0.15)" : showR ? "rgba(220,38,38,0.15)" : "rgba(15,23,42,0.04)", color: showG ? "#22C55E" : showR ? "#DC2626" : "#94A3B8", border:`1px solid ${showG ? "rgba(34,197,94,0.25)" : showR ? "rgba(220,38,38,0.25)" : "rgba(15,23,42,0.10)"}` }}>
+                    <div style={{ width:34, height:34, borderRadius:10, display:"flex", alignItems:"center", justifyContent:"center", fontSize:12, fontWeight:800, flexShrink:0, background: showG ? "rgba(34,197,94,0.15)" : showR ? "rgba(220,38,38,0.15)" : "rgba(15,23,42,0.04)", color: showG ? "#22C55E" : showR ? "#DC2626" : "var(--text-faint)", border:`1px solid ${showG ? "rgba(34,197,94,0.25)" : showR ? "rgba(220,38,38,0.25)" : "rgba(15,23,42,0.10)"}` }}>
                       {showG ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> : showR ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> : String.fromCharCode(65 + idx)}
                     </div>
                     <span style={{ flex:1 }}>{opt}</span>
@@ -3517,7 +3517,7 @@ export default function App() {
                       {profile?.name?.[0]?.toUpperCase() ?? "R"}
                     </div>
                     {dk && <span style={{ fontSize:12.5, fontWeight:600, color:"var(--text-2)", letterSpacing:0.2 }}>{profile?.name ?? "Rep"}</span>}
-                    {dk && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft:2, transform: showNameEdit?"rotate(180deg)":"none", transition:"transform 0.18s ease" }}><polyline points="6 9 12 15 18 9"/></svg>}
+                    {dk && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft:2, transform: showNameEdit?"rotate(180deg)":"none", transition:"transform 0.18s ease" }}><polyline points="6 9 12 15 18 9"/></svg>}
                   </div>
                   {showNameEdit && (
                     <div className="glass" style={{ position:"absolute", top:"calc(100% + 10px)", right:0, borderRadius:14, padding:18, width:240, zIndex:200, boxShadow:"0 24px 60px rgba(0,0,0,0.7)", animation:"popIn 0.18s ease" }}>
@@ -3618,7 +3618,7 @@ export default function App() {
                           <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6 }}>
                             {done && <div style={{ width:20, height:20, borderRadius:6, background:"rgba(34,197,94,0.12)", border:"1px solid rgba(34,197,94,0.3)", display:"flex", alignItems:"center", justifyContent:"center" }}><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>}
                             <div style={{ width:32, height:32, borderRadius:10, background:"rgba(15,23,42,0.04)", border:"1px solid var(--border)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
                             </div>
                           </div>
                         </div>
@@ -3641,14 +3641,14 @@ export default function App() {
                       <div style={{ flex:1, minWidth:0 }}>
                         <div style={{ fontSize:9, fontWeight:800, color:"#10B981", letterSpacing:2.5, marginBottom:4, textTransform:"uppercase" }}>QUIZ</div>
                         <h3 style={{ fontSize:14, fontWeight:700, color:"var(--text)", margin:"0 0 3px", lineHeight:1.3 }}>{x.sub}</h3>
-                        <p style={{ fontSize:11.5, color: isPerfect ? "#10B981" : qs ? "#F59E0B" : "#94A3B8", margin:0, lineHeight:1.4, fontWeight: qs ? 600 : 500 }}>
+                        <p style={{ fontSize:11.5, color: isPerfect ? "#10B981" : qs ? "#F59E0B" : "var(--text-faint)", margin:0, lineHeight:1.4, fontWeight: qs ? 600 : 500 }}>
                           {isPerfect ? "Passed · 100%" : qs ? `Best: ${Math.round(qs.score/qs.total*100)}% — retake for 100%` : x.d}
                         </p>
                       </div>
                       <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6 }}>
                         {isPerfect && <div style={{ width:20, height:20, borderRadius:6, background:"rgba(16,185,129,0.12)", border:"1px solid rgba(16,185,129,0.3)", display:"flex", alignItems:"center", justifyContent:"center" }}><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>}
                         <div style={{ width:32, height:32, borderRadius:10, background:"rgba(15,23,42,0.04)", border:"1px solid var(--border)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
                         </div>
                       </div>
                     </div>
@@ -3686,7 +3686,7 @@ export default function App() {
                     <div style={{ flex:1, minWidth:0 }}>
                       <div style={{ fontSize:9, fontWeight:800, color:"#FFD700", letterSpacing:2.5, marginBottom:4, textTransform:"uppercase" }}>{finalItem.n}</div>
                       <h3 style={{ fontSize:14, fontWeight:700, color:"var(--text)", margin:"0 0 3px", lineHeight:1.3 }}>{finalItem.sub}</h3>
-                      <p style={{ fontSize:11.5, color: finalAttempted ? "#FFD700" : finalUnlocked ? "#475569" : "#94A3B8", margin:0, lineHeight:1.4, fontWeight:500 }}>
+                      <p style={{ fontSize:11.5, color: finalAttempted ? "#FFD700" : finalUnlocked ? "var(--text-3)" : "var(--text-faint)", margin:0, lineHeight:1.4, fontWeight:500 }}>
                         {finalAttempted
                           ? `Submitted · ${quizScores["q-final"].score}/${quizScores["q-final"].total} (${Math.round(quizScores["q-final"].score/quizScores["q-final"].total*100)}%)`
                           : finalUnlocked
@@ -3696,10 +3696,10 @@ export default function App() {
                     </div>
                     <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6 }}>
                       {!finalUnlocked && !finalAttempted && (
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                       )}
                       <div style={{ width:32, height:32, borderRadius:10, background:"rgba(15,23,42,0.04)", border:"1px solid var(--border)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
                       </div>
                     </div>
                   </div>
@@ -3719,7 +3719,7 @@ export default function App() {
                 <h3 style={{ fontSize:14, fontWeight:700, color:"var(--text)", margin:"0 0 2px" }}>Redline Homepage</h3>
                 <p style={{ fontSize:11.5, color:"var(--text-muted)", margin:0, fontWeight:500 }}>redlinewebservices.net</p>
               </div>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" strokeWidth="2" strokeLinecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
             </a>
             <div style={{ display:"grid", gridTemplateColumns:wd?"1fr 1fr 1fr":dk?"1fr 1fr":"1fr", gap:dk?10:8 }}>
               {referenceItems.map((x, i) => (
@@ -3733,7 +3733,7 @@ export default function App() {
                       <p style={{ fontSize:11.5, color:"var(--text-muted)", margin:0, lineHeight:1.4, fontWeight:500 }}>{x.d}</p>
                     </div>
                     <div style={{ width:32, height:32, borderRadius:10, background:"rgba(15,23,42,0.04)", border:"1px solid var(--border)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
                     </div>
                   </div>
                 </div>
@@ -3754,8 +3754,8 @@ export default function App() {
           ];
           const moduleRings = [
             { label:"CORE OPERATIONS", count:5, accent:AMBER, items:["Lead Management & Pipeline","Scheduling & Dispatch","Invoicing & Estimates","CRM","Embedded Payments"] },
-            { label:"INTELLIGENCE",    count:3, accent:"#0F172A", items:["AI Umbrella Chat","BI Dashboard","Call Intelligence"] },
-            { label:"DISTRIBUTION",    count:6, accent:"#64748B", items:["Marketing Automation","Workflow Automation","Team Management","Mobile App","Customer Portal","Site/App Builder"] },
+            { label:"INTELLIGENCE",    count:3, accent:"var(--text)", items:["AI Umbrella Chat","BI Dashboard","Call Intelligence"] },
+            { label:"DISTRIBUTION",    count:6, accent:"var(--text-muted)", items:["Marketing Automation","Workflow Automation","Team Management","Mobile App","Customer Portal","Site/App Builder"] },
           ];
           const stack = [
             { name:"ServiceTitan", price:150 },
@@ -3858,7 +3858,7 @@ export default function App() {
                       position:"relative",
                     }}>
                       {isPro && <div style={{ position:"absolute", top:-1, right:14, fontSize:9, fontWeight:800, color:"#FFFFFF", background:AMBER, padding:"3px 8px", borderRadius:"0 0 5px 5px", letterSpacing:1.5, textTransform:"uppercase" }}>Anchor</div>}
-                      <div className="display" style={{ fontSize:15, color: isPro ? AMBER : "#0F172A", letterSpacing:"0.1em", marginBottom:10 }}>{t.name}</div>
+                      <div className="display" style={{ fontSize:15, color: isPro ? AMBER : "var(--text)", letterSpacing:"0.1em", marginBottom:10 }}>{t.name}</div>
                       <div style={{ display:"flex", alignItems:"baseline", gap:3, marginBottom:14 }}>
                         <span className="mono" style={{ fontSize:dk?26:22, fontWeight:600, color:"var(--text)", lineHeight:1 }}>{t.price}</span>
                         {t.unit && <span className="mono" style={{ fontSize:13, fontWeight:500, color:"var(--text-muted)" }}>{t.unit}</span>}
@@ -3873,7 +3873,7 @@ export default function App() {
                 })}
               </div>
               <div style={{ display:"flex", alignItems:"flex-start", gap:10, marginTop:14, padding:"12px 14px", background:"rgba(0,0,0,0.02)", border:"1px solid var(--border)", borderRadius:10 }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0, marginTop:2 }}><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0, marginTop:2 }}><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
                 <span style={{ fontSize:11.5, color:"var(--text-muted)", lineHeight:1.5 }}>Lower tiers subsidize themselves through processing margin. At GMV scale, payments revenue exceeds SaaS revenue per customer — the Toast / Shopify / Square dynamic.</span>
               </div>
             </div>
@@ -3956,7 +3956,7 @@ export default function App() {
                     onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(15,23,42,0.10)"; e.currentTarget.style.background = "#FFFFFF"; }}>
                     <span className="mono" style={{ fontSize:13, fontWeight:600, color:AMBER, width:24, flexShrink:0 }}>{x.n}</span>
                     <span style={{ flex:1, minWidth:0, fontSize:13, fontWeight:600, color:"var(--text)", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{x.sub}</span>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0 }}><polyline points="9 18 15 12 9 6"/></svg>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0 }}><polyline points="9 18 15 12 9 6"/></svg>
                   </button>
                 ))}
               </div>
