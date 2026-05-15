@@ -1915,10 +1915,6 @@ function Chat({ session, profile, w, width, minW = 220, maxW = 520, onResize }) 
   const [loading, setLoading] = useState(true);
   const [body, setBody] = useState("");
   const [sending, setSending] = useState(false);
-  const [attachment, setAttachment] = useState(null); // File object pending upload
-  const [uploadPct, setUploadPct] = useState(0);
-  const fileInputRef = useRef(null);
-  const ATTACH_MAX_BYTES = 10 * 1024 * 1024; // 10 MB cap
   const [typing, setTyping] = useState({}); // { uid: { name, t: epoch } }
   const scrollRef = useRef(null);
   const stickyRef = useRef(true);
@@ -1930,7 +1926,7 @@ function Chat({ session, profile, w, width, minW = 220, maxW = 520, onResize }) 
 
   const load = async () => {
     const [mRes, pRes] = await Promise.all([
-      supabase.from("messages").select("id, user_id, body, created_at, attachment_url, attachment_name, attachment_type, attachment_size").order("created_at", { ascending: true }).limit(200),
+      supabase.from("messages").select("id, user_id, body, created_at").order("created_at", { ascending: true }).limit(200),
       supabase.from("profiles").select("id, name, role"),
     ]);
     setMsgs(mRes.data ?? []);
@@ -2009,72 +2005,24 @@ function Chat({ session, profile, w, width, minW = 220, maxW = 520, onResize }) 
     if (stickyRef.current) el.scrollTop = el.scrollHeight;
   }, [msgs, loading]);
 
-  const pickFile = () => fileInputRef.current?.click();
-  const onFilePicked = (f) => {
-    if (!f) return;
-    if (f.size > ATTACH_MAX_BYTES) {
-      alert(`File too large. Cap is ${Math.floor(ATTACH_MAX_BYTES / (1024*1024))} MB; this is ${(f.size/(1024*1024)).toFixed(1)} MB.`);
-      return;
-    }
-    setAttachment(f);
-  };
-  const clearAttachment = () => {
-    setAttachment(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
-
   const send = async () => {
     const trimmed = body.trim();
-    if ((!trimmed && !attachment) || sending) return;
+    if (!trimmed || sending) return;
     setSending(true);
-    let att = null;
-    // 1. Upload attachment to storage if present
-    if (attachment) {
-      setUploadPct(5);
-      const safeName = attachment.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 80);
-      const path = `${session.user.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${safeName}`;
-      const { error: upErr } = await supabase.storage
-        .from("chat-attachments")
-        .upload(path, attachment, { contentType: attachment.type || "application/octet-stream", upsert: false });
-      if (upErr) {
-        setSending(false); setUploadPct(0);
-        alert(`Couldn't upload file: ${upErr.message}`);
-        return;
-      }
-      setUploadPct(85);
-      const { data: pub } = supabase.storage.from("chat-attachments").getPublicUrl(path);
-      att = {
-        attachment_url:  pub?.publicUrl ?? null,
-        attachment_name: attachment.name,
-        attachment_type: attachment.type || "application/octet-stream",
-        attachment_size: attachment.size,
-      };
-    }
-    // 2. Insert the message row
     const { data, error } = await supabase
       .from("messages")
-      .insert({ user_id: session.user.id, body: trimmed || null, ...(att || {}) })
+      .insert({ user_id: session.user.id, body: trimmed })
       .select()
       .single();
     setSending(false);
-    setUploadPct(0);
     if (error || !data) {
       alert(`Couldn't send: ${error?.message ?? "no row returned (likely RLS or missing 'messages' table)"}`);
       return;
     }
     setBody("");
-    clearAttachment();
     broadcastStopTyping();
     stickyRef.current = true;
     setMsgs(prev => prev.some(m => m.id === data.id) ? prev : [...prev, data]);
-  };
-
-  // Small byte formatter for file size badges
-  const fmtBytes = (n) => {
-    if (!n && n !== 0) return "";
-    if (n < 1024) return `${n} B`;
-    if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
-    return `${(n / (1024 * 1024)).toFixed(1)} MB`;
   };
 
   const onBodyChange = (val) => {
@@ -2242,30 +2190,11 @@ function Chat({ session, profile, w, width, minW = 220, maxW = 520, onResize }) 
                           <span style={{ fontSize:9.5, color:"#5E6376" }}>{fmtTime(g.created_at)}</span>
                         </div>
                       )}
-                      <div className="chat-bubble" style={{ position:"relative", padding: g.body || !g.attachment_url ? "10px 14px" : "6px", background: isMe ? "linear-gradient(135deg,rgba(204,255,0,0.18),rgba(204,255,0,0.07))" : "linear-gradient(180deg,rgba(255,255,255,0.055),rgba(255,255,255,0.035))", border:`1px solid ${isMe ? "rgba(204,255,0,0.3)" : "rgba(255,255,255,0.08)"}`, borderRadius: g.continued
+                      <div className="chat-bubble" style={{ position:"relative", padding:"10px 14px", background: isMe ? "linear-gradient(135deg,rgba(204,255,0,0.18),rgba(204,255,0,0.07))" : "linear-gradient(180deg,rgba(255,255,255,0.055),rgba(255,255,255,0.035))", border:`1px solid ${isMe ? "rgba(204,255,0,0.3)" : "rgba(255,255,255,0.08)"}`, borderRadius: g.continued
                         ? (isMe ? "18px 6px 18px 18px" : "6px 18px 18px 18px")
                         : (isMe ? "18px 4px 18px 18px" : "4px 18px 18px 18px"),
                         color:"#EEF2F8", fontSize:13.5, lineHeight:1.5, fontWeight:500, whiteSpace:"pre-wrap", wordBreak:"break-word", boxShadow: isMe ? "0 2px 12px rgba(204,255,0,0.08)" : "0 2px 10px rgba(0,0,0,0.25)", transition:"border-color 0.18s ease, background 0.18s ease" }}>
-                        {/* Attachment render — image inline, other types as a file card */}
-                        {g.attachment_url && (g.attachment_type || "").startsWith("image/") && (
-                          <a href={g.attachment_url} target="_blank" rel="noreferrer" style={{ display:"block", borderRadius:12, overflow:"hidden", marginBottom: g.body ? 8 : 0 }}>
-                            <img src={g.attachment_url} alt={g.attachment_name || "attachment"} style={{ display:"block", maxWidth: "min(360px, 100%)", maxHeight: 320, width:"auto", height:"auto", objectFit:"cover", background:"rgba(255,255,255,0.04)" }} />
-                          </a>
-                        )}
-                        {g.attachment_url && !(g.attachment_type || "").startsWith("image/") && (
-                          <a href={g.attachment_url} target="_blank" rel="noreferrer"
-                            style={{ display:"flex", alignItems:"center", gap:10, padding:"10px 12px", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:10, textDecoration:"none", color:"#F2F4F8", marginBottom: g.body ? 8 : 0, minWidth: 220 }}>
-                            <div style={{ width:34, height:34, borderRadius:8, background:"rgba(204,255,0,0.10)", border:"1px solid rgba(204,255,0,0.22)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#CCFF00" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                            </div>
-                            <div style={{ flex:1, minWidth:0 }}>
-                              <div style={{ fontSize:12.5, fontWeight:700, color:"#F2F4F8", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{g.attachment_name || "Attachment"}</div>
-                              <div className="mono" style={{ fontSize:10.5, color:"#9098A8", marginTop:2 }}>{fmtBytes(g.attachment_size)}</div>
-                            </div>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9098A8" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0 }}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                          </a>
-                        )}
-                        {g.body && <div style={{ padding: g.attachment_url ? "0 8px 4px" : 0 }}>{g.body}</div>}
+                        {g.body}
                         {(isMe || isAdmin) && (
                           <button onClick={() => remove(g.id)} title="Delete message" className="msg-del"
                             style={{ position:"absolute", top:-8, right: isMe ? -8 : "auto", left: isMe ? "auto" : -8, width:22, height:22, borderRadius:6, background:"rgba(20,22,28,0.95)", border:"1px solid rgba(255,255,255,0.1)", color:"#666C7E", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", padding:0, transition:"all 0.15s", opacity:0, pointerEvents:"none" }}>
@@ -2301,60 +2230,23 @@ function Chat({ session, profile, w, width, minW = 220, maxW = 520, onResize }) 
           );
         })()}
 
-        {/* Attachment preview chip (only shown when a file is staged) */}
-        {attachment && (
-          <div style={{ display:"flex", alignItems:"center", gap:10, padding:dk?"8px 18px 0":"6px 14px 0", flexShrink:0 }}>
-            <div style={{ display:"flex", alignItems:"center", gap:10, padding:"8px 12px", background:"rgba(204,255,0,0.06)", border:"1px solid rgba(204,255,0,0.25)", borderRadius:10, maxWidth:"100%", overflow:"hidden", flex:1 }}>
-              <div style={{ width:30, height:30, borderRadius:7, background:"rgba(204,255,0,0.10)", border:"1px solid rgba(204,255,0,0.22)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                {attachment.type?.startsWith("image/") ? (
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#CCFF00" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5-9 9"/></svg>
-                ) : (
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#CCFF00" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                )}
-              </div>
-              <div style={{ flex:1, minWidth:0 }}>
-                <div style={{ fontSize:12, fontWeight:700, color:"#F2F4F8", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{attachment.name}</div>
-                <div className="mono" style={{ fontSize:10, color:"#9098A8", marginTop:1 }}>{fmtBytes(attachment.size)}{uploadPct > 0 && uploadPct < 100 ? ` · uploading ${uploadPct}%` : ""}</div>
-              </div>
-              <button onClick={clearAttachment} disabled={sending}
-                aria-label="Remove attachment"
-                style={{ width:24, height:24, borderRadius:6, background:"transparent", border:"none", color:"#9098A8", cursor: sending ? "default" : "pointer", display:"flex", alignItems:"center", justifyContent:"center", padding:0 }}>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-              </button>
-            </div>
-          </div>
-        )}
-
         {/* Composer */}
-        <div style={{ display:"flex", gap:8, padding:dk?"12px 18px 16px":"10px 14px 14px", borderTop:"1px solid rgba(255,255,255,0.05)", background:"linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.025))", flexShrink:0, alignItems:"flex-end" }}>
-          {/* Hidden file input + paperclip trigger */}
-          <input
-            ref={fileInputRef}
-            type="file"
-            onChange={e => { onFilePicked(e.target.files?.[0]); }}
-            style={{ display:"none" }}
-            accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.zip,.json"
-          />
-          <button onClick={pickFile} disabled={sending} aria-label="Attach file"
-            className="chat-attach"
-            style={{ width:42, height:42, padding:0, borderRadius:14, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.09)", color:"#9098A8", cursor: sending ? "default" : "pointer", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, transition:"all 0.16s ease" }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-          </button>
+        <div style={{ display:"flex", gap:10, padding:dk?"12px 18px 16px":"10px 14px 14px", borderTop:"1px solid rgba(255,255,255,0.05)", background:"linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.025))", flexShrink:0, alignItems:"flex-end" }}>
           <div className="chat-input-wrap" style={{ flex:1, position:"relative" }}>
             <textarea
               value={body}
               onChange={e => onBodyChange(e.target.value)}
               onBlur={() => { if (!body.trim()) broadcastStopTyping(); }}
               onKeyDown={onKeyDown}
-              placeholder={attachment ? "Add a caption (optional)…" : "Chat"}
+              placeholder="Chat"
               rows={1}
               className="chat-input"
               style={{ width:"100%", background:"rgba(255,255,255,0.045)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:14, color:"#F2F4F8", fontSize:13.5, fontWeight:500, padding:"12px 15px", fontFamily:"inherit", outline:"none", boxSizing:"border-box", resize:"none", lineHeight:1.5, maxHeight:140, transition:"border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease" }}
             />
           </div>
-          <button onClick={send} disabled={sending || (!body.trim() && !attachment)} className="btn-primary chat-send"
+          <button onClick={send} disabled={sending || !body.trim()} className="btn-primary chat-send"
             aria-label="Send message"
-            style={{ width:42, height:42, padding:0, borderRadius:14, opacity: (sending || (!body.trim() && !attachment)) ? 0.45 : 1, cursor: (sending || (!body.trim() && !attachment)) ? "default" : "pointer", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+            style={{ width:42, height:42, padding:0, borderRadius:14, opacity: sending || !body.trim() ? 0.45 : 1, cursor: sending || !body.trim() ? "default" : "pointer", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
           </button>
         </div>
@@ -2382,7 +2274,6 @@ function Chat({ session, profile, w, width, minW = 220, maxW = 520, onResize }) 
 
         .chat-send:not(:disabled):hover { filter: brightness(1.05); }
         .chat-send:not(:disabled):active { filter: brightness(0.95); }
-        .chat-attach:not(:disabled):hover { color:#F2F4F8 !important; border-color: rgba(255,255,255,0.18) !important; }
 
         .chat-scroll::-webkit-scrollbar { width: 5px; }
         .chat-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.07); border-radius: 6px; }

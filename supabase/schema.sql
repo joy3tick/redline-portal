@@ -297,44 +297,6 @@ create policy "Admins delete any message"
   on public.messages for delete
   using (public.is_admin());
 
--- ─── CHAT ATTACHMENTS (images / files / docs) ───────────────
--- Per-message attachment metadata; the binary lives in the
--- `chat-attachments` storage bucket below.
-alter table public.messages
-  add column if not exists attachment_url  text,
-  add column if not exists attachment_name text,
-  add column if not exists attachment_type text,
-  add column if not exists attachment_size bigint;
-
--- A message can now be attachment-only (no caption text required).
-alter table public.messages alter column body drop not null;
-
--- Storage bucket for chat attachments. Public so message URLs are
--- viewable indefinitely by any logged-in rep — the chat itself is RLS-gated.
-insert into storage.buckets (id, name, public)
-values ('chat-attachments', 'chat-attachments', true)
-on conflict (id) do nothing;
-
-drop policy if exists "Auth read chat attachments" on storage.objects;
-create policy "Auth read chat attachments"
-  on storage.objects for select
-  using (bucket_id = 'chat-attachments' and auth.role() = 'authenticated');
-
-drop policy if exists "Auth insert chat attachments" on storage.objects;
-create policy "Auth insert chat attachments"
-  on storage.objects for insert
-  with check (bucket_id = 'chat-attachments' and auth.role() = 'authenticated');
-
-drop policy if exists "Own delete chat attachments" on storage.objects;
-create policy "Own delete chat attachments"
-  on storage.objects for delete
-  using (bucket_id = 'chat-attachments' and owner = auth.uid());
-
-drop policy if exists "Admin delete chat attachments" on storage.objects;
-create policy "Admin delete chat attachments"
-  on storage.objects for delete
-  using (bucket_id = 'chat-attachments' and public.is_admin());
-
 -- Realtime: ensure all live-updating tables are in the supabase_realtime
 -- publication so INSERT/UPDATE/DELETE events broadcast to subscribed clients.
 do $$
