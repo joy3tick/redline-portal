@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "./lib/supabase";
 
 /* ═══════════════════════════════════════════
@@ -33,18 +33,6 @@ const TOKENS = {
   fontBody:    "'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif",
   fontMono:    "'Geist Mono', ui-monospace, 'SFMono-Regular', monospace",
 };
-
-/* Coalesce bursty realtime callbacks — a flurry of inserts shouldn't trigger
-   N round-trip refetches. Trailing edge fires once per `wait` window. */
-function debounce(fn, wait = 250) {
-  let t = null;
-  const wrapped = (...args) => {
-    if (t) clearTimeout(t);
-    t = setTimeout(() => fn(...args), wait);
-  };
-  wrapped.cancel = () => { if (t) clearTimeout(t); };
-  return wrapped;
-}
 
 const C = {
   "m1": { t: "Module 1 — Onboarding & Culture", st: "Who Redline is, how we operate, what we will not be.", s: [
@@ -901,12 +889,10 @@ function Scheduler({ session, profile, w }) {
 
   useEffect(() => {
     load();
-    const refetch = debounce(load, 300);
     const ch = supabase.channel("schedule-rt")
-      .on("postgres_changes", { event: "*", schema: "public", table: "schedule" }, refetch)
+      .on("postgres_changes", { event: "*", schema: "public", table: "schedule" }, load)
       .subscribe();
-    return () => { refetch.cancel(); supabase.removeChannel(ch); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => supabase.removeChannel(ch);
   }, []);
 
   const toggle = async (day) => {
@@ -1038,18 +1024,14 @@ function Leads({ session, profile, w }) {
 
   useEffect(() => {
     load();
-    const refetch = debounce(load, 300);
     const ch = supabase.channel("leads-rt")
-      .on("postgres_changes", { event: "*", schema: "public", table: "leads" }, refetch)
+      .on("postgres_changes", { event: "*", schema: "public", table: "leads" }, load)
       .subscribe();
-    return () => { refetch.cancel(); supabase.removeChannel(ch); };
+    return () => supabase.removeChannel(ch);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const repById = useMemo(
-    () => Object.fromEntries(reps.map(r => [r.id, r.name || "Rep"])),
-    [reps]
-  );
+  const repById = Object.fromEntries(reps.map(r => [r.id, r.name || "Rep"]));
 
   // CSV parser handles quoted fields, embedded commas/newlines, and "" escapes.
   const parseCSV = (text) => {
@@ -1226,26 +1208,19 @@ function Leads({ session, profile, w }) {
     { v: "closed",    label: "Closed",    color: "#22C55E" },
     { v: "dead",      label: "Dead",      color: "#DC2626" },
   ];
-  const statusByV = useMemo(() => Object.fromEntries(STATUSES.map(s => [s.v, s])), [STATUSES]);
+  const statusByV = Object.fromEntries(STATUSES.map(s => [s.v, s]));
 
-  // Walk leads once, derive visible/counts/total together so a single render
-  // doesn't .filter() five times across the array.
-  const myUid = session.user.id;
-  const filtered = useMemo(
-    () => leads.filter(l => isAdmin || l.assigned_to === myUid),
-    [leads, isAdmin, myUid]
-  );
-  const visible = useMemo(
-    () => statusFilter === "all" ? filtered : filtered.filter(l => l.status === statusFilter),
-    [filtered, statusFilter]
-  );
-  const counts = useMemo(() => {
-    const acc = {};
-    for (const s of STATUSES) acc[s.v] = 0;
-    for (const l of filtered) if (acc[l.status] !== undefined) acc[l.status]++;
+  const visible = leads.filter(l => {
+    if (!isAdmin && l.assigned_to !== session.user.id) return false;
+    if (statusFilter !== "all" && l.status !== statusFilter) return false;
+    return true;
+  });
+
+  const counts = STATUSES.reduce((acc, s) => {
+    acc[s.v] = leads.filter(l => (isAdmin || l.assigned_to === session.user.id) && l.status === s.v).length;
     return acc;
-  }, [filtered, STATUSES]);
-  const totalForFilter = filtered.length;
+  }, {});
+  const totalForFilter = leads.filter(l => isAdmin || l.assigned_to === session.user.id).length;
 
   // Pretty primary line: try common keys, else first non-empty value
   const primaryLine = (d) => {
@@ -1747,78 +1722,6 @@ function Leads({ session, profile, w }) {
   );
 }
 
-/* ─── Dashboard primitives — hoisted out of Dashboard so React doesn't ─────
-   remount the entire subtree on every parent render. ────────────────────── */
-const DAY_LABELS = ["M","T","W","T","F","S","S"];
-
-const BarChart = ({ data, accent, height = 64, highlight = -1 }) => {
-  const max = Math.max(1, ...data);
-  const cols = data.length;
-  return (
-    <div style={{ display:"grid", gridTemplateColumns:`repeat(${cols},1fr)`, gap:8, alignItems:"end", height:height+22 }}>
-      {data.map((v, i) => {
-        const h = Math.round((v / max) * height);
-        const isToday = i === highlight;
-        return (
-          <div key={i} style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6 }}>
-            <div style={{ height, width:"100%", display:"flex", alignItems:"flex-end", justifyContent:"center" }}>
-              <div style={{
-                width:"100%",
-                height: h || 3,
-                background: v > 0
-                  ? `linear-gradient(180deg,${accent},${accent}66)`
-                  : "rgba(255,255,255,0.06)",
-                borderRadius:6,
-                boxShadow: v > 0 ? `0 0 12px ${accent}40` : "none",
-                border: isToday ? `1px solid ${accent}` : "none",
-                transition:"height 0.5s cubic-bezier(0.4,0,0.2,1)"
-              }} />
-            </div>
-            <div style={{ fontSize:9, fontWeight:800, color: isToday ? accent : "#5E6376", letterSpacing:1 }}>{DAY_LABELS[i]}</div>
-          </div>
-        );
-      })}
-    </div>
-  );
-};
-
-const Ring = ({ pct, accent, size = 88, stroke = 8, label, sublabel }) => {
-  const r = (size - stroke) / 2;
-  const c = 2 * Math.PI * r;
-  const offset = c * (1 - Math.max(0, Math.min(100, pct)) / 100);
-  return (
-    <div style={{ position:"relative", width:size, height:size, flexShrink:0 }}>
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={stroke} />
-        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={accent} strokeWidth={stroke} strokeLinecap="round"
-          strokeDasharray={c} strokeDashoffset={offset}
-          transform={`rotate(-90 ${size/2} ${size/2})`}
-          style={{ transition:"stroke-dashoffset 0.7s cubic-bezier(0.4,0,0.2,1)", filter:`drop-shadow(0 0 6px ${accent}55)` }} />
-      </svg>
-      <div style={{ position:"absolute", inset:0, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center" }}>
-        <div style={{ fontSize:18, fontWeight:900, color:"#F2F4F8", lineHeight:1, letterSpacing:"-0.02em" }}>{label}</div>
-        {sublabel && <div style={{ fontSize:8.5, fontWeight:800, color:"#666C7E", letterSpacing:1.5, textTransform:"uppercase", marginTop:3 }}>{sublabel}</div>}
-      </div>
-    </div>
-  );
-};
-
-const DashCard = ({ title, action, actionOnClick, children, fullWidth, dk, wd }) => (
-  <div className="dash-card"
-    style={{ padding:dk?"22px 24px":"18px 20px", gridColumn: fullWidth && wd ? "1 / -1" : undefined }}>
-    <div style={{ display:"flex", alignItems:"baseline", justifyContent:"space-between", marginBottom:16, position:"relative", gap:12 }}>
-      <div className="display" style={{ fontSize:dk?18:16, color:"#F2F4F8", letterSpacing:"0.07em" }}>{title}</div>
-      {action && (
-        <button onClick={actionOnClick} className="btn-ghost"
-          style={{ fontSize:9.5, padding:"5px 9px", borderRadius:7, height:"auto" }}>
-          {action} →
-        </button>
-      )}
-    </div>
-    <div style={{ position:"relative" }}>{children}</div>
-  </div>
-);
-
 function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab, onOpenModule }) {
   const [sales, setSales] = useState([]);
   const [schedule, setSchedule] = useState([]);
@@ -1849,86 +1752,137 @@ function Dashboard({ session, profile, w, completedModules, quizScores, onGoTab,
 
   useEffect(() => {
     load();
-    const refetch = debounce(load, 300);
     const ch = supabase.channel("dashboard-rt")
-      .on("postgres_changes", { event: "*", schema: "public", table: "sales" }, refetch)
-      .on("postgres_changes", { event: "*", schema: "public", table: "schedule" }, refetch)
+      .on("postgres_changes", { event: "*", schema: "public", table: "sales" }, load)
+      .on("postgres_changes", { event: "*", schema: "public", table: "schedule" }, load)
       .subscribe();
-    return () => { refetch.cancel(); supabase.removeChannel(ch); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => supabase.removeChannel(ch);
   }, []);
 
-  // ── Memoized derivations ──────────────────────────────────────────────
-  // Without these, every render walks the sales array N times — e.g. typing in
-  // any input triggers a Dashboard re-render which costs 5+ array passes.
-  const monMs = mon.getTime();
-  const sunMs = sun.getTime();
-  const todayMs = today.getTime();
-  const myUid = session.user.id;
+  const weekSales = sales.filter(s => { const d = new Date(s.sale_date); return d >= mon && d <= sun; });
+  const byRepWeek = {};
+  for (const s of weekSales) {
+    if (!byRepWeek[s.user_id]) byRepWeek[s.user_id] = { count: 0, total: 0 };
+    byRepWeek[s.user_id].count++;
+    byRepWeek[s.user_id].total += s.amount ?? 0;
+  }
+  const rankedWeek = Object.entries(byRepWeek)
+    .map(([uid, stats]) => ({ uid, name: repProfiles[uid] || "Rep", ...stats }))
+    .sort((a, b) => b.count - a.count || b.total - a.total);
 
-  const aggregate = useMemo(() => {
-    const ws = sales.filter(s => { const d = +new Date(s.sale_date); return d >= monMs && d <= sunMs; });
-    const byRep = {};
-    const myD = Array(7).fill(0);
-    const teamD = Array(7).fill(0);
-    const teamAmt = Array(7).fill(0);
-    for (const s of ws) {
-      if (!byRep[s.user_id]) byRep[s.user_id] = { count: 0, total: 0 };
-      byRep[s.user_id].count++;
-      byRep[s.user_id].total += s.amount ?? 0;
-      const idx = Math.max(0, Math.min(6, Math.round((+new Date(s.sale_date) - monMs) / 86400000)));
-      if (s.user_id === myUid) myD[idx]++;
-      teamD[idx]++;
-      teamAmt[idx] += s.amount ?? 0;
-    }
-    const ranked = Object.entries(byRep)
-      .map(([uid, stats]) => ({ uid, name: repProfiles[uid] || "Rep", ...stats }))
-      .sort((a, b) => b.count - a.count || b.total - a.total);
-    return {
-      weekSales: ws,
-      byRepWeek: byRep,
-      rankedWeek: ranked,
-      myWeek: byRep[myUid] ?? { count: 0, total: 0 },
-      myRankWeek: ranked.findIndex(r => r.uid === myUid),
-      myDaily: myD,
-      teamDaily: teamD,
-      teamWeekTotal: teamAmt.reduce((a,b) => a+b, 0),
-      teamWeekCount: teamD.reduce((a,b) => a+b, 0),
-      todayIdx: Math.max(0, Math.min(6, Math.round((todayMs - monMs) / 86400000))),
-    };
-  }, [sales, repProfiles, monMs, sunMs, todayMs, myUid]);
-  const { weekSales, byRepWeek, rankedWeek, myWeek, myRankWeek, myDaily, teamDaily, teamWeekTotal, teamWeekCount, todayIdx } = aggregate;
+  const myWeek = byRepWeek[session.user.id] ?? { count: 0, total: 0 };
+  const myRankWeek = rankedWeek.findIndex(r => r.uid === session.user.id);
 
-  const training = useMemo(() => {
-    const totalModules = CATS.filter(x => x.t === "MODULE" || x.t === "BOOTCAMP").length;
-    const doneModules = CATS.filter(x => (x.t === "MODULE" || x.t === "BOOTCAMP") && completedModules.has(x.k)).length;
-    const totalQuizzes = CATS.filter(x => x.t === "QUIZ").length;
-    const doneQuizzes = CATS.filter(x => {
-      if (x.t !== "QUIZ") return false;
-      const qs = quizScores[x.k];
-      return qs && qs.total > 0 && qs.score >= qs.total;
-    }).length;
-    return {
-      totalModules, doneModules, totalQuizzes, doneQuizzes,
-      trainingPct: totalModules > 0 ? Math.round((doneModules / totalModules) * 100) : 0,
-      nextModule: CATS.find(x => (x.t === "MODULE" || x.t === "BOOTCAMP") && !completedModules.has(x.k)),
-    };
-  }, [completedModules, quizScores]);
-  const { totalModules, doneModules, totalQuizzes, doneQuizzes, trainingPct, nextModule } = training;
+  const totalModules = CATS.filter(x => x.t === "MODULE" || x.t === "BOOTCAMP").length;
+  const doneModules = CATS.filter(x => (x.t === "MODULE" || x.t === "BOOTCAMP") && completedModules.has(x.k)).length;
+  const trainingPct = totalModules > 0 ? Math.round((doneModules / totalModules) * 100) : 0;
+  const totalQuizzes = CATS.filter(x => x.t === "QUIZ").length;
+  const doneQuizzes = CATS.filter(x => {
+    if (x.t !== "QUIZ") return false;
+    const qs = quizScores[x.k];
+    return qs && qs.total > 0 && qs.score >= qs.total;
+  }).length;
 
-  const todaysReps = useMemo(
-    () => schedule.map(e => repProfiles[e.user_id] || "Rep"),
-    [schedule, repProfiles]
-  );
-  const recentSales = useMemo(() => sales.slice(0, 5), [sales]);
+  const nextModule = CATS.find(x => (x.t === "MODULE" || x.t === "BOOTCAMP") && !completedModules.has(x.k));
+  const todaysReps = schedule.map(e => repProfiles[e.user_id] || "Rep");
+  const recentSales = sales.slice(0, 5);
   const MEDALS = ["🥇","🥈","🥉"];
 
-  const tierObj = useMemo(() => TIERS.find(t => t.v === profile?.tier) ?? null, [profile?.tier]);
+  // Daily breakdown (Mon..Sun) for the current week
+  const dayLabels = ["M","T","W","T","F","S","S"];
+  const myDaily = Array(7).fill(0);
+  const teamDaily = Array(7).fill(0);
+  const teamDailyAmount = Array(7).fill(0);
+  for (const s of weekSales) {
+    const d = new Date(s.sale_date); d.setHours(0,0,0,0);
+    const idx = Math.max(0, Math.min(6, Math.round((d - mon) / 86400000)));
+    if (s.user_id === session.user.id) myDaily[idx]++;
+    teamDaily[idx]++;
+    teamDailyAmount[idx] += s.amount ?? 0;
+  }
+  const teamWeekTotal = teamDailyAmount.reduce((a,b) => a+b, 0);
+  const teamWeekCount = teamDaily.reduce((a,b) => a+b, 0);
+  const todayIdx = Math.max(0, Math.min(6, Math.round((today - mon) / 86400000)));
+
+  const tierObj = TIERS.find(t => t.v === profile?.tier) ?? null;
   const tierIdx = tierObj ? TIERS.indexOf(tierObj) : -1;
 
-  // Hoisted DashCard with this Dashboard's dk/wd. useCallback stabilizes the
-  // component identity across renders so children don't unmount/remount.
-  const Card = useCallback((props) => <DashCard {...props} dk={dk} wd={wd} />, [dk, wd]);
+  const onCardMove = (e) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    e.currentTarget.style.setProperty("--mx", `${e.clientX - r.left}px`);
+    e.currentTarget.style.setProperty("--my", `${e.clientY - r.top}px`);
+  };
+
+  // Weekly sales bar chart (SVG)
+  const BarChart = ({ data, accent, height = 64, highlight = -1 }) => {
+    const max = Math.max(1, ...data);
+    const cols = data.length;
+    const gap = 8;
+    return (
+      <div style={{ display:"grid", gridTemplateColumns:`repeat(${cols},1fr)`, gap, alignItems:"end", height:height+22 }}>
+        {data.map((v, i) => {
+          const h = Math.round((v / max) * height);
+          const isToday = i === highlight;
+          return (
+            <div key={i} style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6 }}>
+              <div style={{ height, width:"100%", display:"flex", alignItems:"flex-end", justifyContent:"center" }}>
+                <div style={{
+                  width:"100%",
+                  height: h || 3,
+                  background: v > 0
+                    ? `linear-gradient(180deg,${accent},${accent}66)`
+                    : "rgba(255,255,255,0.06)",
+                  borderRadius:6,
+                  boxShadow: v > 0 ? `0 0 12px ${accent}40` : "none",
+                  border: isToday ? `1px solid ${accent}` : "none",
+                  transition:"height 0.5s cubic-bezier(0.4,0,0.2,1)"
+                }} />
+              </div>
+              <div style={{ fontSize:9, fontWeight:800, color: isToday ? accent : "#5E6376", letterSpacing:1 }}>{dayLabels[i]}</div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
+  // Circular progress ring
+  const Ring = ({ pct, accent, size = 88, stroke = 8, label, sublabel }) => {
+    const r = (size - stroke) / 2;
+    const c = 2 * Math.PI * r;
+    const offset = c * (1 - Math.max(0, Math.min(100, pct)) / 100);
+    return (
+      <div style={{ position:"relative", width:size, height:size, flexShrink:0 }}>
+        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+          <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={stroke} />
+          <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={accent} strokeWidth={stroke} strokeLinecap="round"
+            strokeDasharray={c} strokeDashoffset={offset}
+            transform={`rotate(-90 ${size/2} ${size/2})`}
+            style={{ transition:"stroke-dashoffset 0.7s cubic-bezier(0.4,0,0.2,1)", filter:`drop-shadow(0 0 6px ${accent}55)` }} />
+        </svg>
+        <div style={{ position:"absolute", inset:0, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center" }}>
+          <div style={{ fontSize:18, fontWeight:900, color:"#F2F4F8", lineHeight:1, letterSpacing:"-0.02em" }}>{label}</div>
+          {sublabel && <div style={{ fontSize:8.5, fontWeight:800, color:"#666C7E", letterSpacing:1.5, textTransform:"uppercase", marginTop:3 }}>{sublabel}</div>}
+        </div>
+      </div>
+    );
+  };
+
+  const Card = ({ title, action, actionOnClick, children, fullWidth }) => (
+    <div className="dash-card" onMouseMove={onCardMove}
+      style={{ padding:dk?"22px 24px":"18px 20px", gridColumn: fullWidth && wd ? "1 / -1" : undefined }}>
+      <div style={{ display:"flex", alignItems:"baseline", justifyContent:"space-between", marginBottom:16, position:"relative", gap:12 }}>
+        <div className="display" style={{ fontSize:dk?18:16, color:"#F2F4F8", letterSpacing:"0.07em" }}>{title}</div>
+        {action && (
+          <button onClick={actionOnClick} className="btn-ghost"
+            style={{ fontSize:9.5, padding:"5px 9px", borderRadius:7, height:"auto" }}>
+            {action} →
+          </button>
+        )}
+      </div>
+      <div style={{ position:"relative" }}>{children}</div>
+    </div>
+  );
 
   if (loading) return <div style={{ textAlign:"center", padding:60, color:"#7E8290", fontSize:13 }}>Loading…</div>;
 
@@ -2172,13 +2126,11 @@ function Leaderboard({ session, profile, w }) {
   useEffect(() => {
     load();
     loadBonuses();
-    const refetchSales = debounce(load, 300);
-    const refetchBonuses = debounce(loadBonuses, 300);
     const ch = supabase.channel("sales-rt")
-      .on("postgres_changes", { event: "*", schema: "public", table: "sales" }, refetchSales)
-      .on("postgres_changes", { event: "*", schema: "public", table: "monthly_bonuses" }, refetchBonuses)
+      .on("postgres_changes", { event: "*", schema: "public", table: "sales" }, load)
+      .on("postgres_changes", { event: "*", schema: "public", table: "monthly_bonuses" }, loadBonuses)
       .subscribe();
-    return () => { refetchSales.cancel(); refetchBonuses.cancel(); supabase.removeChannel(ch); };
+    return () => supabase.removeChannel(ch);
   }, []);
 
   const resetForm = () => { setDealAmt(null); setCustomAmt(""); setRetainer(null); setNote(""); setShowAdd(false); };
@@ -2217,30 +2169,19 @@ function Leaderboard({ session, profile, w }) {
   };
 
   const addSale = async () => {
-    if (saving) return;
     const finalAmt = dealAmt === "custom" ? parseFloat(customAmt) : dealAmt;
     if (!finalAmt || isNaN(finalAmt) || finalAmt <= 0) return;
     if (retainer === null) return;
     setSaving(true);
-    try {
-      const { data, error } = await supabase.from("sales").insert({
-        user_id: session.user.id,
-        amount: finalAmt,
-        retainer: retainer || null,
-        note: note.trim() || null,
-        sale_date: new Date().toISOString().split("T")[0],
-      }).select().single();
-      if (error || !data) {
-        alert(`Couldn't log sale: ${error?.message ?? "no row returned"}`);
-        return;
-      }
-      setSales(prev => [data, ...prev]);
-      resetForm();
-    } catch (e) {
-      alert(`Couldn't log sale: ${e?.message ?? "network error"}`);
-    } finally {
-      setSaving(false);
-    }
+    const { data } = await supabase.from("sales").insert({
+      user_id: session.user.id,
+      amount: finalAmt,
+      retainer: retainer || null,
+      note: note.trim() || null,
+      sale_date: new Date().toISOString().split("T")[0],
+    }).select().single();
+    if (data) setSales(prev => [data, ...prev]);
+    resetForm(); setSaving(false);
   };
 
   const now = new Date();
@@ -3276,14 +3217,8 @@ export default function App() {
   };
 
   const saveScore = async (quizId, score, total) => {
-    if (!session || !total) return;
-    try {
-      const { error } = await supabase.from("quiz_scores").insert({ user_id: session.user.id, quiz_id: quizId, score, total });
-      if (error) { console.error("saveScore failed:", error); return; }
-    } catch (e) {
-      console.error("saveScore threw:", e);
-      return;
-    }
+    if (!session) return;
+    await supabase.from("quiz_scores").insert({ user_id: session.user.id, quiz_id: quizId, score, total });
     setQuizScores(prev => {
       const ex = prev[quizId];
       if (!ex || score / total > ex.score / ex.total) return { ...prev, [quizId]: { quiz_id: quizId, score, total } };
@@ -3371,13 +3306,12 @@ export default function App() {
       });
     };
     loadStats();
-    const refetch = debounce(loadStats, 300);
     const ch = supabase.channel("hdr-stats")
-      .on("postgres_changes", { event: "*", schema: "public", table: "sales" }, refetch)
-      .on("postgres_changes", { event: "*", schema: "public", table: "schedule" }, refetch)
-      .on("postgres_changes", { event: "*", schema: "public", table: "leads" }, refetch)
+      .on("postgres_changes", { event: "*", schema: "public", table: "sales" }, loadStats)
+      .on("postgres_changes", { event: "*", schema: "public", table: "schedule" }, loadStats)
+      .on("postgres_changes", { event: "*", schema: "public", table: "leads" }, loadStats)
       .subscribe();
-    return () => { refetch.cancel(); supabase.removeChannel(ch); };
+    return () => supabase.removeChannel(ch);
   }, [session]);
 
   // If the active tab gets revoked by a role change, fall back to the first allowed one.
