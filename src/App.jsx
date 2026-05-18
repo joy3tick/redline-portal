@@ -516,75 +516,119 @@ const GLOBAL_CSS = `
 @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.04)} }
 @keyframes popIn { from{opacity:0;transform:scale(0.96)} to{opacity:1;transform:scale(1)} }
 
+/* ── Theme tokens ───────────────────────────────────────────
+   All surface, text, and border colors that DIFFER between
+   light and dark themes go through CSS variables here. Accent
+   colors (chartreuse, red, success, etc.) stay the same in both. */
+:root, [data-theme="light"] {
+  --bg:            #F7F7F8;
+  --surface:       #FFFFFF;
+  --surface-2:     #F1F5F9;
+  --surface-glass: rgba(255,255,255,0.92);
+  --surface-header:rgba(255,255,255,0.92);
+  --text:          #0F172A;
+  --text-2:        #334155;
+  --text-3:        #475569;
+  --text-muted:    #64748B;
+  --text-faint:    #94A3B8;
+  --border:        rgba(15,23,42,0.10);
+  --border-strong: rgba(15,23,42,0.16);
+  --hairline:      rgba(15,23,42,0.06);
+  --shadow-soft:   0 1px 2px rgba(15,23,42,0.04), 0 1px 1px rgba(15,23,42,0.03);
+  --shadow-hover:  0 4px 14px rgba(15,23,42,0.06), 0 2px 4px rgba(15,23,42,0.04);
+  --scroll-thumb:  rgba(15,23,42,0.10);
+  --dot:           rgba(15,23,42,0.07);
+}
+[data-theme="dark"] {
+  --bg:            #0E0F14;
+  --surface:       rgba(255,255,255,0.025);
+  --surface-2:     rgba(255,255,255,0.05);
+  --surface-glass: rgba(20,22,28,0.88);
+  --surface-header:rgba(14,15,20,0.85);
+  --text:          #F2F4F8;
+  --text-2:        #D6DAE2;
+  --text-3:        #A8AEBA;
+  --text-muted:    #94A3B8;
+  --text-faint:    #64748B;
+  --border:        rgba(255,255,255,0.07);
+  --border-strong: rgba(255,255,255,0.14);
+  --hairline:      rgba(255,255,255,0.05);
+  --shadow-soft:   0 1px 2px rgba(0,0,0,0.25);
+  --shadow-hover:  0 6px 18px rgba(0,0,0,0.35);
+  --scroll-thumb:  rgba(255,255,255,0.10);
+  --dot:           rgba(255,255,255,0.06);
+}
+
 *{margin:0;padding:0;box-sizing:border-box}
-html,body,#root{min-height:100dvh;background:#0E0F14}
-body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden;font-family:'Plus Jakarta Sans',system-ui,sans-serif;letter-spacing:-0.01em;font-feature-settings:"kern","liga","calt"}
+html,body,#root{min-height:100dvh;background:var(--bg);color:var(--text)}
+body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden;font-family:'Plus Jakarta Sans',system-ui,sans-serif;letter-spacing:-0.01em;font-feature-settings:"kern","liga","calt";transition:background 0.2s ease,color 0.2s ease}
 ::selection{background:rgba(204,255,0,0.32);color:#15171E}
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:10px;transition:background 0.2s}
+::-webkit-scrollbar-thumb{background:var(--scroll-thumb);border-radius:10px;transition:background 0.2s}
 ::-webkit-scrollbar-thumb:hover{background:rgba(204,255,0,0.3)}
-input::placeholder{color:#3A3D47}
+input::placeholder{color:var(--text-faint)}
 button{font-family:inherit}
 
 /* Backgrounds */
 .dotgrid {
-  background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-image: radial-gradient(circle, var(--dot) 1px, transparent 1px);
   background-size: 32px 32px;
 }
 
 /* Glass surface */
 .glass {
-  background: rgba(20,22,28,0.88);
+  background: var(--surface-glass);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
 }
 .glass-soft {
-  background: rgba(255,255,255,0.02);
-  border: 1px solid rgba(255,255,255,0.06);
+  background: var(--surface);
+  border: 1px solid var(--border);
 }
 
 /* Sticky header chrome */
 .app-header {
   position:sticky; top:0; z-index:30;
-  background: rgba(14,15,20,0.85);
+  background: var(--surface-header);
   backdrop-filter: blur(22px);
   -webkit-backdrop-filter: blur(22px);
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+  border-bottom: 1px solid var(--hairline);
 }
 
 /* Cards — flat, minimal */
-.card-hover { transition: background 0.18s ease, border-color 0.18s ease }
-.card-hover:hover { background:rgba(255,255,255,0.028) !important; border-color:rgba(255,255,255,0.12) !important }
+.card-hover { transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease }
+.card-hover:hover { background:var(--surface) !important; border-color:var(--border-strong) !important; box-shadow: var(--shadow-hover) !important }
 
 .dash-card {
   position:relative;
-  background: rgba(255,255,255,0.022);
-  border: 1px solid rgba(255,255,255,0.06);
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 14px;
-  transition: background 0.18s ease, border-color 0.18s ease;
+  box-shadow: var(--shadow-soft);
+  transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
   overflow:hidden;
 }
 .dash-card::before { content:none; }
-.dash-card:hover { background:rgba(255,255,255,0.032); border-color:rgba(255,255,255,0.10); }
+.dash-card:hover { border-color: var(--border-strong); box-shadow: var(--shadow-hover); }
 
 /* Accordion */
-.acc-btn { transition: background 0.18s ease }
-.acc-btn:hover { background:rgba(255,255,255,0.03) !important }
+.acc-btn { transition: background 0.18s ease, border-color 0.18s ease }
+.acc-btn:hover { background: var(--surface-2) !important; border-color: var(--border-strong) !important }
 
 /* Nav back */
 .back-btn { transition: opacity 0.18s, transform 0.18s }
 .back-btn:hover { opacity:0.75; transform:translateX(-2px) }
 
 /* Video card */
-.vid-card { transition: background 0.18s ease, border-color 0.18s ease }
-.vid-card:hover { background:rgba(255,255,255,0.03) !important; border-color:rgba(204,255,0,0.35) !important }
+.vid-card { transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease }
+.vid-card:hover { background:var(--surface) !important; border-color:rgba(204,255,0,0.35) !important; box-shadow: 0 4px 14px rgba(204,255,0,0.10) !important }
 .play-pulse { animation: pulse 2.5s ease-in-out infinite }
 
 /* Stat cards */
-.stat-card { transition: background 0.18s ease, border-color 0.18s ease }
-.stat-card:hover { background:rgba(255,255,255,0.03) !important; border-color:rgba(255,255,255,0.12) !important }
+.stat-card { transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease }
+.stat-card:hover { background:var(--surface) !important; border-color:var(--border-strong) !important; box-shadow: var(--shadow-hover) !important }
 
 /* Tabular numerals for any displayed numeric data */
 .num-display, .stat-card, .dash-card { font-variant-numeric: tabular-nums }
@@ -598,10 +642,10 @@ button{font-family:inherit}
 .tab-pill {
   position:relative; background:none; border:none; cursor:pointer;
   font-family:inherit; font-size:11.5px; font-weight:600; letter-spacing:0.2px;
-  color:#6E7483; padding:11px 12px 14px; white-space:nowrap; flex-shrink:0;
+  color:var(--text-muted); padding:11px 12px 14px; white-space:nowrap; flex-shrink:0;
   transition:color 0.2s ease;
 }
-.tab-pill:hover { color:#C4C9D6 }
+.tab-pill:hover { color:var(--text-2) }
 .tab-pill.active { color:var(--tc,#CCFF00); font-weight:700 }
 .tab-pill::after {
   content:""; position:absolute; bottom:0; left:50%; right:50%;
@@ -639,7 +683,7 @@ button{font-family:inherit}
 /* Tertiary (ghost): muted text, chartreuse on hover — utility / nav */
 .btn-ghost {
   background:transparent; border:1px solid transparent;
-  color:#9098A8; font-weight:700; letter-spacing:1.5px; text-transform:uppercase;
+  color:var(--text-muted); font-weight:700; letter-spacing:1.5px; text-transform:uppercase;
   border-radius:10px; cursor:pointer; transition: all 0.16s ease;
 }
 .btn-ghost:hover { color:#CCFF00; background:rgba(204,255,0,0.06); border-color:rgba(204,255,0,0.20) }
@@ -647,15 +691,15 @@ button{font-family:inherit}
 /* Type utilities */
 .mono { font-family: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
 .display { font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.08em; line-height: 1; }
-.eyebrow { font-size: 9px; font-weight: 800; letter-spacing: 2.4px; text-transform: uppercase; color: #9098A8; }
+.eyebrow { font-size: 9px; font-weight: 800; letter-spacing: 2.4px; text-transform: uppercase; color: var(--text-muted); }
 
-/* Header pill buttons — Admin / Sign Out / Profile (all tertiary) */
+/* Header pill buttons — Admin / Sign Out / Profile / Theme toggle (all tertiary) */
 .btn-pill {
   display:inline-flex; align-items:center; justify-content:center; gap:7px;
   height:42px; padding:0 14px; font-size:11px; font-weight:700;
   letter-spacing:1.4px; text-transform:uppercase; border-radius:12px;
   cursor:pointer; transition: all 0.16s ease; font-family:inherit;
-  background: transparent; border: 1px solid transparent; color:#9098A8;
+  background: transparent; border: 1px solid transparent; color:var(--text-muted);
 }
 .btn-pill:hover { background: rgba(204,255,0,0.06); border-color: rgba(204,255,0,0.22); color:#CCFF00 }
 .btn-pill.amber, .btn-pill.amber:hover { /* legacy class — collapsed to tertiary so no orange admin outlier */ }
@@ -663,12 +707,12 @@ button{font-family:inherit}
 .btn-pill svg { display:block }
 
 /* Live header status tiles */
-.hdr-stat { display:flex; flex-direction:column; align-items:flex-start; gap:2px; padding:0 18px; border-left:1px solid rgba(255,255,255,0.06) }
+.hdr-stat { display:flex; flex-direction:column; align-items:flex-start; gap:2px; padding:0 18px; border-left:1px solid var(--border) }
 .hdr-stat:first-child { border-left:none; padding-left:0 }
-.hdr-stat-val { font-family:'IBM Plex Mono', ui-monospace, monospace; font-variant-numeric: tabular-nums; font-weight:600; font-size:22px; color:#F2F4F8; line-height:1; letter-spacing:-0.02em }
+.hdr-stat-val { font-family:'IBM Plex Mono', ui-monospace, monospace; font-variant-numeric: tabular-nums; font-weight:600; font-size:22px; color:var(--text); line-height:1; letter-spacing:-0.02em }
 .hdr-stat-val.hero { color:#CCFF00 }
 .hdr-stat-val.danger { color:#DC2626 }
-.hdr-stat-label { font-size:9px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#5E6376 }
+.hdr-stat-label { font-size:9px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--text-muted) }
 .title-display {
   font-family:'Bebas Neue',sans-serif; letter-spacing:0.32em; line-height:1;
 }
@@ -676,8 +720,8 @@ button{font-family:inherit}
 /* Profile pill */
 .profile-pill {
   display:flex; align-items:center; gap:10px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
-  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
   border-radius: 12px; padding: 6px 14px 6px 6px; cursor:pointer;
   transition: all 0.2s ease;
 }
@@ -703,9 +747,9 @@ button{font-family:inherit}
 /* Bottom nav (mobile) */
 .bnav {
   position:fixed; bottom:0; left:0; right:0; z-index:50;
-  background:rgba(9,10,15,0.98);
+  background:var(--surface-header);
   backdrop-filter:blur(32px); -webkit-backdrop-filter:blur(32px);
-  border-top:1px solid rgba(255,255,255,0.08);
+  border-top:1px solid var(--border);
   display:flex;
   padding:6px 2px;
   padding-bottom:calc(6px + env(safe-area-inset-bottom,0px));
@@ -715,7 +759,7 @@ button{font-family:inherit}
   gap:3px; padding:2px 0; min-width:0;
   background:none; border:none; cursor:pointer;
   font-family:inherit; font-size:9px; font-weight:500; letter-spacing:0px;
-  color:#6E7483; transition:color 0.18s ease;
+  color:var(--text-muted); transition:color 0.18s ease;
 }
 .bnav-btn.active { font-weight:700 }
 .bnav-icon {
@@ -5105,6 +5149,14 @@ function AppInner() {
   const [completedModules, setCompletedModules] = useState(new Set());
   const [quizScores, setQuizScores] = useState({});
   const [view, setView] = useState(null);
+  const [theme, setTheme] = useState(() => {
+    try { return localStorage.getItem("portalTheme") || "dark"; } catch { return "dark"; }
+  });
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    try { localStorage.setItem("portalTheme", theme); } catch { /* ignore */ }
+  }, [theme]);
+  const toggleTheme = () => setTheme(t => t === "dark" ? "light" : "dark");
   const ref = useRef(null);
   const w = useW();
   const dk = w >= 768;
@@ -5506,6 +5558,14 @@ function AppInner() {
                     </div>
                   )}
                 </div>
+
+                <button onClick={toggleTheme} className="btn-pill icon-only" aria-label="Toggle theme" title={theme === "dark" ? "Switch to light" : "Switch to dark"}>
+                  {theme === "dark" ? (
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+                  ) : (
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                  )}
+                </button>
 
                 <button onClick={signOut} className={`btn-pill${dk?"":" icon-only"}`} aria-label="Sign Out">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
