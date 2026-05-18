@@ -29,9 +29,9 @@ const TOKENS = {
   // Top performer accent — gold (used sparingly for #1 / Final Exam)
   gold:      "#CA8A04",
   // Type system
-  fontDisplay: "'Bebas Neue', sans-serif",
-  fontBody:    "'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif",
-  fontMono:    "'Geist Mono', ui-monospace, 'SFMono-Regular', monospace",
+  fontDisplay: "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif",
+  fontBody:    "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif",
+  fontMono:    "'JetBrains Mono', ui-monospace, 'SFMono-Regular', monospace",
 };
 
 const C = {
@@ -544,7 +544,8 @@ const GLOBAL_CSS = `
 
 *{margin:0;padding:0;box-sizing:border-box}
 html,body,#root{min-height:100dvh;background:var(--bg);color:var(--text)}
-body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden;font-family:'Geist',system-ui,sans-serif;letter-spacing:-0.014em;font-feature-settings:"kern","liga","calt","ss03","cv01","cv11";transition:background 0.2s ease,color 0.2s ease}
+body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden;font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;font-feature-settings:"kern","liga","calt","ss01","cv11";font-optical-sizing:auto;letter-spacing:-0.011em;line-height:1.5;transition:background 0.2s ease,color 0.2s ease}
+h1,h2,h3,h4,h5,h6{letter-spacing:-0.022em;line-height:1.15;font-weight:700}
 ::selection{background:rgba(220,38,38,0.32);color:#FFFFFF}
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -641,7 +642,7 @@ button{font-family:inherit}
 /* Tab pills */
 .tab-pill {
   position:relative; background:none; border:none; cursor:pointer;
-  font-family:inherit; font-weight:700; letter-spacing:1.8px; text-transform:uppercase;
+  font-family:inherit; font-weight:600; letter-spacing:-0.01em; text-transform:none;
   color: var(--text-muted); transition: color 0.18s ease;
   border-radius:10px;
 }
@@ -662,10 +663,10 @@ button{font-family:inherit}
 .tab-pill > span { position:relative; z-index:1 }
 
 /* Buttons — three variants only */
-/* Primary: chartreuse fill, charcoal text — main CTAs */
+/* Primary: red fill — main CTAs */
 .btn-primary {
   background:#DC2626;
-  color:#FFFFFF; font-weight:800; letter-spacing:1.2px; text-transform:uppercase;
+  color:#FFFFFF; font-weight:600; letter-spacing:-0.005em; text-transform:none;
   border:none; border-radius:10px; cursor:pointer;
   transition: filter 0.16s ease, background 0.16s ease;
 }
@@ -673,10 +674,10 @@ button{font-family:inherit}
 .btn-primary:active { filter: brightness(0.94) }
 .btn-primary:disabled { cursor:default; filter:none }
 
-/* Secondary: charcoal fill, chartreuse border + text — less critical actions */
+/* Secondary: outlined red — less critical actions */
 .btn-secondary {
   background:transparent; border:1px solid #DC2626; color:#DC2626;
-  font-weight:800; letter-spacing:1.2px; text-transform:uppercase;
+  font-weight:600; letter-spacing:-0.005em; text-transform:none;
   border-radius:10px; cursor:pointer; transition: all 0.16s ease;
 }
 .btn-secondary:hover { background:rgba(220,38,38,0.08) }
@@ -685,21 +686,21 @@ button{font-family:inherit}
 /* Tertiary (ghost): muted text, red on hover — utility / nav */
 .btn-ghost {
   background:transparent; border:1px solid transparent;
-  color: var(--text-muted); font-weight:700; letter-spacing:1.5px; text-transform:uppercase;
+  color: var(--text-muted); font-weight:500; letter-spacing:-0.005em; text-transform:none;
   border-radius:10px; cursor:pointer; transition: all 0.16s ease;
 }
 .btn-ghost:hover { color:#DC2626; background:rgba(220,38,38,0.06); border-color:rgba(220,38,38,0.20) }
 
 /* Type utilities */
-.mono { font-family: 'Geist Mono', ui-monospace, 'SFMono-Regular', monospace; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
-.display { font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.08em; line-height: 1; }
-.eyebrow { font-size: 9px; font-weight: 800; letter-spacing: 2.4px; text-transform: uppercase; color: var(--text-muted); }
+.mono { font-family: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', monospace; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.display { font-family: 'Inter', system-ui, sans-serif; font-weight: 800; letter-spacing: -0.035em; line-height: 1.05; }
+.eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-muted); }
 
 /* Header pill buttons — Admin / Sign Out / Profile / Theme toggle (all tertiary) */
 .btn-pill {
   display:inline-flex; align-items:center; justify-content:center; gap:7px;
-  height:42px; padding:0 14px; font-size:11px; font-weight:700;
-  letter-spacing:1.4px; text-transform:uppercase; border-radius:12px;
+  height:38px; padding:0 14px; font-size:13px; font-weight:500;
+  letter-spacing:-0.005em; text-transform:none; border-radius:10px;
   cursor:pointer; transition: all 0.16s ease; font-family:inherit;
   background: transparent; border: 1px solid transparent; color: var(--text-muted);
 }
@@ -709,14 +710,14 @@ button{font-family:inherit}
 .btn-pill svg { display:block }
 
 /* Live header status tiles */
-.hdr-stat { display:flex; flex-direction:column; align-items:flex-start; gap:2px; padding:0 18px; border-left:1px solid var(--border) }
+.hdr-stat { display:flex; flex-direction:column; align-items:flex-start; gap:3px; padding:0 18px; border-left:1px solid var(--border) }
 .hdr-stat:first-child { border-left:none; padding-left:0 }
-.hdr-stat-val { font-family:'Geist Mono', ui-monospace, monospace; font-variant-numeric: tabular-nums; font-weight:600; font-size:22px; color: var(--text); line-height:1; letter-spacing:-0.02em }
+.hdr-stat-val { font-family:'Inter', system-ui, sans-serif; font-variant-numeric: tabular-nums; font-weight:700; font-size:22px; color: var(--text); line-height:1; letter-spacing:-0.035em }
 .hdr-stat-val.hero { color:#DC2626 }
 .hdr-stat-val.danger { color:#DC2626 }
-.hdr-stat-label { font-size:9px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color: var(--text-muted) }
+.hdr-stat-label { font-size:11px; font-weight:500; letter-spacing:-0.005em; text-transform:none; color: var(--text-muted) }
 .title-display {
-  font-family:'Bebas Neue',sans-serif; letter-spacing:0.32em; line-height:1;
+  font-family:'Inter', system-ui, sans-serif; font-weight:800; letter-spacing:-0.035em; line-height:1.05;
 }
 
 /* Profile pill */
@@ -873,17 +874,17 @@ function Login() {
           <div style={{ display:"flex", justifyContent:"center", margin:"0 auto 20px" }}>
             <RedlineLogo height={52} />
           </div>
-          <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:38, letterSpacing:12, color:"var(--text)", lineHeight:1 }}>REDLINE</div>
-          <div style={{ fontSize:10.5, fontWeight:700, color:"var(--text-muted)", letterSpacing:5, textTransform:"uppercase", marginTop:8 }}>Portal</div>
+          <div style={{ fontFamily:"'Inter',system-ui,sans-serif", fontWeight:800, fontSize:38, letterSpacing:"-0.03em", color:"var(--text)", lineHeight:1 }}>Redline</div>
+          <div style={{ fontSize:12, fontWeight:500, color:"var(--text-muted)", letterSpacing:"-0.005em", marginTop:6 }}>Portal</div>
         </div>
 
         <div style={{ background:"linear-gradient(145deg,rgba(255,255,255,0.99),rgba(255,255,255,0.99))", border:"1px solid var(--border)", borderRadius:24, padding:"36px 32px 32px", boxShadow:"0 24px 80px rgba(15,23,42,0.10), 0 0 0 1px rgba(220,38,38,0.06)" }}>
           <div style={{ marginBottom:16 }}>
-            <label style={{ display:"block", fontSize:9.5, fontWeight:700, color:"var(--text-muted)", letterSpacing:3, marginBottom:10, textTransform:"uppercase" }}>Email</label>
+            <label style={{ display:"block", fontSize:12, fontWeight:500, color:"var(--text-muted)", letterSpacing:"-0.005em", marginBottom:8 }}>Email</label>
             <input type="email" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&go()} placeholder="you@redline.com" autoFocus style={fieldStyle(!!err)} onFocus={onFocus} onBlur={e=>onBlur(e,!!err)} />
           </div>
           <div>
-            <label style={{ display:"block", fontSize:9.5, fontWeight:700, color:"var(--text-muted)", letterSpacing:3, marginBottom:10, textTransform:"uppercase" }}>Password</label>
+            <label style={{ display:"block", fontSize:12, fontWeight:500, color:"var(--text-muted)", letterSpacing:"-0.005em", marginBottom:8 }}>Password</label>
             <input type="password" value={password} onChange={e=>setPassword(e.target.value)} onKeyDown={e=>e.key==="Enter"&&go()} placeholder="••••••••" style={fieldStyle(!!err)} onFocus={onFocus} onBlur={e=>onBlur(e,!!err)} />
           </div>
           {err && (
@@ -892,11 +893,11 @@ function Login() {
               <p style={{ color:"#DC2626", fontSize:12, fontWeight:600 }}>{err}</p>
             </div>
           )}
-          <button onClick={go} disabled={ld} style={{ width:"100%", padding:"16px", background: ld ? "#FCA5A5" : "linear-gradient(135deg,#DC2626,#7F1D1D)", color: ld ? "#FFF" : "#FFFFFF", border:"none", borderRadius:14, fontSize:11, fontWeight:800, letterSpacing:4, cursor: ld ? "wait" : "pointer", marginTop:20, textTransform:"uppercase", boxShadow: ld ? "none" : "0 6px 28px rgba(220,38,38,0.3)", transition:"all 0.25s ease", fontFamily:"inherit" }}>
-            {ld ? "Signing In…" : "Enter Portal"}
+          <button onClick={go} disabled={ld} style={{ width:"100%", padding:"15px", background: ld ? "#FCA5A5" : "linear-gradient(135deg,#DC2626,#7F1D1D)", color: ld ? "#FFF" : "#FFFFFF", border:"none", borderRadius:12, fontSize:15, fontWeight:600, letterSpacing:"-0.01em", cursor: ld ? "wait" : "pointer", marginTop:20, boxShadow: ld ? "none" : "0 6px 28px rgba(220,38,38,0.3)", transition:"all 0.25s ease", fontFamily:"inherit" }}>
+            {ld ? "Signing in…" : "Enter portal"}
           </button>
         </div>
-        <p style={{ color:"var(--text-faint)", fontSize:9, marginTop:32, letterSpacing:2, textTransform:"uppercase", textAlign:"center" }}>© 2026 Redline Web Services LLC</p>
+        <p style={{ color:"var(--text-faint)", fontSize:12, marginTop:32, letterSpacing:"-0.005em", textAlign:"center" }}>© 2026 Redline Web Services LLC</p>
       </div>
     </div>
   );
@@ -1488,7 +1489,7 @@ function Leads({ session, profile, w }) {
                 <div key={s.label} style={{ background:"var(--surface-2)", border:"1px solid var(--border)", borderRadius:12, padding:dk?"14px 14px":"12px 12px" }}>
                   <div style={{ fontSize:9, fontWeight:800, color: hit ? "#22C55E" : s.accent, letterSpacing:1.8, textTransform:"uppercase" }}>{s.label}</div>
                   <div style={{ display:"flex", alignItems:"baseline", gap:6, marginTop:6 }}>
-                    <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?32:26, color:"var(--text)", lineHeight:1, fontVariantNumeric:"tabular-nums" }}>{s.n}</div>
+                    <div style={{ fontFamily:"'Inter',system-ui,sans-serif", fontWeight:700, fontSize:dk?32:26, color:"var(--text)", lineHeight:1, letterSpacing:"-0.035em", fontVariantNumeric:"tabular-nums" }}>{s.n}</div>
                     {s.goal > 0 && (
                       <div style={{ fontSize:11, color:"var(--text-muted)", fontWeight:600, fontVariantNumeric:"tabular-nums" }}>/ {s.goal}</div>
                     )}
@@ -1543,13 +1544,13 @@ function Leads({ session, profile, w }) {
           <div style={{ display:"flex", alignItems:"baseline", justifyContent:"space-between", flexWrap:"wrap", gap:14 }}>
             <div>
               <div style={{ fontSize:9.5, fontWeight:800, color:"var(--text-muted)", letterSpacing:2.5, textTransform:"uppercase" }}>Pipeline</div>
-              <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?38:32, lineHeight:1, color:"var(--text)", letterSpacing:0.5, marginTop:4, fontVariantNumeric:"tabular-nums" }}>{totalForFilter}<span style={{ fontSize:dk?14:12, color:"var(--text-muted)", marginLeft:8, letterSpacing:1.5, fontFamily:"'Geist',sans-serif", fontWeight:600 }}>leads</span></div>
+              <div style={{ fontFamily:"'Inter',system-ui,sans-serif", fontWeight:700, fontSize:dk?38:32, lineHeight:1, color:"var(--text)", letterSpacing:"-0.04em", marginTop:6, fontVariantNumeric:"tabular-nums" }}>{totalForFilter}<span style={{ fontSize:dk?14:12, color:"var(--text-muted)", marginLeft:8, letterSpacing:"-0.005em", fontWeight:500 }}>leads</span></div>
             </div>
             <div style={{ display:"flex", gap:dk?20:14, flexWrap:"wrap" }}>
               {STATUSES.filter(s => (counts[s.v] ?? 0) > 0).map(s => (
                 <div key={s.v}>
                   <div style={{ fontSize:9, fontWeight:800, color:s.color, letterSpacing:1.8, textTransform:"uppercase" }}>{s.label}</div>
-                  <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?22:20, lineHeight:1, color:"var(--text)", marginTop:3, fontVariantNumeric:"tabular-nums" }}>{counts[s.v] ?? 0}</div>
+                  <div style={{ fontFamily:"'Inter',system-ui,sans-serif", fontWeight:700, fontSize:dk?22:20, lineHeight:1, color:"var(--text)", letterSpacing:"-0.035em", marginTop:4, fontVariantNumeric:"tabular-nums" }}>{counts[s.v] ?? 0}</div>
                 </div>
               ))}
             </div>
@@ -2907,8 +2908,8 @@ function AdminPanel({ profile, roles, setRoles, onBack, w, onSignOut }) {
                 <div key={r.name} style={{ background:"var(--surface)", border:"1px solid var(--border)", borderRadius:14, padding:dk?"16px 18px":"14px 16px" }}>
                   <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:10, marginBottom:10 }}>
                     <div style={{ display:"flex", alignItems:"baseline", gap:10, minWidth:0 }}>
-                      <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:22, color:"var(--text)", letterSpacing:1.5, lineHeight:1 }}>{r.label}</div>
-                      {r.is_builtin && <span style={{ fontSize:9, fontWeight:800, color:"var(--text-muted)", letterSpacing:1.5, textTransform:"uppercase" }}>Built-in</span>}
+                      <div style={{ fontFamily:"'Inter',system-ui,sans-serif", fontWeight:700, fontSize:18, color:"var(--text)", letterSpacing:"-0.025em", lineHeight:1.1 }}>{r.label}</div>
+                      {r.is_builtin && <span style={{ fontSize:11, fontWeight:500, color:"var(--text-muted)", letterSpacing:"-0.005em" }}>Built-in</span>}
                       <span style={{ fontSize:11, color:"var(--text-muted)", fontVariantNumeric:"tabular-nums" }}>· {userCount} {userCount===1?"member":"members"}</span>
                     </div>
                     <div style={{ display:"flex", gap:6 }}>
@@ -3116,7 +3117,7 @@ function CompStat({ label, value, accent, dk }) {
   return (
     <div style={{ background:"rgba(15,23,42,0.04)", border:"1px solid var(--border)", borderRadius:12, padding:dk?"10px 14px":"9px 12px", minWidth:dk?120:"auto" }}>
       <div style={{ fontSize:9, fontWeight:800, color:accent, letterSpacing:1.8, textTransform:"uppercase" }}>{label}</div>
-      <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?24:22, color:"var(--text)", letterSpacing:1, lineHeight:1.1, marginTop:3, fontVariantNumeric:"tabular-nums" }}>{value}</div>
+      <div style={{ fontFamily:"'Inter',system-ui,sans-serif", fontWeight:700, fontSize:dk?22:20, color:"var(--text)", letterSpacing:"-0.035em", lineHeight:1.1, marginTop:4, fontVariantNumeric:"tabular-nums" }}>{value}</div>
     </div>
   );
 }
@@ -3146,7 +3147,7 @@ function CompPlanView({ dk }) {
           </div>
           <div style={{ display:"flex", flexDirection:dk?"row":"column", alignItems:dk?"flex-end":"flex-start", gap:dk?28:18, flexWrap:"wrap" }}>
             <div>
-              <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?68:54, lineHeight:1, color:"var(--text)", letterSpacing:1, fontVariantNumeric:"tabular-nums" }}>$240K+</div>
+              <div style={{ fontFamily:"'Inter',system-ui,sans-serif", fontWeight:800, fontSize:dk?64:48, lineHeight:1, color:"var(--text)", letterSpacing:"-0.045em", fontVariantNumeric:"tabular-nums" }}>$240K+</div>
               <div style={{ fontSize:12, color:"var(--text-3)", marginTop:6, fontWeight:500 }}>Year 1 projection for top performers</div>
             </div>
             <div style={{ display:"flex", gap:dk?14:10, flexWrap:"wrap" }}>
@@ -3181,12 +3182,12 @@ function CompPlanView({ dk }) {
                   display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column",
                   flexShrink:0,
                 }}>
-                  <div style={{ fontSize:9, fontWeight:800, letterSpacing:1.4, opacity:0.7 }}>TIER</div>
-                  <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:22, lineHeight:1, letterSpacing:1 }}>{t.num || "—"}</div>
+                  <div style={{ fontSize:10, fontWeight:600, letterSpacing:"0.04em", textTransform:"uppercase", opacity:0.75 }}>Tier</div>
+                  <div style={{ fontFamily:"'Inter',system-ui,sans-serif", fontWeight:800, fontSize:22, lineHeight:1, letterSpacing:"-0.04em", fontVariantNumeric:"tabular-nums" }}>{t.num || "—"}</div>
                 </div>
                 <div>
-                  <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?26:22, color:"var(--text)", letterSpacing:2.5, lineHeight:1 }}>{t.name}</div>
-                  <div style={{ fontSize:10.5, color:"var(--text-muted)", letterSpacing:1.8, textTransform:"uppercase", fontWeight:700, marginTop:5 }}>{t.tag}</div>
+                  <div style={{ fontFamily:"'Inter',system-ui,sans-serif", fontWeight:700, fontSize:dk?22:19, color:"var(--text)", letterSpacing:"-0.025em", lineHeight:1.1 }}>{t.name}</div>
+                  <div style={{ fontSize:12, color:"var(--text-muted)", letterSpacing:"-0.005em", fontWeight:500, marginTop:4 }}>{t.tag}</div>
                 </div>
               </div>
               <div style={{ flex:1, display:"grid", gridTemplateColumns:"1fr 1fr", gap:dk?14:10, width:"100%" }}>
@@ -3194,8 +3195,8 @@ function CompPlanView({ dk }) {
                 <CompMetric label="Pay" value={t.pay} dk={dk} />
               </div>
               <div style={{ flexShrink:0, textAlign:dk?"right":"left", minWidth:dk?180:"auto", borderTop:dk?"none":"1px solid var(--hairline)", paddingTop:dk?0:14, width:dk?"auto":"100%" }}>
-                <div style={{ fontSize:9.5, fontWeight:800, color:t.featured?"#A78BFA":"#06D6F0", letterSpacing:2, textTransform:"uppercase" }}>Take-Home</div>
-                <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:dk?38:32, lineHeight:1.05, color:"var(--text)", letterSpacing:0.5, marginTop:4, fontVariantNumeric:"tabular-nums" }}>
+                <div style={{ fontSize:11, fontWeight:600, color:t.featured?"#A78BFA":"#06D6F0", letterSpacing:"0.04em", textTransform:"uppercase" }}>Take-home</div>
+                <div style={{ fontFamily:"'Inter',system-ui,sans-serif", fontWeight:800, fontSize:dk?36:30, lineHeight:1.05, color:"var(--text)", letterSpacing:"-0.04em", marginTop:6, fontVariantNumeric:"tabular-nums" }}>
                   {t.monthlyMin}
                   {t.monthlyMax ? <span style={{ fontSize:dk?20:18, color:"var(--text-muted)" }}>{" – " + t.monthlyMax}</span> : null}
                   {!t.monthlyMax && t.monthlyMin !== "Variable" ? <span style={{ fontSize:dk?20:18, color:"var(--text-muted)" }}> /mo</span> : null}
@@ -3450,7 +3451,7 @@ export default function App() {
 
   const signOut = async () => { await supabase.auth.signOut(); setView(null); };
 
-  const FONT_LINK = "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Geist:wght@400..900&family=Geist+Mono:wght@400..700&display=swap";
+  const FONT_LINK = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap";
   const baseStyle = { minHeight:"100dvh", background:"var(--bg)", color:"var(--text)" };
 
   const bc = { MODULE:"#DC2626", BOOTCAMP:"#F59E0B", REFERENCE:"#06D6F0", QUIZ:"#10B981", FINAL:"#CA8A04" };
@@ -3530,8 +3531,8 @@ export default function App() {
         <div style={{ display:"flex", justifyContent:"center", margin:"0 auto 16px" }}>
           <RedlineLogo height={44} />
         </div>
-        <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:26, letterSpacing:10, color:"var(--text)" }}>REDLINE</div>
-        <div style={{ fontSize:10, color:"var(--text-muted)", letterSpacing:3, textTransform:"uppercase", marginTop:8, fontWeight:700 }}>Loading…</div>
+        <div style={{ fontFamily:"'Inter',system-ui,sans-serif", fontWeight:800, fontSize:26, letterSpacing:"-0.035em", color:"var(--text)" }}>Redline</div>
+        <div style={{ fontSize:13, color:"var(--text-muted)", letterSpacing:"-0.005em", marginTop:6, fontWeight:500 }}>Loading…</div>
       </div>
     </div>
   );
