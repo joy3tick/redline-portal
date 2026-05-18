@@ -799,7 +799,6 @@ function TabIcon({ tabKey, active, size = 16, color }) {
   const p = { width:size, height:size, viewBox:"0 0 24 24", fill:"none", stroke:col, strokeWidth:sw, strokeLinecap:"round", strokeLinejoin:"round" };
   switch (tabKey) {
     case "dashboard":     return <svg {...p}><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>;
-    case "announcements": return <svg {...p}><path d="M3 11l18-8v18l-18-8v-2z"/><path d="M11 19v-6"/></svg>;
     case "leads":         return <svg {...p}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
     case "leaderboard":   return <svg {...p}><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>;
     case "scheduling":    return <svg {...p}><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>;
@@ -1948,193 +1947,6 @@ function UserCard({ u, color, dmReady, onMessage }) {
 
 const TIER_GLOW = { trial:"rgba(6,214,240,0.3)", bronze:"rgba(184,115,42,0.35)", silver:"rgba(192,200,216,0.3)", gold:"rgba(255,215,0,0.4)", platinum:"rgba(167,139,250,0.35)", diamond:"rgba(204,255,0,0.4)" };
 
-function Announcements({ session, profile, w }) {
-  const [items, setItems] = useState([]);
-  const [authors, setAuthors] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [composing, setComposing] = useState(false);
-  const [title, setTitle] = useState("");
-  const [body, setBody] = useState("");
-  const [saving, setSaving] = useState(false);
-  const dk = w >= 768;
-  const isAdmin = profile?.role === "admin";
-
-  const load = async () => {
-    const [annRes, profRes] = await Promise.all([
-      supabase.from("announcements").select("id, posted_by, title, body, pinned, created_at").order("pinned", { ascending: false }).order("created_at", { ascending: false }),
-      supabase.from("profiles").select("id, name"),
-    ]);
-    setItems(annRes.data ?? []);
-    const am = {};
-    for (const p of profRes.data ?? []) am[p.id] = p.name || "Admin";
-    setAuthors(am);
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    load();
-    const ch = supabase.channel("announcements-rt")
-      .on("postgres_changes", { event: "*", schema: "public", table: "announcements" }, load)
-      .subscribe();
-    return () => supabase.removeChannel(ch);
-  }, []);
-
-  const post = async () => {
-    const trimmedBody = body.trim();
-    if (!trimmedBody) return;
-    setSaving(true);
-    const { data, error } = await supabase
-      .from("announcements")
-      .insert({ posted_by: session.user.id, title: title.trim() || null, body: trimmedBody })
-      .select()
-      .single();
-    setSaving(false);
-    if (error || !data) {
-      alert(`Couldn't post: ${error?.message ?? "no row returned"}`);
-      return;
-    }
-    setTitle(""); setBody(""); setComposing(false);
-    setItems(prev => [data, ...prev]);
-  };
-
-  const remove = async (id) => {
-    if (!confirm("Delete this announcement?")) return;
-    const { error } = await supabase.from("announcements").delete().eq("id", id);
-    if (error) {
-      alert(`Couldn't delete: ${error.message}`);
-      return;
-    }
-    setItems(prev => prev.filter(i => i.id !== id));
-  };
-
-  const togglePin = async (id, pinned) => {
-    const { data, error } = await supabase
-      .from("announcements")
-      .update({ pinned: !pinned })
-      .eq("id", id)
-      .select()
-      .single();
-    if (error || !data) {
-      alert(`Couldn't update: ${error?.message ?? "no row returned"}`);
-      return;
-    }
-    setItems(prev => {
-      const next = prev.map(i => i.id === id ? { ...i, pinned: data.pinned } : i);
-      next.sort((a, b) => (b.pinned - a.pinned) || (new Date(b.created_at) - new Date(a.created_at)));
-      return next;
-    });
-  };
-
-  const fmtWhen = (iso) => {
-    const d = new Date(iso);
-    const today = new Date(); today.setHours(0,0,0,0);
-    const ds = new Date(d); ds.setHours(0,0,0,0);
-    const diff = Math.round((today - ds) / 86400000);
-    const time = d.toLocaleTimeString("en-US",{ hour:"numeric", minute:"2-digit" });
-    if (diff === 0) return `Today · ${time}`;
-    if (diff === 1) return `Yesterday · ${time}`;
-    if (diff < 7) return d.toLocaleDateString("en-US",{ weekday:"long" }) + ` · ${time}`;
-    return d.toLocaleDateString("en-US",{ month:"short", day:"numeric", year: d.getFullYear() === today.getFullYear() ? undefined : "numeric" });
-  };
-
-  return (
-    <div style={{ animation:"fadeUp 0.35s ease", display:"flex", flexDirection:"column", gap:14 }}>
-
-      {isAdmin && (
-        <div className="dash-card" style={{ padding:dk?"20px 22px":"16px 18px" }}>
-          {!composing ? (
-            <button onClick={() => setComposing(true)}
-              style={{ display:"flex", alignItems:"center", gap:12, width:"100%", background:"rgba(255,255,255,0.02)", border:"1px dashed rgba(255,255,255,0.1)", borderRadius:12, padding:"14px 16px", cursor:"pointer", fontFamily:"inherit", textAlign:"left", color:"#666C7E", fontSize:13, fontWeight:600, transition:"all 0.18s" }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor="rgba(245,158,11,0.35)"; e.currentTarget.style.color="#F59E0B"; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor="rgba(255,255,255,0.1)"; e.currentTarget.style.color="#666C7E"; }}>
-              <div style={{ width:32, height:32, borderRadius:9, background:"rgba(245,158,11,0.12)", border:"1px solid rgba(245,158,11,0.22)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              </div>
-              Post a new announcement…
-            </button>
-          ) : (
-            <div>
-              <div style={{ fontSize:10, fontWeight:800, color:"#F59E0B", letterSpacing:2.5, textTransform:"uppercase", marginBottom:14 }}>New Announcement</div>
-              <input
-                autoFocus
-                value={title}
-                onChange={e => setTitle(e.target.value)}
-                placeholder="Title (optional)"
-                style={{ width:"100%", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:10, color:"#F2F4F8", fontSize:14, fontWeight:700, padding:"11px 14px", fontFamily:"inherit", outline:"none", boxSizing:"border-box", marginBottom:8 }}
-              />
-              <textarea
-                value={body}
-                onChange={e => setBody(e.target.value)}
-                placeholder="What do reps need to know?"
-                rows={4}
-                style={{ width:"100%", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:10, color:"#F2F4F8", fontSize:13, fontWeight:500, padding:"11px 14px", fontFamily:"inherit", outline:"none", boxSizing:"border-box", resize:"vertical", lineHeight:1.5 }}
-              />
-              <div style={{ display:"flex", gap:8, marginTop:12, justifyContent:"flex-end" }}>
-                <button onClick={() => { setComposing(false); setTitle(""); setBody(""); }} className="btn-ghost" style={{ fontSize:11, padding:"10px 18px" }}>Cancel</button>
-                <button onClick={post} disabled={saving || !body.trim()} className="btn-primary" style={{ fontSize:11, padding:"10px 22px", opacity: saving || !body.trim() ? 0.5 : 1, cursor: saving || !body.trim() ? "default" : "pointer" }}>
-                  {saving ? "Posting…" : "Post"}
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {loading ? (
-        <div style={{ textAlign:"center", padding:60, color:"#666C7E", fontSize:13 }}>Loading…</div>
-      ) : items.length === 0 ? (
-        <div className="dash-card" style={{ padding:"48px 24px", textAlign:"center" }}>
-          <div style={{ width:54, height:54, borderRadius:16, background:"rgba(245,158,11,0.08)", border:"1px solid rgba(245,158,11,0.2)", display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 16px" }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
-          </div>
-          <div style={{ fontSize:14, fontWeight:700, color:"#D6DAE2", marginBottom:6 }}>No announcements yet</div>
-          <div style={{ fontSize:12, color:"#666C7E" }}>{isAdmin ? "Post the first one above." : "Check back soon — leadership posts updates here."}</div>
-        </div>
-      ) : (
-        items.map((a, i) => {
-          const accent = a.pinned ? "#F59E0B" : "#06D6F0";
-          return (
-            <div key={a.id} className="dash-card" style={{ padding:dk?"20px 22px":"16px 18px", animation:`fadeUp 0.35s ease ${0.04*i}s both`, borderColor: a.pinned ? "rgba(245,158,11,0.22)" : undefined }}>
-              <div style={{ display:"flex", alignItems:"flex-start", gap:14 }}>
-                <div style={{ width:38, height:38, borderRadius:11, background: a.pinned ? "linear-gradient(135deg,#F59E0B,#B45309)" : "linear-gradient(135deg,#06D6F0,#0891B2)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, boxShadow: a.pinned ? "0 4px 14px rgba(245,158,11,0.35)" : "0 4px 14px rgba(6,214,240,0.3)" }}>
-                  {a.pinned ? (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#15171E" stroke="#15171E" strokeWidth="0.5" strokeLinecap="round" strokeLinejoin="round"><path d="M16 4l4 4-7 7-1 4-4-4 4-1 7-7-3-3z"/></svg>
-                  ) : (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15171E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
-                  )}
-                </div>
-                <div style={{ flex:1, minWidth:0 }}>
-                  <div style={{ display:"flex", alignItems:"center", gap:8, flexWrap:"wrap", marginBottom:a.title?6:4 }}>
-                    {a.pinned && <span style={{ fontSize:8.5, fontWeight:800, color:"#F59E0B", background:"rgba(245,158,11,0.12)", border:"1px solid rgba(245,158,11,0.25)", padding:"3px 8px", borderRadius:5, letterSpacing:1.5, textTransform:"uppercase" }}>Pinned</span>}
-                    <span style={{ fontSize:10.5, fontWeight:700, color:"#D6DAE2" }}>{authors[a.posted_by] || "Admin"}</span>
-                    <span style={{ fontSize:10, color:"#5E6376" }}>· {fmtWhen(a.created_at)}</span>
-                  </div>
-                  {a.title && <div style={{ fontSize:dk?17:15, fontWeight:800, color:"#F2F4F8", letterSpacing:"-0.01em", lineHeight:1.3, marginBottom:6 }}>{a.title}</div>}
-                  <div style={{ fontSize:dk?13.5:12.5, color:"#C4C8D4", lineHeight:1.6, fontWeight:500, whiteSpace:"pre-wrap" }}>{a.body}</div>
-                </div>
-                {isAdmin && (
-                  <div style={{ display:"flex", flexDirection:"column", gap:6, flexShrink:0 }}>
-                    <button onClick={() => togglePin(a.id, a.pinned)} title={a.pinned ? "Unpin" : "Pin"}
-                      style={{ width:30, height:30, borderRadius:8, background:"rgba(255,255,255,0.04)", border:`1px solid ${a.pinned ? "rgba(245,158,11,0.3)" : "rgba(255,255,255,0.08)"}`, color: a.pinned ? "#F59E0B" : "#666C7E", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", padding:0, transition:"all 0.18s" }}>
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill={a.pinned ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg>
-                    </button>
-                    <button onClick={() => remove(a.id)} title="Delete"
-                      style={{ width:30, height:30, borderRadius:8, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", color:"#666C7E", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", padding:0, transition:"all 0.18s" }}
-                      onMouseEnter={e => { e.currentTarget.style.color="#DC2626"; e.currentTarget.style.borderColor="rgba(220,38,38,0.3)"; }}
-                      onMouseLeave={e => { e.currentTarget.style.color="#666C7E"; e.currentTarget.style.borderColor="rgba(255,255,255,0.08)"; }}>
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          );
-        })
-      )}
-    </div>
-  );
-}
-
 function Leads({ session, profile, w }) {
   const [leads, setLeads] = useState([]);
   const [reps, setReps] = useState([]);
@@ -2897,380 +2709,6 @@ function Leads({ session, profile, w }) {
         </div>
       )}
     </div>
-  );
-}
-
-function Chat({ session, profile, w, width, minW = 220, maxW = 520, onResize }) {
-  const [msgs, setMsgs] = useState([]);
-  const [reps, setReps] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [body, setBody] = useState("");
-  const [sending, setSending] = useState(false);
-  const [typing, setTyping] = useState({}); // { uid: { name, t: epoch } }
-  const scrollRef = useRef(null);
-  const stickyRef = useRef(true);
-  const channelRef = useRef(null);
-  const lastTypingSentRef = useRef(0);
-  const dragRef = useRef({ active: false });
-  const dk = w >= 768;
-  const isAdmin = profile?.role === "admin";
-  const myName = profile?.name || "Rep";
-
-  const load = async () => {
-    const [mRes, pRes] = await Promise.all([
-      supabase.from("messages").select("id, user_id, body, created_at").order("created_at", { ascending: true }).limit(200),
-      supabase.from("profiles").select("id, name, role"),
-    ]);
-    setMsgs(mRes.data ?? []);
-    const pm = {};
-    for (const p of pRes.data ?? []) pm[p.id] = { name: p.name || "Rep", role: p.role };
-    setReps(pm);
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    load();
-    const ch = supabase.channel("messages-rt", { config: { broadcast: { self: false } } });
-    ch.on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, (payload) => {
-        setMsgs(prev => prev.some(m => m.id === payload.new.id) ? prev : [...prev, payload.new]);
-        // Hide typing indicator for the sender as soon as their message arrives
-        setTyping(prev => {
-          if (!prev[payload.new.user_id]) return prev;
-          const next = { ...prev }; delete next[payload.new.user_id]; return next;
-        });
-      })
-      .on("postgres_changes", { event: "DELETE", schema: "public", table: "messages" }, (payload) => {
-        setMsgs(prev => prev.filter(m => m.id !== payload.old.id));
-      })
-      .on("broadcast", { event: "typing" }, ({ payload }) => {
-        if (!payload?.uid || payload.uid === session.user.id) return;
-        setTyping(prev => ({ ...prev, [payload.uid]: { name: payload.name || "Rep", t: Date.now() } }));
-      })
-      .on("broadcast", { event: "stop_typing" }, ({ payload }) => {
-        if (!payload?.uid) return;
-        setTyping(prev => {
-          if (!prev[payload.uid]) return prev;
-          const next = { ...prev }; delete next[payload.uid]; return next;
-        });
-      })
-      .subscribe();
-    channelRef.current = ch;
-
-    // Tick to expire stale typing entries after 4s of silence
-    const tick = setInterval(() => {
-      const now = Date.now();
-      setTyping(prev => {
-        let changed = false;
-        const next = {};
-        for (const [uid, info] of Object.entries(prev)) {
-          if (now - info.t < 4000) next[uid] = info; else changed = true;
-        }
-        return changed ? next : prev;
-      });
-    }, 1000);
-
-    return () => { clearInterval(tick); supabase.removeChannel(ch); channelRef.current = null; };
-  }, []);
-
-  const broadcastTyping = () => {
-    if (!channelRef.current) return;
-    const now = Date.now();
-    if (now - lastTypingSentRef.current < 1500) return;
-    lastTypingSentRef.current = now;
-    channelRef.current.send({ type:"broadcast", event:"typing", payload: { uid: session.user.id, name: myName } });
-  };
-
-  const broadcastStopTyping = () => {
-    if (!channelRef.current) return;
-    lastTypingSentRef.current = 0;
-    channelRef.current.send({ type:"broadcast", event:"stop_typing", payload: { uid: session.user.id } });
-  };
-
-  const onScroll = () => {
-    const el = scrollRef.current; if (!el) return;
-    stickyRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
-  };
-
-  useEffect(() => {
-    if (loading) return;
-    const el = scrollRef.current; if (!el) return;
-    if (stickyRef.current) el.scrollTop = el.scrollHeight;
-  }, [msgs, loading]);
-
-  const send = async () => {
-    const trimmed = body.trim();
-    if (!trimmed || sending) return;
-    setSending(true);
-    const { data, error } = await supabase
-      .from("messages")
-      .insert({ user_id: session.user.id, body: trimmed })
-      .select()
-      .single();
-    setSending(false);
-    if (error || !data) {
-      alert(`Couldn't send: ${error?.message ?? "no row returned (likely RLS or missing 'messages' table)"}`);
-      return;
-    }
-    setBody("");
-    broadcastStopTyping();
-    stickyRef.current = true;
-    setMsgs(prev => prev.some(m => m.id === data.id) ? prev : [...prev, data]);
-  };
-
-  const onBodyChange = (val) => {
-    setBody(val);
-    if (val.trim()) broadcastTyping();
-    else broadcastStopTyping();
-  };
-
-  const remove = async (id) => {
-    if (!confirm("Delete this message?")) return;
-    const { error } = await supabase.from("messages").delete().eq("id", id);
-    if (error) { alert(`Couldn't delete: ${error.message}`); return; }
-    setMsgs(prev => prev.filter(m => m.id !== id));
-  };
-
-  const fmtTime = (iso) => new Date(iso).toLocaleTimeString("en-US",{ hour:"numeric", minute:"2-digit" });
-  const fmtDay = (iso) => {
-    const d = new Date(iso);
-    const today = new Date(); today.setHours(0,0,0,0);
-    const ds = new Date(d); ds.setHours(0,0,0,0);
-    const diff = Math.round((today - ds) / 86400000);
-    if (diff === 0) return "Today";
-    if (diff === 1) return "Yesterday";
-    if (diff < 7) return d.toLocaleDateString("en-US",{ weekday:"long" });
-    return d.toLocaleDateString("en-US",{ month:"short", day:"numeric", year: d.getFullYear() === today.getFullYear() ? undefined : "numeric" });
-  };
-
-  // Group messages by day, then collapse runs by same author within 3 minutes
-  const grouped = [];
-  let lastDay = null, lastUid = null, lastTs = 0;
-  for (const m of msgs) {
-    const day = fmtDay(m.created_at);
-    if (day !== lastDay) {
-      grouped.push({ kind: "day", id: `d-${day}-${m.id}`, label: day });
-      lastDay = day; lastUid = null;
-    }
-    const ts = new Date(m.created_at).getTime();
-    const continued = m.user_id === lastUid && (ts - lastTs) < 3 * 60 * 1000;
-    grouped.push({ kind: "msg", continued, ...m });
-    lastUid = m.user_id; lastTs = ts;
-  }
-
-  const onKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
-  };
-
-  const palette = ["#CCFF00","#06D6F0","#F59E0B","#FFD700","#A78BFA","#22C55E","#FF7AB6","#FB7185"];
-  const colorFor = (uid) => {
-    let h = 0; for (let i = 0; i < uid.length; i++) h = (h * 31 + uid.charCodeAt(i)) >>> 0;
-    return palette[h % palette.length];
-  };
-
-  // Hide on small mobile screens (no room for a permanent sidebar).
-  if (w < 768) return null;
-  const sidebarW = typeof width === "number" ? width : (w >= 1280 ? 320 : 280);
-
-  // Drag-to-resize the sidebar
-  const startDrag = (e) => {
-    e.preventDefault();
-    dragRef.current.active = true;
-    document.body.style.cursor = "ew-resize";
-    document.body.style.userSelect = "none";
-    const move = (ev) => {
-      if (!dragRef.current.active) return;
-      const x = ev.clientX ?? (ev.touches && ev.touches[0]?.clientX) ?? 0;
-      const next = Math.max(minW, Math.min(maxW, x));
-      onResize?.(next);
-    };
-    const up = () => {
-      dragRef.current.active = false;
-      document.body.style.cursor = "";
-      document.body.style.userSelect = "";
-      window.removeEventListener("mousemove", move);
-      window.removeEventListener("mouseup", up);
-      window.removeEventListener("touchmove", move);
-      window.removeEventListener("touchend", up);
-    };
-    window.addEventListener("mousemove", move);
-    window.addEventListener("mouseup", up);
-    window.addEventListener("touchmove", move);
-    window.addEventListener("touchend", up);
-  };
-
-  return (
-    <>
-      {/* Permanent left sidebar */}
-      <aside
-        style={{
-          position:"fixed", left:0, top:0, bottom:0, zIndex:40,
-          width:sidebarW,
-          display:"flex", flexDirection:"column",
-          background:"linear-gradient(180deg, rgba(18,20,26,0.97), rgba(11,12,16,0.97))",
-          backdropFilter:"blur(24px) saturate(140%)",
-          WebkitBackdropFilter:"blur(24px) saturate(140%)",
-          borderRight:"1px solid rgba(255,255,255,0.06)",
-          boxShadow:"8px 0 40px rgba(0,0,0,0.45)",
-          overflow:"hidden",
-        }}>
-        {/* Resize handle */}
-        <div
-          onMouseDown={startDrag}
-          onTouchStart={startDrag}
-          title="Drag to resize"
-          className="chat-resize-handle"
-          style={{
-            position:"absolute", top:0, bottom:0, right:-4, width:10,
-            cursor:"ew-resize", zIndex:41, touchAction:"none",
-          }}>
-          <div className="chat-resize-grip" style={{
-            position:"absolute", top:"50%", right:1, transform:"translateY(-50%)",
-            width:3, height:46, borderRadius:2,
-            background:"rgba(255,255,255,0.07)",
-            transition:"background 0.15s ease, height 0.15s ease",
-          }} />
-        </div>
-
-        {/* Header */}
-        <div style={{ display:"flex", alignItems:"center", gap:10, padding:"18px 20px", borderBottom:"1px solid rgba(255,255,255,0.05)", flexShrink:0, position:"relative" }}>
-          <div className="display" style={{ fontSize:18, color:"#F2F4F8", letterSpacing:"0.08em" }}>TEAM CHAT</div>
-        </div>
-
-        {/* Messages */}
-        <div style={{ flex:1, position:"relative", minHeight:0 }}>
-          {/* Top fade — softens the line where messages disappear under the header */}
-          <div aria-hidden="true" style={{ position:"absolute", top:0, left:0, right:0, height:24, background:"linear-gradient(180deg, rgba(11,12,16,0.85), transparent)", pointerEvents:"none", zIndex:1 }} />
-          <div ref={scrollRef} onScroll={onScroll} className="chat-scroll" style={{ position:"absolute", inset:0, overflowY:"auto", padding:dk?"16px 22px":"14px 16px" }}>
-          {loading ? (
-            <div style={{ textAlign:"center", padding:60, color:"#666C7E", fontSize:13 }}>Loading…</div>
-          ) : msgs.length === 0 ? (
-            <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", height:"100%", textAlign:"center", color:"#666C7E", padding:"40px 20px" }}>
-              <div style={{ width:54, height:54, borderRadius:16, background:"rgba(204,255,0,0.08)", border:"1px solid rgba(204,255,0,0.2)", display:"flex", alignItems:"center", justifyContent:"center", marginBottom:14 }}>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#CCFF00" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-              </div>
-              <div style={{ fontSize:14, fontWeight:700, color:"#D6DAE2", marginBottom:6 }}>No messages yet</div>
-              <div style={{ fontSize:12 }}>Send the first one.</div>
-            </div>
-          ) : (
-            <div style={{ display:"flex", flexDirection:"column", gap:2 }}>
-              {grouped.map(g => {
-                if (g.kind === "day") return (
-                  <div key={g.id} style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:12, margin:"22px 0 12px" }}>
-                    <div style={{ flex:1, height:1, background:"linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent)" }} />
-                    <div style={{ fontSize:9, fontWeight:800, color:"#7E8595", letterSpacing:2, textTransform:"uppercase", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.06)", padding:"4px 10px", borderRadius:999, whiteSpace:"nowrap" }}>{g.label}</div>
-                    <div style={{ flex:1, height:1, background:"linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent)" }} />
-                  </div>
-                );
-                const isMe = g.user_id === session.user.id;
-                const r = reps[g.user_id];
-                const name = r?.name || "Rep";
-                const isAdminMsg = r?.role === "admin";
-                const c = colorFor(g.user_id);
-                return (
-                  <div key={g.id} style={{ display:"flex", flexDirection: isMe ? "row-reverse" : "row", gap:10, marginTop:g.continued?2:10, alignItems:"flex-end" }}>
-                    <div style={{ width:32, height:32, flexShrink:0, visibility: g.continued ? "hidden" : "visible" }}>
-                      <div style={{ width:32, height:32, borderRadius:10, background: isMe ? "linear-gradient(135deg,#CCFF00,#88AB00)" : `linear-gradient(135deg,${c},${c}88)`, display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Plus Jakarta Sans',sans-serif", fontSize:12.5, fontWeight:900, color:"#15171E", boxShadow: isMe ? "0 4px 14px rgba(204,255,0,0.32), inset 0 1px 0 rgba(255,255,255,0.4)" : `0 3px 10px ${c}40, inset 0 1px 0 rgba(255,255,255,0.3)` }}>
-                        {name[0]?.toUpperCase()}
-                      </div>
-                    </div>
-                    <div style={{ maxWidth:"min(74%, 560px)", display:"flex", flexDirection:"column", alignItems: isMe ? "flex-end" : "flex-start" }}>
-                      {!g.continued && (
-                        <div style={{ display:"flex", gap:8, alignItems:"baseline", padding: isMe ? "0 4px 5px 0" : "0 0 5px 4px", flexDirection: isMe ? "row-reverse" : "row" }}>
-                          <span style={{ fontSize:11, fontWeight:700, color: isMe ? "#CCFF00" : "#D6DAE2", letterSpacing:"-0.005em" }}>{isMe ? "You" : name}</span>
-                          {isAdminMsg && !isMe && <span style={{ fontSize:8, fontWeight:800, color:"#F59E0B", background:"rgba(245,158,11,0.12)", border:"1px solid rgba(245,158,11,0.25)", padding:"1.5px 6px", borderRadius:4, letterSpacing:1.5, textTransform:"uppercase" }}>Admin</span>}
-                          <span style={{ fontSize:9.5, color:"#5E6376" }}>{fmtTime(g.created_at)}</span>
-                        </div>
-                      )}
-                      <div className="chat-bubble" style={{ position:"relative", padding:"10px 14px", background: isMe ? "linear-gradient(135deg,rgba(204,255,0,0.18),rgba(204,255,0,0.07))" : "linear-gradient(180deg,rgba(255,255,255,0.055),rgba(255,255,255,0.035))", border:`1px solid ${isMe ? "rgba(204,255,0,0.3)" : "rgba(255,255,255,0.08)"}`, borderRadius: g.continued
-                        ? (isMe ? "18px 6px 18px 18px" : "6px 18px 18px 18px")
-                        : (isMe ? "18px 4px 18px 18px" : "4px 18px 18px 18px"),
-                        color:"#EEF2F8", fontSize:13.5, lineHeight:1.5, fontWeight:500, whiteSpace:"pre-wrap", wordBreak:"break-word", boxShadow: isMe ? "0 2px 12px rgba(204,255,0,0.08)" : "0 2px 10px rgba(0,0,0,0.25)", transition:"border-color 0.18s ease, background 0.18s ease" }}>
-                        {g.body}
-                        {(isMe || isAdmin) && (
-                          <button onClick={() => remove(g.id)} title="Delete message" className="msg-del"
-                            style={{ position:"absolute", top:-8, right: isMe ? -8 : "auto", left: isMe ? "auto" : -8, width:22, height:22, borderRadius:6, background:"rgba(20,22,28,0.95)", border:"1px solid rgba(255,255,255,0.1)", color:"#666C7E", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", padding:0, transition:"all 0.15s", opacity:0, pointerEvents:"none" }}>
-                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-          </div>
-        </div>
-
-        {/* Typing indicator */}
-        {(() => {
-          const others = Object.entries(typing).filter(([uid]) => uid !== session.user.id).map(([, v]) => v.name);
-          if (others.length === 0) return null;
-          const label = others.length === 1
-            ? `${others[0]} is typing`
-            : others.length === 2
-              ? `${others[0]} and ${others[1]} are typing`
-              : `${others.length} people are typing`;
-          return (
-            <div style={{ display:"flex", alignItems:"center", gap:10, padding:dk?"8px 22px 0":"6px 16px 0", flexShrink:0, color:"#A0A4B0", fontSize:11.5, fontWeight:600, height:22, animation:"fadeIn 0.2s ease" }}>
-              <span className="typing-dots" aria-hidden="true">
-                <span /><span /><span />
-              </span>
-              <span>{label}</span>
-            </div>
-          );
-        })()}
-
-        {/* Composer */}
-        <div style={{ display:"flex", gap:10, padding:dk?"12px 18px 16px":"10px 14px 14px", borderTop:"1px solid rgba(255,255,255,0.05)", background:"linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.025))", flexShrink:0, alignItems:"flex-end" }}>
-          <div className="chat-input-wrap" style={{ flex:1, position:"relative" }}>
-            <textarea
-              value={body}
-              onChange={e => onBodyChange(e.target.value)}
-              onBlur={() => { if (!body.trim()) broadcastStopTyping(); }}
-              onKeyDown={onKeyDown}
-              placeholder="Chat"
-              rows={1}
-              className="chat-input"
-              style={{ width:"100%", background:"rgba(255,255,255,0.045)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:14, color:"#F2F4F8", fontSize:13.5, fontWeight:500, padding:"12px 15px", fontFamily:"inherit", outline:"none", boxSizing:"border-box", resize:"none", lineHeight:1.5, maxHeight:140, transition:"border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease" }}
-            />
-          </div>
-          <button onClick={send} disabled={sending || !body.trim()} className="btn-primary chat-send"
-            aria-label="Send message"
-            style={{ width:42, height:42, padding:0, borderRadius:14, opacity: sending || !body.trim() ? 0.45 : 1, cursor: sending || !body.trim() ? "default" : "pointer", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-          </button>
-        </div>
-      </aside>
-
-      <style>{`
-        .chat-bubble:hover { border-color: rgba(255,255,255,0.14) !important; }
-        .chat-bubble:hover .msg-del { opacity: 1 !important; pointer-events: auto !important; }
-        .msg-del:hover { color: #DC2626 !important; border-color: rgba(220,38,38,0.4) !important; }
-
-        @keyframes typingBounce { 0%,80%,100% { transform: translateY(0); opacity: 0.4 } 40% { transform: translateY(-3px); opacity: 1 } }
-        .typing-dots { display:inline-flex; gap:3px; align-items:center }
-        .typing-dots span { width:4px; height:4px; border-radius:50%; background:#9098A8; display:inline-block; animation: typingBounce 1.2s ease-in-out infinite }
-        .typing-dots span:nth-child(2) { animation-delay: 0.15s }
-        .typing-dots span:nth-child(3) { animation-delay: 0.3s }
-
-        .chat-resize-handle:hover .chat-resize-grip,
-        .chat-resize-handle:active .chat-resize-grip { background: rgba(255,255,255,0.18) !important; height: 56px !important; }
-
-        .chat-input:focus {
-          border-color: rgba(255,255,255,0.18) !important;
-          background: rgba(255,255,255,0.055) !important;
-        }
-        .chat-input::placeholder { color: rgba(255,255,255,0.25); }
-
-        .chat-send:not(:disabled):hover { filter: brightness(1.05); }
-        .chat-send:not(:disabled):active { filter: brightness(0.95); }
-
-        .chat-scroll::-webkit-scrollbar { width: 5px; }
-        .chat-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.07); border-radius: 6px; }
-        .chat-scroll::-webkit-scrollbar-thumb:hover { background: rgba(204,255,0,0.35); }
-      `}</style>
-    </>
   );
 }
 
@@ -4078,8 +3516,6 @@ const TIER_BY_VALUE = Object.fromEntries(TIERS.map(t => [t.v, t]));
 
 const ROLEABLE_TABS = [
   { key:"dashboard",     label:"Dashboard",     color:"#22C55E" },
-  { key:"announcements", label:"Announcements", color:"#F59E0B" },
-  { key:"chat",          label:"Chat",          color:"#CCFF00" },
   { key:"leads",         label:"Leads",         color:"#06D6F0" },
   { key:"leaderboard",   label:"Leaderboard",   color:"#FFD700" },
   { key:"scheduling",    label:"Scheduling",    color:"#F59E0B" },
@@ -5253,22 +4689,6 @@ function AppInner() {
     return () => document.removeEventListener("mousedown", close);
   }, [showMailbox]);
 
-  const CHAT_MIN = 220, CHAT_MAX = 520;
-  const chatDefault = w >= 1280 ? 320 : 280;
-  const [chatW, setChatW] = useState(() => {
-    try {
-      const saved = parseInt(localStorage.getItem("chatSidebarW") || "", 10);
-      if (!isNaN(saved) && saved >= CHAT_MIN && saved <= CHAT_MAX) return saved;
-    } catch { /* ignore */ }
-    return chatDefault;
-  });
-  const persistChatW = (px) => {
-    const clamped = Math.max(CHAT_MIN, Math.min(CHAT_MAX, Math.round(px)));
-    setChatW(clamped);
-    try { localStorage.setItem("chatSidebarW", String(clamped)); } catch { /* ignore */ }
-  };
-  const rawChatSidebarW = w >= 768 ? chatW : 0;
-
   const saveName = async () => {
     const trimmed = nameEdit.trim();
     if (!trimmed) return;
@@ -5311,7 +4731,6 @@ function AppInner() {
   const finalAttempted = !!quizScores["q-final"];
   const ALL_TABS = [
     { key:"dashboard",     label:"Dashboard",     short:"Home",     color:"#22C55E" },
-    { key:"announcements", label:"Announcements", short:"News",     color:"#F59E0B" },
     { key:"leads",         label:"Leads",         short:"Leads",    color:"#06D6F0" },
     { key:"leaderboard",   label:"Leaderboard",   short:"Board",    color:"#FFD700" },
     { key:"scheduling",    label:"Scheduling",    short:"Schedule", color:"#F59E0B" },
@@ -5320,16 +4739,11 @@ function AppInner() {
     { key:"redline-ai",    label:"Redline AI",    short:"AI",       color:"#F59E0B" },
     { key:"people",        label:"People",        short:"Team",     color:"#A78BFA" },
   ];
-  // Tabs the current user can see. Admin always sees everything. If no
-  // role record exists yet (e.g. before the migration runs), default to
-  // showing all tabs so the portal stays accessible.
   const currentRole = roles.find(r => r.name === profile?.role);
   const allowedKeys = profile?.role === "admin"
-    ? ALL_TABS.map(t => t.key).concat("chat")
-    : (currentRole?.allowed_tabs ?? ALL_TABS.map(t => t.key).concat("chat"));
+    ? ALL_TABS.map(t => t.key)
+    : (currentRole?.allowed_tabs ?? ALL_TABS.map(t => t.key));
   const TABS = ALL_TABS.filter(t => allowedKeys.includes(t.key));
-  const showChat = allowedKeys.includes("chat");
-  const chatSidebarW = showChat ? rawChatSidebarW : 0;
 
   // Live header stats — small batched fetch on session ready, refreshed on realtime events.
   const [hdrStats, setHdrStats] = useState({ active: 0, today: 0, pipe: 0 });
@@ -5392,11 +4806,10 @@ function AppInner() {
   );
 
   if (view === "__admin" && profile?.role === "admin") return (
-    <div ref={ref} style={{ ...baseStyle, paddingLeft: chatSidebarW }}>
+    <div ref={ref} style={{ ...baseStyle }}>
       <style>{GLOBAL_CSS}</style>
       <link href={FONT_LINK} rel="stylesheet" />
       <AdminPanel profile={profile} roles={roles} setRoles={setRoles} onBack={() => setView(null)} w={w} onSignOut={signOut} />
-      {showChat && <Chat session={session} profile={profile} w={w} width={chatSidebarW} onResize={persistChatW} minW={CHAT_MIN} maxW={CHAT_MAX} />}
     </div>
   );
 
@@ -5407,26 +4820,24 @@ function AppInner() {
       return null;
     }
     return (
-    <div ref={ref} style={{ ...baseStyle, paddingLeft: chatSidebarW }}>
+    <div ref={ref} style={{ ...baseStyle }}>
       <style>{GLOBAL_CSS}</style>
       <link href={FONT_LINK} rel="stylesheet" />
       <Quiz quizKey={view} onBack={() => { setView(null); setTimeout(top, 50); }} w={w} onComplete={(sc, tot) => saveScore(view, sc, tot)} />
-      {showChat && <Chat session={session} profile={profile} w={w} width={chatSidebarW} onResize={persistChatW} minW={CHAT_MIN} maxW={CHAT_MAX} />}
     </div>
     );
   }
 
   if (view) return (
-    <div ref={ref} style={{ ...baseStyle, paddingLeft: chatSidebarW }}>
+    <div ref={ref} style={{ ...baseStyle }}>
       <style>{GLOBAL_CSS}</style>
       <link href={FONT_LINK} rel="stylesheet" />
       <Viewer ck={view} onBack={() => { setView(null); setTimeout(top, 50); }} w={w} onComplete={markComplete} />
-      {showChat && <Chat session={session} profile={profile} w={w} width={chatSidebarW} onResize={persistChatW} minW={CHAT_MIN} maxW={CHAT_MAX} />}
     </div>
   );
 
   return (
-    <div ref={ref} className="dotgrid" style={{ ...baseStyle, position:"relative", paddingLeft: chatSidebarW }}>
+    <div ref={ref} className="dotgrid" style={{ ...baseStyle, position:"relative" }}>
       <style>{GLOBAL_CSS}</style>
       <link href={FONT_LINK} rel="stylesheet" />
 
@@ -5610,11 +5021,6 @@ function AppInner() {
             onGoTab={setTab}
             onOpenModule={(k) => { setView(k); setTimeout(top, 50); }}
           />
-        )}
-
-        {/* ANNOUNCEMENTS TAB */}
-        {tab === "announcements" && (
-          <Announcements session={session} profile={profile} w={w} />
         )}
 
         {/* LEADS TAB */}
@@ -6031,7 +5437,6 @@ function AppInner() {
           })}
         </nav>
       )}
-      {showChat && <Chat session={session} profile={profile} w={w} width={chatSidebarW} onResize={persistChatW} minW={CHAT_MIN} maxW={CHAT_MAX} />}
     </div>
   );
 }
