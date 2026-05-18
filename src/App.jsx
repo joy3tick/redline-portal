@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, Component } from "react";
-import { supabase } from "./lib/supabase";
+import { supabase, supabaseAdmin } from "./lib/supabase";
 
 class ErrorBoundary extends Component {
   constructor(props) { super(props); this.state = { err: null }; }
@@ -684,7 +684,21 @@ button{font-family:inherit}
 .profile-pill:hover { border-color:rgba(204,255,0,0.25); background:linear-gradient(180deg, rgba(204,255,0,0.05), rgba(204,255,0,0.01)) }
 
 /* Schedule day cards */
-.sched-day:hover { transform:translateY(-2px); border-color:rgba(204,255,0,0.3) !important; box-shadow:0 14px 36px rgba(0,0,0,0.45), 0 0 0 1px rgba(204,255,0,0.10) !important }
+.sched-day {
+  cursor:pointer;
+  transition:transform 0.22s cubic-bezier(0.34,1.56,0.64,1), border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.sched-day:hover {
+  transform:translateY(-3px) scale(1.012);
+  border-color:rgba(204,255,0,0.42) !important;
+  box-shadow:0 18px 44px rgba(0,0,0,0.55), 0 0 0 1px rgba(204,255,0,0.14) !important;
+}
+.sched-day:active { transform:translateY(-1px) scale(1.005) }
+/* Week tab buttons */
+.sched-week-btn {
+  transition:background 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s;
+}
+.sched-week-btn:hover { box-shadow:0 2px 12px rgba(204,255,0,0.08) }
 
 /* Bottom nav (mobile) */
 .bnav {
@@ -698,19 +712,39 @@ button{font-family:inherit}
 }
 .bnav-btn {
   flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
-  gap:4px; padding:2px 0; min-width:0;
+  gap:3px; padding:2px 0; min-width:0;
   background:none; border:none; cursor:pointer;
-  font-family:inherit; font-size:10px; font-weight:500; letter-spacing:0px;
+  font-family:inherit; font-size:9px; font-weight:500; letter-spacing:0px;
   color:#6E7483; transition:color 0.18s ease;
 }
 .bnav-btn.active { font-weight:700 }
 .bnav-icon {
   display:flex; align-items:center; justify-content:center;
-  width:52px; height:34px; border-radius:17px;
+  width:40px; height:28px; border-radius:14px;
   transition:background 0.22s ease, box-shadow 0.22s ease, transform 0.22s cubic-bezier(0.34,1.56,0.64,1);
 }
 .bnav-btn.active .bnav-icon { transform:translateY(-2px) }
+
+/* DM bubbles */
+.dm-bubble-me {
+  background: linear-gradient(135deg, rgba(204,255,0,0.18), rgba(204,255,0,0.08));
+  border: 1px solid rgba(204,255,0,0.28);
+  color: #E8F4D4; align-self:flex-end; border-bottom-right-radius:4px;
+}
+.dm-bubble-them {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  color: #C4C9D4; align-self:flex-start; border-bottom-left-radius:4px;
+}
+.dm-bubble-me, .dm-bubble-them {
+  max-width:80%; padding:9px 13px; border-radius:16px;
+  font-size:13px; font-weight:500; line-height:1.5; word-break:break-word;
+  animation: fadeUp 0.18s ease;
+}
+.people-card { transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease; }
+.people-card:hover { border-color: rgba(167,139,250,0.35) !important; transform: translateY(-1px); }
 `;
+
 
 /* ═══════════════════════════════════════════
    RICH TEXT RENDERER
@@ -728,6 +762,7 @@ function TabIcon({ tabKey, active, size = 16, color }) {
     case "training":      return <svg {...p}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>;
     case "reference":     return <svg {...p}><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>;
     case "quizzes":       return <svg {...p}><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>;
+    case "people":        return <svg {...p}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
     default: return null;
   }
 }
@@ -840,7 +875,86 @@ function useW() {
 /* ═══════════════════════════════════════════
    LOGIN
    ═══════════════════════════════════════════ */
-function Login() {
+/* ═══════════════════════════════════════════
+   AUTH — LANDING / EMPLOYEE LOGIN / CLIENT LOGIN
+   ═══════════════════════════════════════════ */
+function LandingPage() {
+  const [mode, setMode] = useState(null); // null | 'employee' | 'client'
+  if (mode === 'employee') return <EmployeeLogin onBack={() => setMode(null)} />;
+  if (mode === 'client')   return <ClientLogin   onBack={() => setMode(null)} />;
+
+  return (
+    <div className="dotgrid" style={{ minHeight:"100dvh", background:"#0C0D12", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"32px 20px", position:"relative", overflow:"hidden" }}>
+      {/* Background blobs */}
+      <div style={{ position:"absolute", top:"15%", left:"30%", width:600, height:600, background:"radial-gradient(circle, rgba(204,255,0,0.06) 0%, transparent 65%)", pointerEvents:"none" }} />
+      <div style={{ position:"absolute", bottom:"10%", right:"20%", width:500, height:400, background:"radial-gradient(circle, rgba(6,214,240,0.05) 0%, transparent 65%)", pointerEvents:"none" }} />
+
+      {/* Logo */}
+      <div style={{ textAlign:"center", marginBottom:52, animation:"fadeUp 0.6s ease", position:"relative", zIndex:1 }}>
+        <div style={{ display:"flex", justifyContent:"center", marginBottom:18, filter:"drop-shadow(0 8px 40px rgba(204,255,0,0.5))" }}>
+          <RedlineLogo height={60} />
+        </div>
+        <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:48, letterSpacing:16, color:"#DC2626", lineHeight:1, textShadow:"0 0 60px rgba(220,38,38,0.25)" }}>REDLINE</div>
+        <div style={{ fontSize:10, fontWeight:700, color:"#3A3E4A", letterSpacing:6, textTransform:"uppercase", marginTop:8 }}>Web Services</div>
+        <div style={{ width:60, height:1.5, background:"linear-gradient(90deg,transparent,rgba(255,255,255,0.12),transparent)", margin:"18px auto 0" }} />
+        <div style={{ fontSize:13, fontWeight:500, color:"#5C6175", marginTop:16, letterSpacing:0.3 }}>Select your portal to continue</div>
+      </div>
+
+      {/* Portal cards */}
+      <div style={{ display:"flex", gap:16, width:"100%", maxWidth:720, animation:"fadeUp 0.7s ease 0.1s both", position:"relative", zIndex:1, flexWrap:"wrap" }}>
+        {/* Employee */}
+        <button onClick={() => setMode('employee')} style={{
+          flex:"1 1 280px", padding:"32px 28px", cursor:"pointer", textAlign:"left", fontFamily:"inherit",
+          background:"linear-gradient(160deg, rgba(204,255,0,0.07) 0%, rgba(14,15,20,0.97) 60%)",
+          border:"1.5px solid rgba(204,255,0,0.22)",
+          borderRadius:22,
+          boxShadow:"0 12px 48px rgba(0,0,0,0.5), inset 0 1px 0 rgba(204,255,0,0.08)",
+          transition:"transform 0.22s ease, border-color 0.2s, box-shadow 0.2s",
+        }}
+          onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.borderColor = "rgba(204,255,0,0.45)"; e.currentTarget.style.boxShadow = "0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(204,255,0,0.12), inset 0 1px 0 rgba(204,255,0,0.12)"; }}
+          onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.borderColor = "rgba(204,255,0,0.22)"; e.currentTarget.style.boxShadow = "0 12px 48px rgba(0,0,0,0.5), inset 0 1px 0 rgba(204,255,0,0.08)"; }}>
+          <div style={{ width:52, height:52, borderRadius:16, background:"rgba(204,255,0,0.12)", border:"1.5px solid rgba(204,255,0,0.28)", display:"flex", alignItems:"center", justifyContent:"center", marginBottom:20, boxShadow:"0 4px 18px rgba(204,255,0,0.18)" }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#CCFF00" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><path d="M15 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0-3-3.87"/></svg>
+          </div>
+          <div style={{ fontSize:9, fontWeight:800, color:"rgba(204,255,0,0.6)", letterSpacing:2.8, textTransform:"uppercase", marginBottom:8 }}>Team Access</div>
+          <div style={{ fontSize:22, fontWeight:800, color:"#F2F4F8", marginBottom:10, lineHeight:1.2 }}>Employee Portal</div>
+          <div style={{ fontSize:13, color:"#5C6175", fontWeight:500, lineHeight:1.6, marginBottom:22 }}>Rep dashboard, leads, leaderboard, scheduling, training, and team tools.</div>
+          <div style={{ display:"flex", alignItems:"center", gap:8, color:"#CCFF00", fontSize:12, fontWeight:700 }}>
+            Sign in as employee
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+        </button>
+
+        {/* Client */}
+        <button onClick={() => setMode('client')} style={{
+          flex:"1 1 280px", padding:"32px 28px", cursor:"pointer", textAlign:"left", fontFamily:"inherit",
+          background:"linear-gradient(160deg, rgba(6,214,240,0.07) 0%, rgba(14,15,20,0.97) 60%)",
+          border:"1.5px solid rgba(6,214,240,0.18)",
+          borderRadius:22,
+          boxShadow:"0 12px 48px rgba(0,0,0,0.5), inset 0 1px 0 rgba(6,214,240,0.06)",
+          transition:"transform 0.22s ease, border-color 0.2s, box-shadow 0.2s",
+        }}
+          onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.borderColor = "rgba(6,214,240,0.40)"; e.currentTarget.style.boxShadow = "0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(6,214,240,0.10), inset 0 1px 0 rgba(6,214,240,0.10)"; }}
+          onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.borderColor = "rgba(6,214,240,0.18)"; e.currentTarget.style.boxShadow = "0 12px 48px rgba(0,0,0,0.5), inset 0 1px 0 rgba(6,214,240,0.06)"; }}>
+          <div style={{ width:52, height:52, borderRadius:16, background:"rgba(6,214,240,0.10)", border:"1.5px solid rgba(6,214,240,0.25)", display:"flex", alignItems:"center", justifyContent:"center", marginBottom:20, boxShadow:"0 4px 18px rgba(6,214,240,0.15)" }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#06D6F0" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+          </div>
+          <div style={{ fontSize:9, fontWeight:800, color:"rgba(6,214,240,0.6)", letterSpacing:2.8, textTransform:"uppercase", marginBottom:8 }}>Client Access</div>
+          <div style={{ fontSize:22, fontWeight:800, color:"#F2F4F8", marginBottom:10, lineHeight:1.2 }}>Client Portal</div>
+          <div style={{ fontSize:13, color:"#5C6175", fontWeight:500, lineHeight:1.6, marginBottom:22 }}>Track your project, view deliverables, and stay in sync with your Redline team.</div>
+          <div style={{ display:"flex", alignItems:"center", gap:8, color:"#06D6F0", fontSize:12, fontWeight:700 }}>
+            Sign in as client
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+        </button>
+      </div>
+
+      <p style={{ color:"#252830", fontSize:9, marginTop:44, letterSpacing:2, textTransform:"uppercase", position:"relative", zIndex:1 }}>© 2026 Redline Web Services LLC</p>
+    </div>
+  );
+}
+
+function EmployeeLogin({ onBack }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [err, setErr] = useState(null);
@@ -850,8 +964,7 @@ function Login() {
     if (!email || !password) return;
     setLd(true); setErr(null);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) setErr("Invalid email or password.");
-    setLd(false);
+    if (error) { setErr("Invalid email or password."); setLd(false); }
   };
 
   const fieldStyle = (hasErr) => ({
@@ -861,22 +974,31 @@ function Login() {
     borderRadius:14, color:"#F2F4F8", fontSize:15, outline:"none",
     boxSizing:"border-box", fontFamily:"inherit", transition:"all 0.22s ease",
   });
-
   const onFocus = e => { e.target.style.borderColor = "rgba(204,255,0,0.6)"; e.target.style.boxShadow = "0 0 0 4px rgba(204,255,0,0.08)"; };
   const onBlur  = (e, hasErr) => { e.target.style.borderColor = hasErr ? "#DC2626" : "rgba(255,255,255,0.07)"; e.target.style.boxShadow = "none"; };
 
   return (
     <div className="dotgrid" style={{ minHeight:"100dvh", background:"#0E0F14", display:"flex", alignItems:"center", justifyContent:"center", padding:24, position:"relative", overflow:"hidden" }}>
+      <div style={{ position:"absolute", top:"20%", left:"50%", transform:"translate(-50%,-50%)", width:700, height:700, background:"radial-gradient(circle, rgba(204,255,0,0.08) 0%, transparent 65%)", pointerEvents:"none" }} />
+
       <div style={{ width:"100%", maxWidth:420, animation:"fadeUp 0.5s ease", position:"relative", zIndex:1 }}>
+        {/* Back */}
+        {onBack && (
+          <button onClick={onBack} style={{ display:"flex", alignItems:"center", gap:7, background:"none", border:"none", color:"#5C6175", cursor:"pointer", fontFamily:"inherit", fontSize:12, fontWeight:600, marginBottom:28, padding:0 }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+            Back
+          </button>
+        )}
         <div style={{ textAlign:"center", marginBottom:36 }}>
-          <div style={{ display:"flex", justifyContent:"center", margin:"0 auto 20px" }}>
+          <div style={{ display:"flex", justifyContent:"center", margin:"0 auto 20px", filter:"drop-shadow(0 8px 36px rgba(204,255,0,0.45))" }}>
             <RedlineLogo height={52} />
           </div>
           <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:38, letterSpacing:12, color:"#F2F4F8", lineHeight:1 }}>REDLINE</div>
-          <div style={{ fontSize:10.5, fontWeight:700, color:"#5E6376", letterSpacing:5, textTransform:"uppercase", marginTop:8 }}>Portal</div>
+          <div style={{ fontSize:10.5, fontWeight:700, color:"#5E6376", letterSpacing:5, textTransform:"uppercase", marginTop:8 }}>Employee Portal</div>
+          <div style={{ width:50, height:1.5, background:"linear-gradient(90deg,transparent,#CCFF00,transparent)", margin:"12px auto 0" }} />
         </div>
 
-        <div style={{ background:"linear-gradient(145deg,rgba(16,18,24,0.99),rgba(11,12,17,0.99))", border:"1px solid rgba(255,255,255,0.07)", borderRadius:24, padding:"36px 32px 32px", boxShadow:"0 24px 80px rgba(0,0,0,0.65), 0 0 0 1px rgba(204,255,0,0.06)" }}>
+        <div style={{ background:"linear-gradient(145deg,rgba(16,18,24,0.99),rgba(11,12,17,0.99))", border:"1px solid rgba(255,255,255,0.07)", borderRadius:24, padding:"32px 28px 28px", boxShadow:"0 24px 80px rgba(0,0,0,0.65), 0 0 0 1px rgba(204,255,0,0.06)" }}>
           <div style={{ marginBottom:16 }}>
             <label style={{ display:"block", fontSize:9.5, fontWeight:700, color:"#4D5260", letterSpacing:3, marginBottom:10, textTransform:"uppercase" }}>Email</label>
             <input type="email" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&go()} placeholder="you@redline.com" autoFocus style={fieldStyle(!!err)} onFocus={onFocus} onBlur={e=>onBlur(e,!!err)} />
@@ -895,7 +1017,73 @@ function Login() {
             {ld ? "Signing In…" : "Enter Portal"}
           </button>
         </div>
-        <p style={{ color:"#292C35", fontSize:9, marginTop:32, letterSpacing:2, textTransform:"uppercase", textAlign:"center" }}>© 2026 Redline Web Services LLC</p>
+      </div>
+    </div>
+  );
+}
+
+function ClientLogin({ onBack }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [err, setErr] = useState(null);
+  const [ld, setLd] = useState(false);
+
+  const go = async () => {
+    if (!email || !password) return;
+    setLd(true); setErr(null);
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) { setErr("Invalid email or password. Contact your Redline rep for access."); setLd(false); }
+  };
+
+  const fieldStyle = (hasErr) => ({
+    width:"100%", padding:"15px 20px",
+    background:"rgba(7,8,12,0.9)",
+    border:`1.5px solid ${hasErr ? "#FF3370" : "rgba(255,255,255,0.07)"}`,
+    borderRadius:14, color:"#F2F4F8", fontSize:15, outline:"none",
+    boxSizing:"border-box", fontFamily:"inherit", transition:"all 0.22s ease",
+  });
+  const CYAN = "#06D6F0";
+  const onFocus = e => { e.target.style.borderColor = `${CYAN}80`; e.target.style.boxShadow = `0 0 0 4px ${CYAN}12`; };
+  const onBlur  = (e, hasErr) => { e.target.style.borderColor = hasErr ? "#FF3370" : "rgba(255,255,255,0.07)"; e.target.style.boxShadow = "none"; };
+
+  return (
+    <div className="dotgrid" style={{ minHeight:"100dvh", background:"#0C0D12", display:"flex", alignItems:"center", justifyContent:"center", padding:24, position:"relative", overflow:"hidden" }}>
+      <div style={{ position:"absolute", top:"20%", left:"50%", transform:"translate(-50%,-50%)", width:700, height:700, background:`radial-gradient(circle, ${CYAN}0D 0%, transparent 65%)`, pointerEvents:"none" }} />
+
+      <div style={{ width:"100%", maxWidth:420, animation:"fadeUp 0.55s cubic-bezier(0.4,0,0.2,1)", position:"relative", zIndex:1 }}>
+        <button onClick={onBack} style={{ display:"flex", alignItems:"center", gap:7, background:"none", border:"none", color:"#5C6175", cursor:"pointer", fontFamily:"inherit", fontSize:12, fontWeight:600, marginBottom:28, padding:0 }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+          Back
+        </button>
+        <div style={{ textAlign:"center", marginBottom:32 }}>
+          <div style={{ display:"flex", justifyContent:"center", marginBottom:20, filter:`drop-shadow(0 8px 36px ${CYAN}60)` }}>
+            <RedlineLogo height={50} />
+          </div>
+          <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:36, letterSpacing:12, color:"#DC2626", lineHeight:1 }}>REDLINE</div>
+          <div style={{ fontSize:10, fontWeight:700, color:"#4D5260", letterSpacing:5, textTransform:"uppercase", marginTop:6 }}>Client Portal</div>
+          <div style={{ width:50, height:1.5, background:`linear-gradient(90deg,transparent,${CYAN},transparent)`, margin:"12px auto 0" }} />
+        </div>
+
+        <div style={{ background:"linear-gradient(145deg,rgba(16,18,24,0.99),rgba(11,12,17,0.99))", border:`1px solid ${CYAN}18`, borderRadius:24, padding:"32px 28px 28px", boxShadow:`0 24px 80px rgba(0,0,0,0.65), 0 0 0 1px ${CYAN}0A` }}>
+          <div style={{ marginBottom:16 }}>
+            <label style={{ display:"block", fontSize:9.5, fontWeight:700, color:"#4D5260", letterSpacing:3, marginBottom:10, textTransform:"uppercase" }}>Email</label>
+            <input type="email" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&go()} placeholder="your@email.com" autoFocus style={fieldStyle(!!err)} onFocus={onFocus} onBlur={e=>onBlur(e,!!err)} />
+          </div>
+          <div>
+            <label style={{ display:"block", fontSize:9.5, fontWeight:700, color:"#4D5260", letterSpacing:3, marginBottom:10, textTransform:"uppercase" }}>Password</label>
+            <input type="password" value={password} onChange={e=>setPassword(e.target.value)} onKeyDown={e=>e.key==="Enter"&&go()} placeholder="••••••••" style={fieldStyle(!!err)} onFocus={onFocus} onBlur={e=>onBlur(e,!!err)} />
+          </div>
+          {err && (
+            <div style={{ display:"flex", alignItems:"center", gap:7, marginTop:12 }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF3370" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <p style={{ color:"#FF3370", fontSize:12, fontWeight:600 }}>{err}</p>
+            </div>
+          )}
+          <button onClick={go} disabled={ld} style={{ width:"100%", padding:"16px", background: ld ? `${CYAN}33` : `linear-gradient(135deg,${CYAN},#0588A0)`, color: ld ? "#FFF" : "#0A1A1E", border:"none", borderRadius:14, fontSize:11, fontWeight:800, letterSpacing:4, cursor: ld ? "wait" : "pointer", marginTop:20, textTransform:"uppercase", boxShadow: ld ? "none" : `0 6px 28px ${CYAN}40`, transition:"all 0.25s ease", fontFamily:"inherit" }}>
+            {ld ? "Signing In…" : "Access My Project"}
+          </button>
+          <p style={{ fontSize:11, color:"#4A4E5C", textAlign:"center", marginTop:16, lineHeight:1.5 }}>Don't have access yet? Your Redline rep will set up your account.</p>
+        </div>
       </div>
     </div>
   );
@@ -1004,29 +1192,44 @@ function Scheduler({ session, profile, w }) {
     return c;
   };
 
-  if (loading) return <div style={{ textAlign:"center", padding:60, color:"#7E8290", fontSize:13 }}>Loading schedule…</div>;
+  // Hash a user_id to one of several rep accent colors for variety
+  const repColor = (uid) => {
+    const COLORS = ["#06D6F0","#F59E0B","#A78BFA","#34D399","#F472B6","#60A5FA","#FB923C"];
+    let h = 0; for (let i = 0; i < (uid||"").length; i++) h = (h * 31 + uid.charCodeAt(i)) & 0xFFFFFF;
+    return COLORS[h % COLORS.length];
+  };
+
+  if (loading) return (
+    <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:80, gap:14 }}>
+      <div style={{ width:40, height:40, borderRadius:"50%", border:"3px solid rgba(204,255,0,0.2)", borderTopColor:"#CCFF00", animation:"spin 0.8s linear infinite" }} />
+      <span style={{ color:"#5C6175", fontSize:12, fontWeight:600, letterSpacing:1.2, textTransform:"uppercase" }}>Loading schedule…</span>
+    </div>
+  );
 
   const stats = [
     {
-      label: "My Bookings",
-      value: `${myBookedInWeek}`,
-      sub: metMin ? "Above minimum ✓" : `Need ${MIN - myBookedInWeek} more`,
+      label: "My Days",
+      value: myBookedInWeek,
+      sub: metMin ? "Minimum met" : `${MIN - myBookedInWeek} more needed`,
+      ok: metMin,
       color: metMin ? "#22C55E" : "#F59E0B",
-      detail: `of ${MIN} required`,
+      icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
     },
     {
-      label: "Team Bookings",
+      label: "Team Slots",
       value: totalBookings,
-      sub: `${(totalBookings/5).toFixed(1)} avg per day`,
+      sub: `${(totalBookings/5).toFixed(1)} avg/day`,
+      ok: true,
       color: "#CCFF00",
-      detail: `across ${days.length} days`,
+      icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
     },
     {
       label: "Full Days",
       value: fullDays,
-      sub: fullDays > 0 ? "at capacity" : "all days open",
+      sub: fullDays > 0 ? "At capacity" : "All days open",
+      ok: fullDays === 0,
       color: fullDays > 0 ? "#F59E0B" : "#10B981",
-      detail: `of ${days.length} days`,
+      icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
     },
   ];
 
@@ -1034,33 +1237,53 @@ function Scheduler({ session, profile, w }) {
     <div style={{ animation:"fadeUp 0.35s ease" }}>
 
       {/* Week selector */}
-      <div style={{ display:"flex", gap:6, marginBottom:dk?16:12, background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:13, padding:5 }}>
+      <div style={{ display:"flex", gap:6, marginBottom:dk?18:13, background:"rgba(255,255,255,0.018)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:14, padding:5 }}>
         {[0,1].map(i => {
           const active = weekIdx === i;
           const mine = weekMyCount(i);
           const ok = mine >= MIN;
           return (
             <button key={i} onClick={() => setWeekIdx(i)}
+              className="sched-week-btn"
               style={{
-                flex:1, padding:dk?"10px 14px":"9px 10px",
-                background: active ? "linear-gradient(180deg, rgba(204,255,0,0.10), rgba(204,255,0,0.04))" : "transparent",
-                border: active ? "1px solid rgba(204,255,0,0.28)" : "1px solid transparent",
-                borderRadius:9, cursor:"pointer", fontFamily:"inherit",
-                color: active ? "#F2F4F8" : "#7E8290",
-                transition:"all 0.2s", textAlign:"left",
+                flex:1, padding:dk?"11px 16px":"10px 12px",
+                background: active
+                  ? "linear-gradient(160deg, rgba(204,255,0,0.11) 0%, rgba(204,255,0,0.04) 100%)"
+                  : "transparent",
+                border: `1px solid ${active ? "rgba(204,255,0,0.30)" : "transparent"}`,
+                borderRadius:10, cursor:"pointer", fontFamily:"inherit",
                 display:"flex", alignItems:"center", justifyContent:"space-between", gap:8,
+                boxShadow: active ? "inset 0 1px 0 rgba(204,255,0,0.08)" : "none",
               }}>
-              <div style={{ minWidth:0 }}>
-                <div style={{ fontSize:dk?12:11, fontWeight:800, letterSpacing:1.2, textTransform:"uppercase", color: active ? "#CCFF00" : "#7E8290" }}>
-                  {i === 0 ? "This Week" : "Next Week"}
+              <div style={{ display:"flex", alignItems:"center", gap:dk?9:7, minWidth:0 }}>
+                <div style={{
+                  width:32, height:32, borderRadius:9, flexShrink:0,
+                  background: active ? "rgba(204,255,0,0.12)" : "rgba(255,255,255,0.04)",
+                  border: `1px solid ${active ? "rgba(204,255,0,0.22)" : "rgba(255,255,255,0.06)"}`,
+                  display:"flex", alignItems:"center", justifyContent:"center",
+                  color: active ? "#CCFF00" : "#4A4E5C",
+                }}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                  </svg>
                 </div>
-                <div style={{ fontSize:dk?10.5:9.5, fontWeight:600, color: active ? "#888D9C" : "#4A4E5C", marginTop:2 }}>
-                  {weekRange(i)}
+                <div style={{ minWidth:0 }}>
+                  <div style={{ fontSize:dk?11.5:10.5, fontWeight:800, letterSpacing:0.8, textTransform:"uppercase", color: active ? "#CCFF00" : "#5C6175" }}>
+                    {i === 0 ? "This Week" : "Next Week"}
+                  </div>
+                  <div style={{ fontSize:dk?10:9, fontWeight:600, color: active ? "#6E7483" : "#3A3E4A", marginTop:2 }}>
+                    {weekRange(i)}
+                  </div>
                 </div>
               </div>
-              <div style={{ display:"flex", alignItems:"center", gap:4, padding:"3px 8px", borderRadius:8, background: ok ? "rgba(34,197,94,0.10)" : "rgba(245,158,11,0.10)", border:`1px solid ${ok ? "rgba(34,197,94,0.22)" : "rgba(245,158,11,0.22)"}` }}>
-                <span style={{ fontSize:dk?11:10, fontWeight:800, color: ok ? "#22C55E" : "#F59E0B" }}>{mine}</span>
-                <span style={{ fontSize:8.5, fontWeight:700, color: ok ? "#22C55E99" : "#F59E0B99", letterSpacing:0.5 }}>/{MIN}</span>
+              <div style={{
+                display:"flex", alignItems:"center", gap:3, padding:"4px 9px 4px 8px",
+                borderRadius:20, flexShrink:0,
+                background: ok ? "rgba(34,197,94,0.12)" : "rgba(245,158,11,0.12)",
+                border:`1px solid ${ok ? "rgba(34,197,94,0.25)" : "rgba(245,158,11,0.25)"}`,
+              }}>
+                <span style={{ fontSize:dk?13:12, fontWeight:900, lineHeight:1, color: ok ? "#22C55E" : "#F59E0B" }}>{mine}</span>
+                <span style={{ fontSize:8, fontWeight:700, color: ok ? "#22C55E88" : "#F59E0B88", letterSpacing:0.3 }}>/{MIN}</span>
               </div>
             </button>
           );
@@ -1068,21 +1291,28 @@ function Scheduler({ session, profile, w }) {
       </div>
 
       {/* Stats row */}
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:dk?10:6, marginBottom:dk?18:14 }}>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:dk?10:7, marginBottom:dk?20:15 }}>
         {stats.map(s => (
-          <div key={s.label} style={{ background:`linear-gradient(160deg, ${s.color}10, ${s.color}04)`, border:`1px solid ${s.color}22`, borderRadius:13, padding:dk?"13px 14px":"10px 11px", position:"relative", overflow:"hidden" }}>
-            <div style={{ fontSize:8.5, fontWeight:800, color:`${s.color}AA`, letterSpacing:1.8, textTransform:"uppercase" }}>{s.label}</div>
-            <div style={{ display:"flex", alignItems:"baseline", gap:5, marginTop:dk?6:4 }}>
-              <span style={{ fontSize:dk?28:22, fontWeight:900, color:s.color, lineHeight:1, letterSpacing:"-0.02em" }}>{s.value}</span>
-              <span style={{ fontSize:dk?10:9, fontWeight:700, color:"#5C6175", letterSpacing:0.3 }}>{s.detail}</span>
+          <div key={s.label} style={{
+            background:`linear-gradient(150deg, ${s.color}12 0%, ${s.color}03 100%)`,
+            border:`1px solid ${s.color}28`,
+            borderRadius:14, padding:dk?"14px 15px":"11px 12px",
+            position:"relative", overflow:"hidden",
+          }}>
+            {/* decorative circle */}
+            <div style={{ position:"absolute", top:-18, right:-18, width:60, height:60, borderRadius:"50%", background:`${s.color}0A`, pointerEvents:"none" }} />
+            <div style={{ display:"flex", alignItems:"center", gap:7, marginBottom:dk?8:5 }}>
+              <div style={{ color:`${s.color}CC`, display:"flex" }}>{s.icon}</div>
+              <div style={{ fontSize:9, fontWeight:800, color:`${s.color}88`, letterSpacing:1.6, textTransform:"uppercase" }}>{s.label}</div>
             </div>
-            <div style={{ fontSize:dk?10.5:9.5, fontWeight:600, color:`${s.color}CC`, marginTop:dk?6:4 }}>{s.sub}</div>
+            <div style={{ fontSize:dk?32:26, fontWeight:900, color:s.color, lineHeight:1, letterSpacing:"-0.03em" }}>{s.value}</div>
+            <div style={{ fontSize:dk?10.5:9.5, fontWeight:600, color:`${s.color}BB`, marginTop:dk?5:3, lineHeight:1.3 }}>{s.sub}</div>
           </div>
         ))}
       </div>
 
       {/* Day cards grid */}
-      <div style={{ display:"grid", gridTemplateColumns: dk ? "repeat(5,1fr)" : "1fr", gap:dk?10:9 }}>
+      <div style={{ display:"grid", gridTemplateColumns: dk ? "repeat(5,1fr)" : "repeat(2,1fr)", gap:dk?10:8 }}>
         {days.map((day, di) => {
           const dateStr = ds(day);
           const dayEntries = byDate[dateStr] ?? [];
@@ -1095,6 +1325,11 @@ function Scheduler({ session, profile, w }) {
           const isFull = count >= dayMax && !isMine;
           const pct = (count / dayMax) * 100;
           const capColor = count >= dayMax ? "#F59E0B" : count >= 4 ? "#FFD700" : count >= 1 ? "#22C55E" : "#3A3E4A";
+          const capGradient = count >= dayMax
+            ? "linear-gradient(90deg,#F59E0B,#FF3370)"
+            : count >= 4
+              ? "linear-gradient(90deg,#22C55E,#FFD700)"
+              : "linear-gradient(90deg,#22C55E,#06D6F0)";
           const clickable = !isPast && !isFull;
           const openSpots = dayMax - count;
 
@@ -1103,111 +1338,163 @@ function Scheduler({ session, profile, w }) {
               className={clickable ? "sched-day" : ""}
               style={{
                 background: isMine
-                  ? "linear-gradient(160deg, rgba(204,255,0,0.07), rgba(204,255,0,0.015))"
+                  ? "linear-gradient(160deg, rgba(204,255,0,0.08) 0%, rgba(16,18,24,0.96) 60%)"
                   : override
                   ? "linear-gradient(160deg, rgba(245,158,11,0.06), rgba(14,15,20,0.94))"
-                  : "linear-gradient(160deg, rgba(22,24,31,0.92), rgba(14,15,20,0.94))",
-                border: `1.5px solid ${isMine ? "rgba(204,255,0,0.38)" : override ? "rgba(245,158,11,0.35)" : isToday ? "rgba(204,255,0,0.18)" : "rgba(255,255,255,0.06)"}`,
+                  : "linear-gradient(160deg, rgba(22,24,31,0.95) 0%, rgba(12,14,19,0.97) 100%)",
+                border: `1.5px solid ${isMine ? "rgba(204,255,0,0.40)" : override ? "rgba(245,158,11,0.35)" : isToday ? "rgba(204,255,0,0.20)" : "rgba(255,255,255,0.065)"}`,
                 borderRadius: 16,
-                padding: dk ? "14px 13px 0" : "12px 12px 0",
+                padding: dk ? "14px 13px 0" : "11px 11px 0",
                 cursor: clickable ? "pointer" : "default",
-                opacity: isPast ? 0.42 : 1,
-                transition: "transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease",
+                opacity: isPast ? 0.38 : 1,
                 position: "relative",
-                boxShadow: isMine ? "0 8px 28px rgba(204,255,0,0.10)" : "0 4px 18px rgba(0,0,0,0.30)",
+                boxShadow: isMine
+                  ? "0 8px 32px rgba(204,255,0,0.12), inset 0 1px 0 rgba(204,255,0,0.10)"
+                  : isToday
+                    ? "0 6px 24px rgba(204,255,0,0.06), inset 0 1px 0 rgba(255,255,255,0.04)"
+                    : "0 4px 20px rgba(0,0,0,0.32), inset 0 1px 0 rgba(255,255,255,0.025)",
                 display:"flex", flexDirection:"column",
+                // Left accent bar
+                borderLeft: `2.5px solid ${isMine ? "#CCFF00" : isToday ? "rgba(204,255,0,0.40)" : "rgba(255,255,255,0.06)"}`,
               }}>
 
               {/* Header */}
-              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:10 }}>
+              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:dk?11:9 }}>
                 <div>
-                  <div style={{ fontSize:9.5, fontWeight:800, color: isToday ? "#CCFF00" : "#7E8290", letterSpacing:2.4 }}>
+                  <div style={{ fontSize:9, fontWeight:800, color: isToday ? "#CCFF00" : "#4A4E5C", letterSpacing:2.6, textTransform:"uppercase" }}>
                     {DAY_NAMES[di]}
                   </div>
-                  <div style={{ display:"flex", alignItems:"baseline", gap:5, marginTop:3 }}>
-                    <span style={{ fontSize:dk?22:20, fontWeight:900, color:isPast?"#7E8290":"#F2F4F8", lineHeight:1, letterSpacing:"-0.02em" }}>{day.getDate()}</span>
-                    <span style={{ fontSize:11, fontWeight:600, color:"#5C6175" }}>{MONTHS[day.getMonth()]}</span>
+                  <div style={{ display:"flex", alignItems:"baseline", gap:4, marginTop:2 }}>
+                    <span style={{
+                      fontSize:dk?26:22, fontWeight:900,
+                      lineHeight:1, letterSpacing:"-0.03em",
+                      background: isMine
+                        ? "linear-gradient(135deg,#CCFF00,#A8E000)"
+                        : isPast ? "none" : "linear-gradient(135deg,#F2F4F8,#9EA3B0)",
+                      WebkitBackgroundClip: (isMine || !isPast) ? "text" : undefined,
+                      WebkitTextFillColor: (isMine || !isPast) ? "transparent" : undefined,
+                      color: isPast ? "#5C6175" : undefined,
+                    }}>{day.getDate()}</span>
+                    <span style={{ fontSize:dk?11:10, fontWeight:600, color:"#4A4E5C" }}>{MONTHS[day.getMonth()]}</span>
                   </div>
                 </div>
-                <div style={{ display:"flex", flexDirection:"column", alignItems:"flex-end", gap:4 }}>
-                  {isToday && <span style={{ fontSize:8.5, fontWeight:800, color:"#15171E", background:"#CCFF00", padding:"3px 7px", borderRadius:6, letterSpacing:1.2, textTransform:"uppercase" }}>Today</span>}
-                  {override && <span style={{ fontSize:8.5, fontWeight:800, color:"#F59E0B", background:"rgba(245,158,11,0.12)", border:"1px solid rgba(245,158,11,0.35)", padding:"2px 6px", borderRadius:6, letterSpacing:1.0, textTransform:"uppercase" }}>{override.label || "Half Day"}</span>}
+                <div style={{ display:"flex", flexDirection:"column", alignItems:"flex-end", gap:3 }}>
+                  {isToday && (
+                    <span style={{ fontSize:8, fontWeight:900, color:"#15171E", background:"#CCFF00", padding:"3px 7px", borderRadius:20, letterSpacing:1.4, textTransform:"uppercase", boxShadow:"0 2px 8px rgba(204,255,0,0.40)" }}>TODAY</span>
+                  )}
+                  {override && <span style={{ fontSize:8, fontWeight:900, color:"#F59E0B", background:"rgba(245,158,11,0.12)", border:"1px solid rgba(245,158,11,0.30)", padding:"2px 7px", borderRadius:20, letterSpacing:1.4, textTransform:"uppercase" }}>{override.label || "Half Day"}</span>}
                   {override?.hours && <span style={{ fontSize:8, fontWeight:700, color:"#F59E0BAA", letterSpacing:0.5 }}>{override.hours}</span>}
-                  {isMine && !isToday && <span style={{ fontSize:8.5, fontWeight:800, color:"#CCFF00", background:"rgba(204,255,0,0.10)", border:"1px solid rgba(204,255,0,0.28)", padding:"2px 6px", borderRadius:6, letterSpacing:1.2, textTransform:"uppercase" }}>You</span>}
-                  {isFull && !isMine && <span style={{ fontSize:8.5, fontWeight:800, color:"#F59E0B", background:"rgba(245,158,11,0.10)", border:"1px solid rgba(245,158,11,0.28)", padding:"2px 6px", borderRadius:6, letterSpacing:1.2, textTransform:"uppercase" }}>Full</span>}
+                  {isMine && !isToday && (
+                    <span style={{ fontSize:8, fontWeight:900, color:"#CCFF00", background:"rgba(204,255,0,0.12)", border:"1px solid rgba(204,255,0,0.30)", padding:"2px 7px", borderRadius:20, letterSpacing:1.4, textTransform:"uppercase" }}>YOU</span>
+                  )}
+                  {isFull && !isMine && (
+                    <span style={{ fontSize:8, fontWeight:900, color:"#F59E0B", background:"rgba(245,158,11,0.12)", border:"1px solid rgba(245,158,11,0.30)", padding:"2px 7px", borderRadius:20, letterSpacing:1.4, textTransform:"uppercase" }}>FULL</span>
+                  )}
                 </div>
               </div>
 
               {/* Capacity bar */}
-              <div style={{ marginBottom:11 }}>
-                <div style={{ height:5, borderRadius:3, background:"rgba(255,255,255,0.05)", overflow:"hidden" }}>
-                  <div style={{ height:"100%", width:`${pct}%`, background: capColor, transition:"width 0.45s ease", boxShadow:count>0?`0 0 8px ${capColor}80`:"none" }} />
+              <div style={{ marginBottom:dk?12:10 }}>
+                <div style={{ height:6, borderRadius:4, background:"rgba(255,255,255,0.04)", overflow:"hidden", position:"relative" }}>
+                  <div style={{
+                    height:"100%", width:`${pct}%`,
+                    background: count > 0 ? capGradient : "transparent",
+                    transition:"width 0.5s cubic-bezier(0.4,0,0.2,1)",
+                    boxShadow: count > 0 ? `0 0 10px ${capColor}70` : "none",
+                    borderRadius:4,
+                  }} />
                 </div>
-                <div style={{ display:"flex", justifyContent:"space-between", marginTop:5 }}>
-                  <span style={{ fontSize:9, fontWeight:800, letterSpacing:1, textTransform:"uppercase", color:capColor }}>{count}/{dayMax} booked</span>
-                  <span style={{ fontSize:9, fontWeight:700, letterSpacing:0.8, textTransform:"uppercase", color: count >= dayMax ? "#F59E0B" : count >= 4 ? "#FFD70099" : "#3A3E4A" }}>
+                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginTop:5 }}>
+                  <span style={{ fontSize:8.5, fontWeight:800, letterSpacing:0.8, color:capColor }}>
+                    {count}/{dayMax}
+                  </span>
+                  <span style={{
+                    fontSize:8, fontWeight:700, letterSpacing:1.2, textTransform:"uppercase",
+                    color: count >= dayMax ? "#F59E0B" : count >= 4 ? "#FFD700" : count === 0 ? "#3A3E4A" : "#22C55E66",
+                  }}>
                     {count >= dayMax ? "Full" : count >= 4 ? "Filling" : count === 0 ? "Empty" : "Open"}
                   </span>
                 </div>
               </div>
 
-              {/* Reps */}
-              <div style={{ display:"flex", flexDirection:"column", gap:4, flex:1 }}>
+              {/* Reps + open slots */}
+              <div style={{ display:"flex", flexDirection:"column", gap:dk?5:4, flex:1 }}>
                 {dayEntries.map(e => {
                   const isMe = e.user_id === session.user.id;
                   const name = repProfiles[e.user_id] || "Rep";
+                  const rc = isMe ? "#CCFF00" : repColor(e.user_id);
                   return (
                     <div key={e.id} style={{
                       display:"flex", alignItems:"center", gap:7, padding:"5px 8px",
-                      background: isMe ? "rgba(204,255,0,0.12)" : "rgba(255,255,255,0.025)",
-                      border: `1px solid ${isMe ? "rgba(204,255,0,0.28)" : "rgba(255,255,255,0.05)"}`,
-                      borderRadius:8,
+                      background: isMe ? "rgba(204,255,0,0.09)" : "rgba(255,255,255,0.022)",
+                      border: `1px solid ${isMe ? "rgba(204,255,0,0.24)" : "rgba(255,255,255,0.045)"}`,
+                      borderRadius:9,
                     }}>
                       <div style={{
-                        width:20, height:20, borderRadius:6,
-                        background: isMe ? "linear-gradient(135deg,#CCFF00,#6E9100)" : "rgba(255,255,255,0.07)",
+                        width:22, height:22, borderRadius:7, flexShrink:0,
+                        background: isMe ? "linear-gradient(135deg,#CCFF00,#7DB800)" : `${rc}22`,
+                        border: `1.5px solid ${isMe ? "rgba(204,255,0,0.50)" : `${rc}55`}`,
                         display:"flex", alignItems:"center", justifyContent:"center",
-                        fontSize:9.5, fontWeight:900,
-                        color: isMe ? "#15171E" : "#A0A4B0",
-                        flexShrink:0,
-                        boxShadow: isMe ? "0 2px 6px rgba(204,255,0,0.35)" : "none",
+                        fontSize:10, fontWeight:900,
+                        color: isMe ? "#15171E" : rc,
+                        boxShadow: isMe ? "0 2px 8px rgba(204,255,0,0.30)" : `0 2px 6px ${rc}25`,
                       }}>
                         {name[0]?.toUpperCase()}
                       </div>
-                      <span style={{ fontSize:11, fontWeight:600, color: isMe ? "#F2F4F8" : "#C4C9D4", flex:1, minWidth:0, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
-                        {name}
+                      <span style={{
+                        fontSize:dk?11:10.5, fontWeight: isMe ? 700 : 500,
+                        color: isMe ? "#E8F4D4" : "#9EA3B0",
+                        flex:1, minWidth:0, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap",
+                      }}>
+                        {isMe ? "You" : name}
                       </span>
+                      {isMe && (
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#CCFF0066" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      )}
                     </div>
                   );
                 })}
-                {openSpots > 0 && (
-                  <div style={{
-                    padding:"5px 8px", border:"1px dashed rgba(255,255,255,0.08)",
-                    borderRadius:8, textAlign:"center",
-                    fontSize:9.5, fontWeight:700, color:"#4A4E5C",
-                    letterSpacing:1, textTransform:"uppercase",
+                {/* Open slot placeholders */}
+                {!isPast && openSpots > 0 && Array.from({ length: Math.min(openSpots, 3) }).map((_, si) => (
+                  <div key={`open-${si}`} style={{
+                    padding:"5px 8px", border:"1px dashed rgba(255,255,255,0.06)",
+                    borderRadius:9, display:"flex", alignItems:"center", gap:7,
                   }}>
-                    {openSpots} {openSpots === 1 ? "spot" : "spots"} open
+                    <div style={{ width:22, height:22, borderRadius:7, border:"1.5px dashed rgba(255,255,255,0.10)", flexShrink:0, display:"flex", alignItems:"center", justifyContent:"center" }}>
+                      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    </div>
+                    <span style={{ fontSize:9.5, fontWeight:500, color:"rgba(255,255,255,0.14)", fontStyle:"italic" }}>
+                      {si === 0 && openSpots > 3 ? `${openSpots} spots open` : "Open slot"}
+                    </span>
                   </div>
-                )}
+                ))}
               </div>
 
               {/* CTA footer */}
               <div style={{
-                marginTop:10, marginLeft:-13, marginRight:-13,
-                padding:"9px 12px",
-                borderTop:"1px solid rgba(255,255,255,0.05)",
+                marginTop:dk?11:9,
+                marginLeft: dk ? -13 : -11,
+                marginRight: dk ? -13 : -11,
+                padding:"9px 13px",
+                borderTop:`1px solid ${isMine ? "rgba(204,255,0,0.10)" : "rgba(255,255,255,0.04)"}`,
                 textAlign:"center",
-                background: isMine ? "rgba(204,255,0,0.04)" : "transparent",
+                background: isMine ? "rgba(204,255,0,0.035)" : isPast ? "transparent" : "rgba(255,255,255,0.008)",
+                borderRadius:"0 0 14px 14px",
               }}>
                 {isPast ? (
-                  <span style={{ fontSize:9.5, color:"#3A3E4A", fontWeight:700, letterSpacing:1.2, textTransform:"uppercase" }}>Past</span>
+                  <span style={{ fontSize:9, color:"#2E3240", fontWeight:700, letterSpacing:1.4, textTransform:"uppercase" }}>Past</span>
                 ) : isMine ? (
-                  <span style={{ fontSize:9.5, color:"#FF3370", fontWeight:800, letterSpacing:1.2, textTransform:"uppercase" }}>Tap to cancel</span>
+                  <span style={{ fontSize:9, color:"#FF3370", fontWeight:800, letterSpacing:1.4, textTransform:"uppercase", display:"flex", alignItems:"center", justifyContent:"center", gap:5 }}>
+                    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    Cancel
+                  </span>
                 ) : isFull ? (
-                  <span style={{ fontSize:9.5, color:"#F59E0B", fontWeight:700, letterSpacing:1.2, textTransform:"uppercase" }}>Day is full</span>
+                  <span style={{ fontSize:9, color:"#F59E0B", fontWeight:700, letterSpacing:1.4, textTransform:"uppercase" }}>Day full</span>
                 ) : (
-                  <span style={{ fontSize:9.5, color:"#CCFF00", fontWeight:800, letterSpacing:1.2, textTransform:"uppercase" }}>+ Book this day</span>
+                  <span style={{ fontSize:9, color:"#CCFF00", fontWeight:800, letterSpacing:1.4, textTransform:"uppercase", display:"flex", alignItems:"center", justifyContent:"center", gap:5 }}>
+                    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Book
+                  </span>
                 )}
               </div>
             </div>
@@ -1215,16 +1502,402 @@ function Scheduler({ session, profile, w }) {
         })}
       </div>
 
-      {/* Policy notice — compact, at bottom */}
-      <div style={{ display:"flex", alignItems:"center", gap:11, padding:dk?"11px 15px":"10px 12px", background:"rgba(255,51,112,0.05)", border:"1px solid rgba(255,51,112,0.15)", borderRadius:11, marginTop:dk?18:14 }}>
-        <div style={{ width:26, height:26, borderRadius:8, background:"rgba(255,51,112,0.12)", border:"1px solid rgba(255,51,112,0.25)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+      {/* Policy notice */}
+      <div style={{
+        display:"flex", alignItems:"center", gap:11,
+        padding:dk?"12px 16px":"10px 13px",
+        background:"rgba(255,51,112,0.04)",
+        border:"1px solid rgba(255,51,112,0.14)",
+        borderRadius:12, marginTop:dk?20:15,
+      }}>
+        <div style={{ width:28, height:28, borderRadius:9, background:"rgba(255,51,112,0.10)", border:"1px solid rgba(255,51,112,0.22)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#FF3370" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         </div>
-        <div style={{ fontSize:dk?11.5:10.5, color:"#C4C8D4", fontWeight:500, lineHeight:1.45 }}>
-          <span style={{ color:"#FF3370", fontWeight:800, letterSpacing:0.3 }}>Policy:</span> Reps must book a minimum of <span style={{ color:"#F2F4F8", fontWeight:700 }}>{MIN} days</span> per week. Missing this minimum is grounds for <span style={{ color:"#FF3370", fontWeight:700 }}>termination</span>.
+        <div style={{ fontSize:dk?11:10, color:"#9EA3B0", fontWeight:500, lineHeight:1.5 }}>
+          <span style={{ color:"#FF3370", fontWeight:800 }}>Policy:</span> Minimum <span style={{ color:"#F2F4F8", fontWeight:700 }}>{MIN} days</span> per week required. Failure may result in <span style={{ color:"#FF3370", fontWeight:700 }}>termination</span>.
         </div>
       </div>
 
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════
+   DIRECT MESSAGES — conversation thread
+   ═══════════════════════════════════════════ */
+const DM_SETUP_SQL = `-- Run this in your Supabase SQL Editor (once):
+create table if not exists public.direct_messages (
+  id uuid primary key default gen_random_uuid(),
+  from_id uuid not null references auth.users(id) on delete cascade,
+  to_id   uuid not null references auth.users(id) on delete cascade,
+  body    text not null check (char_length(body) <= 2000),
+  created_at timestamptz not null default now()
+);
+create index if not exists dm_thread_idx on public.direct_messages
+  (least(from_id::text,to_id::text), greatest(from_id::text,to_id::text), created_at);
+alter table public.direct_messages enable row level security;
+create policy "read own dms"   on public.direct_messages for select using (auth.uid()=from_id or auth.uid()=to_id);
+create policy "send dms"       on public.direct_messages for insert with check (auth.uid()=from_id);
+create policy "delete own dms" on public.direct_messages for delete using (auth.uid()=from_id);
+alter publication supabase_realtime add table public.direct_messages;`;
+
+function DMConversation({ session, profile, peer, w, onBack }) {
+  const [msgs, setMsgs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [body, setBody] = useState("");
+  const [sending, setSending] = useState(false);
+  const scrollRef = useRef(null);
+  const stickyRef = useRef(true);
+  const dk = w >= 768;
+  const myId = session.user.id;
+  const peerId = peer.id;
+
+  const load = async () => {
+    const { data } = await supabase
+      .from("direct_messages")
+      .select("id, from_id, to_id, body, created_at")
+      .or(`and(from_id.eq.${myId},to_id.eq.${peerId}),and(from_id.eq.${peerId},to_id.eq.${myId})`)
+      .order("created_at", { ascending: true })
+      .limit(300);
+    setMsgs(data ?? []);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    load();
+    const chName = `dm-${[myId, peerId].sort().join("-")}`;
+    const ch = supabase.channel(chName)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "direct_messages" }, ({ new: m }) => {
+        if ((m.from_id === myId && m.to_id === peerId) || (m.from_id === peerId && m.to_id === myId)) {
+          setMsgs(prev => prev.some(x => x.id === m.id) ? prev : [...prev, m]);
+        }
+      })
+      .on("postgres_changes", { event: "DELETE", schema: "public", table: "direct_messages" }, ({ old: m }) => {
+        setMsgs(prev => prev.filter(x => x.id !== m.id));
+      })
+      .subscribe();
+    return () => supabase.removeChannel(ch);
+  }, [peerId]);
+
+  useEffect(() => {
+    if (!loading && scrollRef.current && stickyRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [msgs, loading]);
+
+  const onScroll = () => {
+    const el = scrollRef.current; if (!el) return;
+    stickyRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+  };
+
+  const send = async () => {
+    const trimmed = body.trim();
+    if (!trimmed || sending) return;
+    setSending(true);
+    const { data, error } = await supabase
+      .from("direct_messages")
+      .insert({ from_id: myId, to_id: peerId, body: trimmed })
+      .select().single();
+    setSending(false);
+    if (!error && data) {
+      setBody("");
+      stickyRef.current = true;
+      setMsgs(prev => prev.some(m => m.id === data.id) ? prev : [...prev, data]);
+    }
+  };
+
+  const remove = async (id) => {
+    if (!confirm("Delete message?")) return;
+    await supabase.from("direct_messages").delete().eq("id", id);
+    setMsgs(prev => prev.filter(m => m.id !== id));
+  };
+
+  const fmtTime = (iso) => new Date(iso).toLocaleTimeString("en-US", { hour:"numeric", minute:"2-digit" });
+  const fmtDay = (iso) => {
+    const d = new Date(iso), today = new Date(); today.setHours(0,0,0,0);
+    const ds = new Date(d); ds.setHours(0,0,0,0);
+    const diff = Math.round((today - ds) / 86400000);
+    if (diff === 0) return "Today";
+    if (diff === 1) return "Yesterday";
+    return d.toLocaleDateString("en-US", { weekday:"long", month:"short", day:"numeric" });
+  };
+
+  const peerColor = (() => {
+    const COLORS = ["#06D6F0","#F59E0B","#A78BFA","#34D399","#F472B6","#60A5FA","#FB923C"];
+    let h = 0; for (let i = 0; i < (peerId||"").length; i++) h = (h*31 + peerId.charCodeAt(i)) & 0xFFFFFF;
+    return COLORS[h % COLORS.length];
+  })();
+
+  return (
+    <div style={{ display:"flex", flexDirection:"column", height:"calc(100dvh - 140px)", minHeight:360, animation:"fadeUp 0.25s ease" }}>
+
+      {/* Header */}
+      <div style={{ display:"flex", alignItems:"center", gap:12, padding:"0 0 14px", borderBottom:"1px solid rgba(255,255,255,0.06)", flexShrink:0 }}>
+        <button onClick={onBack} style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:9, padding:"7px 10px", cursor:"pointer", display:"flex", alignItems:"center", gap:6, color:"#9EA3B0", fontFamily:"inherit", fontSize:12, fontWeight:700 }}>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          {dk && "Back"}
+        </button>
+        <div style={{ width:36, height:36, borderRadius:11, background:`${peerColor}22`, border:`1.5px solid ${peerColor}55`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:15, fontWeight:900, color:peerColor, flexShrink:0 }}>
+          {peer.name?.[0]?.toUpperCase() ?? "R"}
+        </div>
+        <div style={{ flex:1, minWidth:0 }}>
+          <div style={{ fontSize:dk?15:13, fontWeight:700, color:"#F2F4F8" }}>{peer.name || "Rep"}</div>
+          <div style={{ fontSize:10, fontWeight:600, color:"#5C6175", letterSpacing:0.5 }}>{peer.role === "admin" ? "Admin" : "Rep"}</div>
+        </div>
+      </div>
+
+      {/* Messages */}
+      <div ref={scrollRef} onScroll={onScroll} style={{ flex:1, overflowY:"auto", padding:"16px 0", display:"flex", flexDirection:"column", gap:6 }}>
+        {loading ? (
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"center", height:"100%", color:"#5C6175", fontSize:12 }}>Loading…</div>
+        ) : msgs.length === 0 ? (
+          <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", height:"100%", gap:10 }}>
+            <div style={{ width:52, height:52, borderRadius:16, background:`${peerColor}15`, border:`1px solid ${peerColor}30`, display:"flex", alignItems:"center", justifyContent:"center" }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={peerColor} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <div style={{ fontSize:13, fontWeight:700, color:"#D6DAE2" }}>No messages yet</div>
+            <div style={{ fontSize:11, color:"#5C6175" }}>Start the conversation with {peer.name || "them"}</div>
+          </div>
+        ) : (() => {
+          const items = [];
+          let lastDay = null, lastFrom = null, lastTs = 0;
+          for (const m of msgs) {
+            const day = fmtDay(m.created_at);
+            if (day !== lastDay) {
+              items.push(
+                <div key={`d-${m.id}`} style={{ display:"flex", alignItems:"center", gap:10, margin:"10px 0 6px" }}>
+                  <div style={{ flex:1, height:1, background:"rgba(255,255,255,0.05)" }} />
+                  <span style={{ fontSize:9, fontWeight:800, color:"#4A4E5C", letterSpacing:1.8, textTransform:"uppercase" }}>{day}</span>
+                  <div style={{ flex:1, height:1, background:"rgba(255,255,255,0.05)" }} />
+                </div>
+              );
+              lastDay = day; lastFrom = null;
+            }
+            const isMe = m.from_id === myId;
+            const ts = new Date(m.created_at).getTime();
+            const continued = m.from_id === lastFrom && (ts - lastTs) < 3 * 60000;
+            lastFrom = m.from_id; lastTs = ts;
+            items.push(
+              <div key={m.id} style={{ display:"flex", flexDirection:"column", alignItems: isMe ? "flex-end" : "flex-start", gap:2, marginTop: continued ? 1 : 8 }}>
+                {!continued && (
+                  <span style={{ fontSize:9.5, fontWeight:600, color:"#4A4E5C", marginLeft: isMe ? 0 : 2, marginRight: isMe ? 2 : 0 }}>
+                    {isMe ? "You" : peer.name || "Rep"} · {fmtTime(m.created_at)}
+                  </span>
+                )}
+                <div style={{ display:"flex", alignItems:"flex-end", gap:6, flexDirection: isMe ? "row-reverse" : "row" }}>
+                  <div className={isMe ? "dm-bubble-me" : "dm-bubble-them"}>{m.body}</div>
+                  {isMe && (
+                    <button onClick={() => remove(m.id)} title="Delete" style={{ opacity:0, background:"none", border:"none", cursor:"pointer", color:"#FF3370", padding:2, fontSize:10, flexShrink:0, transition:"opacity 0.15s" }}
+                      onMouseEnter={e => e.currentTarget.style.opacity = "1"}
+                      onMouseLeave={e => e.currentTarget.style.opacity = "0"}>
+                      ×
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          }
+          return items;
+        })()}
+      </div>
+
+      {/* Input */}
+      <div style={{ borderTop:"1px solid rgba(255,255,255,0.06)", paddingTop:12, flexShrink:0 }}>
+        <div style={{ display:"flex", gap:8, alignItems:"flex-end" }}>
+          <textarea
+            value={body}
+            onChange={e => setBody(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
+            placeholder={`Message ${peer.name || "rep"}…`}
+            rows={1}
+            style={{ flex:1, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:12, color:"#F2F4F8", fontSize:13, fontWeight:500, padding:"11px 13px", fontFamily:"inherit", outline:"none", resize:"none", lineHeight:1.5, maxHeight:120, overflowY:"auto" }}
+            onInput={e => { e.target.style.height = "auto"; e.target.style.height = Math.min(e.target.scrollHeight, 120) + "px"; }}
+          />
+          <button onClick={send} disabled={!body.trim() || sending}
+            style={{ background: body.trim() ? "#CCFF00" : "rgba(255,255,255,0.06)", border:"none", borderRadius:12, padding:"11px 16px", cursor: body.trim() ? "pointer" : "default", color: body.trim() ? "#15171E" : "#4A4E5C", fontFamily:"inherit", fontWeight:800, fontSize:12, transition:"all 0.18s ease", flexShrink:0 }}>
+            {sending ? "…" : "Send"}
+          </button>
+        </div>
+        <div style={{ fontSize:9, color:"#3A3E4A", marginTop:6, textAlign:"right" }}>Enter to send · Shift+Enter for newline</div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════
+   PEOPLE TAB — user directory + DMs
+   ═══════════════════════════════════════════ */
+function People({ session, profile, w }) {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [dmReady, setDmReady] = useState(null); // null=checking, true=ok, false=needs setup
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [search, setSearch] = useState("");
+  const dk = w >= 768;
+  const myId = session.user.id;
+
+  useEffect(() => {
+    const init = async () => {
+      const [profRes, probe] = await Promise.all([
+        supabase.from("profiles").select("id, name, role").order("name"),
+        supabase.from("direct_messages").select("id").limit(1),
+      ]);
+      setUsers((profRes.data ?? []).filter(u => u.id !== myId));
+      const errMsg = probe.error?.message ?? "";
+      setDmReady(!probe.error || (!errMsg.includes("does not exist") && !errMsg.includes("relation")));
+      setLoading(false);
+    };
+    init();
+  }, []);
+
+  const userColor = (uid) => {
+    const COLORS = ["#06D6F0","#F59E0B","#A78BFA","#34D399","#F472B6","#60A5FA","#FB923C","#CCFF00"];
+    let h = 0; for (let i = 0; i < (uid||"").length; i++) h = (h*31 + uid.charCodeAt(i)) & 0xFFFFFF;
+    return COLORS[h % COLORS.length];
+  };
+
+  if (loading) return (
+    <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:80, gap:14 }}>
+      <div style={{ width:36, height:36, borderRadius:"50%", border:"3px solid rgba(167,139,250,0.2)", borderTopColor:"#A78BFA", animation:"spin 0.8s linear infinite" }} />
+      <span style={{ color:"#5C6175", fontSize:12, fontWeight:600, letterSpacing:1.2, textTransform:"uppercase" }}>Loading team…</span>
+    </div>
+  );
+
+  if (selectedUser && dmReady) {
+    return <DMConversation session={session} profile={profile} peer={selectedUser} w={w} onBack={() => setSelectedUser(null)} />;
+  }
+
+  const filtered = users.filter(u => (u.name || "Rep").toLowerCase().includes(search.toLowerCase()));
+  const admins = filtered.filter(u => u.role === "admin");
+  const reps = filtered.filter(u => u.role !== "admin");
+
+  return (
+    <div style={{ animation:"fadeUp 0.35s ease" }}>
+
+      {/* DB setup warning — only shows if table missing */}
+      {!dmReady && (
+        <div style={{ marginBottom:20, background:"rgba(245,158,11,0.05)", border:"1px solid rgba(245,158,11,0.20)", borderRadius:14, padding:dk?"18px 20px":"14px 15px" }}>
+          <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:12 }}>
+            <div style={{ width:28, height:28, borderRadius:8, background:"rgba(245,158,11,0.12)", border:"1px solid rgba(245,158,11,0.25)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2.5" strokeLinecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <div>
+              <div style={{ fontSize:12, fontWeight:800, color:"#F59E0B", letterSpacing:0.3 }}>DM table not set up yet</div>
+              <div style={{ fontSize:10.5, color:"#9EA3B0", marginTop:2 }}>Run this SQL once in your Supabase dashboard to enable messaging.</div>
+            </div>
+          </div>
+          <pre style={{ fontSize:10, color:"#9EA3B0", background:"rgba(0,0,0,0.35)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:10, padding:"12px 14px", overflowX:"auto", lineHeight:1.6, margin:0, fontFamily:"'JetBrains Mono',monospace", whiteSpace:"pre-wrap" }}>{DM_SETUP_SQL}</pre>
+          <div style={{ fontSize:10, color:"#5C6175", marginTop:10 }}>Go to <span style={{ color:"#A78BFA", fontWeight:700 }}>Supabase → SQL Editor</span>, paste and run. Then refresh the portal.</div>
+        </div>
+      )}
+
+      {/* Search */}
+      <div style={{ position:"relative", marginBottom:dk?18:13 }}>
+        <div style={{ position:"absolute", left:13, top:"50%", transform:"translateY(-50%)", pointerEvents:"none" }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5C6175" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
+        <input
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Search by name…"
+          style={{ width:"100%", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:12, color:"#F2F4F8", fontSize:13, fontWeight:500, padding:"11px 13px 11px 38px", fontFamily:"inherit", outline:"none", boxSizing:"border-box", transition:"border-color 0.18s" }}
+          onFocus={e => e.target.style.borderColor = "rgba(167,139,250,0.35)"}
+          onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.08)"}
+        />
+      </div>
+
+      {/* Stats bar */}
+      <div style={{ display:"flex", gap:8, marginBottom:dk?20:15 }}>
+        {[
+          { label:"Total", value:users.length, color:"#A78BFA" },
+          { label:"Reps", value:users.filter(u=>u.role!=="admin").length, color:"#CCFF00" },
+          { label:"Admins", value:users.filter(u=>u.role==="admin").length, color:"#F59E0B" },
+        ].map(s => (
+          <div key={s.label} style={{ flex:1, background:`${s.color}0D`, border:`1px solid ${s.color}22`, borderRadius:12, padding:dk?"12px 14px":"10px 11px", textAlign:"center" }}>
+            <div style={{ fontSize:dk?24:20, fontWeight:900, color:s.color, lineHeight:1, letterSpacing:"-0.02em" }}>{s.value}</div>
+            <div style={{ fontSize:9, fontWeight:800, color:`${s.color}88`, letterSpacing:1.4, textTransform:"uppercase", marginTop:3 }}>{s.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Admin section */}
+      {admins.length > 0 && (
+        <div style={{ marginBottom:dk?20:16 }}>
+          <div style={{ fontSize:9, fontWeight:800, color:"#F59E0B88", letterSpacing:2.4, textTransform:"uppercase", marginBottom:8 }}>Leadership</div>
+          <div style={{ display:"grid", gridTemplateColumns:dk?"repeat(auto-fill, minmax(260px,1fr))":"1fr", gap:dk?8:7 }}>
+            {admins.map(u => <UserCard key={u.id} u={u} color={userColor(u.id)} dmReady={dmReady} onMessage={() => setSelectedUser(u)} />)}
+          </div>
+        </div>
+      )}
+
+      {/* Reps section */}
+      {reps.length > 0 && (
+        <div>
+          <div style={{ fontSize:9, fontWeight:800, color:"#A78BFA88", letterSpacing:2.4, textTransform:"uppercase", marginBottom:8 }}>Reps</div>
+          <div style={{ display:"grid", gridTemplateColumns:dk?"repeat(auto-fill, minmax(260px,1fr))":"1fr", gap:dk?8:7 }}>
+            {reps.map(u => <UserCard key={u.id} u={u} color={userColor(u.id)} dmReady={dmReady} onMessage={() => setSelectedUser(u)} />)}
+          </div>
+        </div>
+      )}
+
+      {filtered.length === 0 && (
+        <div style={{ textAlign:"center", padding:"60px 20px", color:"#4A4E5C" }}>
+          <div style={{ fontSize:32, marginBottom:10 }}>🔍</div>
+          <div style={{ fontSize:14, fontWeight:700, color:"#D6DAE2", marginBottom:6 }}>No results</div>
+          <div style={{ fontSize:12 }}>No one found matching "{search}"</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function UserCard({ u, color, dmReady, onMessage }) {
+  return (
+    <div className="people-card" style={{
+      display:"flex", alignItems:"center", gap:13,
+      background:"linear-gradient(135deg, rgba(22,24,31,0.95), rgba(14,15,20,0.97))",
+      border:"1px solid rgba(255,255,255,0.065)",
+      borderRadius:15, padding:"13px 14px",
+    }}>
+      {/* Avatar */}
+      <div style={{
+        width:44, height:44, borderRadius:13, flexShrink:0,
+        background:`${color}18`, border:`2px solid ${color}40`,
+        display:"flex", alignItems:"center", justifyContent:"center",
+        fontSize:18, fontWeight:900, color:color,
+        boxShadow:`0 4px 14px ${color}25`,
+      }}>
+        {(u.name || "R")[0].toUpperCase()}
+      </div>
+      {/* Info */}
+      <div style={{ flex:1, minWidth:0 }}>
+        <div style={{ fontSize:14, fontWeight:700, color:"#EEF2F8", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{u.name || "Rep"}</div>
+        <div style={{ display:"flex", alignItems:"center", gap:5, marginTop:3 }}>
+          <span style={{
+            fontSize:9, fontWeight:800, letterSpacing:1.2, textTransform:"uppercase",
+            color: u.role === "admin" ? "#F59E0B" : "#A78BFA",
+            background: u.role === "admin" ? "rgba(245,158,11,0.10)" : "rgba(167,139,250,0.10)",
+            border: `1px solid ${u.role === "admin" ? "rgba(245,158,11,0.22)" : "rgba(167,139,250,0.22)"}`,
+            padding:"2px 7px", borderRadius:20,
+          }}>{u.role === "admin" ? "Admin" : "Rep"}</span>
+        </div>
+      </div>
+      {/* DM button */}
+      <button onClick={onMessage} disabled={!dmReady} title={dmReady ? `Message ${u.name}` : "DMs not set up yet"}
+        style={{
+          background: dmReady ? "rgba(167,139,250,0.12)" : "rgba(255,255,255,0.04)",
+          border: `1px solid ${dmReady ? "rgba(167,139,250,0.28)" : "rgba(255,255,255,0.06)"}`,
+          borderRadius:10, padding:"8px 12px", cursor: dmReady ? "pointer" : "default",
+          display:"flex", alignItems:"center", gap:6, flexShrink:0,
+          color: dmReady ? "#A78BFA" : "#3A3E4A",
+          fontFamily:"inherit", fontSize:11, fontWeight:700,
+          transition:"all 0.18s ease",
+        }}
+        onMouseEnter={e => { if (dmReady) { e.currentTarget.style.background = "rgba(167,139,250,0.22)"; e.currentTarget.style.transform = "scale(1.04)"; } }}
+        onMouseLeave={e => { e.currentTarget.style.background = dmReady ? "rgba(167,139,250,0.12)" : "rgba(255,255,255,0.04)"; e.currentTarget.style.transform = "scale(1)"; }}>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        DM
+      </button>
     </div>
   );
 }
@@ -3371,12 +4044,80 @@ const ROLEABLE_TABS = [
   { key:"redline-ai",    label:"Redline AI",    color:"#F59E0B" },
 ];
 
+const PACKAGES = [
+  { label:"Starter Build", amount:1497 },
+  { label:"Pro Build",     amount:2497 },
+  { label:"Elite Build",   amount:4497 },
+  { label:"Custom",        amount:null },
+];
+
+function ClientForm({ repName, repEmail, onSave, onCancel, saving }) {
+  const [f, setF] = useState({
+    name:"", email:"", password:"", businessName:"",
+    packageName:"Starter Build", packageAmount:"1497",
+    phase:"onboarding", repName: repName || "", repEmail: repEmail || "", notes:"",
+  });
+  const set = (k, v) => setF(p => ({ ...p, [k]: v }));
+  const CYAN = "#06D6F0";
+
+  const inputStyle = { width:"100%", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:10, color:"#F2F4F8", fontSize:13, fontWeight:500, padding:"11px 13px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" };
+  const labelStyle = { display:"block", fontSize:9, fontWeight:800, color:"#5C6175", letterSpacing:2.2, textTransform:"uppercase", marginBottom:7 };
+
+  return (
+    <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
+        <div><label style={labelStyle}>Client Name *</label><input style={inputStyle} value={f.name} onChange={e=>set("name",e.target.value)} placeholder="John Smith" /></div>
+        <div><label style={labelStyle}>Business Name</label><input style={inputStyle} value={f.businessName} onChange={e=>set("businessName",e.target.value)} placeholder="ACME Plumbing" /></div>
+        <div><label style={labelStyle}>Email *</label><input style={inputStyle} type="email" value={f.email} onChange={e=>set("email",e.target.value)} placeholder="john@acmeplumbing.com" /></div>
+        <div><label style={labelStyle}>Password *</label><input style={inputStyle} type="text" value={f.password} onChange={e=>set("password",e.target.value)} placeholder="Temporary password" /></div>
+      </div>
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:12 }}>
+        <div>
+          <label style={labelStyle}>Package</label>
+          <select style={{ ...inputStyle, cursor:"pointer" }} value={f.packageName} onChange={e => { const pkg = PACKAGES.find(p=>p.label===e.target.value); set("packageName",e.target.value); if (pkg?.amount) set("packageAmount", String(pkg.amount)); }}>
+            {PACKAGES.map(p => <option key={p.label}>{p.label}</option>)}
+          </select>
+        </div>
+        <div><label style={labelStyle}>Amount ($)</label><input style={inputStyle} type="number" value={f.packageAmount} onChange={e=>set("packageAmount",e.target.value)} placeholder="2497" /></div>
+        <div>
+          <label style={labelStyle}>Phase</label>
+          <select style={{ ...inputStyle, cursor:"pointer" }} value={f.phase} onChange={e=>set("phase",e.target.value)}>
+            {CLIENT_PHASES.map(p => <option key={p.key} value={p.key}>{p.icon} {p.label}</option>)}
+          </select>
+        </div>
+      </div>
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
+        <div><label style={labelStyle}>Your Name (Rep)</label><input style={inputStyle} value={f.repName} onChange={e=>set("repName",e.target.value)} placeholder="Your name" /></div>
+        <div><label style={labelStyle}>Your Email (Rep)</label><input style={inputStyle} value={f.repEmail} onChange={e=>set("repEmail",e.target.value)} placeholder="you@redline.com" /></div>
+      </div>
+      <div><label style={labelStyle}>Message to Client</label><textarea style={{ ...inputStyle, resize:"vertical", minHeight:72 }} value={f.notes} onChange={e=>set("notes",e.target.value)} placeholder="Welcome! Your project is now underway…" /></div>
+      <div style={{ display:"flex", gap:10, justifyContent:"flex-end" }}>
+        <button onClick={onCancel} style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", color:"#7E8595", fontSize:11, fontWeight:700, cursor:"pointer", padding:"11px 20px", borderRadius:10, fontFamily:"inherit" }}>Cancel</button>
+        <button onClick={() => onSave(f)} disabled={saving || !f.name || !f.email || !f.password}
+          style={{ background: saving || !f.name || !f.email || !f.password ? `${CYAN}33` : `linear-gradient(135deg,${CYAN},#0588A0)`, border:"none", color: saving || !f.name || !f.email || !f.password ? "#4A4E5C" : "#0A1A1E", fontSize:11, fontWeight:800, cursor: saving || !f.name || !f.email || !f.password ? "default" : "pointer", padding:"11px 24px", borderRadius:10, fontFamily:"inherit", letterSpacing:0.5 }}>
+          {saving ? "Creating…" : "Create Client Account"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function AdminPanel({ profile, roles, setRoles, onBack, w, onSignOut }) {
+  const [adminTab, setAdminTab] = useState("reps"); // "reps" | "clients"
   const [users, setUsers] = useState([]);
+  const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingRole, setEditingRole] = useState(null); // role.name or "__new"
   const [draftRole, setDraftRole] = useState({ name:"", label:"", allowed_tabs:[] });
+  const [clientsLoading, setClientsLoading] = useState(true);
+  const [showCreate, setShowCreate] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [createErr, setCreateErr] = useState(null);
+  const [editingClient, setEditingClient] = useState(null); // client_id being edited
+  const [editFields, setEditFields] = useState({});
+  const [savingEdit, setSavingEdit] = useState(false);
   const dk = w >= 768;
+  const CYAN = "#06D6F0";
 
   useEffect(() => {
     const load = async () => {
@@ -3419,6 +4160,18 @@ function AdminPanel({ profile, roles, setRoles, onBack, w, onSignOut }) {
     setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: data.role } : u));
   };
 
+  const loadClients = async () => {
+    setClientsLoading(true);
+    const { data: profs } = await supabase.from("profiles").select("id, name, role").eq("role", "client");
+    const { data: projects } = await supabase.from("client_projects").select("*");
+    const projMap = {};
+    for (const p of projects ?? []) projMap[p.client_id] = p;
+    setClients((profs ?? []).map(u => ({ ...u, project: projMap[u.id] ?? null })));
+    setClientsLoading(false);
+  };
+
+  useEffect(() => { if (adminTab === "clients") loadClients(); }, [adminTab]);
+
   const startNewRole = () => {
     setEditingRole("__new");
     setDraftRole({ name:"", label:"", allowed_tabs:["dashboard"] });
@@ -3458,18 +4211,8 @@ function AdminPanel({ profile, roles, setRoles, onBack, w, onSignOut }) {
   };
 
   const setTier = async (userId, tier) => {
-    const next = tier || null;
-    const { data, error } = await supabase
-      .from("profiles")
-      .update({ tier: next })
-      .eq("id", userId)
-      .select()
-      .single();
-    if (error || !data) {
-      console.error("setTier failed:", error);
-      alert(`Couldn't save tier: ${error?.message ?? "no row updated (likely RLS or missing 'tier' column)"}`);
-      return;
-    }
+    const { data, error } = await supabase.from("profiles").update({ tier: tier || null }).eq("id", userId).select().single();
+    if (error || !data) { alert(`Couldn't save tier: ${error?.message}`); return; }
     setUsers(prev => prev.map(u => u.id === userId ? { ...u, tier: data.tier } : u));
   };
 
@@ -3480,10 +4223,62 @@ function AdminPanel({ profile, roles, setRoles, onBack, w, onSignOut }) {
     alert(`Final Exam attempt cleared for ${userName || "rep"}.`);
   };
 
+  const createClient = async (f) => {
+    if (!supabaseAdmin) { setCreateErr("Service key not configured."); return; }
+    setCreating(true); setCreateErr(null);
+    // 1. Create auth user
+    const { data: authData, error: authErr } = await supabaseAdmin.auth.admin.createUser({
+      email: f.email, password: f.password, email_confirm: true,
+      user_metadata: { name: f.name },
+    });
+    if (authErr) { setCreateErr(authErr.message); setCreating(false); return; }
+    const uid = authData.user.id;
+    // 2. Set profile role + name (trigger auto-creates profile)
+    await new Promise(r => setTimeout(r, 600)); // brief wait for trigger
+    await supabase.from("profiles").update({ name: f.name, role: "client" }).eq("id", uid);
+    // 3. Create project record
+    await supabase.from("client_projects").upsert({
+      client_id: uid,
+      business_name: f.businessName || null,
+      package_name: f.packageName || null,
+      package_amount: f.packageAmount ? Number(f.packageAmount) : null,
+      phase: f.phase || "onboarding",
+      rep_name: f.repName || null,
+      rep_email: f.repEmail || null,
+      client_notes: f.notes || null,
+    });
+    setCreating(false);
+    setShowCreate(false);
+    loadClients();
+  };
+
+  const saveClientEdit = async (clientId) => {
+    setSavingEdit(true);
+    await supabase.from("client_projects").update({
+      business_name: editFields.businessName,
+      package_name: editFields.packageName,
+      package_amount: editFields.packageAmount ? Number(editFields.packageAmount) : null,
+      phase: editFields.phase,
+      rep_name: editFields.repName,
+      rep_email: editFields.repEmail,
+      client_notes: editFields.notes,
+    }).eq("client_id", clientId);
+    setSavingEdit(false);
+    setEditingClient(null);
+    loadClients();
+  };
+
+  const inputStyle = { width:"100%", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:10, color:"#F2F4F8", fontSize:12, fontWeight:500, padding:"9px 11px", fontFamily:"inherit", outline:"none", boxSizing:"border-box" };
+  const labelStyle = { display:"block", fontSize:8.5, fontWeight:800, color:"#5C6175", letterSpacing:2, textTransform:"uppercase", marginBottom:6 };
+
+  const reps = users.filter(u => u.role !== "client");
+
+
   return (
     <div>
+      {/* Sticky header */}
       <div style={{ position:"sticky", top:0, zIndex:20, background:"rgba(7,8,12,0.92)", backdropFilter:"blur(24px)", WebkitBackdropFilter:"blur(24px)", borderBottom:"1px solid rgba(255,255,255,0.05)" }}>
-        <div style={{ maxWidth:1000, margin:"0 auto", padding:dk?"0 44px":"0 20px", height:52, display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+        <div style={{ maxWidth:1100, margin:"0 auto", padding:dk?"0 44px":"0 20px", height:52, display:"flex", alignItems:"center", justifyContent:"space-between" }}>
           <button className="back-btn" onClick={onBack} style={{ background:"none", border:"none", color:"#CCFF00", fontSize:13, fontWeight:700, cursor:"pointer", padding:"6px 0", display:"flex", alignItems:"center", gap:8, fontFamily:"inherit" }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
             Back to Portal
@@ -3492,16 +4287,31 @@ function AdminPanel({ profile, roles, setRoles, onBack, w, onSignOut }) {
         </div>
       </div>
 
-      <div style={{ maxWidth:1000, margin:"0 auto", padding:dk?"0 44px 90px":"0 20px 90px" }}>
-        <div style={{ padding:"40px 0 28px", animation:"fadeUp 0.5s ease" }}>
-          <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:18 }}>
+      <div style={{ maxWidth:1100, margin:"0 auto", padding:dk?"0 44px 90px":"0 20px 90px" }}>
+        <div style={{ padding:"36px 0 24px", animation:"fadeUp 0.5s ease" }}>
+          <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:14 }}>
             <div style={{ width:32, height:4, background:"linear-gradient(90deg,#F59E0B,transparent)", borderRadius:4 }} />
             <div style={{ fontSize:9.5, fontWeight:800, color:"#F59E0B", letterSpacing:3.5, textTransform:"uppercase" }}>Admin</div>
           </div>
-          <h2 style={{ fontSize:dk?30:24, fontWeight:800, color:"#F2F4F8", margin:"0 0 8px", letterSpacing:"-0.03em" }}>Admin Panel</h2>
-          <p style={{ fontSize:14, color:"#7E8595", margin:0, fontWeight:500 }}>Rep accounts, progress, and access management.</p>
+          <h2 style={{ fontSize:dk?30:24, fontWeight:800, color:"#F2F4F8", margin:"0 0 20px", letterSpacing:"-0.03em" }}>Admin Panel</h2>
+
+          {/* Tab switcher */}
+          <div style={{ display:"flex", gap:6, background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:12, padding:5, width:"fit-content" }}>
+            {[
+              { key:"reps", label:"Reps & Admins", color:"#F59E0B" },
+              { key:"clients", label:"Clients", color:CYAN },
+            ].map(t => (
+              <button key={t.key} onClick={() => setAdminTab(t.key)}
+                style={{ padding:"9px 20px", borderRadius:8, border: adminTab===t.key ? `1px solid ${t.color}35` : "1px solid transparent", background: adminTab===t.key ? `${t.color}10` : "transparent", color: adminTab===t.key ? t.color : "#5C6175", fontFamily:"inherit", fontSize:12, fontWeight:700, cursor:"pointer", transition:"all 0.18s" }}>
+                {t.label}
+              </button>
+            ))}
+          </div>
         </div>
 
+        {/* ── REPS TAB ── */}
+        {adminTab === "reps" && (
+          <>
         <a href={SUPABASE_USERS_URL} target="_blank" rel="noreferrer" className="card-hover vid-card"
           style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:16, background:"linear-gradient(135deg,rgba(20,16,8,0.95),rgba(14,12,6,0.95))", border:"1px solid rgba(245,158,11,0.2)", borderRadius:18, padding:"20px 24px", marginBottom:28, textDecoration:"none", animation:"fadeUp 0.5s ease 0.1s both", boxShadow:"0 4px 24px rgba(0,0,0,0.35)" }}>
           <div>
@@ -3642,6 +4452,123 @@ function AdminPanel({ profile, roles, setRoles, onBack, w, onSignOut }) {
               </div>
             ))}
           </div>
+        )}
+          </>
+        )}
+
+        {/* ── CLIENTS TAB ── */}
+        {adminTab === "clients" && (
+          <>
+            {/* Create button / form */}
+            {!showCreate ? (
+              <button onClick={() => { setShowCreate(true); setCreateErr(null); }}
+                style={{ display:"flex", alignItems:"center", gap:10, background:`linear-gradient(135deg,${CYAN}15,${CYAN}06)`, border:`1px solid ${CYAN}30`, borderRadius:14, padding:"16px 22px", cursor:"pointer", fontFamily:"inherit", color:CYAN, fontSize:13, fontWeight:700, marginBottom:20, width:"100%", transition:"all 0.18s" }}
+                onMouseEnter={e=>e.currentTarget.style.borderColor=`${CYAN}55`}
+                onMouseLeave={e=>e.currentTarget.style.borderColor=`${CYAN}30`}>
+                <div style={{ width:30, height:30, borderRadius:9, background:`${CYAN}18`, border:`1px solid ${CYAN}35`, display:"flex", alignItems:"center", justifyContent:"center" }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={CYAN} strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </div>
+                Create New Client Account
+              </button>
+            ) : (
+              <div style={{ background:"linear-gradient(160deg,rgba(6,214,240,0.05),rgba(14,15,20,0.97))", border:`1px solid ${CYAN}22`, borderRadius:16, padding:"22px 24px", marginBottom:20 }}>
+                <div style={{ fontSize:12, fontWeight:800, color:CYAN, letterSpacing:0.5, marginBottom:18 }}>New Client Account</div>
+                {createErr && <div style={{ color:"#FF3370", fontSize:12, fontWeight:600, marginBottom:12, padding:"10px 14px", background:"rgba(255,51,112,0.08)", border:"1px solid rgba(255,51,112,0.2)", borderRadius:8 }}>{createErr}</div>}
+                <ClientForm
+                  repName={profile?.name}
+                  repEmail={null}
+                  onSave={createClient}
+                  onCancel={() => { setShowCreate(false); setCreateErr(null); }}
+                  saving={creating}
+                />
+              </div>
+            )}
+
+            {/* Client list */}
+            {clientsLoading ? (
+              <div style={{ textAlign:"center", padding:60, color:"#666C7E", fontSize:13 }}>Loading clients…</div>
+            ) : clients.length === 0 ? (
+              <div style={{ textAlign:"center", padding:"50px 20px", color:"#4A4E5C", background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.05)", borderRadius:16 }}>
+                <div style={{ fontSize:28, marginBottom:12 }}>👤</div>
+                <div style={{ fontSize:14, fontWeight:700, color:"#D6DAE2", marginBottom:6 }}>No clients yet</div>
+                <div style={{ fontSize:12 }}>Create your first client account above.</div>
+              </div>
+            ) : (
+              <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+                {clients.map((c, i) => {
+                  const proj = c.project;
+                  const phase = CLIENT_PHASES.find(p => p.key === proj?.phase);
+                  const isEditing = editingClient === c.id;
+                  return (
+                    <div key={c.id} style={{ background:"linear-gradient(135deg,rgba(16,18,24,0.98),rgba(11,12,16,0.98))", border:`1px solid ${isEditing ? CYAN+"44" : "rgba(255,255,255,0.06)"}`, borderRadius:16, padding:"20px 22px", animation:`fadeUp 0.4s ease ${0.05*i}s both` }}>
+                      {/* Header row */}
+                      <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom: isEditing ? 20 : 0 }}>
+                        <div style={{ width:42, height:42, borderRadius:12, background:`${CYAN}18`, border:`1.5px solid ${CYAN}40`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:17, fontWeight:900, color:CYAN, flexShrink:0 }}>
+                          {(c.name||"C")[0].toUpperCase()}
+                        </div>
+                        <div style={{ flex:1, minWidth:0 }}>
+                          <div style={{ fontSize:14, fontWeight:700, color:"#F2F4F8" }}>{c.name || "—"}</div>
+                          <div style={{ fontSize:11, color:"#5C6175", marginTop:2 }}>{proj?.business_name || "No business name set"}</div>
+                        </div>
+                        {proj && phase && !isEditing && (
+                          <div style={{ display:"flex", alignItems:"center", gap:6, padding:"5px 11px", background:`${CYAN}10`, border:`1px solid ${CYAN}28`, borderRadius:20 }}>
+                            <span style={{ fontSize:13 }}>{phase.icon}</span>
+                            <span style={{ fontSize:10, fontWeight:800, color:CYAN, letterSpacing:0.5 }}>{phase.label}</span>
+                          </div>
+                        )}
+                        {proj && !isEditing && (
+                          <span style={{ fontSize:11, fontWeight:700, color:"#CCFF00" }}>{proj.package_amount ? `$${Number(proj.package_amount).toLocaleString()}` : ""}</span>
+                        )}
+                        <button onClick={() => {
+                          if (isEditing) { setEditingClient(null); return; }
+                          setEditingClient(c.id);
+                          setEditFields({
+                            businessName: proj?.business_name||"", packageName: proj?.package_name||"Starter Build",
+                            packageAmount: proj?.package_amount||"", phase: proj?.phase||"onboarding",
+                            repName: proj?.rep_name||"", repEmail: proj?.rep_email||"", notes: proj?.client_notes||"",
+                          });
+                        }}
+                          style={{ background: isEditing ? "rgba(255,255,255,0.06)" : `${CYAN}15`, border:`1px solid ${isEditing ? "rgba(255,255,255,0.1)" : CYAN+"30"}`, color: isEditing ? "#7E8595" : CYAN, fontSize:11, fontWeight:700, cursor:"pointer", padding:"7px 14px", borderRadius:9, fontFamily:"inherit", transition:"all 0.18s" }}>
+                          {isEditing ? "Cancel" : "Edit"}
+                        </button>
+                      </div>
+
+                      {/* Edit form */}
+                      {isEditing && (
+                        <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
+                          <div style={{ display:"grid", gridTemplateColumns: dk?"1fr 1fr 1fr":"1fr 1fr", gap:10 }}>
+                            <div><label style={labelStyle}>Business Name</label><input style={inputStyle} value={editFields.businessName} onChange={e=>setEditFields(p=>({...p,businessName:e.target.value}))} /></div>
+                            <div>
+                              <label style={labelStyle}>Package</label>
+                              <select style={{ ...inputStyle, cursor:"pointer" }} value={editFields.packageName} onChange={e=>{const pkg=PACKAGES.find(p=>p.label===e.target.value); setEditFields(p=>({...p,packageName:e.target.value,...(pkg?.amount?{packageAmount:String(pkg.amount)}:{})}));}}>
+                                {PACKAGES.map(p=><option key={p.label}>{p.label}</option>)}
+                              </select>
+                            </div>
+                            <div><label style={labelStyle}>Amount ($)</label><input style={inputStyle} type="number" value={editFields.packageAmount} onChange={e=>setEditFields(p=>({...p,packageAmount:e.target.value}))} /></div>
+                            <div>
+                              <label style={labelStyle}>Phase</label>
+                              <select style={{ ...inputStyle, cursor:"pointer" }} value={editFields.phase} onChange={e=>setEditFields(p=>({...p,phase:e.target.value}))}>
+                                {CLIENT_PHASES.map(p=><option key={p.key} value={p.key}>{p.icon} {p.label}</option>)}
+                              </select>
+                            </div>
+                            <div><label style={labelStyle}>Rep Name</label><input style={inputStyle} value={editFields.repName} onChange={e=>setEditFields(p=>({...p,repName:e.target.value}))} /></div>
+                            <div><label style={labelStyle}>Rep Email</label><input style={inputStyle} value={editFields.repEmail} onChange={e=>setEditFields(p=>({...p,repEmail:e.target.value}))} /></div>
+                          </div>
+                          <div><label style={labelStyle}>Message to Client</label><textarea style={{ ...inputStyle, resize:"vertical", minHeight:60 }} value={editFields.notes} onChange={e=>setEditFields(p=>({...p,notes:e.target.value}))} /></div>
+                          <div style={{ display:"flex", justifyContent:"flex-end" }}>
+                            <button onClick={() => saveClientEdit(c.id)} disabled={savingEdit}
+                              style={{ background:savingEdit?`${CYAN}33`:`linear-gradient(135deg,${CYAN},#0588A0)`, border:"none", color:savingEdit?"#4A4E5C":"#0A1A1E", fontSize:11, fontWeight:800, cursor:savingEdit?"default":"pointer", padding:"10px 22px", borderRadius:9, fontFamily:"inherit" }}>
+                              {savingEdit ? "Saving…" : "Save Changes"}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
@@ -4000,6 +4927,176 @@ const LINK_ICONS = [
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>,
 ];
 
+/* ═══════════════════════════════════════════
+   CLIENT PORTAL
+   ═══════════════════════════════════════════ */
+const CLIENT_PHASES = [
+  { key:"onboarding",   label:"Onboarding",   icon:"📋", desc:"Form & payment received" },
+  { key:"design",       label:"Design",        icon:"🎨", desc:"Mockups & brand direction" },
+  { key:"development",  label:"Development",   icon:"⚙️",  desc:"Building your site" },
+  { key:"review",       label:"Review",        icon:"🔍", desc:"Your feedback & revisions" },
+  { key:"live",         label:"Live",          icon:"🚀", desc:"Site launched" },
+];
+
+function ClientPortal({ session, profile, onSignOut }) {
+  const [project, setProject] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const w = useW();
+  const dk = w >= 768;
+  const CYAN = "#06D6F0";
+
+  useEffect(() => {
+    const load = async () => {
+      const { data } = await supabase
+        .from("client_projects")
+        .select("*")
+        .eq("client_id", session.user.id)
+        .single();
+      setProject(data ?? null);
+      setLoading(false);
+    };
+    load();
+  }, [session.user.id]);
+
+  const phaseIdx = CLIENT_PHASES.findIndex(p => p.key === project?.phase) ?? 0;
+  const safePhaseIdx = phaseIdx === -1 ? 0 : phaseIdx;
+  const clientName = profile?.name || "there";
+
+  return (
+    <div style={{ minHeight:"100dvh", background:"#0C0D12", color:"#FFF", position:"relative" }}>
+      <style>{GLOBAL_CSS}</style>
+      <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+      {/* Background */}
+      <div style={{ position:"fixed", inset:0, pointerEvents:"none", zIndex:0 }}>
+        <div style={{ position:"absolute", top:"10%", right:"15%", width:500, height:500, background:`radial-gradient(circle, ${CYAN}08 0%, transparent 65%)` }} />
+        <div style={{ position:"absolute", bottom:"20%", left:"10%", width:400, height:400, background:"radial-gradient(circle, rgba(204,255,0,0.04) 0%, transparent 65%)" }} />
+      </div>
+
+      {/* Header */}
+      <div style={{ position:"relative", zIndex:1, borderBottom:"1px solid rgba(255,255,255,0.06)", background:"rgba(12,13,18,0.92)", backdropFilter:"blur(20px)", padding: dk ? "18px 48px" : "14px 18px" }}>
+        <div style={{ maxWidth:1000, margin:"0 auto", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+          <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+            <RedlineLogo height={dk ? 28 : 24} />
+            <div>
+              <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize: dk ? 20 : 17, letterSpacing:8, color:"#DC2626", lineHeight:1 }}>REDLINE</div>
+              <div style={{ fontSize:8.5, fontWeight:700, color:CYAN, letterSpacing:3.5, textTransform:"uppercase", marginTop:2 }}>Client Portal</div>
+            </div>
+          </div>
+          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+            <div style={{ width:30, height:30, borderRadius:9, background:`${CYAN}22`, border:`1.5px solid ${CYAN}44`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:13, fontWeight:900, color:CYAN }}>
+              {clientName[0]?.toUpperCase()}
+            </div>
+            {dk && <span style={{ fontSize:12.5, fontWeight:600, color:"#9EA3B0" }}>{clientName}</span>}
+            <button onClick={onSignOut} style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.07)", borderRadius:9, padding:"7px 12px", cursor:"pointer", color:"#6E7483", fontFamily:"inherit", fontSize:11, fontWeight:600 }}>Sign Out</button>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ position:"relative", zIndex:1, maxWidth:1000, margin:"0 auto", padding: dk ? "36px 48px 60px" : "20px 18px 48px" }}>
+
+        {loading ? (
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"center", padding:80 }}>
+            <div style={{ width:36, height:36, borderRadius:"50%", border:`3px solid ${CYAN}22`, borderTopColor:CYAN, animation:"spin 0.8s linear infinite" }} />
+          </div>
+        ) : (
+          <>
+            {/* Welcome */}
+            <div style={{ marginBottom: dk ? 32 : 24, animation:"fadeUp 0.4s ease" }}>
+              <div style={{ fontSize: dk ? 28 : 22, fontWeight:800, color:"#F2F4F8", lineHeight:1.2 }}>
+                Welcome back, <span style={{ color:CYAN }}>{clientName}</span>
+              </div>
+              {project ? (
+                <div style={{ fontSize:13, color:"#5C6175", marginTop:6 }}>{project.business_name} · Project #{project.id?.slice(0,8)?.toUpperCase()}</div>
+              ) : (
+                <div style={{ fontSize:13, color:"#5C6175", marginTop:6 }}>Your project details are being set up. Check back soon.</div>
+              )}
+            </div>
+
+            {project ? (
+              <>
+                {/* Phase progress */}
+                <div style={{ background:"linear-gradient(160deg, rgba(6,214,240,0.05), rgba(14,15,20,0.95))", border:`1px solid ${CYAN}22`, borderRadius:18, padding: dk ? "28px 30px" : "20px 18px", marginBottom: dk ? 20 : 14, animation:"fadeUp 0.4s ease 0.05s both" }}>
+                  <div style={{ fontSize:9, fontWeight:800, color:`${CYAN}88`, letterSpacing:2.4, textTransform:"uppercase", marginBottom:20 }}>Project Status</div>
+                  {/* Phase steps */}
+                  <div style={{ display:"flex", alignItems:"flex-start", gap: dk ? 0 : 12, flexDirection: dk ? "row" : "column" }}>
+                    {CLIENT_PHASES.map((p, i) => {
+                      const done = i < safePhaseIdx;
+                      const active = i === safePhaseIdx;
+                      const upcoming = i > safePhaseIdx;
+                      return (
+                        <div key={p.key} style={{ flex: dk ? 1 : undefined, display:"flex", flexDirection: dk ? "column" : "row", alignItems: dk ? "center" : "center", gap: dk ? 0 : 12, position:"relative" }}>
+                          {/* Connector line */}
+                          {dk && i < CLIENT_PHASES.length - 1 && (
+                            <div style={{ position:"absolute", top:20, left:"calc(50% + 20px)", right:"calc(-50% + 20px)", height:2, background: done ? CYAN : "rgba(255,255,255,0.07)", transition:"background 0.4s", zIndex:0 }} />
+                          )}
+                          {/* Circle */}
+                          <div style={{
+                            width:40, height:40, borderRadius:"50%", flexShrink:0,
+                            background: done ? CYAN : active ? `${CYAN}22` : "rgba(255,255,255,0.04)",
+                            border: `2px solid ${done ? CYAN : active ? CYAN : "rgba(255,255,255,0.08)"}`,
+                            display:"flex", alignItems:"center", justifyContent:"center",
+                            fontSize: done ? 14 : 18,
+                            boxShadow: active ? `0 0 20px ${CYAN}50` : "none",
+                            position:"relative", zIndex:1,
+                            transition:"all 0.3s",
+                          }}>
+                            {done
+                              ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0A1A1E" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                              : <span style={{ fontSize:16 }}>{p.icon}</span>
+                            }
+                          </div>
+                          {/* Label */}
+                          <div style={{ textAlign: dk ? "center" : "left", marginTop: dk ? 10 : 0 }}>
+                            <div style={{ fontSize: dk ? 11 : 12, fontWeight:700, color: done ? CYAN : active ? "#F2F4F8" : "#4A4E5C", marginBottom:2 }}>{p.label}</div>
+                            {(active || !dk) && <div style={{ fontSize:10, color: active ? `${CYAN}99` : "#3A3E4A", fontWeight:500 }}>{p.desc}</div>}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Info grid */}
+                <div style={{ display:"grid", gridTemplateColumns: dk ? "1fr 1fr" : "1fr", gap: dk ? 16 : 12, marginBottom: dk ? 20 : 14 }}>
+                  {/* Package */}
+                  <div style={{ background:"linear-gradient(160deg,rgba(22,24,31,0.96),rgba(14,15,20,0.97))", border:"1px solid rgba(255,255,255,0.065)", borderRadius:16, padding: dk ? "20px 22px" : "16px 18px", animation:"fadeUp 0.4s ease 0.1s both" }}>
+                    <div style={{ fontSize:9, fontWeight:800, color:"#5C6175", letterSpacing:2.2, textTransform:"uppercase", marginBottom:12 }}>Package</div>
+                    <div style={{ fontSize: dk ? 20 : 18, fontWeight:800, color:"#F2F4F8" }}>{project.package_name || "Starter Build"}</div>
+                    {project.package_amount && <div style={{ fontSize:13, color:"#CCFF00", fontWeight:700, marginTop:4 }}>${Number(project.package_amount).toLocaleString()}</div>}
+                  </div>
+                  {/* Rep */}
+                  <div style={{ background:"linear-gradient(160deg,rgba(22,24,31,0.96),rgba(14,15,20,0.97))", border:"1px solid rgba(255,255,255,0.065)", borderRadius:16, padding: dk ? "20px 22px" : "16px 18px", animation:"fadeUp 0.4s ease 0.12s both" }}>
+                    <div style={{ fontSize:9, fontWeight:800, color:"#5C6175", letterSpacing:2.2, textTransform:"uppercase", marginBottom:12 }}>Your Rep</div>
+                    <div style={{ fontSize: dk ? 20 : 18, fontWeight:800, color:"#F2F4F8" }}>{project.rep_name || "Redline Team"}</div>
+                    {project.rep_email && <div style={{ fontSize:12, color:"#5C6175", marginTop:4 }}>{project.rep_email}</div>}
+                  </div>
+                </div>
+
+                {/* Notes from rep */}
+                {project.client_notes && (
+                  <div style={{ background:`linear-gradient(160deg,${CYAN}08,rgba(14,15,20,0.97))`, border:`1px solid ${CYAN}18`, borderRadius:16, padding: dk ? "20px 22px" : "16px 18px", animation:"fadeUp 0.4s ease 0.15s both" }}>
+                    <div style={{ fontSize:9, fontWeight:800, color:`${CYAN}88`, letterSpacing:2.2, textTransform:"uppercase", marginBottom:10 }}>Message from your rep</div>
+                    <div style={{ fontSize:13, color:"#C4C9D4", lineHeight:1.7, fontWeight:500 }}>{project.client_notes}</div>
+                  </div>
+                )}
+              </>
+            ) : (
+              /* No project yet */
+              <div style={{ textAlign:"center", padding: dk ? "60px 40px" : "40px 20px", background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.05)", borderRadius:18, animation:"fadeUp 0.4s ease 0.05s both" }}>
+                <div style={{ width:64, height:64, borderRadius:20, background:`${CYAN}12`, border:`1px solid ${CYAN}28`, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 20px", fontSize:28 }}>🚀</div>
+                <div style={{ fontSize:20, fontWeight:800, color:"#F2F4F8", marginBottom:10 }}>Project incoming</div>
+                <div style={{ fontSize:13, color:"#5C6175", lineHeight:1.6, maxWidth:400, margin:"0 auto" }}>Your Redline rep is finalizing your project setup. You'll see your project status and details here once everything is ready.</div>
+                <div style={{ fontSize:11, color:`${CYAN}88`, marginTop:20, fontWeight:600 }}>Questions? Reach out to your rep directly.</div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function AppInner() {
   const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
@@ -4233,8 +5330,13 @@ function AppInner() {
     <div style={baseStyle}>
       <style>{GLOBAL_CSS}</style>
       <link href={FONT_LINK} rel="stylesheet" />
-      <Login />
+      <LandingPage />
     </div>
+  );
+
+  // Client role → dedicated client portal
+  if (profile?.role === "client") return (
+    <ClientPortal session={session} profile={profile} onSignOut={signOut} />
   );
 
   if (view === "__admin" && profile?.role === "admin") return (
@@ -4421,10 +5523,7 @@ function AppInner() {
                     <button key={t.key} onClick={() => setTab(t.key)}
                       className={"tab-pill" + (active ? " active" : "")}
                       style={{ '--tc': t.color }}>
-                      <span style={{ display:"flex", alignItems:"center", gap:7 }}>
-                        <TabIcon tabKey={t.key} active={active} size={15} color={active ? t.color : "currentColor"} />
-                        {t.label}
-                      </span>
+                      {t.label}
                     </button>
                   );
                 })}
@@ -4623,7 +5722,7 @@ function AppInner() {
         )}
 
         {/* PEOPLE TAB */}
-        {tab === "people" && <PeopleTab session={session} profile={profile} w={w} />}
+        {tab === "people" && <People session={session} profile={profile} w={w} />}
 
         {/* REDLINE AI TAB */}
         {tab === "redline-ai" && (() => {
@@ -4864,7 +5963,7 @@ function AppInner() {
                   background: active ? `${t.color}22` : "transparent",
                   boxShadow: active ? `0 2px 14px ${t.color}50` : "none",
                 }}>
-                  <TabIcon tabKey={t.key} active={active} size={22} color={active ? t.color : "#6E7483"} />
+                  <TabIcon tabKey={t.key} active={active} size={18} color={active ? t.color : "#6E7483"} />
                 </span>
                 <span style={{ fontSize:10, lineHeight:1 }}>{t.short}</span>
               </button>
@@ -4873,53 +5972,6 @@ function AppInner() {
         </nav>
       )}
       {showChat && <Chat session={session} profile={profile} w={w} width={chatSidebarW} onResize={persistChatW} minW={CHAT_MIN} maxW={CHAT_MAX} />}
-    </div>
-  );
-}
-
-function PeopleTab({ session, profile, w }) {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const dk = w >= 768;
-
-  useEffect(() => {
-    supabase.from("profiles").select("id, name, role").order("name").then(({ data }) => {
-      setUsers(data ?? []);
-      setLoading(false);
-    });
-  }, []);
-
-  const palette = ["#CCFF00","#06D6F0","#F59E0B","#FFD700","#A78BFA","#22C55E","#FF7AB6","#FB7185"];
-  const colorFor = (uid) => {
-    let h = 0; for (let i = 0; i < uid.length; i++) h = (h * 31 + uid.charCodeAt(i)) >>> 0;
-    return palette[h % palette.length];
-  };
-
-  if (loading) return <div style={{ textAlign:"center", padding:60, color:"#7E8290", fontSize:13 }}>Loading…</div>;
-
-  return (
-    <div style={{ animation:"fadeUp 0.35s ease" }}>
-      <div style={{ fontSize:9.5, fontWeight:800, color:"#A78BFA", letterSpacing:3, textTransform:"uppercase", marginBottom:16 }}>Team · {users.length} Members</div>
-      <div style={{ display:"grid", gridTemplateColumns: dk ? "repeat(auto-fill, minmax(220px, 1fr))" : "1fr", gap:dk?10:8 }}>
-        {users.map(u => {
-          const isMe = u.id === session.user.id;
-          const col = colorFor(u.id);
-          const initials = (u.name || "?")[0].toUpperCase();
-          return (
-            <div key={u.id} style={{ display:"flex", alignItems:"center", gap:12, padding:"14px 16px", background: isMe ? "linear-gradient(135deg,rgba(167,139,250,0.08),rgba(167,139,250,0.02))" : "rgba(255,255,255,0.022)", border:`1px solid ${isMe ? "rgba(167,139,250,0.3)" : "rgba(255,255,255,0.06)"}`, borderRadius:14 }}>
-              <div style={{ width:38, height:38, borderRadius:11, background:`linear-gradient(135deg,${col}33,${col}11)`, border:`1px solid ${col}44`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:15, fontWeight:900, color:col, flexShrink:0 }}>
-                {initials}
-              </div>
-              <div style={{ flex:1, minWidth:0 }}>
-                <div style={{ fontSize:13, fontWeight:700, color:"#F2F4F8", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
-                  {u.name || "—"}{isMe && <span style={{ marginLeft:6, fontSize:9, fontWeight:800, color:"#A78BFA", letterSpacing:1.2, textTransform:"uppercase" }}>You</span>}
-                </div>
-                <div style={{ fontSize:10.5, fontWeight:600, color:"#5E6376", textTransform:"capitalize", marginTop:2 }}>{u.role || "rep"}</div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
     </div>
   );
 }

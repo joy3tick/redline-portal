@@ -552,3 +552,107 @@ begin
     alter publication supabase_realtime add table public.outreach_events;
   end if;
 end $$;
+
+-- ─── DIRECT MESSAGES ────────────────────────────────────────
+-- One-on-one DMs between reps. Used by the People tab.
+create table if not exists public.direct_messages (
+  id         uuid default gen_random_uuid() primary key,
+  from_id    uuid references auth.users(id) on delete cascade not null,
+  to_id      uuid references auth.users(id) on delete cascade not null,
+  body       text not null check (char_length(body) <= 2000),
+  created_at timestamptz default now()
+);
+
+create index if not exists dm_thread_idx on public.direct_messages (
+  least(from_id::text, to_id::text),
+  greatest(from_id::text, to_id::text),
+  created_at
+);
+
+alter table public.direct_messages enable row level security;
+
+drop policy if exists "Users read own DMs" on public.direct_messages;
+create policy "Users read own DMs"
+  on public.direct_messages for select
+  using (auth.uid() = from_id or auth.uid() = to_id);
+
+drop policy if exists "Users send DMs as self" on public.direct_messages;
+create policy "Users send DMs as self"
+  on public.direct_messages for insert
+  with check (auth.uid() = from_id);
+
+drop policy if exists "Users delete own DMs" on public.direct_messages;
+create policy "Users delete own DMs"
+  on public.direct_messages for delete
+  using (auth.uid() = from_id);
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'direct_messages'
+  ) then
+    alter publication supabase_realtime add table public.direct_messages;
+  end if;
+end $$;
+
+
+-- ─── CLIENT ROLES & PROJECTS ────────────────────────────────
+-- Allow 'client' as a valid profile role
+alter table public.profiles drop constraint if exists profiles_role_check;
+alter table public.profiles add constraint profiles_role_check
+  check (role in ('rep', 'admin', 'client'));
+
+-- Client project records — one per client user
+create table if not exists public.client_projects (
+  id              uuid default gen_random_uuid() primary key,
+  client_id       uuid references auth.users(id) on delete cascade not null unique,
+  business_name   text,
+  package_name    text,
+  package_amount  numeric,
+  phase           text not null default 'onboarding'
+                  check (phase in ('onboarding','design','development','review','live')),
+  rep_name        text,
+  rep_email       text,
+  client_notes    text,
+  created_at      timestamptz default now(),
+  updated_at      timestamptz default now()
+);
+
+alter table public.client_projects enable row level security;
+
+-- Clients can only read their own project
+create policy "Clients read own project"
+  on public.client_projects for select
+  using (auth.uid() = client_id);
+
+-- Admins and reps can read/write all client projects
+create policy "Admins manage all projects"
+  on public.client_projects for all
+  using (public.is_admin());
+
+create policy "Reps read all client projects"
+  on public.client_projects for select
+  using (auth.role() = 'authenticated');
+
+create policy "Reps update client projects"
+  on public.client_projects for update
+  using (auth.role() = 'authenticated');
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'client_projects'
+  ) then
+    alter publication supabase_realtime add table public.client_projects;
+  end if;
+end $$;
+
+-- To create a client account:
+-- 1. Create the user in Supabase Auth (Dashboard → Authentication → Users → Add user)
+-- 2. Update their profile role:
+--    update public.profiles set role = 'client', name = 'Business Name' where id = '<user-uuid>';
+-- 3. Create their project record:
+--    insert into public.client_projects (client_id, business_name, package_name, package_amount, phase, rep_name, rep_email)
+--    values ('<user-uuid>', 'ACME Plumbing', 'Pro Build', 2497, 'onboarding', 'Your Name', 'you@redline.com');
