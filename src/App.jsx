@@ -995,53 +995,53 @@ function Scheduler({ session, profile, w }) {
         </div>
       </div>
 
-      {[0,1].map(week => (
-        <div key={week} style={{ marginBottom:32, animation:"fadeUp 0.4s ease" }}>
-          <div style={{ display:"flex", alignItems:"center", gap:12, paddingBottom:14 }}>
-            <div style={{ fontSize:10, fontWeight:700, color: week===0?"#DC2626":"#F59E0B", letterSpacing:3, textTransform:"uppercase" }}>{week===0?"This Week":"Next Week"}</div>
-            <div style={{ flex:1, height:1, background:"var(--surface-2)" }} />
-          </div>
-          <div style={{ display:"grid", gridTemplateColumns:dk?"repeat(5,1fr)":"repeat(2,1fr)", gap:10 }}>
-            {days.slice(week*5, week*5+5).map((day, di) => {
-              const dateStr = ds(day);
-              const dayEntries = byDate[dateStr] ?? [];
-              const isPast = day < today;
-              const isToday = dateStr === ds(today);
-              const isMine = dayEntries.some(e => e.user_id === session.user.id);
-              const isFull = dayEntries.length >= 6 && !isMine;
-              return (
-                <div key={dateStr} onClick={() => !isPast && !isFull && toggle(day)}
-                  className={isPast || isFull ? "" : "card-hover"}
-                  style={{ background: isMine?"rgba(220,38,38,0.05)":"var(--surface-2)", border:"1px solid "+(isMine?"rgba(220,38,38,0.20)":isToday?"var(--border-strong)":"var(--border)"), borderRadius:16, padding:"16px 14px", cursor:isPast||isFull?"default":"pointer", opacity:isPast?0.35:1, transition:"all 0.2s", minHeight:140, position:"relative" }}>
-                  {isToday && !isFull && <div style={{ position:"absolute", top:10, right:12, fontSize:8, fontWeight:700, color:"#DC2626", letterSpacing:2, textTransform:"uppercase" }}>Today</div>}
-                  {isFull && <div style={{ position:"absolute", top:10, right:12, fontSize:8, fontWeight:700, color:"#F59E0B", letterSpacing:2, textTransform:"uppercase" }}>Full</div>}
-                  <div style={{ fontSize:9, fontWeight:700, color:isToday?"#DC2626":"var(--text-muted)", letterSpacing:2, marginBottom:4 }}>{DAY_NAMES[di]}</div>
-                  <div style={{ fontSize:22, fontWeight:800, color:isToday?"#DC2626":"var(--text)", marginBottom:4, lineHeight:1 }}>
-                    {day.getDate()} <span style={{ fontSize:12, fontWeight:500, color:"var(--text-muted)" }}>{MONTHS[day.getMonth()]}</span>
-                  </div>
-                  <div style={{ fontSize:9, color:"var(--text-muted)", marginBottom:12, letterSpacing:1, display:"flex", justifyContent:"space-between" }}>
-                    <span>9:00 AM – 5:00 PM</span>
-                    <span style={{ color: dayEntries.length >= 6 ? "#F59E0B" : "var(--text-faint)" }}>{dayEntries.length}/6</span>
-                  </div>
-                  <div style={{ display:"flex", flexDirection:"column", gap:5 }}>
-                    {dayEntries.map(e => (
-                      <div key={e.id} style={{ fontSize:11, fontWeight:600, color:e.user_id===session.user.id?"#DC2626":"var(--text)", background:e.user_id===session.user.id?"rgba(220,38,38,0.08)":"var(--surface)", border:"1px solid "+(e.user_id===session.user.id?"rgba(220,38,38,0.20)":"var(--border)"), borderRadius:6, padding:"4px 8px" }}>
-                        {repProfiles[e.user_id] || "Rep"}
-                      </div>
-                    ))}
-                    {dayEntries.length === 0 && !isPast && (
-                      <div style={{ fontSize:10, color:"var(--text-muted)" }}>+ Add yourself</div>
-                    )}
-                    {isFull && !isMine && (
-                      <div style={{ fontSize:10, color:"#F59E0B88" }}>Day is full</div>
-                    )}
-                  </div>
+      <div style={{ animation:"fadeUp 0.4s ease" }}>
+        <div style={{ display:"grid", gridTemplateColumns:dk?"repeat(5,1fr)":"repeat(2,1fr)", gap:10 }}>
+          {days.map((day, idx) => {
+            const week = Math.floor(idx / 5);
+            const di = idx % 5;
+            const dateStr = ds(day);
+            const dayEntries = byDate[dateStr] ?? [];
+            const isPast = day < today;
+            const isToday = dateStr === ds(today);
+            const isMine = dayEntries.some(e => e.user_id === session.user.id);
+            const isFull = dayEntries.length >= 6 && !isMine;
+            const weekAccent = week === 0 ? "#DC2626" : "#F59E0B";
+            return (
+              <div key={dateStr} onClick={() => !isPast && !isFull && toggle(day)}
+                className={isPast || isFull ? "" : "card-hover"}
+                style={{ background: isMine?"rgba(220,38,38,0.05)":"var(--surface-2)", border:"1px solid "+(isMine?"rgba(220,38,38,0.20)":isToday?"var(--border-strong)":"var(--border)"), borderRadius:16, padding:"16px 14px", cursor:isPast||isFull?"default":"pointer", opacity:isPast?0.35:1, transition:"all 0.2s", minHeight:140, position:"relative" }}>
+                {isToday && !isFull && <div style={{ position:"absolute", top:10, right:12, fontSize:8, fontWeight:700, color:"#DC2626", letterSpacing:2, textTransform:"uppercase" }}>Today</div>}
+                {isFull && !isToday && <div style={{ position:"absolute", top:10, right:12, fontSize:8, fontWeight:700, color:"#F59E0B", letterSpacing:2, textTransform:"uppercase" }}>Full</div>}
+                <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:4 }}>
+                  <div style={{ fontSize:9, fontWeight:700, color:isToday?"#DC2626":"var(--text-muted)", letterSpacing:2 }}>{DAY_NAMES[di]}</div>
+                  <div style={{ fontSize:8, fontWeight:700, color:weekAccent, letterSpacing:1.5, textTransform:"uppercase", padding:"2px 6px", borderRadius:4, background:week===0?"rgba(220,38,38,0.08)":"rgba(245,158,11,0.08)", border:"1px solid "+(week===0?"rgba(220,38,38,0.18)":"rgba(245,158,11,0.20)") }}>{week===0?"Wk 1":"Wk 2"}</div>
                 </div>
-              );
-            })}
-          </div>
+                <div style={{ fontSize:22, fontWeight:800, color:isToday?"#DC2626":"var(--text)", marginBottom:4, lineHeight:1 }}>
+                  {day.getDate()} <span style={{ fontSize:12, fontWeight:500, color:"var(--text-muted)" }}>{MONTHS[day.getMonth()]}</span>
+                </div>
+                <div style={{ fontSize:9, color:"var(--text-muted)", marginBottom:12, letterSpacing:1, display:"flex", justifyContent:"space-between" }}>
+                  <span>9:00 AM – 5:00 PM</span>
+                  <span style={{ color: dayEntries.length >= 6 ? "#F59E0B" : "var(--text-faint)" }}>{dayEntries.length}/6</span>
+                </div>
+                <div style={{ display:"flex", flexDirection:"column", gap:5 }}>
+                  {dayEntries.map(e => (
+                    <div key={e.id} style={{ fontSize:11, fontWeight:600, color:e.user_id===session.user.id?"#DC2626":"var(--text)", background:e.user_id===session.user.id?"rgba(220,38,38,0.08)":"var(--surface)", border:"1px solid "+(e.user_id===session.user.id?"rgba(220,38,38,0.20)":"var(--border)"), borderRadius:6, padding:"4px 8px" }}>
+                      {repProfiles[e.user_id] || "Rep"}
+                    </div>
+                  ))}
+                  {dayEntries.length === 0 && !isPast && (
+                    <div style={{ fontSize:10, color:"var(--text-muted)" }}>+ Add yourself</div>
+                  )}
+                  {isFull && !isMine && (
+                    <div style={{ fontSize:10, color:"#F59E0B88" }}>Day is full</div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
-      ))}
+      </div>
     </div>
   );
 }
